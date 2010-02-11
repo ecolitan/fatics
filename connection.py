@@ -46,7 +46,7 @@ class connection(Protocol):
                         if len(passwd) == 0:
                                 self.login()
                         elif self.user.check_passwd(passwd):
-                                self.state = self.dataReceivedLoggedIn
+                                self.dataReceived = self.dataReceivedLoggedIn
                         else:
                                 self.transport.write('\n\n**** Invalid password! ****\n\n')
                                 self.login()

@@ -5,29 +5,29 @@ import string
 
 from db import db
 
-users = {}
+#users = {}
 
 # a registered user
 class User:
-	def __init__(self, id, name, passwd_hash):
-                self.id = id
-                self.name = name
-                self.passwd_hash = passwd_hash
+	def __init__(self, u):
+                self.id = u['user_id']
+                self.name = u['user_name']
+                self.passwd_hash = u['user_passwd']
                 self.is_guest = False
 
         def set_passwd(self, passwd):
-                assert(self.id)
-                print "salt " + bcrypt.gensalt()
-                print "hash " + bcrypt.hashpw(passwd, bcrypt.gensalt())
                 self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
-                db.query("UPDATE user SET user_passwd='%s' WHERE user_id='%s'" % (self.passwd_hash, self.id))
-
+                db.set_user_passwd(self.id, self.passwd_hash)
+        
+        def set_admin_level(self, level):
+                db.set_user_admin_level(self.id, level)
+        
         # check if an unencrypted password is correct
         def check_passwd(self, passwd):
                 # don't perform expensive computation on arbitrarily long data
                 if len(passwd) > 32:
                         return False
-                return bcrypt.hashpw(password, self.passwd_hash) == self.passwd_hash
+                return bcrypt.hashpw(passwd, self.passwd_hash) == self.passwd_hash
 
 class GuestUser:
         def __init__(self, name):
@@ -55,10 +55,10 @@ def get_by_name(name):
         elif len(name) > 18:
                 raise UsernameException("Sorry, names may be at most %d characters long.  Try again." % 18)
 
-        res = db.query("SELECT user_id,user_name,user_passwd FROM user WHERE user_name='%s'" % name)
-        row = db.fetch()
-        if row:
-                return User(row[0], row[1], row[2])
+        print "here-1 %s" % name
+        u = db.get_user(name)
+        if u:
+                return User(u)
         else:
                 return GuestUser(name)
 
