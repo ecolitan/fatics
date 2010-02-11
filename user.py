@@ -2,35 +2,84 @@ import re
 import bcrypt
 import random
 import string
+import time
 
 from db import db
+from timer import timer
 
-#users = {}
+online = {}
+
+class BaseUser:
+        def __init__(self):
+                self.is_online = False
+                self.login_time = None
+                self.last_command_time = None
+
+        def log_in(self):
+                self.is_online = True
+                self.login_time = time.time()
+	        self.last_command_time = time.time()
+                online[self.name] = self
+
+        def log_out(self):
+                del online[self.name]
+                if not self.is_guest:
+                        db.user_update_last_logout(self.id)
+
+        """returns a human-readable string"""
+        def get_idle_time(self):
+                assert(self.last_command_time != None)
+                return timer.hms(time.time() - self.last_command_time)
+
+        """returns a human-readable string"""
+        def get_online_time(self):
+                assert(self.login_time != None)
+                return timer.hms(time.time() - self.login_time)
 
 # a registered user
-class User:
+class User(BaseUser):
 	def __init__(self, u):
+                #super(User, self).__init__()
+                BaseUser.__init__(self)
                 self.id = u['user_id']
                 self.name = u['user_name']
                 self.passwd_hash = u['user_passwd']
+                self.last_logout = u['user_last_logout']
                 self.is_guest = False
 
         def set_passwd(self, passwd):
                 self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
                 db.set_user_passwd(self.id, self.passwd_hash)
+
+        # test whether a string meets the requirements for a password
+        def is_legal_passwd(self, passwd):
+                if len(passwd) > 32:
+                        return False
+                if len(passwd) < 4:
+                        return False
+                # passwords may not contain spaces because they are set
+                # using a command
+                if not re.match(r'^\S+$', passwd):
+                        return False
+                return True
         
         def set_admin_level(self, level):
-                db.set_user_admin_level(self.id, level)
+                db.user_set_admin_level(self.id, level)
         
         # check if an unencrypted password is correct
         def check_passwd(self, passwd):
                 # don't perform expensive computation on arbitrarily long data
-                if len(passwd) > 32:
+                if not self.is_legal_passwd(passwd):
                         return False
                 return bcrypt.hashpw(passwd, self.passwd_hash) == self.passwd_hash
+        
+        def get_last_logout(self):
+                return db.user_get_last_logout(self.id)
 
-class GuestUser:
+class GuestUser(BaseUser):
         def __init__(self, name):
+                #super(GuestUser, self).__init__()
+                BaseUser.__init__(self)
                 self.is_guest = True
                 if name == None:
                         self.name = 'Guest'
@@ -45,21 +94,35 @@ class UsernameException(Exception):
         def __init__(self, reason):
                 self.reason = reason
 
-def get_by_name(name):
-        if name.lower() == 'g' or name.lower() == 'guest':
-                return GuestUser(None)
-        elif not re.match('^[a-zA-Z_]+$', name):
-                raise UsernameException('Sorry, names can only consist of lower and upper case letters.  Try again.')
-        elif len(name) < 3:
-                raise UsernameException('A name should be at least %d characters long!  Try again.' % 3)
-        elif len(name) > 18:
-                raise UsernameException("Sorry, names may be at most %d characters long.  Try again." % 18)
+class Find:
+        # return a user object if one exists; otherwise make a 
+        # guest user
+        def by_name_for_login(self, name, conn):
+                if name.lower() == 'g' or name.lower() == 'guest':
+                        u = GuestUser(None)
+                        conn.write('\nLogging you in as "%s"; you may use this name to play unrated games.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter as "%s":' % (u.name, u.name))
+                else:
+                        u = self.by_name(name)
+                        if u:
+                                conn.write('\n%s is a registered name.  If it is yours, type the password.\nIf not, just hit return to try another name.\n\npassword: ' % name)
+                        else:
+                                u = GuestUser(name)
+                                conn.write('\n"%s" is not a registered name.  You may play unrated games as a guest.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter as "%s":' % (name, name))
+                return u
 
-        print "here-1 %s" % name
-        u = db.get_user(name)
-        if u:
-                return User(u)
-        else:
-                return GuestUser(name)
+        def by_name(self, name):
+                if len(name) < 3:
+                        raise UsernameException('A name should be at least %d characters long!  Try again.' % 3)
+                elif len(name) > 18:
+                        raise UsernameException("Sorry, names may be at most %d characters long.  Try again." % 18)
+                elif not re.match('^[a-zA-Z_]+$', name):
+                        raise UsernameException('Sorry, names can only consist of lower and upper case letters.  Try again.')
+
+                u = db.get_user(name)
+                if u:
+                        return User(u)
+                else:
+                        return None
+find = Find()
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

@@ -101,7 +101,6 @@ class Trie(object):
 
     def __getitem__(self, k):
         n = self._getnode(k)
-	print 'getnode %s -> nodes %s\n' % (k, n.nodes)
         if n.value is Node.no_value:
             if n.nodes:
                 raise NeedMore()
@@ -131,7 +130,6 @@ class Trie(object):
         {'r': 'This is a foobar.', 'z': 'Here is a foobaz.'}
         """
         n = self._getnode(k)
-	print 'getnode2 %s -> nodes %s\n' % (k, n.nodes)
         return dict((k, n.nodes[k].value)
                     for k in n.nodes
                     if n.nodes[k].value is not Node.no_value)

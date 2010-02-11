@@ -1,0 +1,1 @@
+twistd -noy chessd.tac
