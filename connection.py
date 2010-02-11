@@ -1,6 +1,7 @@
 from twisted.internet.protocol import Protocol
 
 import user
+import command
 
 connections = []
 
@@ -39,24 +40,32 @@ class connection(Protocol):
         
         def dataReceivedPasswd(self, data):
                 if self.user.is_guest:
-                        # ignore whater was entered in place of a password
-                        self.dataReceived = self.dataReceivedLoggedIn
+                        # ignore whatever was entered in place of a password
+                        self.prompt()
                 else:
                         passwd = data.strip()
                         if len(passwd) == 0:
                                 self.login()
                         elif self.user.check_passwd(passwd):
-                                self.dataReceived = self.dataReceivedLoggedIn
+                                self.prompt()
                         else:
                                 self.transport.write('\n\n**** Invalid password! ****\n\n')
                                 self.login()
 
                 assert(self.dataReceived != self.dataReceivedPasswd)
 
+        def prompt(self):
+                self.transport.write('fics% ')
+                self.dataReceived = self.dataReceivedLoggedIn
+
         def dataReceivedLoggedIn(self, data):
-                if data == 'quit\n':
+                try:
+                        command.handle_command(data.strip(), self)
+                except command.QuitException:
                         self.transport.loseConnection()
-                else:
-                        print "command: %s" % data
+                self.write('fics% ')
+        
+        def write(self, s):
+                self.transport.write(s)
                 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

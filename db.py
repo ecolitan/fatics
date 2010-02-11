@@ -15,10 +15,7 @@ class DB:
                 return res.fetch_row()"""
 
         def get_user(self, name):
-                print "Here11111111111111"
-                print "Here0000 " + name
                 cursor = self.db.cursor(cursors.DictCursor)
-                print("""SELECT user_id,user_name,user_passwd FROM user WHERE user_name=%s""" % (name,))
                 cursor.execute("""SELECT user_id,user_name,user_passwd FROM user WHERE user_name=%s""", (name,))
                 row = cursor.fetchone()
                 return row
