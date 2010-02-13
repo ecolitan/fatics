@@ -114,7 +114,7 @@ def handle_command(s, conn):
 		try:
 			cmd = command_list.cmds[word]
 		except KeyError:
-                	conn.write("%s: Command not found.\n" % cmd)
+                	conn.write("%s: Command not found.\n" % word)
 		except trie.NeedMore:
                 	matches = command_list.cmds.all_children(word)
 			assert(len(matches) > 0)

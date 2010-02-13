@@ -1,25 +1,32 @@
 import time
-from twisted.internet.protocol import Protocol
+from twisted.conch.telnet import TelnetProtocol, ECHO
+from twisted.protocols import basic
 
 import user
 import command
 
 connections = []
 
-class IcsProtocol(Protocol):
+class IcsProtocol(basic.LineReceiver, TelnetProtocol):
+        # the telnet transport changes all '\n' to 
+        # '\r\n', so we can just use '\n' here
+        delimiter = '\n'
+        MAX_LENGTH = 1024
         def connectionMade(self):
                 connections.append(self)
                 f = open("messages/welcome.txt")
-                self.transport.write(f.read())
+                self.write(f.read())
                 self.login()
 
         def login(self):
-                self.dataReceived = self.dataReceivedLogin
+                self.lineReceived = self.lineReceivedLogin
                 f = open("messages/login.txt")
-                self.transport.write(f.read())
-                self.transport.write("login: ")
+                self.write(f.read())
+                self.write("login: ")
 
         def connectionLost(self, reason):
+                basic.LineReceiver.connectionLost(self, reason)
+                TelnetProtocol.connectionLost(self, reason)
                 try:
                         if self.user.is_online:
                                 self.user.log_out()
@@ -27,16 +34,19 @@ class IcsProtocol(Protocol):
                         pass
                 connections.remove(self)
 
-        def dataReceivedLogin(self, data):
+        def lineReceivedLogin(self, data):
                 name = data.strip()
                 try:
                         self.user = user.find.by_name_for_login(name, self)
                 except user.UsernameException as e:
                         self.write('\n' + e.reason + '\n')
+                        self.write("login: ")
                 else:
-                        self.dataReceived = self.dataReceivedPasswd
+                        self.transport.will(ECHO)
+                        self.lineReceived = self.lineReceivedPasswd
         
-        def dataReceivedPasswd(self, data):
+        def lineReceivedPasswd(self, data):
+                self.transport.wont(ECHO)
                 if self.user.is_guest:
                         # ignore whatever was entered in place of a password
                         self.prompt()
@@ -47,17 +57,17 @@ class IcsProtocol(Protocol):
                         elif self.user.check_passwd(passwd):
                                 self.prompt()
                         else:
-                                self.transport.write('\n\n**** Invalid password! ****\n\n')
+                                self.write('\n\n**** Invalid password! ****\n\n')
                                 self.login()
 
-                assert(self.dataReceived != self.dataReceivedPasswd)
+                assert(self.lineReceived != self.lineReceivedPasswd)
 
         def prompt(self):
                 self.user.log_in()
-                self.transport.write('fics% ')
-                self.dataReceived = self.dataReceivedLoggedIn
+                self.write('fics% ')
+                self.lineReceived = self.lineReceivedLoggedIn
 
-        def dataReceivedLoggedIn(self, data):
+        def lineReceivedLoggedIn(self, data):
                 try:
                         command.handle_command(data.strip(), self)
                 except command.QuitException:
