@@ -66,7 +66,7 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 assert(self.lineReceived != self.lineReceivedPasswd)
 
         def prompt(self):
-                self.user.log_in()
+                self.user.log_in(self)
                 self.write('fics% ')
                 self.lineReceived = self.lineReceivedLoggedIn
 

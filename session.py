@@ -7,9 +7,10 @@ import time
 from timer import timer
 
 class Session: 
-        def __init__(self, user):
+        def __init__(self, user, conn):
                 self.user = user
-                online[user.name] = self
+                self.conn = conn
+                online[user.name.lower()] = self
                 self.login_time = time.time()
 	        self.last_command_time = time.time()
 
