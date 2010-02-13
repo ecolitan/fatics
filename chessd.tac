@@ -9,18 +9,18 @@ from twisted.application import service, internet
 from twisted.internet.protocol import Factory
 from twisted.internet import reactor
 
-import connection
+import ics_protocol
 
 PORT = 5000
 
 class IcsFactory(Factory):
-        protocol = connection.connection
+        protocol = ics_protocol.IcsProtocol
 
 def getService():
-    """
-    Return a service suitable for creating an application object.
-    """
-    return internet.TCPServer(5000, IcsFactory())
+        """
+        Return a service suitable for creating an application object.
+        """
+        return internet.TCPServer(5000, IcsFactory())
 
 # this is the core part of any tac file, the creation of the root-level
 # application object

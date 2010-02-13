@@ -6,7 +6,7 @@ import command
 
 connections = []
 
-class connection(Protocol):
+class IcsProtocol(Protocol):
         def connectionMade(self):
                 connections.append(self)
                 f = open("messages/welcome.txt")
