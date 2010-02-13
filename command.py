@@ -89,21 +89,21 @@ class CommandList():
 			else:
 				u = conn.user
 		except user.UsernameException:
-			conn.write('"%s" is not a valid handle\n.' % args[0])
+			conn.write(_('"%s" is not a valid handle\n.') % args[0])
 		else:
 			if not u:
 				# XXX substring matches
-				conn.write('There is no player matching the name "%s".\n' % args[0])
+				conn.write(_('There is no player matching the name "%s".\n') % args[0])
 			else:
-				conn.write('Finger of %s:\n\n' % u.get_display_name())
+				conn.write(_('Finger of %s:\n\n') % u.get_display_name())
 				if u.is_online:
-					conn.write('On for: %s   Idle: %s\n\n' % (u.session.get_online_time(), u.session.get_idle_time()))
+					conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 					
 				else:
 					if u.last_logout == None:
-						conn.write('%s has never connected.\n\n' % u.name)
+						conn.write(_('%s has never connected.\n\n') % u.name)
 					else:
-						conn.write('Last disconnected: %s\n\n' % u.last_logout)
+						conn.write(_('Last disconnected: %s\n\n') % u.last_logout)
 
 	
 	def follow(self, args, conn):
@@ -113,14 +113,14 @@ class CommandList():
 		try:
 			u = user.find.by_name(args[0])
 		except user.UsernameException:
-			conn.write('"%s" is not a valid handle.\n' % args[0])
+			conn.write(_('"%s" is not a valid handle.\n') % args[0])
 		else:
 			if not u:
-				conn.write('There is no player matching the name "%s".\n' % args[0])
+				conn.write(_('There is no player matching the name "%s".\n') % args[0])
 			elif not u.is_online:
-				conn.write('%s is not logged in.' % args[0])
+				conn.write(_('%s is not logged in.') % args[0])
 			else:
-				u.write('\n' + conn.user.get_display_name() + " tells you: " + args[1] + '\n')
+				u.write('\n' + conn.user.get_display_name() + _(" tells you: ") + args[1] + '\n')
 				
 	
 	def quit(self, args, conn):

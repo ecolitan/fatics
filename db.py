@@ -4,16 +4,6 @@ class DB:
 	def __init__(self):
 		self.db = connect(host="localhost", db="chess", user="chess", passwd="Luu9yae7")
 
-        """def query(self, s):
-                self.db.query(s)
-
-        def query(self, s):
-                self.db.query(s)
-
-        def fetch(self):
-                res = self.db.store_result()
-                return res.fetch_row()"""
-
         def get_user(self, name):
                 cursor = self.db.cursor(cursors.DictCursor)
                 cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout FROM user WHERE user_name=%s""", (name,))

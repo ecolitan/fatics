@@ -9,6 +9,9 @@ from twisted.internet.protocol import Factory
 from twisted.internet import reactor
 from twisted.conch.telnet import TelnetTransport
 
+import gettext
+gettext.install('interface', './locale', unicode=False)
+
 import sys
 if os.geteuid() == 0:
         sys.path.append('.')

@@ -1,6 +1,8 @@
+from gettext import ngettext
 
 class Timer:
         def hms(self, secs):
+                secs = int(secs)
                 days = int(secs / (60*60*24))
                 secs = secs - 60*60*24*days
                 hours = int(secs / (60*60))
@@ -9,12 +11,12 @@ class Timer:
                 secs = secs - 60*mins
                 ret = ''
                 if days != 0:
-                        ret = ret + "%d day%s " % (days, 's' if days != 1 else '')
+                        ret = ret + ngettext("%d day", "%d days", days) % days + " "
                 if days != 0 or hours != 0:
-                        ret = ret + "%d hr%s " % (hours, 's' if hours != 1 else '')
+                        ret = ret + ngettext("%d hour", "%d hours", hours) % hours + " "
                 if days != 0 or hours != 0 or mins != 0:
-                        ret = ret + "%d min%s " % (mins, 's' if mins != 1 else '')
-                ret = ret + "%d sec%s" % (secs, 's' if secs != 1 else '')
+                        ret = ret + ngettext("%d minute", "%d minutes", mins) % mins + " "
+                ret = ret + ngettext("%d second", "%d seconds", secs) % secs
                 return ret
 
 timer = Timer()
