@@ -1,5 +1,5 @@
 import time
-from twisted.conch.telnet import TelnetProtocol, ECHO
+from twisted.conch import telnet
 from twisted.protocols import basic
 
 import user
@@ -7,12 +7,14 @@ import command
 
 connections = []
 
-class IcsProtocol(basic.LineReceiver, TelnetProtocol):
+class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
         # the telnet transport changes all '\n' to 
         # '\r\n', so we can just use '\n' here
         delimiter = '\n'
         MAX_LENGTH = 1024
+
         def connectionMade(self):
+                self.transport.commandMap[telnet.IP] = self.loseConnection
                 connections.append(self)
                 f = open("messages/welcome.txt")
                 self.write(f.read())
@@ -26,7 +28,7 @@ class IcsProtocol(basic.LineReceiver, TelnetProtocol):
 
         def connectionLost(self, reason):
                 basic.LineReceiver.connectionLost(self, reason)
-                TelnetProtocol.connectionLost(self, reason)
+                telnet.TelnetProtocol.connectionLost(self, reason)
                 try:
                         if self.user.is_online:
                                 self.user.log_out()
@@ -42,11 +44,11 @@ class IcsProtocol(basic.LineReceiver, TelnetProtocol):
                         self.write('\n' + e.reason + '\n')
                         self.write("login: ")
                 else:
-                        self.transport.will(ECHO)
+                        self.transport.will(telnet.ECHO)
                         self.lineReceived = self.lineReceivedPasswd
         
         def lineReceivedPasswd(self, data):
-                self.transport.wont(ECHO)
+                self.transport.wont(telnet.ECHO)
                 self.write('\n')
                 if self.user.is_guest:
                         # ignore whatever was entered in place of a password
@@ -74,6 +76,9 @@ class IcsProtocol(basic.LineReceiver, TelnetProtocol):
                 except command.QuitException:
                         self.transport.loseConnection()
                 self.write('fics% ')
+
+        def loseConnection(self, reason):
+                self.transport.loseConnection()
         
         def write(self, s):
                 self.transport.write(s)
