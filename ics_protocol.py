@@ -47,6 +47,7 @@ class IcsProtocol(basic.LineReceiver, TelnetProtocol):
         
         def lineReceivedPasswd(self, data):
                 self.transport.wont(ECHO)
+                self.write('\n')
                 if self.user.is_guest:
                         # ignore whatever was entered in place of a password
                         self.prompt()
