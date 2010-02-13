@@ -2,39 +2,23 @@ import re
 import bcrypt
 import random
 import string
-import time
 
 from db import db
-from timer import timer
-
-online = {}
+from session import Session
 
 class BaseUser:
         def __init__(self):
-                self.is_online = False
-                self.login_time = None
-                self.last_command_time = None
+                pass
 
         def log_in(self):
+                self.session = Session(self)
                 self.is_online = True
-                self.login_time = time.time()
-	        self.last_command_time = time.time()
-                online[self.name] = self
 
         def log_out(self):
-                del online[self.name]
+                self.session.close()
                 if not self.is_guest:
-                        db.user_update_last_logout(self.id)
-
-        """returns a human-readable string"""
-        def get_idle_time(self):
-                assert(self.last_command_time != None)
-                return timer.hms(time.time() - self.last_command_time)
-
-        """returns a human-readable string"""
-        def get_online_time(self):
-                assert(self.login_time != None)
-                return timer.hms(time.time() - self.login_time)
+                        db.user_update_last_logout(self.user.id)
+                self.is_online = False
 
 # a registered user
 class User(BaseUser):

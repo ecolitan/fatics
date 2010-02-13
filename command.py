@@ -87,7 +87,7 @@ class CommandList():
 		else:
 			conn.write('Finger of %s:\n\n' % u.name)
 			if u.is_online:
-				conn.write('On for: %s   Idle: %s\n\n' % (u.get_online_time(), u.get_idle_time()))
+				conn.write('On for: %s   Idle: %s\n\n' % (u.session.get_online_time(), u.session.get_idle_time()))
 				
 			else:
 				if u.last_logout == None:
@@ -106,7 +106,7 @@ class CommandList():
 command_list = CommandList()
 
 def handle_command(s, conn):
-	conn.user.last_command_time = time.time()
+	conn.user.session.last_command_time = time.time()
 	m = re.match(r'^(\S+)(?:\s+(.*))?$', s)
 	cmd = None
 	if m:
