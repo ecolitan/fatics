@@ -8,13 +8,17 @@ from timer import timer
 
 # user state that is per-session and not saved to persistent storage
 class Session: 
-        def __init__(self, user, conn):
-                self.user = user
+        def __init__(self, conn):
                 self.conn = conn
-                online[user.name.lower()] = self
                 self.login_time = time.time()
 	        self.last_command_time = time.time()
                 self.last_tell_user = None
+                self.use_timeseal = True
+                self.check_for_timeseal = True
+
+        def set_user(self, user):
+                self.user = user
+                online[user.name.lower()] = self
 
         def close(self):
                 del online[user.name]

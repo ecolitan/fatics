@@ -4,6 +4,8 @@ from twisted.protocols import basic
 
 import user
 import command
+from timeseal import timeseal
+from session import Session
 
 connections = []
 
@@ -12,6 +14,7 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
         # '\r\n', so we can just use '\n' here
         delimiter = '\n'
         MAX_LENGTH = 1024
+        ics_state = 'initial'
 
         def connectionMade(self):
                 self.transport.commandMap[telnet.IP] = self.loseConnection
@@ -19,12 +22,20 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 f = open("messages/welcome.txt")
                 self.write(f.read())
                 self.login()
+                self.session = Session(self)
 
         def login(self):
-                self.lineReceived = self.lineReceivedLogin
+                self.ics_state = 'login'
                 f = open("messages/login.txt")
                 self.write(f.read())
                 self.write("login: ")
+
+        def lineReceived(self, line):
+                #print '((%s,%s))\n' % (self.ics_state, line)
+                if self.session.use_timeseal:
+                        (t, line) = timeseal.decode(line)
+                if self.ics_state:
+                        getattr(self, "lineReceived_" + self.ics_state)(line)
 
         def connectionLost(self, reason):
                 basic.LineReceiver.connectionLost(self, reason)
@@ -32,12 +43,22 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 try:
                         if self.user.is_online:
                                 self.user.log_out()
+                        self.session.close()
                 except AttributeError:
                         pass
                 connections.remove(self)
+        
+        def lineReceived_initial(self):
+                pass
 
-        def lineReceivedLogin(self, data):
-                name = data.strip()
+        def lineReceived_login(self, line):
+                if self.session.check_for_timeseal:
+                        self.session.check_for_timeseal = False
+                        (t, dec) = timeseal.decode(line)
+                        if t != 0 and dec[0:10] == 'TIMESTAMP|':
+                                self.session.use_timeseal = True
+                                return
+                name = line.strip()
                 try:
                         self.user = user.find.by_name_for_login(name, self)
                 except user.UsernameException as e:
@@ -45,16 +66,16 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                         self.write("login: ")
                 else:
                         self.transport.will(telnet.ECHO)
-                        self.lineReceived = self.lineReceivedPasswd
+                        self.ics_state = 'passwd'
         
-        def lineReceivedPasswd(self, data):
+        def lineReceived_passwd(self, line):
                 self.transport.wont(telnet.ECHO)
                 self.write('\n')
                 if self.user.is_guest:
                         # ignore whatever was entered in place of a password
                         self.prompt()
                 else:
-                        passwd = data.strip()
+                        passwd = line.strip()
                         if len(passwd) == 0:
                                 self.login()
                         elif self.user.check_passwd(passwd):
@@ -62,20 +83,21 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                         else:
                                 self.write('\n\n**** Invalid password! ****\n\n')
                                 self.login()
-
-                assert(self.lineReceived != self.lineReceivedPasswd)
+                assert(self.ics_state != 'passwd')
 
         def prompt(self):
                 self.user.log_in(self)
                 self.write('fics% ')
-                self.lineReceived = self.lineReceivedLoggedIn
+                self.ics_state = 'online'
 
-        def lineReceivedLoggedIn(self, data):
+        def lineReceived_online(self, line):
                 try:
-                        command.handle_command(data.strip(), self)
+                        command.handle_command(line, self)
+                        self.write('fics% ')
                 except command.QuitException:
-                        self.transport.loseConnection()
-                self.write('fics% ')
+                        f = open("messages/logout.txt")
+                        self.write(f.read())
+                        self.loseConnection('quit')
 
         def loseConnection(self, reason):
                 self.transport.loseConnection()

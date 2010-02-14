@@ -5,7 +5,7 @@ a twisted application for chessd
 import os
 
 from twisted.application import service, internet
-from twisted.internet.protocol import Factory
+from twisted.internet.protocol import ServerFactory
 from twisted.internet import reactor
 from twisted.conch.telnet import TelnetTransport
 
@@ -19,7 +19,7 @@ import ics_protocol
 
 PORT = 5000
 
-class IcsFactory(Factory):
+class IcsFactory(ServerFactory):
         def buildProtocol(self, addr):
                 return TelnetTransport(ics_protocol.IcsProtocol)
 

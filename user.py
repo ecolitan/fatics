@@ -12,12 +12,11 @@ class BaseUser:
                 self.is_online = False
 
         def log_in(self, conn):
-                self.session = Session(self, conn)
-                conn.session = self.session
+                self.session = conn.session
+                self.session.set_user(self)
                 self.is_online = True
 
         def log_out(self):
-                self.session.close()
                 if not self.is_guest:
                         db.user_update_last_logout(self.user.id)
                 self.is_online = False
