@@ -13,6 +13,7 @@ class BaseUser:
 
         def log_in(self, conn):
                 self.session = Session(self, conn)
+                conn.session = self.session
                 self.is_online = True
 
         def log_out(self):

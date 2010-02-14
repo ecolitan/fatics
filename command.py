@@ -76,6 +76,7 @@ class CommandList():
 		self.add_command(Command('follow', [], 'w', self.follow, admin.Level.user))
 		self.add_command(Command('quit', [], '', self.quit, admin.Level.user))
 		self.add_command(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
+		self.add_command(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
 
 	def add_command(self, cmd):
 		self.cmds[cmd.name] = cmd
@@ -108,20 +109,40 @@ class CommandList():
 	
 	def follow(self, args, conn):
 		conn.write('FOLLOW')
-	
+
 	def tell(self, args, conn):
-		try:
-			u = user.find.by_name(args[0])
-		except user.UsernameException:
-			conn.write(_('"%s" is not a valid handle.\n') % args[0])
-		else:
+		u = self._do_tell(args, conn)
+		conn.session.last_tell_user = u
+	
+	def xtell(self, args, conn):
+		u = self._do_tell(args, conn)
+
+	def _do_tell(self, args, conn):
+		if args[0] == '.':
+			u = conn.session.last_tell_user
 			if not u:
-				conn.write(_('There is no player matching the name "%s".\n') % args[0])
+				conn.write(_("I don't know who to tell that to.\n"))
 			elif not u.is_online:
-				conn.write(_('%s is not logged in.') % args[0])
+				conn.write(_('"%s" is no longer online.\n') % args[0])
+				u = None
+
+		else:
+			try:
+				u = user.find.by_name(args[0])
+			except user.UsernameException:
+				conn.write(_('"%s" is not a valid handle.\n') % args[0])
 			else:
-				u.write('\n' + conn.user.get_display_name() + _(" tells you: ") + args[1] + '\n')
-				
+				if not u:
+					conn.write(_('There is no player matching the name "%s".\n') % args[0])
+				elif not u.is_online:
+					conn.write(_('%s is not logged in.') % args[0])
+					u = None
+
+		if u:
+			u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
+			conn.write(_("(told %s)") % u.name + '\n')
+
+		return u
 	
 	def quit(self, args, conn):
 		raise QuitException()
