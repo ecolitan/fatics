@@ -55,7 +55,6 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 if self.session.check_for_timeseal:
                         self.session.check_for_timeseal = False
                         (t, dec) = timeseal.decode(line)
-                        print 'checking for timeseal'
                         if t != 0 and dec[0:10] == 'TIMESTAMP|':
                                 self.session.use_timeseal = True
                                 return

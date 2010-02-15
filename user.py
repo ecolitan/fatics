@@ -3,6 +3,7 @@ import bcrypt
 import random
 import string
 
+import admin
 from db import db
 import session
 from session import Session
@@ -44,27 +45,15 @@ class User(BaseUser):
 
         def set_passwd(self, passwd):
                 self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
-                db.set_user_passwd(self.id, self.passwd_hash)
+                db.user_set_passwd(self.id, self.passwd_hash)
 
-        # test whether a string meets the requirements for a password
-        def is_legal_passwd(self, passwd):
-                if len(passwd) > 32:
-                        return False
-                if len(passwd) < 4:
-                        return False
-                # passwords may not contain spaces because they are set
-                # using a command
-                if not re.match(r'^\S+$', passwd):
-                        return False
-                return True
-        
         def set_admin_level(self, level):
                 db.user_set_admin_level(self.id, level)
         
         # check if an unencrypted password is correct
         def check_passwd(self, passwd):
                 # don't perform expensive computation on arbitrarily long data
-                if not self.is_legal_passwd(passwd):
+                if not is_legal_passwd(passwd):
                         return False
                 return bcrypt.hashpw(passwd, self.passwd_hash) == self.passwd_hash
         
@@ -145,5 +134,31 @@ class Find:
                         return None
 
 find = Find()
+        
+# test whether a string meets the requirements for a password
+def is_legal_passwd(passwd):
+        if len(passwd) > 32:
+                return False
+        if len(passwd) < 4:
+                return False
+        # passwords may not contain spaces because they are set
+        # using a command
+        if not re.match(r'^\S+$', passwd):
+                return False
+        return True
+
+class Create:
+        def passwd(self):
+                chars = string.letters + string.digits
+                passlen = random.choice(range(5, 8))
+                ret = ''
+                for i in range(passlen):
+                        ret = ret + random.choice(chars)
+                return ret
+
+        def new(self, name, email, passwd, real_name):
+                hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
+                db.user_add(name, email, hash, real_name, admin.Level.user)
+create = Create()
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

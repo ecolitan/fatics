@@ -24,17 +24,18 @@ class Command:
         def parse_params(self, s):
                 params = []
                 for c in self.param_str:
-                        if c in ['i', 'w']:
+                        if c in ['i', 'w', 'W']:
                                 # required argument
                                 if s == None:
                                         raise BadCommandException()
                                 else:
                                         m = re.split(r'\s+', s, 1)
                                         assert(len(m) > 0)
-                                        param = m[0].lower()
-                                        assert(len(param) > 0)
+                                        param = m[0]
                                         if len(param) == 0:
                                                 raise BadCommandException()
+                                        if c == c.lower():
+                                                param = param.lower()
                                         s = m[1] if len(m) > 1 else None
                         elif c in ['o', 'n']:
                                 # optional argument
@@ -66,7 +67,7 @@ class Command:
                                 raise InternalException()
                         params.append(param)
 
-                if not (s == None or re.match(r'\s*', s)):
+                if not (s == None or re.match(r'^\s*$', s)):
                         # extraneous data at the end
                         raise BadCommandException()
                                 
@@ -80,17 +81,55 @@ class CommandList():
                 # the trie data structure allows for efficiently finding
                 # a command given a substring
                 self.cmds = trie.Trie()
-                self.add_command(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
-                self.add_command(Command('follow', [], 'w', self.follow, admin.Level.user))
-                self.add_command(Command('quit', [], '', self.quit, admin.Level.user))
-                self.add_command(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
-                self.add_command(Command('who', [], 'T', self.who, admin.Level.user))
-                self.add_command(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
+                self._add(Command('addplayer', [], 'WWS', self.addplayer, admin.Level.admin))
+                self._add(Command('asetpasswd', [], 'wW', self.asetpasswd, admin.Level.admin))
 
-        def add_command(self, cmd):
+                self._add(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
+                self._add(Command('follow', [], 'w', self.follow, admin.Level.user))
+                self._add(Command('quit', [], '', self.quit, admin.Level.user))
+                self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
+                self._add(Command('who', [], 'T', self.who, admin.Level.user))
+                self._add(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
+
+        def _add(self, cmd):
+                #if cmd.adminlevel > admin.Level.user:
                 self.cmds[cmd.name] = cmd
                 for a in cmd.aliases:
                         self.cmds[a] = cmd
+
+        def addplayer(self, args, conn):
+                [name, email, real_name] = args
+                try:
+                        u = user.find.by_name(name)
+                except user.UsernameException as e:
+                        conn.write(e.reason + '\n')
+                else:
+                        if u:
+                                conn.write(_('A player named %s is already registered.\n') % name)
+                        else:
+                                passwd = user.create.passwd()
+                                user.create.new(name, email, passwd, real_name)
+                                conn.write(_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
+
+
+        def asetpasswd(self, args, conn):
+                [name, passwd] = args
+                try:
+                        u = user.find.by_name(name)
+                except user.UsernameException:
+                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
+                else:
+                        if not u:
+                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
+                        elif u.is_guest:
+                                conn.write(_('You cannot set the password of an unregistered player!\n'))
+                        elif not user.is_legal_passwd(passwd):
+                                conn.write(_('"%s" is not a valid password.\n') % passwd)
+                        else:
+                                u.set_passwd(passwd)
+                                conn.write(_('Password of %s changed to %s.\n') % (name, '*' * len(passwd)))
+                                if u.is_online:
+                                        u.session.conn.write(_('\n%s has changed your password.\n') % conn.user.name)
 
         def finger(self, args, conn):
                 try:
@@ -123,6 +162,9 @@ class CommandList():
         
         def follow(self, args, conn):
                 conn.write('FOLLOW')
+        
+        def quit(self, args, conn):
+                raise QuitException()
 
         def tell(self, args, conn):
                 u = self._do_tell(args, conn)
@@ -158,9 +200,6 @@ class CommandList():
 
                 return u
         
-        def quit(self, args, conn):
-                raise QuitException()
-
         def who(self, args, conn):
                 count = 0
                 for s in session.online.values():

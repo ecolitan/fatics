@@ -16,6 +16,20 @@ CREATE TABLE `user` (
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+-- user variables
+CREATE TABLE `var` (
+  `var_id` int(11) NOT NULL,
+  `var_name` varchar(16) NOT NULL,
+  PRIMARY KEY (`var_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+CREATE TABLE `user_var` (
+  `user_id` int(11) NOT NULL,
+  `var_id` int(11) NOT NULL,
+  `var_val` varchar(128) NOT NULL,
+  UNIQUE KEY `user_var` (`user_id`,`var_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 --
 -- Dumping data for table `user`
 --
