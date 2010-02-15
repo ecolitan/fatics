@@ -31,7 +31,7 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 self.write("login: ")
 
         def lineReceived(self, line):
-                print '((%s,%s))\n' % (self.ics_state, repr(line))
+                #print '((%s,%s))\n' % (self.ics_state, repr(line))
                 if self.session.use_timeseal:
                         (t, line) = timeseal.decode(line)
                 if self.ics_state:
@@ -57,11 +57,8 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                         (t, dec) = timeseal.decode(line)
                         print 'checking for timeseal'
                         if t != 0 and dec[0:10] == 'TIMESTAMP|':
-                                print 'enabled timeseal'
                                 self.session.use_timeseal = True
                                 return
-                        else:
-                                print 'disabled timeseal'
                 name = line.strip()
                 try:
                         self.user = user.find.by_name_for_login(name, self)

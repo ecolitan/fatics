@@ -4,6 +4,7 @@ import time
 import user
 import trie
 import admin
+import session
 
 class InternalException(Exception):
         pass
@@ -54,6 +55,13 @@ class Command:
                                         raise BadCommandException()
                                 param = s
                                 s = None
+                        elif c == 'T':
+                                # optional string to end
+                                if s == None or len(s) == 0:
+                                        param = None
+                                else:
+                                        param = s
+                                s = None
                         else:
                                 raise InternalException()
                         params.append(param)
@@ -76,6 +84,7 @@ class CommandList():
                 self.add_command(Command('follow', [], 'w', self.follow, admin.Level.user))
                 self.add_command(Command('quit', [], '', self.quit, admin.Level.user))
                 self.add_command(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
+                self.add_command(Command('who', [], 'T', self.who, admin.Level.user))
                 self.add_command(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
 
         def add_command(self, cmd):
@@ -151,7 +160,15 @@ class CommandList():
         
         def quit(self, args, conn):
                 raise QuitException()
-                
+
+        def who(self, args, conn):
+                count = 0
+                for s in session.online.values():
+                        conn.write(s.user.get_display_name() + '\n')
+                        count = count + 1
+                conn.write('\n')
+                # assume plural
+                conn.write(_('%d players displayed.\n\n') % count)
 
 command_list = CommandList()
 
