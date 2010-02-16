@@ -46,7 +46,6 @@ class Command:
                                         m = re.split(r'\s+', s, 1)
                                         assert(len(m) > 0)
                                         param = m[0].lower()
-                                        assert(len(param) > 0)
                                         if len(param) == 0:
                                                 param = None
                                                 assert(len(m) == 1)

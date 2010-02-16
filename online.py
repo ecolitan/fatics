@@ -14,7 +14,8 @@ class Online(object):
                 del self.online[u.name.lower()]
 
         def is_online(self, name):
-                return name.lower() in self.online
+                # there's probably a more efficient way
+                return self.find_exact(name) != None
 
         def find_exact(self, name):
                 name = name.lower()

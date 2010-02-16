@@ -6,6 +6,7 @@ import user
 import command
 from timeseal import timeseal
 from session import Session
+from login import login
 
 connections = []
 
@@ -15,6 +16,7 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
         delimiter = '\n'
         MAX_LENGTH = 1024
         ics_state = 'initial'
+        user = None
 
         def connectionMade(self):
                 self.transport.commandMap[telnet.IP] = self.loseConnection
@@ -59,14 +61,12 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                                 self.session.use_timeseal = True
                                 return
                 name = line.strip()
-                try:
-                        self.user = user.find.by_name_for_login(name, self)
-                except user.UsernameException as e:
-                        self.write('\n' + e.reason + '\n')
-                        self.write("login: ")
-                else:
+                self.user = login.get_user(name, self)
+                if self.user:
                         d = self.transport.will(telnet.ECHO)
                         self.ics_state = 'passwd'
+                else:
+                        self.write("login: ")
         
         def lineReceived_passwd(self, line):
                 if self.session.use_timeseal:
@@ -108,11 +108,11 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 except command.QuitException:
                         f = open("messages/logout.txt")
                         self.write(f.read())
-                        if self.user.is_online:
-                                self.user.log_out()
                         self.loseConnection('quit')
 
         def loseConnection(self, reason):
+                if self.user and self.user.is_online:
+                        self.user.log_out()
                 self.transport.loseConnection()
         
         def write(self, s):
