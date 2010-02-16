@@ -103,7 +103,7 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
 
         def lineReceived_online(self, line):
                 try:
-                        command.handle_command(line, self)
+                        command.parser.run(line, self)
                         self.write('fics% ')
                 except command.QuitException:
                         f = open("messages/logout.txt")

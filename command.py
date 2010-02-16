@@ -14,7 +14,7 @@ class QuitException(Exception):
 class BadCommandException(Exception):
         pass
 
-class Command:
+class Command(object):
         def __init__(self, name, aliases, param_str, run, adminlevel):
                 self.name = name
                 self.aliases = aliases
@@ -76,7 +76,7 @@ class Command:
         def help(self, conn):
                 conn.write("help for %s\n" % self.name)
 
-class CommandList():
+class CommandList(object):
         def __init__(self):
                 # the trie data structure allows for efficiently finding
                 # a command given a substring
@@ -215,30 +215,50 @@ class CommandList():
 
 command_list = CommandList()
 
-def handle_command(s, conn):
-        conn.user.session.last_command_time = time.time()
-        m = re.match(r'^(\S+)(?:\s+(.*))?$', s)
-        cmd = None
-        if m:
-                word = m.group(1)
-                try:
-                        cmd = command_list.cmds[word]
-                except KeyError:
-                        conn.write("%s: Command not found.\n" % word)
-                except trie.NeedMore:
-                        matches = command_list.cmds.all_children(word)
-                        assert(len(matches) > 0)
-                        if len(matches) == 1:
-                                cmd = matches.pop()
-                        else:
-                                conn.write("""Ambiguous command "%s". Matches: %s\n""" % (word, ' '.join([c.name for c in matches])))
-                if cmd:
+class CommandParser(object):
+        def run(self, s, conn):
+                update_idle = True
+                # previously the prefix '$' was used to not expand aliases
+                # and '$$' was used to not update the idle time.  But these
+                # options should really be orthogonal, so I made '$$' alone
+                # expand aliaes. Now if you want the old behavior of neither
+                # expanding aliases nor updating idle time, use '$$$'.
+                if s[0:2] == '$$':
+                        s = s[2:]
+                else:
+                        conn.user.session.last_command_time = time.time()
+                if s[0] == '$':
+                        s = s[1:]
+                else:
+                        s = self.expand_aliases(s)
+
+                m = re.match(r'^(\S+)(?:\s+(.*))?$', s)
+                cmd = None
+                if m:
+                        word = m.group(1)
                         try:
-                                cmd.run(cmd.parse_params(m.group(2)), conn)
-                        except BadCommandException:
-                                cmd.help(conn)
-        else:
-                conn.write("Command not found.\n")
+                                cmd = command_list.cmds[word]
+                        except KeyError:
+                                conn.write("%s: Command not found.\n" % word)
+                        except trie.NeedMore:
+                                matches = command_list.cmds.all_children(word)
+                                assert(len(matches) > 0)
+                                if len(matches) == 1:
+                                        cmd = matches.pop()
+                                else:
+                                        conn.write("""Ambiguous command "%s". Matches: %s\n""" % (word, ' '.join([c.name for c in matches])))
+                        if cmd:
+                                try:
+                                        cmd.run(cmd.parse_params(m.group(2)), conn)
+                                except BadCommandException:
+                                        cmd.help(conn)
+                else:
+                        conn.write(_("Command not found.\n"))
+
+        def expand_aliases(self, s):
+                return s
+
+parser = CommandParser()
 
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
