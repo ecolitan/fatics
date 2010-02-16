@@ -108,6 +108,8 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 except command.QuitException:
                         f = open("messages/logout.txt")
                         self.write(f.read())
+                        if self.user.is_online:
+                                self.user.log_out()
                         self.loseConnection('quit')
 
         def loseConnection(self, reason):

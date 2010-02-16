@@ -1,13 +1,12 @@
-online = {}
-
 import user
 import db
 import time
+from online import online
 
 from timer import timer
 
 # user state that is per-session and not saved to persistent storage
-class Session: 
+class Session(object): 
         def __init__(self, conn):
                 self.conn = conn
                 self.login_time = time.time()
@@ -18,10 +17,6 @@ class Session:
 
         def set_user(self, user):
                 self.user = user
-                online[user.name.lower()] = self
-
-        def close(self):
-                del online[user.name]
 
         """returns a human-readable string"""
         def get_idle_time(self):
@@ -33,5 +28,3 @@ class Session:
                 assert(self.login_time != None)
                 return timer.hms(time.time() - self.login_time)
 
-
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

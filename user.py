@@ -6,7 +6,7 @@ import string
 import admin
 from db import db
 import session
-from session import Session
+from online import online
 
 class BaseUser:
         def __init__(self):
@@ -15,12 +15,14 @@ class BaseUser:
         def log_in(self, conn):
                 self.session = conn.session
                 self.session.set_user(self)
+                online.add(self)
                 self.is_online = True
 
         def log_out(self):
                 if not self.is_guest:
-                        db.user_update_last_logout(self.user.id)
+                        db.user_update_last_logout(self.id)
                 self.is_online = False
+                online.remove(self)
 
         def write(self, s):
                 assert(self.is_online)
@@ -71,7 +73,7 @@ class GuestUser(BaseUser):
                                 self.name = 'Guest'
                                 for i in range(4):
                                         self.name = self.name + random.choice(string.ascii_uppercase)
-                                if not self.name in session.online:
+                                if not session.online.is_online(self.name):
                                         break
                                 count = count + 1
                                 if count > 3:
@@ -87,8 +89,8 @@ class UsernameException(Exception):
                 self.reason = reason
 
 class AmbiguousException(Exception):
-        def __init__(self, users):
-                self.users = users
+        def __init__(self, names):
+                self.names = names
 
 class Find:
         # return a user object if one exists; otherwise make a 
@@ -98,7 +100,7 @@ class Find:
                         u = GuestUser(None)
                         conn.write(_('\nLogging you in as "%s"; you may use this name to play unrated games.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter as "%s":') % (u.name, u.name))
                 else:
-                        u = self.by_name(name)
+                        u = self.by_name_exact(name)
                         if u:
                                 if u.is_guest:
                                         # It's theoretically possible that
@@ -113,7 +115,7 @@ class Find:
                                 conn.write(_('\n"%s" is not a registered name.  You may play unrated games as a guest.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter as "%s":') % (name, name))
                 return u
 
-        def by_name(self, name, min_len = 3):
+        def by_name_exact(self, name, min_len = 3):
                 if len(name) < min_len:
                         raise UsernameException(_('A name should be at least %d characters long!  Try again.\n') % 3)
                 elif len(name) > 18:
@@ -121,34 +123,35 @@ class Find:
                 elif not re.match('^[a-zA-Z_]+$', name):
                         raise UsernameException(_('Sorry, names can only consist of lower and upper case letters.  Try again.\n'))
 
-                u = self.online(name)
+                u = session.online.find_exact(name)
                 if not u:
                         dbu = db.get_user(name)
                         if dbu:
                                 u = User(dbu)
-                        else:
-                                u = None
                 return u
 
-        def by_prefix(self, prefix):
-                users = db.user_get_matching(prefix)
-                if len(users) == 1:
-                        dbu = users[0]
-                        ou = self.online(dbu['user_name'])
-                        if ou:
-                                u = ou
-                        else:
-                                u = User(dbu)
-                else:
-                        raise AmbiguousException(users)
+        """ find a user but allow the name to abbreviated if
+        it is unambiguous; if the name is not an exact match, prefer
+        online users to offline """
+        def by_name_or_prefix(self, name):
+                assert(len(name) >= 2)
+                u = self.by_name_exact(name, 2)
+                if not u:
+                        ulist = session.online.find_matching(name)
+                        if len(ulist) == 1:
+                                u = ulist[0]
+                        elif len(ulist) > 1:
+                                # when there are multiple matching users
+                                # online, don't bother searching for offline
+                                # users who also match
+                                raise AmbiguousException([u.name for u in ulist])
+                if not u: 
+                        ulist = db.user_get_matching(name)
+                        if len(ulist) == 1:
+                                u = User(ulist[0])
+                        elif len(ulist) > 1:
+                                raise AmbiguousException([u['user_name'] for u in ulist])
                 return u
-
-        def online(self, name):
-                name = name.lower()
-                if name in session.online:
-                        return session.online[name].user
-                else:
-                        return None
 
 find = Find()
         

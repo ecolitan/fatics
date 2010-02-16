@@ -5,6 +5,7 @@ import user
 import trie
 import admin
 import session
+from online import online
 
 class InternalException(Exception):
         pass
@@ -100,7 +101,7 @@ class CommandList():
         def addplayer(self, args, conn):
                 [name, email, real_name] = args
                 try:
-                        u = user.find.by_name(name)
+                        u = user.find.by_name_exact(name)
                 except user.UsernameException as e:
                         conn.write(e.reason + '\n')
                 else:
@@ -115,7 +116,7 @@ class CommandList():
         def asetpasswd(self, args, conn):
                 [name, passwd] = args
                 try:
-                        u = user.find.by_name(name)
+                        u = user.find.by_name_exact(name)
                 except user.UsernameException:
                         conn.write(_('"%s" is not a valid handle\n.') % args[0])
                 else:
@@ -138,11 +139,9 @@ class CommandList():
                                 if len(args[0]) < 2:
                                         conn.write(_('You need to specify at least two characters of the name.\n'))
                                 else:
-                                        u = user.find.by_name(args[0], min_len=2)
+                                        u = user.find.by_name_or_prefix(args[0])
                                         if not u:
-                                                u = user.find.by_prefix(args[0])
-                                                if not u:
-                                                        conn.write(_('There is no player matching the name "%s".\n') % args[0])
+                                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
                         else:
                                 u = conn.user
                         if u:
@@ -163,7 +162,7 @@ class CommandList():
                 except user.UsernameException:
                         conn.write(_('"%s" is not a valid handle\n.') % args[0])
                 except user.AmbiguousException as e:
-                        conn.write("""Ambiguous name "%s". Matches: %s\n""" % (args[0], ' '.join([dbu['user_name'] for dbu in e.users])))
+                        conn.write("""Ambiguous name "%s". Matches: %s\n""" % (args[0], ' '.join(e.names)))
 
         
         def follow(self, args, conn):
@@ -185,12 +184,12 @@ class CommandList():
                         if not u:
                                 conn.write(_("I don't know who to tell that to.\n"))
                         elif not u.is_online:
-                                conn.write(_('"%s" is no longer online.\n') % args[0])
+                                conn.write(_('%s is no longer online.\n') % u.name)
                                 u = None
 
                 else:
                         try:
-                                u = user.find.by_name(args[0])
+                                u = user.find.by_name_or_prefix(args[0])
                         except user.UsernameException:
                                 conn.write(_('"%s" is not a valid handle.\n') % args[0])
                         else:
@@ -208,8 +207,8 @@ class CommandList():
         
         def who(self, args, conn):
                 count = 0
-                for s in session.online.values():
-                        conn.write(s.user.get_display_name() + '\n')
+                for u in online.itervalues():
+                        conn.write(u.get_display_name() + '\n')
                         count = count + 1
                 conn.write('\n')
                 # assume plural
