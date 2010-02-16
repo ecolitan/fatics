@@ -17,18 +17,29 @@ CREATE TABLE `user` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- user variables
+DROP TABLE IF EXISTS `var`;
 CREATE TABLE `var` (
   `var_id` int(11) NOT NULL,
   `var_name` varchar(16) NOT NULL,
+  `var_type` int(11) NOT NULL,
   PRIMARY KEY (`var_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
-CREATE TABLE `user_var` (
-  `user_id` int(11) NOT NULL,
+DROP TABLE IF EXISTS `var_int`;
+CREATE TABLE `var_int` (
   `var_id` int(11) NOT NULL,
-  `var_val` varchar(128) NOT NULL,
-  UNIQUE KEY `user_var` (`user_id`,`var_id`)
+  `user_id` int(11) NOT NULL,
+  `var_int` int(11) NOT NULL,
+  UNIQUE KEY (`var_id`, `user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `var_str`;
+CREATE TABLE `var_str` (
+  `var_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `var_str` int(11) NOT NULL,
+  UNIQUE KEY (`var_id`, `user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `user`
@@ -37,4 +48,5 @@ CREATE TABLE `user_var` (
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
 INSERT INTO `user` VALUES (1,'admin','$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy','Admin Account','lics@openchess.dyndns.org',1000,NULL,NULL);
+INSERT INTO `user` VALUES (2,'admintw','$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy','Admin Account','lics@openchess.dyndns.org',1000,NULL,NULL);
 UNLOCK TABLES;

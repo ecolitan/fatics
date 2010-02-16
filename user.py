@@ -86,6 +86,10 @@ class UsernameException(Exception):
         def __init__(self, reason):
                 self.reason = reason
 
+class AmbiguousException(Exception):
+        def __init__(self, users):
+                self.users = users
+
 class Find:
         # return a user object if one exists; otherwise make a 
         # guest user
@@ -109,8 +113,8 @@ class Find:
                                 conn.write(_('\n"%s" is not a registered name.  You may play unrated games as a guest.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter as "%s":') % (name, name))
                 return u
 
-        def by_name(self, name):
-                if len(name) < 3:
+        def by_name(self, name, min_len = 3):
+                if len(name) < min_len:
                         raise UsernameException(_('A name should be at least %d characters long!  Try again.\n') % 3)
                 elif len(name) > 18:
                         raise UsernameException(_('Sorry, names may be at most %d characters long.  Try again.\n') % 18)
@@ -124,6 +128,19 @@ class Find:
                                 u = User(dbu)
                         else:
                                 u = None
+                return u
+
+        def by_prefix(self, prefix):
+                users = db.user_get_matching(prefix)
+                if len(users) == 1:
+                        dbu = users[0]
+                        ou = self.online(dbu['user_name'])
+                        if ou:
+                                u = ou
+                        else:
+                                u = User(dbu)
+                else:
+                        raise AmbiguousException(users)
                 return u
 
         def online(self, name):

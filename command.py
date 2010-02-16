@@ -133,17 +133,19 @@ class CommandList():
 
         def finger(self, args, conn):
                 try:
+                        u = None
                         if args[0] != None:
-                                u = user.find.by_name(args[0])
+                                if len(args[0]) < 2:
+                                        conn.write(_('You need to specify at least two characters of the name.\n'))
+                                else:
+                                        u = user.find.by_name(args[0], min_len=2)
+                                        if not u:
+                                                u = user.find.by_prefix(args[0])
+                                                if not u:
+                                                        conn.write(_('There is no player matching the name "%s".\n') % args[0])
                         else:
                                 u = conn.user
-                except user.UsernameException:
-                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
-                else:
-                        if not u:
-                                # XXX substring matches
-                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
-                        else:
+                        if u:
                                 conn.write(_('Finger of %s:\n\n') % u.get_display_name())
                                 if u.is_online:
                                         conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
@@ -158,6 +160,10 @@ class CommandList():
                                                 conn.write(_('%s has never connected.\n\n') % u.name)
                                         else:
                                                 conn.write(_('Last disconnected: %s\n\n') % u.last_logout)
+                except user.UsernameException:
+                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
+                except user.AmbiguousException as e:
+                        conn.write("""Ambiguous name "%s". Matches: %s\n""" % (args[0], ' '.join([dbu['user_name'] for dbu in e.users])))
 
         
         def follow(self, args, conn):
