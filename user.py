@@ -23,6 +23,8 @@ class BaseUser(object):
                                 u = online.find_exact(self.name)
                                 u.session.conn.write(_("**** %s has arrived; you can't both be logged in. ****\n") % self.name)
                                 u.session.conn.loseConnection('logged in again')
+                conn.write(_('**** Starting session as %s ****\n\n') % self.name)
+
                 self.session = conn.session
                 self.session.set_user(self)
                 online.add(self)

@@ -223,10 +223,14 @@ class CommandParser(object):
                 # options should really be orthogonal, so I made '$$' alone
                 # expand aliaes. Now if you want the old behavior of neither
                 # expanding aliases nor updating idle time, use '$$$'.
-                if s[0:2] == '$$':
+                if len(s) >= 2 and s[0:2] == '$$':
                         s = s[2:]
                 else:
                         conn.user.session.last_command_time = time.time()
+
+                if len(s) == 0:
+                        # ignore blank line
+                        return
                 if s[0] == '$':
                         s = s[1:]
                 else:

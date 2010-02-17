@@ -1,7 +1,9 @@
 import time
-from twisted.conch import telnet
 from twisted.protocols import basic
+import twisted.internet.interfaces
+from zope.interface import implements
 
+import telnet
 import user
 import command
 from timeseal import timeseal
@@ -10,7 +12,8 @@ from login import login
 
 connections = []
 
-class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
+class Connection(basic.LineReceiver):
+        implements(twisted.internet.interfaces.IProtocol)
         # the telnet transport changes all '\n' to 
         # '\r\n', so we can just use '\n' here
         delimiter = '\n'
@@ -41,7 +44,6 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
 
         def connectionLost(self, reason):
                 basic.LineReceiver.connectionLost(self, reason)
-                telnet.TelnetProtocol.connectionLost(self, reason)
                 try:
                         if self.user.is_online:
                                 self.user.log_out()
@@ -63,24 +65,13 @@ class IcsProtocol(basic.LineReceiver, telnet.TelnetProtocol):
                 name = line.strip()
                 self.user = login.get_user(name, self)
                 if self.user:
-                        d = self.transport.will(telnet.ECHO)
+                        self.transport.will(telnet.ECHO)
                         self.ics_state = 'passwd'
                 else:
                         self.write("login: ")
         
         def lineReceived_passwd(self, line):
-                if self.session.use_timeseal:
-                        # timeseal interferes with us receiving confirmation
-                        # that the client has disabled echo, so assume
-                        # it was disabled
-                        #s = self.transport.getOptionState(telnet.ECHO)
-                        #s.us.negotiating = False
-                        #s.us.state = 'yes'
-                        self.transport.telnet_DO(telnet.ECHO)
-                d = self.transport.wont(telnet.ECHO)
-                if self.session.use_timeseal:
-                        # see above
-                        self.transport.telnet_DONT(telnet.ECHO)
+                self.transport.wont(telnet.ECHO)
                 self.write('\n')
                 if self.user.is_guest:
                         # ignore whatever was entered in place of a password

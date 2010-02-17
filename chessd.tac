@@ -7,21 +7,23 @@ import os
 from twisted.application import service, internet
 from twisted.internet.protocol import ServerFactory
 from twisted.internet import reactor
-from twisted.conch.telnet import TelnetTransport
 
 import gettext
+import sys
+
+import telnet
+import connection
+
 gettext.install('interface', './locale', unicode=False)
 
-import sys
 if os.geteuid() == 0:
         sys.path.append('.')
-import ics_protocol
 
 PORT = 5000
 
 class IcsFactory(ServerFactory):
         def buildProtocol(self, addr):
-                return TelnetTransport(ics_protocol.IcsProtocol)
+                return telnet.TelnetTransport(connection.Connection)
 
 def getService(port):
         """
