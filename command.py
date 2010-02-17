@@ -87,6 +87,7 @@ class CommandList(object):
                 self._add(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
                 self._add(Command('follow', [], 'w', self.follow, admin.Level.user))
                 self._add(Command('quit', [], '', self.quit, admin.Level.user))
+                self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
                 self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
                 self._add(Command('who', [], 'T', self.who, admin.Level.user))
                 self._add(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
@@ -169,6 +170,21 @@ class CommandList(object):
         
         def quit(self, args, conn):
                 raise QuitException()
+        
+        def remplayer(self, args, conn):
+                name = args[0]
+                try:
+                        u = user.find.by_name_exact(name)
+                except user.UsernameException:
+                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
+                else:
+                        if not u:
+                                conn.write(_("No player by the name %s is registered.\n") % name)
+                        elif u.is_online:
+                                conn.write(_("A player by that name is logged in.\n"))
+                        else:
+                                u.remove()
+                                conn.write(_("Player %s removed.\n") % name)
 
         def tell(self, args, conn):
                 u = self._do_tell(args, conn)

@@ -14,8 +14,8 @@ connections = []
 
 class Connection(basic.LineReceiver):
         implements(twisted.internet.interfaces.IProtocol)
-        # the telnet transport changes all '\n' to 
-        # '\r\n', so we can just use '\n' here
+        # the telnet transport changes all '\r\n' to '\n',
+        # so we can just use '\n' here
         delimiter = '\n'
         MAX_LENGTH = 1024
         ics_state = 'initial'

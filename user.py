@@ -73,6 +73,9 @@ class User(BaseUser):
         
         def get_last_logout(self):
                 return db.user_get_last_logout(self.id)
+        
+        def remove(self):
+                return db.user_delete(self.id)
 
 class GuestUser(BaseUser):
         def __init__(self, name):
@@ -111,7 +114,7 @@ class Find:
 
                 u = session.online.find_exact(name)
                 if not u:
-                        dbu = db.get_user(name)
+                        dbu = db.user_get(name)
                         if dbu:
                                 u = User(dbu)
                 return u

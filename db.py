@@ -4,7 +4,7 @@ class DB(object):
 	def __init__(self):
 		self.db = connect(host="localhost", db="chess", user="chess", passwd="Luu9yae7")
 
-        def get_user(self, name):
+        def user_get(self, name):
                 cursor = self.db.cursor(cursors.DictCursor)
                 cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout FROM user WHERE user_name=%s""", (name,))
                 row = cursor.fetchone()
@@ -36,6 +36,11 @@ class DB(object):
         def user_update_last_logout(self, id):
                 cursor = self.db.cursor()
                 cursor.execute("""UPDATE user SET user_last_logout=NOW() WHERE user_id='%s'""", (id,))
+                cursor.close()
+        
+        def user_delete(self, id):
+                cursor = self.db.cursor()
+                cursor.execute("""DELETE FROM user WHERE user_id='%s'""", (id,))
                 cursor.close()
         
 

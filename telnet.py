@@ -8,7 +8,6 @@ followed the server and not the RFC."""
 
 from zope.interface import implements
 from twisted.internet import protocol, interfaces
-from twisted.python import log
 
 # telnet codes
 ECHO = chr(1)
@@ -67,33 +66,17 @@ class Telnet(protocol.Protocol):
     def _write(self, bytes):
         self.transport.write(bytes)
 
-    def _do(self, option):
+    def do(self, option):
         self._write(IAC + DO + option)
 
-    def _dont(self, option):
+    def dont(self, option):
         self._write(IAC + DONT + option)
 
-    def _will(self, option):
+    def will(self, option):
         self._write(IAC + WILL + option)
 
-    def _wont(self, option):
-        self._write(IAC + WONT + option)
-
-    def will(self, option):
-        """Indicate our willingness to enable an option.
-        """
-        self._will(option)
-
     def wont(self, option):
-        """Indicate we are not willing to enable an option.
-        """
-        self._wont(option)
-
-    def do(self, option):
-        self._do(option)
-
-    def dont(self, option):
-        self._dont(option)
+        self._write(IAC + WONT + option)
 
     def dataReceived(self, data):
         appDataBuffer = []
@@ -120,7 +103,7 @@ class Telnet(protocol.Protocol):
                     self.state = 'command'
                     self.command = b
                 else:
-                    raise ValueError("Stumped", b)
+                    self.state = 'data'
             elif self.state == 'command':
                 self.state = 'data'
                 command = self.command
@@ -151,7 +134,7 @@ class Telnet(protocol.Protocol):
                 else:
                     appDataBuffer.append('\r' + b)
             else:
-                raise ValueError("How'd you do this?")
+                raise ValueError("should not happen: unknown state")
 
         if appDataBuffer:
             self.applicationDataReceived(''.join(appDataBuffer))
@@ -185,23 +168,8 @@ class Telnet(protocol.Protocol):
         pass
 
 
-class ProtocolTransportMixin:
-    def write(self, bytes):
-        self.transport.write(bytes.replace('\n', '\r\n'))
-
-    def writeSequence(self, seq):
-        self.transport.writeSequence(seq)
-
-    def loseConnection(self):
-        self.transport.loseConnection()
-
-    def getHost(self):
-        return self.transport.getHost()
-
-    def getPeer(self):
-        return self.transport.getPeer()
-
-class TelnetTransport(Telnet, ProtocolTransportMixin):
+class TelnetTransport(Telnet):
+    implements(interfaces.ITransport)
     """
     @ivar protocol: An instance of the protocol to which this
     transport is connected, or None before the connection is
@@ -250,13 +218,25 @@ class TelnetTransport(Telnet, ProtocolTransportMixin):
             finally:
                 del self.protocol
 
-    def unhandledSubnegotiation(self, command, bytes):
-        self.protocol.unhandledSubnegotiation(command, bytes)
-
     def applicationDataReceived(self, bytes):
         self.protocol.dataReceived(bytes)
 
     def write(self, data):
-        ProtocolTransportMixin.write(self, data.replace('\xff','\xff\xff'))
+        data = data.replace('\xff','\xff\xff')
+        data = data.replace('\n', '\r\n')
+        self.transport.write(data)
+
+    def writeSequence(self, seq):
+        self.transport.writeSequence(seq)
+
+    def loseConnection(self):
+        self.transport.loseConnection()
+
+    def getHost(self):
+        return self.transport.getHost()
+
+    def getPeer(self):
+        return self.transport.getPeer()
+
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
