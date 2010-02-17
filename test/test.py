@@ -2,8 +2,9 @@
 import sys
 import telnetlib
 import socket
-import unittest
 import os
+from twisted.trial import unittest
+#import unittest
 
 if True:
 	host = 'localhost'
@@ -13,57 +14,6 @@ else:
 	port = '5000'
 admin_passwd = 'admin'
 
-tests = []
-class Test(object):
-	def __init__(self):
-		tests.append(self)
-		self.passed = 0
-		self.total = 0
-
-	def run(self):
-		"""This method should call yes() and no() as many times as
-		desired to indicate whether tests succeed."""
-		pass
-
-	def yes(self, msg):
-		self.passed = self.passed + 1
-		self.total = self.total + 1
-		print 'PASS: %s: %s' % (self.__class__.__name__, msg)
-
-	def no(self, msg):
-		self.total = self.total + 1
-		print 'FAIL: %s: %s' % (self.__class__.__name__, msg)
-
-	def test(self, test, msg):
-		if test:
-			self.yes(msg)
-		else:
-			self.no(msg)
-
-	def expect_exact(self, str, t, msg, timeout=2):
-		ret = t.read_until(str, timeout)
-		if str in ret:
-			self.yes(msg)
-		else:
-			self.no(msg)
-	
-	def expect_EOF(self, t, msg):
-		try:
-			ret = t.read_very_eager()
-			ret = t.read_until('not-seen', 2)
-		except EOFError:
-			self.yes(msg)
-		else:
-			self.no(msg)
-
-	def connect(self, login='admin\r\n%s\r\n' % admin_passwd):
-		t = connect()
-		if login:
-			t.write(login)
-			t.read_until('fics%')
-		return t
-	
-	
 def connect():
 	try:
 		t = telnetlib.Telnet(host, port, 120)
@@ -73,179 +23,195 @@ def connect():
 		t = None
 	return t
 
-class ConnectTest(Test):
-	def run(self):
-		t = self.connect(None)
+class Test(unittest.TestCase):
+	def expect(self, str, t, msg, timeout=2):
+		ret = t.read_until(str, timeout)
+		self.assert_(str in ret)
+	
+	def expect_EOF(self, t, msg):
+		def read_some(unused):
+			t.read_very_eager()
+			t.read_until('not-seen', 2)
+		self.assertRaises(EOFError, read_some, msg)
 
-		# welcome message
-		self.expect_exact('Welcome', t, "welcome message")
+	def connect(self):
+		return connect()
+	
+	def connect_as_guest(self):
+		t = connect()
+		t.write("guest\r\n\r\n")
+		t.read_until('fics%', 2)
+		return t
+	
+	def connect_as_admin(self):
+		t = connect()
+		t.write("admin\r\n%s\r\n" % admin_passwd)
+		t.read_until('fics%', 2)
+		return t
 
-		self.expect_exact('login:', t, "login prompt")
+class OneConnectionTest(Test):
+	def setUp(self):
+		self.t = self.connect()
 
-		t.close()
-ConnectTest()
+	def tearDown(self):
+		self.t.close()
+
+class ConnectTest(OneConnectionTest):
+	def testWelcome(self):
+		self.expect('Welcome', self.t, "welcome message")
+
+	def testLogin(self):
+		self.expect('login:', self.t, "login prompt")
 
 class LoginTest(Test):
-	def run(self):
-		# anonymous guest
-		t = self.connect(None)
-
+	def testLogin(self):
+		t = self.connect()
 		t.read_until('login:', 2)
 		t.write('\r\n')
-		self.expect_exact('login:', t, "blank line at login prompt")
+		self.expect('login:', t, "blank line at login prompt")
 
 		t.write('ad\r\n')
-		self.expect_exact('name should be at least', t, "login username too short")
+		self.expect('name should be at least', t, "login username too short")
 		
 		t.write('adminabcdefghijklmno\r\n')
-		self.expect_exact('names may be at most', t, "login username too long")
+		self.expect('names may be at most', t, "login username too long")
 		
 		t.write('admin1\r\n')
-		self.expect_exact('names can only consist', t, "login username contains numbers")
+		self.expect('names can only consist', t, "login username contains numbers")
 
 		t.write('guest\r\n')
-		self.expect_exact('Press return to enter', t, "anonymous guest login start")
+		self.expect('Press return to enter', t, "anonymous guest login start")
 		
 		t.write('\r\n')
-		self.expect_exact(' Starting', t, "anonymous guest login complete")
+		self.expect(' Starting', t, "anonymous guest login complete")
 		t.close()
 
+	def testRegisteredUserLogin(self):
 		# registered user
-		t = self.connect(None)
+		t = self.connect()
 		t.write('admin\r\n')
-		self.expect_exact('is a registered', t, "registered user login start")
+		self.expect('is a registered', t, "registered user login start")
 
 		t.write(admin_passwd + '\r\n')
-		self.expect_exact(' Starting', t, "registered user login complete")
+		self.expect(' Starting', t, "registered user login complete")
 		t.close()
-LoginTest()
 
 class PromptTest(Test):
-	def run(self):
-		t = self.connect(None)
+	def testPrompt(self):
+		t = self.connect()
 		t.write('guest\r\n\r\n')
-		self.expect_exact('fics%', t, "fics% prompt")
+		self.expect('fics%', t, "fics% prompt")
 		t.close()
-PromptTest()
 
 class FingerTest(Test):
-	def run(self):
-		t = connect()
-		t.write('admin\r\n%s\r\n' % admin_passwd)
-		[i, m, text] = t.expect(['fics%'], 2)
+	def testFinger(self):
+		t = self.connect_as_admin()
 		t.write('finger\r\n')
-		[i, m, text] = t.expect(['Finger of admin:'], 2)
-		self.test(i == 0, "finger")
-		[i, m, text] = t.expect(['On for:'], 2)
-		self.test(i == 0, "finger of online user")
+		self.expect('Finger of admin:', t, "finger")
+		self.expect('On for:', t, "finger of online user")
 		
 		t.write('finger \r\n')
-		[i, m, text] = t.expect(['Finger of admin:'], 2)
-		self.test(i == 0, "finger with trailing space")
+		self.expect('Finger of admin:', t, "finger with trailing space")
 
 		t.write('finger admin\r\n')
-		[i, m, text] = t.expect(['Finger of admin:'], 2)
-		self.test(i == 0, "finger with parameter")
+		self.expect('Finger of admin:', t, "finger with parameter")
 		
 		t.write('finger ad\r\n')
-		[i, m, text] = t.expect(['Finger of admin:'], 2)
-		self.test(i == 0, "finger with prefix")
+		self.expect('Finger of admin:', t, "finger with prefix")
 
 		t.write('addplayer admintwo nobody@example.com Admin Two\r\n')
 		t.write('asetpass admintwo admintwo\r\n')
 		t.write('finger ad\r\n')
-		[i, m, text] = t.expect(['Finger of admin:'], 2)
-		self.test(i == 0, "finger with prefix ignores offline user")
+		self.expect('Finger of admin:', t, "finger with prefix ignores offline user")
 		t2 = connect()
 		t2.write('admintwo\r\nadmintwo\r\n')
-		[i, m, text] = t2.expect(['fics%'], 2)
+		t2.read_until('fics%', 2)
 		t2.write('finger ad\r\n')
-		[i, m, text] = t2.expect(['Matches: admin admintwo'], 2)
-                self.test(i == 0, "finger ambiguous online users")
+		self.expect('Matches: admin admintwo', t2, "finger ambiguous online users")
 		t2.close()
-		t.write('remplayer admintwo\r\n')
-		[i, m, text] = t.expect(['removed'], 2)
-		
+
 		t.write('finger notarealuser\r\n')
-		[i, m, text] = t.expect(['no player matching'], 2)
-		self.test(i == 0, "nonexistent user")
+		self.expect('no player matching', t, "nonexistent user")
 		
 		t.write('finger admin1\r\n')
-		[i, m, text] = t.expect(['not a valid handle'], 2)
-		self.test(i == 0, "invalid name")
+		self.expect('not a valid handle', t, "invalid name")
+		
+		t.write('remplayer admintwo\r\n')
+		t.read_until('removed', 2)
 
 		t.close()
-		
-		t = self.connect('guest\r\n\r\n')
-		t.read_until('fics%', 2)
+	
+	def testFingerGuest(self):	
+		t = self.connect_as_guest()
+
+		t.write('finger\r\n')
+		self.expect('Finger of Guest', t, "finger offline user")
+
 		t.write('finger admin\r\n')
-		self.expect_exact('Last disconnected:', t, "finger offline user")
+		self.expect('Last disconnected:', t, "finger offline user")
 		
 		t.write('finger admi\r\n')
-		self.expect_exact('Last disconnected:', t, "finger offline user prefix")
+		self.expect('Last disconnected:', t, "finger offline user prefix")
+		
 		t.close()
-FingerTest()
 
 
 class AddplayerTest(Test):
-	def run(self):
-		t = self.connect()
+	def testAddplayer(self):
+		t = self.connect_as_admin()
 		t.write('addplayer testplayer nobody@example.com Foo Bar\r\n')
-		self.expect_exact('Added:', t, 'addplayer')
+		self.expect('Added:', t, 'addplayer')
 		t.write('addplayer testplayer nobody@example.com Foo Bar\r\n')
-		self.expect_exact('already registered', t, 'addplayer duplicate player')
+		self.expect('already registered', t, 'addplayer duplicate player')
 		t.write('remplayer testplayer\r\n')
 		t.close()
-AddplayerTest()
 
 class TelnetTest(Test):
-	def run(self):
+	def testTelnet(self):
 		t = self.connect()
 		t.read_until('fics%', 2)
 		os.write(t.fileno(), chr(255) + chr(244))
 		self.expect_EOF(t, "interrupt connection")
 		t.close()
-TelnetTest()
 
 class TimeoutTest(Test):
-	def run(self):
-		t = self.connect(None)
-		self.expect_exact('TIMEOUT', t, "login timeout", timeout=65)
+	def testTimeout(self):
+		t = self.connect()
+		self.expect('TIMEOUT', t, "login timeout", timeout=65)
+		t.close()
+	
+	def testGuestTimeoutPassword(self):	
+		t = self.connect()
+		t.write("guest\r\n")
+		self.expect('TIMEOUT', t, "login timeout at password prompt", timeout=65)
 		t.close()
 		
-		t = self.connect(None)
+	def testGuestTimeout(self):	
+		t = self.connect()
 		t.write("guest\r\n")
-		self.expect_exact('TIMEOUT', t, "login timeout at password prompt", timeout=65)
+		self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
 		t.close()
-		
-		t = self.connect(None)
-		t.write("guest\r\n")
-		self.expect_exact('TIMEOUT', t, "login timeout guest", timeout=65)
-		t.close()
-TimeoutTest()
 
+"""not stable
 class AreloadTest(Test):
-	def run(self):
+	def runTest(self):
+		self.skip()
 		t = self.connect()
 		t.write('areload\r\n')
-		self.expect_exact('reloaded online', t, "server reload")
+		self.expect('reloaded online', t, "server reload")
 		t.close()
-AreloadTest()
+"""
 
-def main():
+def check_server():
 	t = connect()
 	if not t:
 		print 'ERROR: Unable to connect.  A running server is required to do the tests.\r\n'
 		sys.exit(1)
 	t.close()
+	
+check_server()
 
-	total = 0
-	passed = 0	
-	for test in tests:
-		test.run()
-		total = total + test.total
-		passed = passed + test.passed
-	print "Passed %d/%d tests." % (passed, total)
+if __name__ == '__main__':
+	exit('this should be run using trial')
 
-if __name__ == "__main__":
-	main()
+
