@@ -29,22 +29,6 @@ IAC = chr(255) # interpret as command
 
 BS = chr(8) # backspace
 
-class TelnetError(Exception):
-    pass
-
-class NegotiationError(TelnetError):
-    def __str__(self):
-        return self.__class__.__module__ + '.' + self.__class__.__name__ + ':' + repr(self.args[0])
-
-class OptionRefused(NegotiationError):
-    pass
-
-class AlreadyEnabled(NegotiationError):
-    pass
-
-class AlreadyDisabled(NegotiationError):
-    pass
-
 class Telnet(protocol.Protocol):
     """
     @ivar commandMap: A mapping of bytes to callables.  When a
@@ -56,14 +40,6 @@ class Telnet(protocol.Protocol):
     only WILL, WONT, DO, and DONT are handled.  These should not
     be overridden, as this class handles them correctly and
     provides an API for interacting with them.
-
-    @ivar negotiationMap: A mapping of bytes to callables.  When
-    a subnegotiation command is received, the command byte (the
-    first byte after SB) is looked up in this dictionary.  If
-    a callable is found, it is invoked with the argument of the
-    subnegotiation.  Values should be added to this dictionary if
-    subnegotiations are to be handled.  By default, no values are
-    handled.
 
     @ivar options: A mapping of option bytes to their current
     state.  This state is likely of little use to user code.
@@ -82,7 +58,6 @@ class Telnet(protocol.Protocol):
 
     def __init__(self):
         self.options = {}
-        self.negotiationMap = {}
         self.commandMap = {
             WILL: self.telnet_WILL,
             WONT: self.telnet_WONT,
@@ -91,21 +66,6 @@ class Telnet(protocol.Protocol):
 
     def _write(self, bytes):
         self.transport.write(bytes)
-
-    class _OptionState:
-        class _Perspective:
-            state = 'no'
-            onResult = None
-
-        def __init__(self):
-            self.us = self._Perspective()
-            self.him = self._Perspective()
-
-        def __repr__(self):
-            return '<_OptionState us=%s him=%s>' % (self.us, self.him)
-
-    def getOptionState(self, opt):
-        return self.options.setdefault(opt, self._OptionState())
 
     def _do(self, option):
         self._write(IAC + DO + option)
@@ -122,21 +82,17 @@ class Telnet(protocol.Protocol):
     def will(self, option):
         """Indicate our willingness to enable an option.
         """
-        s = self.getOptionState(option)
         self._will(option)
 
     def wont(self, option):
         """Indicate we are not willing to enable an option.
         """
-        s = self.getOptionState(option)
         self._wont(option)
 
     def do(self, option):
-        s = self.getOptionState(option)
-    	self._do(option)
+        self._do(option)
 
     def dont(self, option):
-        s = self.getOptionState(option)
         self._dont(option)
 
     def dataReceived(self, data):
@@ -202,98 +158,31 @@ class Telnet(protocol.Protocol):
 
 
     def connectionLost(self, reason):
-        for state in self.options.values():
-            if state.us.onResult is not None:
-                d = state.us.onResult
-                state.us.onResult = None
-                d.errback(reason)
-            if state.him.onResult is not None:
-                d = state.him.onResult
-                state.him.onResult = None
-                d.errback(reason)
+        pass
 
     def applicationDataReceived(self, bytes):
         """Called with application-level data.
         """
 
-    def unhandledCommand(self, command, argument):
-        """Called for commands for which no handler is installed.
-        """
-
     def commandReceived(self, command, argument):
         cmdFunc = self.commandMap.get(command)
-        if cmdFunc is None:
-            self.unhandledCommand(command, argument)
-        else:
+        if cmdFunc:
             cmdFunc(argument)
 
-    def negotiate(self, bytes):
-        command, bytes = bytes[0], bytes[1:]
-        cmdFunc = self.negotiationMap.get(command)
-        if cmdFunc is None:
-            self.unhandledSubnegotiation(command, bytes)
-        else:
-            cmdFunc(bytes)
-
     def telnet_WILL(self, option):
-	pass
+        pass
 
     def telnet_WONT(self, option):
-	pass
+        pass
 
     def telnet_DO(self, option):
-        s = self.getOptionState(option)
-	if option == TM:
-		self._will(TM)
-	elif option == SGA:
-		self._will(SGA)
+        if option == TM:
+                self._will(TM)
+        elif option == SGA:
+                self._will(SGA)
 
     def telnet_DONT(self, option):
-	pass
-
-    def enableLocal(self, option):
-        """
-        Reject all attempts to enable options.
-        """
-        return False
-
-
-    def enableRemote(self, option):
-        """
-        Reject all attempts to enable options.
-        """
-        return False
-
-
-    def disableLocal(self, option):
-        """
-        Signal a programming error by raising an exception.
-
-        L{enableLocal} must return true for the given value of C{option} in
-        order for this method to be called.  If a subclass of L{Telnet}
-        overrides enableLocal to allow certain options to be enabled, it must
-        also override disableLocal to disable those options.
-
-        @raise NotImplementedError: Always raised.
-        """
-        raise NotImplementedError(
-            "Don't know how to disable local telnet option %r" % (option,))
-
-
-    def disableRemote(self, option):
-        """
-        Signal a programming error by raising an exception.
-
-        L{enableRemote} must return true for the given value of C{option} in
-        order for this method to be called.  If a subclass of L{Telnet}
-        overrides enableRemote to allow certain options to be enabled, it must
-        also override disableRemote tto disable those options.
-
-        @raise NotImplementedError: Always raised.
-        """
-        raise NotImplementedError(
-            "Don't know how to disable remote telnet option %r" % (option,))
-
+        pass
 
 
 class ProtocolTransportMixin:
@@ -361,23 +250,8 @@ class TelnetTransport(Telnet, ProtocolTransportMixin):
             finally:
                 del self.protocol
 
-    def enableLocal(self, option):
-        return self.protocol.enableLocal(option)
-
-    def enableRemote(self, option):
-        return self.protocol.enableRemote(option)
-
-    def disableLocal(self, option):
-        return self.protocol.disableLocal(option)
-
-    def disableRemote(self, option):
-        return self.protocol.disableRemote(option)
-
     def unhandledSubnegotiation(self, command, bytes):
         self.protocol.unhandledSubnegotiation(command, bytes)
-
-    def unhandledCommand(self, command, argument):
-        self.protocol.unhandledCommand(command, argument)
 
     def applicationDataReceived(self, bytes):
         self.protocol.dataReceived(bytes)
@@ -385,3 +259,4 @@ class TelnetTransport(Telnet, ProtocolTransportMixin):
     def write(self, data):
         ProtocolTransportMixin.write(self, data.replace('\xff','\xff\xff'))
 
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
