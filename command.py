@@ -6,6 +6,7 @@ import trie
 import admin
 import session
 from online import online
+from reload import reload
 
 class InternalException(Exception):
         pass
@@ -82,6 +83,7 @@ class CommandList(object):
                 # a command given a substring
                 self.cmds = trie.Trie()
                 self._add(Command('addplayer', [], 'WWS', self.addplayer, admin.Level.admin))
+                self._add(Command('areload', [], '', self.areload, admin.Level.god))
                 self._add(Command('asetpasswd', [], 'wW', self.asetpasswd, admin.Level.admin))
 
                 self._add(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
@@ -112,6 +114,8 @@ class CommandList(object):
                                 user.create.new(name, email, passwd, real_name)
                                 conn.write(_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
 
+        def areload(self, args, conn):
+                reload.reload_all(conn)
 
         def asetpasswd(self, args, conn):
                 [name, passwd] = args
@@ -264,7 +268,7 @@ class CommandParser(object):
                                 matches = command_list.cmds.all_children(word)
                                 assert(len(matches) > 0)
                                 if len(matches) == 1:
-                                        cmd = matches.pop()
+                                        cmd = matches[0]
                                 else:
                                         conn.write("""Ambiguous command "%s". Matches: %s\n""" % (word, ' '.join([c.name for c in matches])))
                         if cmd:

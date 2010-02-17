@@ -11,8 +11,6 @@ from timeseal import timeseal
 from session import Session
 from login import login
 
-connections = []
-
 login_timeout = 5
 
 class Connection(basic.LineReceiver):
@@ -25,7 +23,7 @@ class Connection(basic.LineReceiver):
         user = None
 
         def connectionMade(self):
-                connections.append(self)
+                self.factory.connections.append(self)
                 f = open("messages/welcome.txt")
                 self.write(f.read())
                 self.login()
@@ -39,7 +37,8 @@ class Connection(basic.LineReceiver):
                 self.loseConnection('login timeout')
 
         def login(self):
-                assert(self.state == 'login')
+                #assert(self.state == 'login')
+                self.state = 'login'
                 f = open("messages/login.txt")
                 self.write(f.read())
                 self.write("login: ")
@@ -117,7 +116,7 @@ class Connection(basic.LineReceiver):
                         self.session.close()
                 except AttributeError:
                         pass
-                connections.remove(self)
+                self.factory.connections.remove(self)
         
         
         def write(self, s):

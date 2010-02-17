@@ -39,7 +39,9 @@ class TelnetTransport(protocol.Protocol):
             WILL: self.telnet_WILL,
             WONT: self.telnet_WONT,
             DO: self.telnet_DO,
-            DONT: self.telnet_DONT}
+            DONT: self.telnet_DONT,
+            IP: self.telnet_IP,
+            AYT: self.telnet_AYT}
         self.state = 'data'
         if protocolFactory is not None:
             self.protocolFactory = protocolFactory
@@ -136,11 +138,17 @@ class TelnetTransport(protocol.Protocol):
 
     def telnet_DO(self, option):
         if option == TM:
-                self._will(TM)
+                self.will(TM)
         elif option == SGA:
-                self._will(SGA)
+                self.will(SGA)
 
     def telnet_DONT(self, option):
+        pass
+    
+    def telnet_IP(self, option):
+        self.loseConnection()
+
+    def telnet_AYT(self, option):
         pass
 
     def connectionMade(self):

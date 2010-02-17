@@ -22,8 +22,11 @@ if os.geteuid() == 0:
 PORT = 5000
 
 class IcsFactory(ServerFactory):
+        connections = []
         def buildProtocol(self, addr):
-                return telnet.TelnetTransport(connection.Connection)
+                conn = telnet.TelnetTransport(connection.Connection)
+                conn.factory = self
+                return conn
 
 def getService(port):
         """
