@@ -28,40 +28,23 @@ IAC = chr(255) # interpret as command
 
 BS = chr(8) # backspace
 
-class Telnet(protocol.Protocol):
-    """
-    @ivar commandMap: A mapping of bytes to callables.  When a
-    telnet command is received, the command byte (the first byte
-    after IAC) is looked up in this dictionary.  If a callable is
-    found, it is invoked with the argument of the command, or None
-    if the command takes no argument.  Values should be added to
-    this dictionary if commands wish to be handled.  By default,
-    only WILL, WONT, DO, and DONT are handled.  These should not
-    be overridden, as this class handles them correctly and
-    provides an API for interacting with them.
+class TelnetTransport(protocol.Protocol):
+    implements(interfaces.ITransport)
+    protocolFactory = None
+    protocol = None
+    disconnecting = False
 
-    @ivar options: A mapping of option bytes to their current
-    state.  This state is likely of little use to user code.
-    Changes should not be made to it.
-
-    @ivar state: A string indicating the current parse state.  It
-    can take on the values "data", "escaped", "command", "newline",
-    "subnegotiation", and "subnegotiation-escaped".  Changes
-    should not be made to it.
-
-    @ivar transport: This protocol's transport object.
-    """
-
-    # One of a lot of things
-    state = 'data'
-
-    def __init__(self):
-        self.options = {}
+    def __init__(self, protocolFactory=None, *a, **kw):
         self.commandMap = {
             WILL: self.telnet_WILL,
             WONT: self.telnet_WONT,
             DO: self.telnet_DO,
             DONT: self.telnet_DONT}
+        self.state = 'data'
+        if protocolFactory is not None:
+            self.protocolFactory = protocolFactory
+            self.protocolArgs = a
+            self.protocolKwArgs = kw
 
     def _write(self, bytes):
         self.transport.write(bytes)
@@ -140,13 +123,6 @@ class Telnet(protocol.Protocol):
             self.applicationDataReceived(''.join(appDataBuffer))
 
 
-    def connectionLost(self, reason):
-        pass
-
-    def applicationDataReceived(self, bytes):
-        """Called with application-level data.
-        """
-
     def commandReceived(self, command, argument):
         cmdFunc = self.commandMap.get(command)
         if cmdFunc:
@@ -167,38 +143,6 @@ class Telnet(protocol.Protocol):
     def telnet_DONT(self, option):
         pass
 
-
-class TelnetTransport(Telnet):
-    implements(interfaces.ITransport)
-    """
-    @ivar protocol: An instance of the protocol to which this
-    transport is connected, or None before the connection is
-    established and after it is lost.
-
-    @ivar protocolFactory: A callable which returns protocol instances
-    which provide L{ITelnetProtocol}.  This will be invoked when a
-    connection is established.  It is passed *protocolArgs and
-    **protocolKwArgs.
-
-    @ivar protocolArgs: A tuple of additional arguments to
-    pass to protocolFactory.
-
-    @ivar protocolKwArgs: A dictionary of additional arguments
-    to pass to protocolFactory.
-    """
-
-    disconnecting = False
-
-    protocolFactory = None
-    protocol = None
-
-    def __init__(self, protocolFactory=None, *a, **kw):
-        Telnet.__init__(self)
-        if protocolFactory is not None:
-            self.protocolFactory = protocolFactory
-            self.protocolArgs = a
-            self.protocolKwArgs = kw
-
     def connectionMade(self):
         if self.protocolFactory is not None:
             self.protocol = self.protocolFactory(*self.protocolArgs, **self.protocolKwArgs)
@@ -211,7 +155,6 @@ class TelnetTransport(Telnet):
             self.protocol.makeConnection(self)
 
     def connectionLost(self, reason):
-        Telnet.connectionLost(self, reason)
         if self.protocol is not None:
             try:
                 self.protocol.connectionLost(reason)
@@ -237,6 +180,5 @@ class TelnetTransport(Telnet):
 
     def getPeer(self):
         return self.transport.getPeer()
-
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

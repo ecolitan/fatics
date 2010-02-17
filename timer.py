@@ -1,6 +1,6 @@
 from gettext import ngettext
 
-class Timer:
+class Timer(object):
         def hms(self, secs):
                 secs = int(secs)
                 days = int(secs / (60*60*24))

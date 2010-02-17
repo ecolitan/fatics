@@ -11,7 +11,10 @@ class Online(object):
                 self.online[u.name.lower()] = u
 
         def remove(self, u):
-                del self.online[u.name.lower()]
+                try:
+                        del self.online[u.name.lower()]
+                except KeyError:
+                        pass
 
         def is_online(self, name):
                 # there's probably a more efficient way

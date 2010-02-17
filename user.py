@@ -103,7 +103,7 @@ class AmbiguousException(Exception):
         def __init__(self, names):
                 self.names = names
 
-class Find:
+class Find(object):
         def by_name_exact(self, name, min_len = 3):
                 if len(name) < min_len:
                         raise UsernameException(_('A name should be at least %d characters long!  Try again.\n') % 3)
@@ -156,7 +156,7 @@ def is_legal_passwd(passwd):
                 return False
         return True
 
-class Create:
+class Create(object):
         def passwd(self):
                 chars = string.letters + string.digits
                 passlen = random.choice(range(5, 8))
