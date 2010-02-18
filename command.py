@@ -85,6 +85,7 @@ class CommandList(object):
                 self._add(Command('addplayer', [], 'WWS', self.addplayer, admin.Level.admin))
                 self._add(Command('areload', [], '', self.areload, admin.Level.god))
                 self._add(Command('asetpasswd', [], 'wW', self.asetpasswd, admin.Level.admin))
+                self._add(Command('date', [], '', self.date, admin.Level.user))
 
                 self._add(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
                 self._add(Command('follow', [], 'w', self.follow, admin.Level.user))
@@ -135,6 +136,12 @@ class CommandList(object):
                                 conn.write(_('Password of %s changed to %s.\n') % (name, '*' * len(passwd)))
                                 if u.is_online:
                                         u.session.conn.write(_('\n%s has changed your password.\n') % conn.user.name)
+        
+        def date(self, args, conn):
+                t = time.time()
+                #conn.write(_("Local time     - %s\n") % )
+                conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(t)))
+                conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
 
         def finger(self, args, conn):
                 try:
