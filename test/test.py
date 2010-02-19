@@ -18,7 +18,7 @@ def connect():
         return t
 
 class Test(unittest.TestCase):
-        def expect(self, str, t, msg, timeout=2):
+        def expect(self, str, t, msg=None, timeout=2):
                 ret = t.read_until(str, timeout)
                 self.assert_(str in ret)
         
