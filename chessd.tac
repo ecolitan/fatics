@@ -19,7 +19,7 @@ gettext.install('interface', './locale', unicode=False)
 if os.geteuid() == 0:
         sys.path.append('.')
 
-PORT = 5000
+PORT = 5001
 
 class IcsFactory(ServerFactory):
         connections = []
@@ -36,7 +36,7 @@ def getService(port):
 
 application = service.Application("chessd")
 
-service = getService(5000)
+service = getService(PORT)
 service.setServiceParent(application)
 if os.geteuid() == 0:
         service = getService(23)

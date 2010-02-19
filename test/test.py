@@ -4,12 +4,8 @@ import socket
 import os
 from twisted.trial import unittest
 
-if True:
-        host = 'localhost'
-        port = '5000'
-else:
-        host = 'sheila'
-        port = '5000'
+host = 'localhost'
+port = '5001'
 admin_passwd = 'admin'
 
 def connect():

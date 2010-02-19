@@ -4,22 +4,22 @@ class FingerTest(Test):
         def testFinger(self):
                 t = self.connect_as_admin()
                 t.write('finger\r\n')
-                self.expect('Finger of admin:', t, "finger")
+                self.expect('Finger of admin(*):', t, "finger")
                 self.expect('On for:', t, "finger of online user")
                 
                 t.write('finger \r\n')
-                self.expect('Finger of admin:', t, "finger with trailing space")
+                self.expect('Finger of admin(*):', t, "finger with trailing space")
 
                 t.write('finger admin\r\n')
-                self.expect('Finger of admin:', t, "finger with parameter")
+                self.expect('Finger of admin(*):', t, "finger with parameter")
                 
                 t.write('finger ad\r\n')
-                self.expect('Finger of admin:', t, "finger with prefix")
+                self.expect('Finger of admin(*):', t, "finger with prefix")
 
                 t.write('addplayer admintwo nobody@example.com Admin Two\r\n')
                 t.write('asetpass admintwo admintwo\r\n')
                 t.write('finger ad\r\n')
-                self.expect('Finger of admin:', t, "finger with prefix ignores offline user")
+                self.expect('Finger of admin(*):', t, "finger with prefix ignores offline user")
                 t2 = connect()
                 t2.write('admintwo\r\nadmintwo\r\n')
                 t2.read_until('fics%', 2)
