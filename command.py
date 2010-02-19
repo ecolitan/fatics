@@ -1,12 +1,15 @@
 import re
 import time
+import socket
 
 import user
 import trie
 import admin
 import session
+from timer import timer
 from online import online
 from reload import reload
+from server import server
 
 class InternalException(Exception):
         pass
@@ -92,6 +95,7 @@ class CommandList(object):
                 self._add(Command('quit', [], '', self.quit, admin.Level.user))
                 self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
                 self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
+                self._add(Command('uptime', [], '', self.uptime, admin.Level.user))
                 self._add(Command('who', [], 'T', self.who, admin.Level.user))
                 self._add(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
 
@@ -200,6 +204,12 @@ class CommandList(object):
         def tell(self, args, conn):
                 u = self._do_tell(args, conn)
                 conn.session.last_tell_user = u
+ 
+        
+        def uptime(self, args, conn):
+                conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
+                conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
+                conn.write(_("Up for: %s\n") % timer.hms(time.time() - server.start_time))
         
         def xtell(self, args, conn):
                 u = self._do_tell(args, conn)
