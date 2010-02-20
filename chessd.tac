@@ -7,14 +7,14 @@ import os
 from twisted.application import service, internet
 from twisted.internet.protocol import ServerFactory
 from twisted.internet import reactor
-
 import gettext
 import sys
 
+gettext.install('interface', './locale', unicode=False)
+
 import telnet
 import connection
-
-gettext.install('interface', './locale', unicode=False)
+import var
 
 if os.geteuid() == 0:
         sys.path.append('.')

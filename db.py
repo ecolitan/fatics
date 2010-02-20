@@ -10,6 +10,13 @@ class DB(object):
                 row = cursor.fetchone()
                 cursor.close()
                 return row
+        
+        def vars_load(self, user_id):
+                cursor = self.db.cursor(cursors.DictCursor)
+                cursor.execute("""SELECT tell,shout FROM var WHERE user_id=%s""", (user_id,))
+                row = cursor.fetchone()
+                cursor.close()
+                return row
 
         def user_get_matching(self, prefix):
                 cursor = self.db.cursor(cursors.DictCursor)

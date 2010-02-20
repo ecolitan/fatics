@@ -92,10 +92,12 @@ class CommandList(object):
 
                 self._add(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
                 self._add(Command('follow', [], 'w', self.follow, admin.Level.user))
+                self._add(Command('password', [], 'WW', self.password, admin.Level.user))
                 self._add(Command('quit', [], '', self.quit, admin.Level.user))
                 self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
                 self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', [], '', self.uptime, admin.Level.user))
+                self._add(Command('vars', [], '', self.vars, admin.Level.user))
                 self._add(Command('who', [], 'T', self.who, admin.Level.user))
                 self._add(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
 
@@ -181,7 +183,18 @@ class CommandList(object):
 
         
         def follow(self, args, conn):
-                conn.write('FOLLOW')
+                conn.write('FOLLOW\n')
+        
+        def password(self, args, conn):
+                if conn.user.is_guest:
+                        conn.write(_("Setting a password is only for registered players.\n"))
+                else:
+                        [oldpass, newpass] = args
+                        if not conn.user.check_passwd(oldpass):
+                                conn.write(_("Incorrect password; password not changed!\n"))
+                        else:
+                                conn.user.set_passwd(newpass)
+                                conn.write(_("Password changed to %s.\n") % ('*' * len(newpass)))
         
         def quit(self, args, conn):
                 raise QuitException()
@@ -210,6 +223,12 @@ class CommandList(object):
                 conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
                 conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
                 conn.write(_("Up for: %s\n") % timer.hms(time.time() - server.start_time))
+        
+        def vars(self, args, conn):
+                conn.write(_("Variable settings of %s:\n\n") % conn.user.name)
+                for var in conn.user.vars.keys():
+                        conn.write("%s=%d\n" % (var, int(conn.user.vars[var])))
+                conn.write("\n")
         
         def xtell(self, args, conn):
                 u = self._do_tell(args, conn)
