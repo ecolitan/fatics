@@ -1,3 +1,7 @@
+* It may take slightly longer to log in.  This is a security feature;
+the password hashing algorithm is harder to crack because it requires
+more computation.
+
 * If you use the "." command to tell the last told player, and that player
 has logged off, you now get the error message "PLAYER is no longer online",
 rather than "I don't know who to tell that to".

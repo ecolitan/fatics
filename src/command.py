@@ -22,12 +22,12 @@ class BadCommandException(Exception):
         pass
 
 class Command(object):
-        def __init__(self, name, aliases, param_str, run, adminlevel):
+        def __init__(self, name, aliases, param_str, run, admin_level):
                 self.name = name
                 self.aliases = aliases
                 self.param_str = param_str
                 self.run = run
-                self.adminlevel = adminlevel
+                self.admin_level = admin_level
 
         def parse_params(self, s):
                 params = []
@@ -94,6 +94,7 @@ class CommandList(object):
                 # the trie data structure allows for efficiently finding
                 # a command given a substring
                 self.cmds = trie.Trie()
+                self.admin_cmds = trie.Trie()
                 self._add(Command('addplayer', [], 'WWS', self.addplayer, admin.Level.admin))
                 self._add(Command('announce', [], 'S', self.announce, admin.Level.admin))
                 self._add(Command('areload', [], '', self.areload, admin.Level.god))
@@ -107,8 +108,8 @@ class CommandList(object):
                 self._add(Command('qtell', [], 'iS', self.qtell, admin.Level.user))
                 self._add(Command('quit', [], '', self.quit, admin.Level.user))
                 self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
-                self._add(Command('set', [], 'wT', self.set, admin.Level.admin))
-                self._add(Command('shout', ['!'], 'S', self.shout, admin.Level.admin))
+                self._add(Command('set', [], 'wT', self.set, admin.Level.user))
+                self._add(Command('shout', ['!'], 'S', self.shout, admin.Level.user))
                 self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', [], '', self.uptime, admin.Level.user))
                 self._add(Command('vars', [], '', self.vars, admin.Level.user))
@@ -116,10 +117,11 @@ class CommandList(object):
                 self._add(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
 
         def _add(self, cmd):
-                #if cmd.adminlevel > admin.Level.user:
-                self.cmds[cmd.name] = cmd
-                for a in cmd.aliases:
-                        self.cmds[a] = cmd
+                self.admin_cmds[cmd.name] = cmd
+                if cmd.admin_level <= admin.Level.user:
+                        self.cmds[cmd.name] = cmd
+                        for a in cmd.aliases:
+                                self.cmds[a] = cmd
 
         def addplayer(self, args, conn):
                 [name, email, real_name] = args
@@ -378,16 +380,21 @@ class CommandParser(object):
                 else:
                         s = self.expand_aliases(s)
 
+                if conn.user.admin_level > admin.Level.user:
+                        cmds = command_list.admin_cmds
+                else:
+                        cmds = command_list.cmds
+
                 m = re.match(r'^(\S+)(?:\s+(.*))?$', s)
                 cmd = None
                 if m:
                         word = m.group(1)
                         try:
-                                cmd = command_list.cmds[word]
+                                cmd = cmds[word]
                         except KeyError:
                                 conn.write("%s: Command not found.\n" % word)
                         except trie.NeedMore:
-                                matches = command_list.cmds.all_children(word)
+                                matches = cmds.all_children(word)
                                 assert(len(matches) > 0)
                                 if len(matches) == 1:
                                         cmd = matches[0]
