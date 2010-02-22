@@ -1,1 +1,1 @@
-twistd -noy chessd.tac
+PYTHONPATH=src twistd -noy src/chessd.tac

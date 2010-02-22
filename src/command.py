@@ -92,9 +92,11 @@ class CommandList(object):
 
                 self._add(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
                 self._add(Command('follow', [], 'w', self.follow, admin.Level.user))
+                self._add(Command('help', [], 'w', self.help, admin.Level.user))
                 self._add(Command('password', [], 'WW', self.password, admin.Level.user))
                 self._add(Command('quit', [], '', self.quit, admin.Level.user))
                 self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
+                self._add(Command('shout', ['!'], 'S', self.shout, admin.Level.admin))
                 self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', [], '', self.uptime, admin.Level.user))
                 self._add(Command('vars', [], '', self.vars, admin.Level.user))
@@ -184,6 +186,9 @@ class CommandList(object):
         
         def follow(self, args, conn):
                 conn.write('FOLLOW\n')
+
+        def help(self, args, conn):
+                conn.write('help\n')
         
         def password(self, args, conn):
                 if conn.user.is_guest:
@@ -213,6 +218,13 @@ class CommandList(object):
                         else:
                                 u.remove()
                                 conn.write(_("Player %s removed.\n") % name)
+
+        def shout(self, args, conn):
+                if conn.user.is_guest:
+                        conn.write(_("Only registered players can use the shout command.\n"))
+                else:
+                        conn.write(_("not implemented\n"))
+                        
 
         def tell(self, args, conn):
                 u = self._do_tell(args, conn)
