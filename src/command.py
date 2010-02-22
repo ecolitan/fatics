@@ -332,12 +332,11 @@ class CommandList(object):
                                         u = None
 
                 if u:
-                        if not checker.check_user_utf8(args[1]):
-                                conn.write(_("Your message contains one or more unprintable characters.\n"))
-                                u = None
-                        else:
-                                assert not '\a' in args[1]
-                                
+                        #if not checker.check_user_utf8(args[1]):
+                        #        conn.write(_("Your message contains one or more unprintable characters.\n"))
+                        #        u = None
+                        pass
+
                 if u:
                         u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                         conn.write(_("(told %s)") % u.name + '\n')
@@ -357,6 +356,9 @@ command_list = CommandList()
 
 class CommandParser(object):
         def run(self, s, conn):
+                if not checker.check_user_utf8(s):
+                        conn.write(_("Your command contains some unprintable characters.\n"))
+
                 update_idle = True
                 # previously the prefix '$' was used to not expand aliases
                 # and '$$' was used to not update the idle time.  But these
