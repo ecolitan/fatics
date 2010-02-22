@@ -88,6 +88,7 @@ class CommandList(object):
                 # a command given a substring
                 self.cmds = trie.Trie()
                 self._add(Command('addplayer', [], 'WWS', self.addplayer, admin.Level.admin))
+                self._add(Command('announce', [], 'S', self.announce, admin.Level.admin))
                 self._add(Command('areload', [], '', self.areload, admin.Level.god))
                 self._add(Command('asetpasswd', [], 'wW', self.asetpasswd, admin.Level.admin))
                 self._add(Command('date', [], '', self.date, admin.Level.user))
@@ -125,6 +126,14 @@ class CommandList(object):
                                 passwd = user.create.passwd()
                                 user.create.new(name, email, passwd, real_name)
                                 conn.write(_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
+        
+        def announce(self, args, conn):
+                count = 0
+                for u in online.itervalues():
+                        if u != conn.user:
+                                count = count + 1
+                                u.session.conn.write(_("\n\n    **ANNOUNCEMENT** from %s: %s\n\n") % (conn.user.name, args[0]))
+                conn.write(_("(%d) **ANNOUNCEMENT** from %s: %s\n\n") % (count, conn.user.name, args[0]))
 
         def areload(self, args, conn):
                 reload.reload_all(conn)

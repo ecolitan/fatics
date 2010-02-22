@@ -5,6 +5,6 @@ class TestFoo(Test):
 		t = self.connect_as_guest()
 		t.write('foo\r\n')
                 self.expect("bar", t)
-                t.close()
+                self.close(t)
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

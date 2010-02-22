@@ -1,7 +1,7 @@
 from test import *
 
 class AddplayerTest(Test):
-        def testAddplayer(self):
+        def test_addplayer(self):
                 t = self.connect_as_admin()
                 t.write('addplayer testplayer nobody@example.com Foo Bar\r\n')
                 self.expect('Added:', t, 'addplayer')
@@ -9,6 +9,15 @@ class AddplayerTest(Test):
                 self.expect('already registered', t, 'addplayer duplicate player')
                 t.write('remplayer testplayer\r\n')
                 t.close()
+
+class AnnounceTest(Test):
+        def test_announce(self):
+                t = self.connect_as_admin()
+                t2 = self.connect_as_guest()
+
+                t.write("announce foo bar baz\r\n")
+                self.expect('(1) **ANNOUNCEMENT** from admin: foo bar baz', t)
+                self.expect('**ANNOUNCEMENT** from admin: foo bar baz', t2)
 
 """not stable
 class AreloadTest(Test):
