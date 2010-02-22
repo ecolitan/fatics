@@ -4,7 +4,7 @@ import socket
 import os
 from twisted.trial import unittest
 
-host = 'localhost'
+host = '127.0.0.1'
 port = '5001'
 admin_passwd = 'admin'
 
