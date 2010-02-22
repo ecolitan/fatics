@@ -91,6 +91,7 @@ class Connection(basic.LineReceiver):
         def prompt(self):
                 self.timeout_check.cancel() 
                 self.user.log_in(self)
+                assert(self.user.is_online)
                 self.write('fics% ')
                 self.state = 'online'
 

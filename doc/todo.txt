@@ -1,0 +1,2 @@
+- maybe implement the telnet protocol correctly, rather than mimicking FICS's
+  partial implementation

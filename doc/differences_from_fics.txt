@@ -1,0 +1,3 @@
+The "(shouted to N players)" given by the shout command includes the
+user doing the shout (assuming that user has shouts enabled).
+

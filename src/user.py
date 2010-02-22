@@ -22,18 +22,23 @@ class BaseUser(object):
                         if online.is_online(self.name):
                                 conn.write(_("**** %s is already logged in; closing the other connection. ****\n" % self.name))
                                 u = online.find_exact(self.name)
-                                u.session.conn.write(_("**** %s has arrived; you can't both be logged in. ****\n") % self.name)
+                                u.session.conn.write(_("**** %s has arrived; you can't both be logged in. ****\n\n") % self.name)
                                 u.session.conn.loseConnection('logged in again')
-                conn.write(_('**** Starting session as %s ****\n\n') % self.name)
-
+                        count = 0
+                        while online.is_online(self.name):
+                                time.sleep(0.1)
+                                count += 1
+                                if count > 50:
+                                        raise Exception("failed to kick off user")
+                self.is_online = True
                 self.session = conn.session
                 self.session.set_user(self)
                 online.add(self)
-                self.is_online = True
+                conn.write(_('**** Starting session as %s ****\n\n') % self.name)
 
         def log_out(self):
                 if not self.is_guest:
-                        db.user_update_last_logout(self.id)
+                        db.user_set_last_logout(self.id)
                 self.is_online = False
                 online.remove(self)
 
@@ -49,10 +54,13 @@ class BaseUser(object):
                         ret += '(U)'
                 return ret
 
+        def set_var(self, name, val):
+                self.vars[name] = val
+
+
 # a registered user
 class User(BaseUser):
 	def __init__(self, u):
-                #super(User, self).__init__()
                 BaseUser.__init__(self)
                 self.id = u['user_id']
                 self.name = u['user_name']
@@ -60,7 +68,7 @@ class User(BaseUser):
                 self.last_logout = u['user_last_logout']
                 self.admin_level = u['user_admin_level']
                 self.is_guest = False
-                self.vars = db.vars_load(self.id)
+                self.vars = db.user_load_vars(self.id)
 
         def set_passwd(self, passwd):
                 self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
@@ -81,6 +89,10 @@ class User(BaseUser):
         
         def remove(self):
                 return db.user_delete(self.id)
+        
+        def set_var(self, var, val):
+                BaseUser.set_var(self, var, val)
+                db.user_set_var(self.id, var, val)
 
 class GuestUser(BaseUser):
         def __init__(self, name):

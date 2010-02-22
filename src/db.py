@@ -1,5 +1,7 @@
 from MySQLdb import *
 
+import var
+
 class DB(object):
 	def __init__(self):
 		self.db = connect(host="localhost", db="chess", user="chess", passwd="Luu9yae7")
@@ -11,12 +13,19 @@ class DB(object):
                 cursor.close()
                 return row
         
-        def vars_load(self, user_id):
+        def user_load_vars(self, user_id):
                 cursor = self.db.cursor(cursors.DictCursor)
-                cursor.execute("""SELECT tell,shout FROM var WHERE user_id=%s""", (user_id,))
+                cursor.execute("""SELECT tell,shout FROM user WHERE user_id=%s""", (user_id,))
                 row = cursor.fetchone()
                 cursor.close()
                 return row
+        
+        def user_set_var(self, user_id, name, val):
+                assert(name in var.vars)
+                cursor = self.db.cursor()
+                up = """UPDATE user SET %s""" % (var.vars[name].dbname)
+                cursor.execute(up + """=%s WHERE user_id=%s""", (val,user_id))
+                cursor.close()
 
         def user_get_matching(self, prefix):
                 cursor = self.db.cursor(cursors.DictCursor)
@@ -40,7 +49,7 @@ class DB(object):
                 cursor.execute("""UPDATE user SET user_admin_level=%d WHERE user_id=%s""", (level, id))
                 cursor.close()
 
-        def user_update_last_logout(self, id):
+        def user_set_last_logout(self, id):
                 cursor = self.db.cursor()
                 cursor.execute("""UPDATE user SET user_last_logout=NOW() WHERE user_id='%s'""", (id,))
                 cursor.close()

@@ -1,11 +1,13 @@
 import re
 import time
 import socket
+import gettext
 
 import user
 import trie
 import admin
 import session
+import var
 from timer import timer
 from online import online
 from reload import reload
@@ -96,6 +98,7 @@ class CommandList(object):
                 self._add(Command('password', [], 'WW', self.password, admin.Level.user))
                 self._add(Command('quit', [], '', self.quit, admin.Level.user))
                 self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
+                self._add(Command('set', [], 'wT', self.set, admin.Level.admin))
                 self._add(Command('shout', ['!'], 'S', self.shout, admin.Level.admin))
                 self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', [], '', self.uptime, admin.Level.user))
@@ -219,11 +222,34 @@ class CommandList(object):
                                 u.remove()
                                 conn.write(_("Player %s removed.\n") % name)
 
+        def set(self, args, conn):
+                [name, val] = args
+                try:
+                        v = var.vars[name]
+                        val = v.parse_val(val)
+                except KeyError:
+                        conn.write(_('No such variable "%s".\n') % name)
+                except var.BadVarException:
+                        conn.write(_('Bad value given for variable "%s".\n') % name)
+                else:
+                        conn.user.set_var(name, val)
+                        msg = v.get_message(val)
+                        if msg:
+                                conn.write("%s\n" % msg)
+
         def shout(self, args, conn):
                 if conn.user.is_guest:
                         conn.write(_("Only registered players can use the shout command.\n"))
                 else:
-                        conn.write(_("not implemented\n"))
+                        count = 0
+                        name = conn.user.get_display_name()
+                        for u in online.itervalues():
+                                if u.vars['shout']:
+                                        u.session.conn.write(_("%s shouts: %s\n") % (name, args[0]))
+                                        count += 1
+                        conn.write(_("(shouted to %d %s)\n" % (count, gettext.ngettext("player", "players", count))))
+                        if not conn.user.vars['shout']:
+                                conn.write(_("(you are not listening to shouts)\n"))
                         
 
         def tell(self, args, conn):

@@ -20,6 +20,8 @@ def connect():
 class Test(unittest.TestCase):
         def expect(self, str, t, msg=None, timeout=2):
                 ret = t.read_until(str, timeout)
+                if not str in ret:
+                        print "got {{%s}}" % ret
                 self.assert_(str in ret)
         
         def expect_EOF(self, t, msg):
@@ -40,8 +42,13 @@ class Test(unittest.TestCase):
         def connect_as_admin(self):
                 t = connect()
                 t.write("admin\r\n%s\r\n" % admin_passwd)
-                t.read_until('fics%', 2)
+                t.read_until('fics%', 6)
                 return t
+
+        def close(self, t):
+                t.write('quit\r\n')
+                t.read_until('Thank you for using')
+                t.close()
 
 class OneConnectionTest(Test):
         def setUp(self):

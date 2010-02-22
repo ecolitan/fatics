@@ -12,17 +12,10 @@ CREATE TABLE `user` (
   `user_admin_level` smallint(11) unsigned NOT NULL,
   `user_fics_name` varchar(18) DEFAULT NULL,
   `user_last_logout` datetime DEFAULT NULL,
+  `shout` BOOLEAN NOT NULL DEFAULT 1,
+  `tell` BOOLEAN NOT NULL DEFAULT 0,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-
--- user variables
-DROP TABLE IF EXISTS `var`;
-CREATE TABLE `var` (
-  `user_id` int(11) NOT NULL,
-  `shout` BOOLEAN NOT NULL DEFAULT 1,
-  `tell` BOOLEAN NOT NULL DEFAULT 1,
-  KEY (`user_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 --
@@ -31,9 +24,6 @@ CREATE TABLE `var` (
 
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
-INSERT INTO `user` VALUES (1,'admin','$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy','Admin Account','lics@openchess.dyndns.org',1000,NULL,NULL);
+INSERT INTO `user` VALUES (1,'admin','$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy','Admin Account','lics@openchess.dyndns.org',1000,NULL,NULL,1,0);
 UNLOCK TABLES;
 
-LOCK TABLES `var` WRITE;
-INSERT INTO `var` VALUES (1,1,0);
-UNLOCK TABLES;

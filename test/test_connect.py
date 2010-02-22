@@ -28,7 +28,7 @@ class LoginTest(Test):
                 
                 t.write('\r\n')
                 self.expect(' Starting', t, "anonymous guest login complete")
-                t.close()
+                self.close(t)
 
         def testRegisteredUserLogin(self):
                 # registered user
@@ -38,14 +38,24 @@ class LoginTest(Test):
 
                 t.write(admin_passwd + '\r\n')
                 self.expect(' Starting', t, "registered user login complete")
+                self.close(t)
+
+        def testDoubleLogin(self):
+                t = self.connect_as_admin()
+                t2 = self.connect()
+                t2.write('admin\r\n%s\r\n' % admin_passwd)
+                self.expect(' is already logged in', t2)
+                self.expect(' has arrived', t)
                 t.close()
+                t2.close()
+
 
 class PromptTest(Test):
         def testPrompt(self):
                 t = self.connect()
                 t.write('guest\r\n\r\n')
                 self.expect('fics%', t, "fics% prompt")
-                t.close()
+                self.close(t)
 
 class TimeoutTest(Test):
         def testTimeout(self):
@@ -59,10 +69,10 @@ class TimeoutTest(Test):
                 self.expect('TIMEOUT', t, "login timeout at password prompt", timeout=65)
                 t.close()
                 
-        def testGuestTimeout(self):     
+        """def testGuestTimeout(self):     
                 t = self.connect()
                 t.write("guest\r\n")
                 self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
-                t.close()
+                t.close()"""
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
