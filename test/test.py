@@ -35,20 +35,40 @@ class Test(unittest.TestCase):
         
         def connect_as_guest(self):
                 t = connect()
-                t.write("guest\r\n\r\n")
+                t.write("guest\n\n")
                 t.read_until('fics%', 2)
                 return t
         
         def connect_as_admin(self):
                 t = connect()
-                t.write("admin\r\n%s\r\n" % admin_passwd)
+                t.write("admin\n%s\n" % admin_passwd)
+                t.read_until('fics%', 6)
+                return t
+        
+        def connect_as_user(self, name, passwd):
+                t = connect()
+                t.write("%s\n%s\n" % (name, passwd))
                 t.read_until('fics%', 6)
                 return t
 
         def close(self, t):
-                t.write('quit\r\n')
+                t.write('quit\n')
                 t.read_until('Thank you for using')
                 t.close()
+
+        def adduser(self, name, passwd, lists=None):
+                t = self.connect_as_admin()
+                t.write('addplayer %s fakeemail@example.com Test Player\n' % name)
+                t.write('asetpass %s %s\n' % (name, passwd))
+                if lists:
+                        for lname in lists:
+                                t.write('addlist %s %s\n' % (lname, name))
+                self.close(t)
+
+        def deluser(self, name):
+                t = self.connect_as_admin()
+                t.write('remplayer %s\n' % name)
+                self.close(t)
 
 class OneConnectionTest(Test):
         def setUp(self):

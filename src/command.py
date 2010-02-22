@@ -43,6 +43,12 @@ class Command(object):
                                                 raise BadCommandException()
                                         if c == c.lower():
                                                 param = param.lower()
+                                        if c == 'i':
+                                                # integer or word
+                                                try:
+                                                        param = int(param, 10)
+                                                except ValueError:
+                                                        pass
                                         s = m[1] if len(m) > 1 else None
                         elif c in ['o', 'n']:
                                 # optional argument
@@ -97,6 +103,7 @@ class CommandList(object):
                 self._add(Command('follow', [], 'w', self.follow, admin.Level.user))
                 self._add(Command('help', [], 'w', self.help, admin.Level.user))
                 self._add(Command('password', [], 'WW', self.password, admin.Level.user))
+                self._add(Command('qtell', [], 'iS', self.qtell, admin.Level.user))
                 self._add(Command('quit', [], '', self.quit, admin.Level.user))
                 self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
                 self._add(Command('set', [], 'wT', self.set, admin.Level.admin))
@@ -216,6 +223,28 @@ class CommandList(object):
         def quit(self, args, conn):
                 raise QuitException()
         
+        def qtell(self, args, conn):
+                # 0 means success
+                # XXX check for td
+                if type(args[0]) == type(1):
+                        # qtell channel
+                        conn.write('NOT IMPLEMENTED\n')
+                        conn.write('*qtell %d 1*\n' % args[0])
+                else:
+                        # qtell user
+                        try:
+                                u = user.find.by_name_exact(args[0])
+                                if not u or not u.is_online:
+                                        ret = 1
+                                else:
+                                        args[0] = u.name
+                                        msg = args[1].replace('\\n', '\n:').replace('\\b', '\x07').replace('\\H', '\x1b[7m').replace('\\h', '\x1b[0m')
+                                        u.write('\n:%s\n' % msg)
+                                        ret = 0
+                        except user.UsernameException:
+                                ret = 1
+                        conn.write('*qtell %s %d*\n' % (args[0], ret))
+        
         def remplayer(self, args, conn):
                 name = args[0]
                 try:
@@ -264,7 +293,6 @@ class CommandList(object):
         def tell(self, args, conn):
                 u = self._do_tell(args, conn)
                 conn.session.last_tell_user = u
- 
         
         def uptime(self, args, conn):
                 conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
@@ -284,7 +312,7 @@ class CommandList(object):
                 if args[0] == '.':
                         u = conn.session.last_tell_user
                         if not u:
-                                conn.write(_("I don't know who to tell that to.\n"))
+                                conn.write(_("I don't know whom to tell that to.\n"))
                         elif not u.is_online:
                                 conn.write(_('%s is no longer online.\n') % u.name)
                                 u = None
@@ -294,6 +322,7 @@ class CommandList(object):
                                 u = user.find.by_name_or_prefix(args[0])
                         except user.UsernameException:
                                 conn.write(_('"%s" is not a valid handle.\n') % args[0])
+                                u = None
                         else:
                                 if not u:
                                         conn.write(_('There is no player matching the name "%s".\n') % args[0])
