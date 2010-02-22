@@ -3,15 +3,15 @@ from test import *
 class TestCommand(Test):
 	def test_command(self):
 		t = self.connect_as_guest()
-		t.write('badcommand\r\n')
+		t.write('badcommand\n')
                 self.expect('Command not found', t)
 
                 # abbreviate command
-                t.write('fin\r\n')
+                t.write('fin\n')
                 self.expect('Finger of ', t)
                 
                 # don't update idle time
-                t.write('$$finger\r\n')
+                t.write('$$finger\n')
                 self.expect('Finger of ', t)
 
                 t.close()

@@ -3,11 +3,11 @@ from test import *
 class AddplayerTest(Test):
         def test_addplayer(self):
                 t = self.connect_as_admin()
-                t.write('addplayer testplayer nobody@example.com Foo Bar\r\n')
+                t.write('addplayer testplayer nobody@example.com Foo Bar\n')
                 self.expect('Added:', t, 'addplayer')
-                t.write('addplayer testplayer nobody@example.com Foo Bar\r\n')
+                t.write('addplayer testplayer nobody@example.com Foo Bar\n')
                 self.expect('already registered', t, 'addplayer duplicate player')
-                t.write('remplayer testplayer\r\n')
+                t.write('remplayer testplayer\n')
                 t.close()
 
 class AnnounceTest(Test):
@@ -15,7 +15,7 @@ class AnnounceTest(Test):
                 t = self.connect_as_admin()
                 t2 = self.connect_as_guest()
 
-                t.write("announce foo bar baz\r\n")
+                t.write("announce foo bar baz\n")
                 self.expect('(1) **ANNOUNCEMENT** from admin: foo bar baz', t)
                 self.expect('**ANNOUNCEMENT** from admin: foo bar baz', t2)
 
@@ -24,7 +24,7 @@ class AreloadTest(Test):
         def runTest(self):
                 self.skip()
                 t = self.connect()
-                t.write('areload\r\n')
+                t.write('areload\n')
                 self.expect('reloaded online', t, "server reload")
                 t.close()
 """

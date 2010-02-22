@@ -11,39 +11,39 @@ class LoginTest(Test):
         def testLogin(self):
                 t = self.connect()
                 t.read_until('login:', 2)
-                t.write('\r\n')
+                t.write('\n')
                 self.expect('login:', t, "blank line at login prompt")
 
-                t.write('ad\r\n')
+                t.write('ad\n')
                 self.expect('name should be at least', t, "login username too short")
                 
-                t.write('adminabcdefghijklmno\r\n')
+                t.write('adminabcdefghijklmno\n')
                 self.expect('names may be at most', t, "login username too long")
                 
-                t.write('admin1\r\n')
+                t.write('admin1\n')
                 self.expect('names can only consist', t, "login username contains numbers")
 
-                t.write('guest\r\n')
+                t.write('guest\n')
                 self.expect('Press return to enter', t, "anonymous guest login start")
                 
-                t.write('\r\n')
+                t.write('\n')
                 self.expect(' Starting', t, "anonymous guest login complete")
                 self.close(t)
 
         def testRegisteredUserLogin(self):
                 # registered user
                 t = self.connect()
-                t.write('admin\r\n')
+                t.write('admin\n')
                 self.expect('is a registered', t, "registered user login start")
 
-                t.write(admin_passwd + '\r\n')
+                t.write(admin_passwd + '\n')
                 self.expect(' Starting', t, "registered user login complete")
                 self.close(t)
 
         def testDoubleLogin(self):
                 t = self.connect_as_admin()
                 t2 = self.connect()
-                t2.write('admin\r\n%s\r\n' % admin_passwd)
+                t2.write('admin\n%s\n' % admin_passwd)
                 self.expect(' is already logged in', t2)
                 self.expect(' has arrived', t)
                 t.close()
@@ -53,7 +53,7 @@ class LoginTest(Test):
 class PromptTest(Test):
         def testPrompt(self):
                 t = self.connect()
-                t.write('guest\r\n\r\n')
+                t.write('guest\n\n')
                 self.expect('fics%', t, "fics% prompt")
                 self.close(t)
 
@@ -65,13 +65,13 @@ class TimeoutTest(Test):
         
         def testGuestTimeoutPassword(self):     
                 t = self.connect()
-                t.write("guest\r\n")
+                t.write("guest\n")
                 self.expect('TIMEOUT', t, "login timeout at password prompt", timeout=65)
                 t.close()
                 
         """def testGuestTimeout(self):     
                 t = self.connect()
-                t.write("guest\r\n")
+                t.write("guest\n")
                 self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
                 t.close()"""
 

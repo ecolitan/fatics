@@ -12,6 +12,7 @@ from timer import timer
 from online import online
 from reload import reload
 from server import server
+from utf8 import checker
 
 class InternalException(Exception):
         pass
@@ -330,6 +331,13 @@ class CommandList(object):
                                         conn.write(_('%s is not logged in.') % args[0])
                                         u = None
 
+                if u:
+                        if not checker.check_user_utf8(args[1]):
+                                conn.write(_("Your message contains one or more unprintable characters.\n"))
+                                u = None
+                        else:
+                                assert not '\a' in args[1]
+                                
                 if u:
                         u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                         conn.write(_("(told %s)") % u.name + '\n')
