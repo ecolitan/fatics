@@ -124,7 +124,8 @@ class CommandList(object):
                 '-': 'sublist',
                 '!': 'shout',
                 '.': 'tell .',
-                ',': 'tell ,'
+                ',': 'tell ,',
+                'variables': 'vars'
         }
 
         def _add(self, cmd):
@@ -309,14 +310,17 @@ class CommandList(object):
         def set(self, args, conn):
                 [name, val] = args
                 try:
-                        v = var.vars[name]
+                        v = var.vars.get(name)
                         val = v.parse_val(val)
+                except trie.NeedMore as e:
+                        assert(len(e.matches) >= 2)
+                        conn.write(_('Ambiguous variable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))
                 except KeyError:
                         conn.write(_('No such variable "%s".\n') % name)
                 except var.BadVarException:
                         conn.write(_('Bad value given for variable "%s".\n') % name)
                 else:
-                        conn.user.set_var(name, val)
+                        conn.user.set_var(v, val)
                         msg = v.get_message(val)
                         if msg:
                                 conn.write("%s\n" % msg)

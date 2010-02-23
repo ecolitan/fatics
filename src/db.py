@@ -21,7 +21,7 @@ class DB(object):
                 return row
         
         def user_set_var(self, user_id, name, val):
-                assert(name in var.vars)
+                assert(var.vars[name].name == name)
                 cursor = self.db.cursor()
                 up = """UPDATE user SET %s""" % (var.vars[name].dbname)
                 cursor.execute(up + """=%s WHERE user_id=%s""", (val,user_id))

@@ -1,13 +1,15 @@
 import copy
 import trie
 
-vars = {}
+vars = trie.Trie()
 
 class Var(object):
         def __init__(self, name, default):
+                assert(name == name.lower())
                 self.name = name
                 self.dbname = name
                 self.default = default
+                print 'vars[%s] = foo' % self.name
                 vars[self.name] = self
 
 class BadVarException(Exception):
@@ -16,7 +18,16 @@ class BadVarException(Exception):
 class StringVar(Var):
         pass
 class IntVar(Var):
-        pass
+        def parse_val(self, val):
+                try:
+                        ret = int(val, 10)
+                except ValueError:
+                        raise BadVarException
+                return ret
+        
+        def get_message(self, val):
+                return _("%s set to %d.") % (self.name, val)
+
 class BoolVar(Var):
         def __init__(self, name, default, on_msg, off_msg):
                 Var.__init__(self, name, default)
@@ -35,14 +46,18 @@ class BoolVar(Var):
                         msg = self.off_msg
                 return msg
 
-shout = BoolVar("shout", True, _("You will now hear shouts."), _("You will not hear shouts."))
-tell = BoolVar("tell", False, _("You will now hear direct tells from unregistered users."), _("You will not hear direct tells from unregistered users."))
+class VarList(object):
+        def __init__(self):
+                BoolVar("shout", True, _("You will now hear shouts."), _("You will not hear shouts."))
+                BoolVar("tell", False, _("You will now hear direct tells from unregistered users."), _("You will not hear direct tells from unregistered users."))
+                IntVar("time", 2)
+                self.default_vars = {}
+                for var in vars.itervalues():
+                        self.default_vars[var.name] = var.default
 
-default_vars = {}
-for var in vars.values():
-        default_vars[var.name] = var.default
+        def get_default_vars(self):
+                return copy.copy(self.default_vars)
 
-def get_default_vars():
-        return copy.copy(default_vars)
+varlist = VarList()
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

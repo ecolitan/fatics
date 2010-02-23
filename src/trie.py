@@ -1,6 +1,6 @@
 class NeedMore(Exception):
-    pass
-
+    def __init__(self, matches=None):
+        self.matches = matches
 
 class Node(object):
     """Internal representation of Trie nodes."""
@@ -107,6 +107,23 @@ class Trie(object):
             else:
                 raise KeyError(k)
         return n.value
+   
+    """like __getitem__, but returns the matches"""
+    def get(self, k):
+        n = self._getnode(k)
+        if n.value is Node.no_value:
+            if n.nodes:
+		children = self.all_children(k)
+                assert(len(children) > 0)
+		if len(children) == 1:
+		    ret = children[0]
+		elif len(children) > 0:
+		    raise NeedMore(children)
+            else:
+                raise KeyError(k)
+        else:
+	    ret = n.value
+        return ret
 
     def __delitem__(self, k):
         n = self._getnode(k)
