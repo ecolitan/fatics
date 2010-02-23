@@ -6,7 +6,7 @@ import time
 
 from test import *
         
-seal_prog = 'timeseal/openseal'
+seal_prog = 'timeseal/zipseal'
 
 class TestTimeseal(Test):
 	def test_timeseal(self):
@@ -24,7 +24,7 @@ class TestTimeseal(Test):
                 [out, err] = process.communicate()
                 self.assert_('fics%' in out)
                 self.assert_('Finger of admin' in out)
-                self.assert_('Timeseal: On' in out)
+                self.assert_('Zipseal: On' in out)
                 self.assert_('Thank you for using' in out)
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

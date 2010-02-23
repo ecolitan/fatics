@@ -1,5 +1,5 @@
 /* 
- * OPENSEAL_DECODER
+ * zipseal_decoder
  *
  * openseal_decoder has been designed to be used with the open-source
  * chess server "lasker" maintained by Andrew Tridgell (you can find it
@@ -20,6 +20,8 @@
  *       m.mamino@sns.it
  *       http://linuz.sns.it/~m2/
  *       vacaboja on FICS
+ *
+ * modified by Wil Mahan
  */
 
 
@@ -31,7 +33,7 @@
 
 char *key="Timestamp (FICS) v1.0 - programmed by Henrik Gram.";
 
-int decrypt(char *s)
+void decrypt(char *s)
 {
 	int n,offset,l=strlen(s);
 	char *tmp_time,*tmp_end,*num_end;
@@ -44,12 +46,9 @@ int decrypt(char *s)
 	strcpy(tmp,s);
 	for(n=0;n<l;n++) {
 		tmp[n]=(tmp[n]+32)^key[(n+offset-0x80)%50];
-		if(!tmp[n]&0x80) goto malformed_message;
+		if(!(tmp[n]&0x80)) goto malformed_message;
 		tmp[n]^=0x80;
 	}
-#define SC(A,B) tmp[B]^=tmp[A]^=tmp[B],tmp[A]^=tmp[B]
-	for(n=0;n<l;n+=12)
-		SC(n,n+11), SC(n+2,n+9), SC(n+4,n+7);
 	// find the timestamp beginning
 	tmp_time=strchr(tmp,'\x18');
 	if(!tmp_time) goto malformed_message;

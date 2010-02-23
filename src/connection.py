@@ -46,7 +46,9 @@ class Connection(basic.LineReceiver):
         def lineReceived(self, line):
                 #print '((%s,%s))\n' % (self.state, repr(line))
                 if self.session.use_timeseal:
-                        (t, line) = timeseal.decode(line)
+                        (t, line) = timeseal.decode_timeseal(line)
+                elif self.session.use_zipseal:
+                        (t, line) = zipseal.decode_timeseal(line)
                 if self.state:
                         getattr(self, "lineReceived_" + self.state)(line)
 
@@ -56,10 +58,19 @@ class Connection(basic.LineReceiver):
                 self.session.login_last_command = time.time()
                 if self.session.check_for_timeseal:
                         self.session.check_for_timeseal = False
-                        (t, dec) = timeseal.decode(line)
-                        if t != 0 and dec[0:10] == 'TIMESTAMP|':
-                                self.session.use_timeseal = True
+                        (t, dec) = timeseal.decode_timeseal(line)
+                        if t != 0:
+                                if dec[0:10] == 'TIMESTAMP|':
+                                        self.session.use_timeseal = True
+                                        return
+                                elif dec[0:10] == 'TIMESEAL2|':
+                                        self.session.use_timeseal = True
+                                        return
+                        (t, dec) = timeseal.decode_zipseal(line)
+                        if t != 0 and dec[0:8] == 'zipseal|':
+                                self.session.use_zipseal = True
                                 return
+                        # no timeseal; continue
                 name = line.strip()
                 self.user = login.get_user(name, self)
                 if self.user:

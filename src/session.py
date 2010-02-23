@@ -13,6 +13,7 @@ class Session(object):
 	        self.last_command_time = time.time()
                 self.last_tell_user = None
                 self.use_timeseal = False
+                self.use_zipseal = False
                 self.check_for_timeseal = True
 
         def set_user(self, user):

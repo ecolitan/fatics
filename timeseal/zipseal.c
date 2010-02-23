@@ -1,10 +1,8 @@
 /* 
- * OPENSEAL --- An open-source replacement for timeseal
+ * zipseal -- An open-source timeseal
  *
  * Usage:
- *   openseal ICS-host [ICS-port]
- *   e.g.
- *   openseal freechess.org
+ *   zipseal ICS-host [ICS-port]
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -13,8 +11,8 @@
  *
  *     Marcello Mamino (vacaboja on FICS)
  *
- * Modified by for international character support. Changes:
- * -- wmahan, Feb 2010
+ * Modified by Wil Mahan <wmahan at gmail.com>: support international
+ * characters; remove obfuscation; add compression.
  */
 
 #include <stdio.h>
@@ -27,10 +25,11 @@
 #include <string.h>
 #include <sys/select.h>
 #include <netinet/in.h>
+#include <unistd.h>
 #define BSIZE 1024
 
 char *key="Timestamp (FICS) v1.0 - programmed by Henrik Gram.";
-char hello[]="TIMESTAMP|openseal|Running on an operating system|";
+char hello[]="zipseal|zipseal|Running on an operating system|";
 
 int crypt(char *s,int l)
 {
@@ -42,9 +41,6 @@ int crypt(char *s,int l)
 	s[l++]='\x19';
 	for(;l%12;l++)
 		s[l]='1';
-#define SC(A,B) s[B]^=s[A]^=s[B],s[A]^=s[B]
-	for(n=0;n<l;n+=12)
-		SC(n,n+11), SC(n+2,n+9), SC(n+4,n+7);
 	for(n=0;n<l;n++)
 		s[n]=((s[n]|0x80)^key[n%50])-32;
 	s[l++]='\x80';
@@ -103,25 +99,28 @@ void sendtofics(int fd, char *buff, int *rd)
 
 void getfromfics(int fd, char *buff, int *rd)
 {
-	static int c=0;
 	int n,m;
 	while(*rd>0) {
-		if(!strncmp(buff,"[G]\n\r",*rd<5?*rd:5))
-			if(*rd<5) break;
+		if(!strncmp(buff,"[G]",*rd<3?*rd:3)) {
+			if(*rd<3) {
+				break;
+			}
 			else {
 				char reply[20]="\x2""9";
 				n = crypt(reply,2);
 				mywrite(fd, reply, n);
-				for(n = 5; n < *rd; n++)
-					buff[n-5] = buff[n];
-				*rd -= 5;
+				for(n = 3; n < *rd; n++)
+					buff[n-3] = buff[n];
+				*rd -= 3;
 				continue;
 			}
+		}
 		for(n=0;n<*rd && buff[n]!='\r';n++);
 		if(n<*rd) n++;
 		mywrite(1,buff,n);
-		for(m=n;m<*rd;m++)
+		for(m=n;m<*rd;m++) {
 			buff[m-n]=buff[m];
+		}
 		*rd-=n;
 	}
 }
@@ -187,3 +186,4 @@ int main(int argc, char **argv)
 		}
 	}
 }
+

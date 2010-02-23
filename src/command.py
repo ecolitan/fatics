@@ -225,9 +225,11 @@ class CommandList(object):
                                         conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 
                                         if u.session.use_timeseal:
-                                                conn.write(_('Timeseal 1: On\n\n'))
+                                                conn.write(_('Timeseal: On\n\n'))
+                                        elif u.session.use_zipseal:
+                                                conn.write(_('Zipseal: On\n\n'))
                                         else:
-                                                conn.write(_('Timeseal 1: Off\n\n'))
+                                                conn.write(_('Zipseal: Off\n\n'))
                                         
                                 else:
                                         if u.last_logout == None:

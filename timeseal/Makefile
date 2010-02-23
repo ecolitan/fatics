@@ -1,4 +1,4 @@
-all: openseal openseal_decoder openseal2 openseal_decoder2
+all: openseal openseal_decoder zipseal zipseal_decoder
 
 openseal: openseal.c
 	$(CC) -o openseal openseal.c
@@ -6,11 +6,11 @@ openseal: openseal.c
 openseal_decoder: openseal_decoder.c
 	$(CC) -o openseal_decoder openseal_decoder.c
 
-openseal2: openseal2.c
-	$(CC) -Wall -o openseal2 openseal2.c
+zipseal: zipseal.c
+	$(CC) -Wall -o zipseal zipseal.c
 
-openseal_decoderw: openseal_decoder2.c
-	$(CC) -Wall -o openseal_decoder2 openseal_decoder2.c
+zipseal_decoder: zipseal_decoder.c
+	$(CC) -Wall -o zipseal_decoder zipseal_decoder.c
 
 clean:
-	rm -f openseal openseal_decoder openseal2 openseal_decoder2
+	rm -f openseal openseal_decoder zipseal zipseal_decoder
