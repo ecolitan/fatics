@@ -13,6 +13,7 @@ from online import online
 from reload import reload
 from server import server
 from utf8 import checker
+from alias import alias
 
 class InternalException(Exception):
         pass
@@ -22,9 +23,8 @@ class BadCommandException(Exception):
         pass
 
 class Command(object):
-        def __init__(self, name, aliases, param_str, run, admin_level):
+        def __init__(self, name, param_str, run, admin_level):
                 self.name = name
-                self.aliases = aliases
                 self.param_str = param_str
                 self.run = run
                 self.admin_level = admin_level
@@ -96,34 +96,41 @@ class CommandList(object):
                 # a command given a substring
                 self.cmds = trie.Trie()
                 self.admin_cmds = trie.Trie()
-                self._add(Command('addplayer', [], 'WWS', self.addplayer, admin.Level.admin))
-                self._add(Command('announce', [], 'S', self.announce, admin.Level.admin))
-                self._add(Command('areload', [], '', self.areload, admin.Level.god))
-                self._add(Command('asetadmin', [], 'wd', self.asetadmin, admin.Level.admin))
-                self._add(Command('asetpasswd', [], 'wW', self.asetpasswd, admin.Level.admin))
-                self._add(Command('date', [], '', self.date, admin.Level.user))
+                self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
+                self._add(Command('announce', 'S', self.announce, admin.Level.admin))
+                self._add(Command('areload', '', self.areload, admin.Level.god))
+                self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
+                self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
+                self._add(Command('date', '', self.date, admin.Level.user))
+                self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
+                self._add(Command('follow', 'w', self.follow, admin.Level.user))
+                self._add(Command('help', 'w', self.help, admin.Level.user))
+                self._add(Command('password', 'WW', self.password, admin.Level.user))
+                self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
+                self._add(Command('quit', '', self.quit, admin.Level.user))
+                self._add(Command('remplayer', 'w', self.remplayer, admin.Level.admin))
+                self._add(Command('set', 'wT', self.set, admin.Level.user))
+                self._add(Command('shout', 'S', self.shout, admin.Level.user))
+                self._add(Command('tell', 'nS', self.tell, admin.Level.user))
+                self._add(Command('uptime', '', self.uptime, admin.Level.user))
+                self._add(Command('vars', '', self.vars, admin.Level.user))
+                self._add(Command('who', 'T', self.who, admin.Level.user))
+                self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
 
-                self._add(Command('finger', ['f'], 'ooo', self.finger, admin.Level.user))
-                self._add(Command('follow', [], 'w', self.follow, admin.Level.user))
-                self._add(Command('help', [], 'w', self.help, admin.Level.user))
-                self._add(Command('password', [], 'WW', self.password, admin.Level.user))
-                self._add(Command('qtell', [], 'iS', self.qtell, admin.Level.user))
-                self._add(Command('quit', [], '', self.quit, admin.Level.user))
-                self._add(Command('remplayer', [], 'w', self.remplayer, admin.Level.admin))
-                self._add(Command('set', [], 'wT', self.set, admin.Level.user))
-                self._add(Command('shout', ['!'], 'S', self.shout, admin.Level.user))
-                self._add(Command('tell', ['t'], 'nS', self.tell, admin.Level.user))
-                self._add(Command('uptime', [], '', self.uptime, admin.Level.user))
-                self._add(Command('vars', [], '', self.vars, admin.Level.user))
-                self._add(Command('who', [], 'T', self.who, admin.Level.user))
-                self._add(Command('xtell', [], 'nS', self.xtell, admin.Level.user))
+        system_aliases = {
+                'f': 'finger',
+                't': 'tell',
+                '+': 'addlist',
+                '-': 'sublist',
+                '!': 'shout',
+                '.': 'tell .',
+                ',': 'tell ,'
+        }
 
         def _add(self, cmd):
                 self.admin_cmds[cmd.name] = cmd
                 if cmd.admin_level <= admin.Level.user:
                         self.cmds[cmd.name] = cmd
-                        for a in cmd.aliases:
-                                self.cmds[a] = cmd
 
         def addplayer(self, args, conn):
                 [name, email, real_name] = args
@@ -159,7 +166,7 @@ class CommandList(object):
                 else:
                         if not u:
                                 conn.write(_('There is no player matching the name "%s".\n') % args[0])
-                        # Note: it seems to be possible to set the admin level
+                        # It seems to be possible to set the admin level
                         # of a guest. I'm not sure if it's by accident or
                         # design, but I see no reason to change it.
                         elif not admin.checker.check_users(conn.user, u):
@@ -213,6 +220,7 @@ class CommandList(object):
                                 u = conn.user
                         if u:
                                 conn.write(_('Finger of %s:\n\n') % u.get_display_name())
+                                
                                 if u.is_online:
                                         conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 
@@ -225,7 +233,12 @@ class CommandList(object):
                                         if u.last_logout == None:
                                                 conn.write(_('%s has never connected.\n\n') % u.name)
                                         else:
-                                                conn.write(_('Last disconnected: %s\n\n') % u.last_logout)
+                                                #conn.write(_('Last disconnected: %s\n\n') % u.last_logout)
+                                                conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
+                                if u.is_guest:
+                                        conn.write(_('%s is NOT a registered player.\n') % u.name)
+                                if u.admin_level > admin.Level.user:
+                                        conn.write(_('Admin Level: %s\n') % admin.level.to_str(u.admin_level))
                 except user.UsernameException:
                         conn.write(_('"%s" is not a valid handle\n.') % args[0])
                 except user.AmbiguousException as e:
@@ -380,7 +393,8 @@ class CommandList(object):
                         count = count + 1
                 conn.write('\n')
                 # assume plural
-                conn.write(_('%d players displayed.\n\n') % count)
+                #conn.write(_('%d players displayed.\n\n') % count)
+                conn.write(_('%d Players Displayed.\n\n') % count)
 
 command_list = CommandList()
 
@@ -400,13 +414,15 @@ class CommandParser(object):
                 else:
                         conn.user.session.last_command_time = time.time()
 
+                s = s.lstrip()
                 if len(s) == 0:
                         # ignore blank line
                         return
                 if s[0] == '$':
                         s = s[1:]
                 else:
-                        s = self.expand_aliases(s)
+                        s = alias.expand(s, command_list.system_aliases, conn.user.aliases)
+                s = s.lstrip()
 
                 if conn.user.admin_level > admin.Level.user:
                         cmds = command_list.admin_cmds

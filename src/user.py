@@ -23,6 +23,7 @@ class BaseUser(object):
                                 conn.write(_("**** %s is already logged in; closing the other connection. ****\n" % self.name))
                                 u = online.find_exact(self.name)
                                 u.session.conn.write(_("**** %s has arrived; you can't both be logged in. ****\n\n") % self.name)
+                                #u.session.conn.write(_("**** %s has arrived - you can't both be logged in. ****\n\n") % self.name)
                                 u.session.conn.loseConnection('logged in again')
                         count = 0
                         while online.is_online(self.name):
@@ -31,6 +32,7 @@ class BaseUser(object):
                                 if count > 50:
                                         raise Exception("failed to kick off user")
                 self.is_online = True
+                self.aliases = {}
                 self.session = conn.session
                 self.session.set_user(self)
                 online.add(self)

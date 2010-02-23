@@ -12,3 +12,5 @@ user doing the shout (assuming that user has shouts enabled).
 * Gods can now set their own adminlevel. Not sure if it's useful, but it
 follows the principle of "gods can do anything".
 
+* Newlines are now sent after carriage returns ('\r\n'), rather than
+vice versa ('\n\r').

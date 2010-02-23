@@ -175,6 +175,7 @@ class TelnetTransport(protocol.Protocol):
     def write(self, data):
         data = data.replace('\xff','\xff\xff')
         data = data.replace('\n', '\r\n')
+        #data = data.replace('\n', '\n\r')
         self.transport.write(data)
 
     def writeSequence(self, seq):
