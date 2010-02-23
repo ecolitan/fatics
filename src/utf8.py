@@ -1,6 +1,6 @@
 import re
 
-class Checker:
+class Checker(object):
         def check_user_utf8(self, s):
                 ret =  re.match('''^[\t\x20-\xfd]*$''', s)
                 if ret:

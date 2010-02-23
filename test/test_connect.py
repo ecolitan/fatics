@@ -29,6 +29,17 @@ class LoginTest(Test):
                 t.write('\n')
                 self.expect(' Starting', t, "anonymous guest login complete")
                 self.close(t)
+       
+        """User should not actually be logged in until a correct password
+        is entered."""
+        def testHalfLogin(self):
+                t = self.connect()
+                t.write('admin\n')
+                t2 = self.connect_as_guest()
+                t2.write('finger admin\n')
+                self.expect('Last disconnected:', t2)
+                self.close(t2)
+                t.close()
 
         def testRegisteredUserLogin(self):
                 # registered user

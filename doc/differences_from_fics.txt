@@ -9,3 +9,6 @@ rather than "I don't know who to tell that to".
 * The "(shouted to N players)" given by the shout command includes the
 user doing the shout (assuming that user has shouts enabled).
 
+* Gods can now set their own adminlevel. Not sure if it's useful, but it
+follows the principle of "gods can do anything".
+

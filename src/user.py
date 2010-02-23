@@ -46,6 +46,11 @@ class BaseUser(object):
                 assert(self.is_online)
                 self.session.conn.write(s)
         
+        def write_prompt(self, s):
+                assert(self.is_online)
+                self.session.conn.write(s)
+                self.session.conn.write('fics% ')
+        
         def get_display_name(self):
                 ret = self.name
                 if self.admin_level >= admin.Level.admin:
@@ -76,6 +81,7 @@ class User(BaseUser):
 
         def set_admin_level(self, level):
                 db.user_set_admin_level(self.id, level)
+                self.admin_level = level
         
         # check if an unencrypted password is correct
         def check_passwd(self, passwd):

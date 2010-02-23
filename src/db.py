@@ -46,7 +46,7 @@ class DB(object):
 
         def user_set_admin_level(self, id, level):
                 cursor = self.db.cursor()
-                cursor.execute("""UPDATE user SET user_admin_level=%d WHERE user_id=%s""", (level, id))
+                cursor.execute("""UPDATE user SET user_admin_level=%s WHERE user_id=%s""", (str(level), id))
                 cursor.close()
 
         def user_set_last_logout(self, id):

@@ -32,7 +32,7 @@ class Command(object):
         def parse_params(self, s):
                 params = []
                 for c in self.param_str:
-                        if c in ['i', 'w', 'W']:
+                        if c in ['d', 'i', 'w', 'W']:
                                 # required argument
                                 if s == None:
                                         raise BadCommandException()
@@ -44,12 +44,13 @@ class Command(object):
                                                 raise BadCommandException()
                                         if c == c.lower():
                                                 param = param.lower()
-                                        if c == 'i':
+                                        if c in ['i', 'd']:
                                                 # integer or word
                                                 try:
                                                         param = int(param, 10)
                                                 except ValueError:
-                                                        pass
+                                                        if c == 'd':
+                                                                raise BadCommandException()
                                         s = m[1] if len(m) > 1 else None
                         elif c in ['o', 'n']:
                                 # optional argument
@@ -98,6 +99,7 @@ class CommandList(object):
                 self._add(Command('addplayer', [], 'WWS', self.addplayer, admin.Level.admin))
                 self._add(Command('announce', [], 'S', self.announce, admin.Level.admin))
                 self._add(Command('areload', [], '', self.areload, admin.Level.god))
+                self._add(Command('asetadmin', [], 'wd', self.asetadmin, admin.Level.admin))
                 self._add(Command('asetpasswd', [], 'wW', self.asetpasswd, admin.Level.admin))
                 self._add(Command('date', [], '', self.date, admin.Level.user))
 
@@ -142,11 +144,33 @@ class CommandList(object):
                 for u in online.itervalues():
                         if u != conn.user:
                                 count = count + 1
-                                u.session.conn.write(_("\n\n    **ANNOUNCEMENT** from %s: %s\n\n") % (conn.user.name, args[0]))
+                                u.write_prompt(_("\n\n    **ANNOUNCEMENT** from %s: %s\n\n") % (conn.user.name, args[0]))
                 conn.write(_("(%d) **ANNOUNCEMENT** from %s: %s\n\n") % (count, conn.user.name, args[0]))
 
         def areload(self, args, conn):
                 reload.reload_all(conn)
+
+        def asetadmin(self, args, conn):
+                [name, level] = args
+                try:
+                        u = user.find.by_name_exact(name)
+                except user.UsernameException:
+                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
+                else:
+                        if not u:
+                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
+                        # Note: it seems to be possible to set the admin level
+                        # of a guest. I'm not sure if it's by accident or
+                        # design, but I see no reason to change it.
+                        elif not admin.checker.check_users(conn.user, u):
+                                conn.write(_('You can only set the adminlevel for players below your adminlevel.'))
+                        elif not admin.checker.check_level(conn.user.admin_level, level):
+                                conn.write(_('''You can't promote someone to or above your adminlevel.\n'''))
+                        else:
+                                u.set_admin_level(level)
+                                conn.write(_('''Admin level of %s set to %d.\n''' % (name, level)))
+                                if u.is_online:
+                                        u.write_prompt(_('''\n\n%s has set your admin level to %d.\n\n''') % (conn.user.name, level))
 
         def asetpasswd(self, args, conn):
                 [name, passwd] = args
@@ -159,13 +183,15 @@ class CommandList(object):
                                 conn.write(_('There is no player matching the name "%s".\n') % args[0])
                         elif u.is_guest:
                                 conn.write(_('You cannot set the password of an unregistered player!\n'))
+                        elif not admin.checker.check_users(conn.user, u):
+                                conn.write(_('You can only set the password of players below your admin level.')) 
                         elif not user.is_legal_passwd(passwd):
                                 conn.write(_('"%s" is not a valid password.\n') % passwd)
                         else:
                                 u.set_passwd(passwd)
                                 conn.write(_('Password of %s changed to %s.\n') % (name, '*' * len(passwd)))
                                 if u.is_online:
-                                        u.session.conn.write(_('\n%s has changed your password.\n') % conn.user.name)
+                                        u.write_prompt(_('\n%s has changed your password.\n') % conn.user.name)
         
         def date(self, args, conn):
                 t = time.time()
@@ -257,6 +283,8 @@ class CommandList(object):
                 else:
                         if not u:
                                 conn.write(_("No player by the name %s is registered.\n") % name)
+                        elif not admin.checker.check_users(conn.user, u):
+                                conn.write(_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
                         elif u.is_online:
                                 conn.write(_("A player by that name is logged in.\n"))
                         else:
@@ -286,7 +314,7 @@ class CommandList(object):
                         name = conn.user.get_display_name()
                         for u in online.itervalues():
                                 if u.vars['shout']:
-                                        u.session.conn.write(_("%s shouts: %s\n") % (name, args[0]))
+                                        u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
                                         count += 1
                         conn.write(_("(shouted to %d %s)\n" % (count, gettext.ngettext("player", "players", count))))
                         if not conn.user.vars['shout']:
@@ -340,7 +368,7 @@ class CommandList(object):
                         pass
 
                 if u:
-                        u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
+                        u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                         conn.write(_("(told %s)") % u.name + '\n')
 
                 return u

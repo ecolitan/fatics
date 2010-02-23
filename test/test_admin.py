@@ -35,6 +35,33 @@ class CommandTest(Test):
                 self.expect('fics%', t2)
                 self.close(t2)
                 self.deluser('testplayer')
+        
+        def test_asetadmin(self):
+                self.adduser('testplayer', 'passwd')
+                self.adduser('testtwo', 'passwd')
+                t = self.connect_as_admin()
+                t2 = self.connect_as_user('testplayer', 'passwd')
+                t.write('asetadmin testplayer 100\n')
+                self.expect('Admin level of testplayer set to 100.', t)
+                self.close(t)
+
+                # need to excecute a command before admin commands are
+                # recognized. 
+                self.expect('admin has set your admin level to 100.', t2)
+                t2.write('\n')
+                t2.write('asetadmin admin 100\n')
+                self.expect('You can only set the adminlevel for players below', t2)
+                t2.write('asetadmin testplayer 1000\n')
+                self.expect('You can only set the adminlevel for players below', t2)
+                
+                t2.write('asetadmin testtwo 100\n')
+                self.expect('''You can't promote''', t2)
+
+                t2.write('asetadmin testtwo 50\n')
+                self.expect('Admin level of testtwo set', t2)
+                self.close(t2)
+                self.deluser('testplayer')
+                self.deluser('testplayer2')
 
 class PermissionsTest(Test):
         def test_permissions(self):
