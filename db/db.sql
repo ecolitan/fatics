@@ -22,7 +22,7 @@ CREATE TABLE `user` (
 DROP TABLE IF EXISTS `channel`;
 CREATE TABLE `channel` (
   `channel_id` int(11) NOT NULL,
-  `name` varchar(32) NOT NULL,
+  `name` varchar(32) DEFAULT NULL,
   `descr` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`channel_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

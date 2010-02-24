@@ -1,3 +1,4 @@
+import sys
 import copy
 
 from db import db
@@ -19,13 +20,10 @@ class Channel(object):
                                 self.online.append(u)"""
 
         def tell(self, msg, user):
-                if not user in self.online:
-                        user.write('''(You're not listening to channel %s.)\n''' % self.id)
-                        return
-
                 msg = '%s(%s): %s\n' % (user.get_display_name(), self.id, msg)
                 for u in self.online:
                         u.write(msg)
+                return len(self.online)
 
         def log_on(self, user):
                 self.online.append(user)
@@ -52,8 +50,18 @@ class Channel(object):
                 user.remove_channel(self.id)
                 user.write(_('[%s] removed from your channel list.\n') % self.id)
 
+        def get_display_name(self):
+                if self.name != None:
+                        return '''%d "%s"''' % (self.id, self.name)
+                else:
+                        return "%d" % self.id
+        
+        def get_online(self):
+                return [u.get_display_name() for u in self.online]
+
 class ChannelList(object):
         all = {}
+        max = sys.maxint
         def __init__(self):
                 for ch in db.channel_list():
                         id = ch['channel_id']
@@ -61,6 +69,8 @@ class ChannelList(object):
 
         def __getitem__(self, key):
                 assert(type(key) == type(1) or type(key) == type(1l))
+                if key < 0 or key > self.max:
+                        raise KeyError
                 try:
                         return self.all[key]
                 except KeyError:
@@ -68,7 +78,7 @@ class ChannelList(object):
                         return self.all[key]
 
         def make_ch(self, key):
-                name = 'Channnel %d' % key
+                name = None
                 db.channel_new(key, name)
                 return Channel(key, name, None)
 

@@ -73,7 +73,7 @@ class Alias(object):
                 're': 'refresh $@',
                 'rem': 'rematch',
                 'res': 'resign $@',
-                'rping': 'xtell ROBOadmin Ping',
+                #'rping': 'xtell ROBOadmin Ping',
                 'saa': 'simallabort',
                 'saab': 'simallabort',
                 'saadj': 'simalladjourn',
@@ -155,7 +155,7 @@ class Alias(object):
 
         """Expand system and user aliases in a given command."""
         def expand(self, s, syslist, userlist, user):
-                m = re.match(r'''^([@!#$%^&*\-+'"\/.,]+)(.*)''', s)
+                m = re.match(r'''^([@!#$%^&*\-+'"\/.,=]+)(.*)''', s)
                 if m:
                         word = m.group(1)
                         rest = m.group(2)

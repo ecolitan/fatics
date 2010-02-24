@@ -27,16 +27,20 @@ class ChannelList(UserList):
         def add(self, val, user):
                 try:
                         val = int(val, 10)
+                        channel.chlist[val].add(user)
                 except ValueError:
                         raise ListError(_('The channel must be a number.'))
-                channel.chlist[val].add(user)
+                except KeyError:
+                        raise ListError(_('Invalid channel number.'))
 
         def sub(self, val, user):
                 try:
                         val = int(val, 10)
+                        channel.chlist[val].remove(user)
                 except ValueError:
                         raise ListError(_('The channel must be a number.'))
-                channel.chlist[val].remove(user)
+                except KeyError:
+                        raise ListError(_('Invalid channel number.'))
 
 ChannelList()
 

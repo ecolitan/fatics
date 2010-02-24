@@ -21,7 +21,7 @@ class InternalException(Exception):
         pass
 class QuitException(Exception):
         pass
-class BadCommandException(Exception):
+class BadCommandError(Exception):
         pass
 
 class Command(object):
@@ -37,13 +37,13 @@ class Command(object):
                         if c in ['d', 'i', 'w', 'W']:
                                 # required argument
                                 if s == None:
-                                        raise BadCommandException()
+                                        raise BadCommandError()
                                 else:
                                         m = re.split(r'\s+', s, 1)
                                         assert(len(m) > 0)
                                         param = m[0]
                                         if len(param) == 0:
-                                                raise BadCommandException()
+                                                raise BadCommandError()
                                         if c == c.lower():
                                                 param = param.lower()
                                         if c in ['i', 'd']:
@@ -52,9 +52,9 @@ class Command(object):
                                                         param = int(param, 10)
                                                 except ValueError:
                                                         if c == 'd':
-                                                                raise BadCommandException()
+                                                                raise BadCommandError()
                                         s = m[1] if len(m) > 1 else None
-                        elif c in ['o', 'n']:
+                        elif c in ['o', 'n', 'p']:
                                 # optional argument
                                 if s == None:
                                         param = None
@@ -65,11 +65,17 @@ class Command(object):
                                         if len(param) == 0:
                                                 param = None
                                                 assert(len(m) == 1)
+                                        elif c in ['n', 'p']:
+                                                try:
+                                                        param = int(param, 10)
+                                                except ValueError:
+                                                        if c == 'p':
+                                                                raise BadCommandError()
                                         s = m[1] if len(m) > 1 else None
                         elif c == 'S':
                                 # string to end
                                 if s == None or len(s) == 0:
-                                        raise BadCommandException()
+                                        raise BadCommandError()
                                 param = s
                                 s = None
                         elif c == 'T':
@@ -85,7 +91,7 @@ class Command(object):
 
                 if not (s == None or re.match(r'^\s*$', s)):
                         # extraneous data at the end
-                        raise BadCommandException()
+                        raise BadCommandError()
                                 
                 return params
 
@@ -108,6 +114,7 @@ class CommandList(object):
                 self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
                 self._add(Command('follow', 'w', self.follow, admin.Level.user))
                 self._add(Command('help', 'w', self.help, admin.Level.user))
+                self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
                 self._add(Command('password', 'WW', self.password, admin.Level.user))
                 self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
                 self._add(Command('quit', '', self.quit, admin.Level.user))
@@ -257,6 +264,27 @@ class CommandList(object):
         def help(self, args, conn):
                 conn.write('help\n')
         
+        def inchannel(self, args, conn):
+                if args[0] != None:
+                        if type(args[0]) != str:
+                                try:
+                                        ch = channel.chlist.all[args[0]]
+                                except KeyError:
+                                        conn.write(_('Invalid channel number.\n'))
+                                else:
+                                        on = ch.get_online()
+                                        if len(on) > 0:
+                                                conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
+                                        count = len(on)
+                                        conn.write(gettext.ngettext('There is %d player in channel %d.\n', 'There are %d players in channel %d.\n', count) % (count, args[0]))
+                        else:
+                                conn.write("INCHANNEL USER\n")
+                else:
+                        for ch in channel.chlist.all.values():
+                                on = ch.get_online()
+                                if len(on) > 0:
+                                        conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
+        
         def password(self, args, conn):
                 if conn.user.is_guest:
                         conn.write(_("Setting a password is only for registered players.\n"))
@@ -354,7 +382,6 @@ class CommandList(object):
                 except list.ListError as e:
                         conn.write(_('Cannot remove from list: %s\n') % e.reason)
 
-
         def tell(self, args, conn):
                 (u, ch) = self._do_tell(args, conn)
                 if u != None:
@@ -391,9 +418,16 @@ class CommandList(object):
                         if not ch:
                                 conn.write(_('No previous channel.\n'))
                 else:
-                        try:
-                                ch = int(args[0], 10)
-                        except ValueError:
+                        if type(args[0]) != str:
+                                try:
+                                        ch = channel.chlist[args[0]]
+                                except KeyError:
+                                        conn.write(_('Invalid channel number.\n'))
+                                else:
+                                        if not conn.user in ch.online:
+                                                conn.user.write(_('''(You're not in channel %s.)\n''') % ch.id)
+                                                ch = None
+                        else:
                                 try:
                                         u = user.find.by_name_or_prefix(args[0])
                                 except user.UsernameException:
@@ -407,7 +441,8 @@ class CommandList(object):
                                                 u = None
 
                 if ch:
-                        channel.chlist[ch].tell(args[1], conn.user)
+                        count = ch.tell(args[1], conn.user)
+                        conn.write(gettext.ngettext('(told %d player in channel %d)\n', '(told %d players in channel %d)\n', count) % (count, ch.id))
                 elif u:
                         u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                         conn.write(_("(told %s)") % u.name + '\n')
@@ -478,7 +513,7 @@ class CommandParser(object):
                         if cmd:
                                 try:
                                         cmd.run(cmd.parse_params(m.group(2)), conn)
-                                except BadCommandException:
+                                except BadCommandError:
                                         cmd.help(conn)
                 else:
                         #conn.write(_("Command not found.\n"))

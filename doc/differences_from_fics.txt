@@ -18,3 +18,6 @@ vice versa ('\n\r').
 * If an alias contains invalid syntax (such as a bare $), the server will
 print an error message rather than trying to execute the command anyway.
 
+* The "inchannel" command, when invoked on an emtpy channel, prints
+"There are 0 players in channel N", rather than "Channel N is empty".
+
