@@ -114,6 +114,7 @@ class CommandList(object):
                 self._add(Command('remplayer', 'w', self.remplayer, admin.Level.admin))
                 self._add(Command('set', 'wT', self.set, admin.Level.user))
                 self._add(Command('shout', 'S', self.shout, admin.Level.user))
+                self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
                 self._add(Command('tell', 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', '', self.uptime, admin.Level.user))
                 self._add(Command('variables', '', self.variables, admin.Level.user))
@@ -353,6 +354,17 @@ class CommandList(object):
                         if not conn.user.vars['shout']:
                                 conn.write(_("(you are not listening to shouts)\n"))
                         
+        
+        def sublist(self, args, conn):
+                try:
+                        list.lists.get(args[0]).sub(args[1], conn.user)
+                except KeyError:
+                        conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
+                except trie.NeedMore as e:
+                        conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
+                except list.ListError as e:
+                        conn.write(_('Cannot remove from list: %s\n') % e.reason)
+
 
         def tell(self, args, conn):
                 (u, ch) = self._do_tell(args, conn)
@@ -391,8 +403,7 @@ class CommandList(object):
                                 conn.write(_('No previous channel.\n'))
                 else:
                         try:
-                                int(args[0], 10)
-                                ch = args[0]
+                                ch = int(args[0], 10)
                         except ValueError:
                                 try:
                                         u = user.find.by_name_or_prefix(args[0])
@@ -407,7 +418,7 @@ class CommandList(object):
                                                 u = None
 
                 if ch:
-                        channel.chlist[ch].tell(args[1])
+                        channel.chlist[ch].tell(args[1], conn.user)
                 elif u:
                         u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                         conn.write(_("(told %s)") % u.name + '\n')

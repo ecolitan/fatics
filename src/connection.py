@@ -102,7 +102,7 @@ class Connection(basic.LineReceiver):
 
         def prompt(self):
                 self.timeout_check.cancel() 
-                self.user.log_in(self)
+                self.user.log_on(self)
                 assert(self.user.is_online)
                 self.write('fics% ')
                 self.state = 'online'
@@ -118,14 +118,14 @@ class Connection(basic.LineReceiver):
 
         def loseConnection(self, reason):
                 if self.user and self.user.is_online:
-                        self.user.log_out()
+                        self.user.log_off()
                 self.transport.loseConnection()
         
         def connectionLost(self, reason):
                 basic.LineReceiver.connectionLost(self, reason)
                 try:
                         if self.user.is_online:
-                                self.user.log_out()
+                                self.user.log_off()
                         self.session.close()
                 except AttributeError:
                         pass

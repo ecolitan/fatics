@@ -16,7 +16,7 @@ class TestShout(Test):
 		t.write('shout test shout\r\n')
                 self.expect("shouts: test shout", t)
                 self.expect("shouts: test shout", t2)
-                self.expect("(shouted to 2 players)", t)
+                self.expect("(shouted to ", t)
                 self.close(t)
                 self.close(t2)
                 self.close(t3)

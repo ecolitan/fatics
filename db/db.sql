@@ -21,11 +21,11 @@ CREATE TABLE `user` (
 
 DROP TABLE IF EXISTS `channel`;
 CREATE TABLE `channel` (
-  `channel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `channel_id` int(11) NOT NULL,
   `name` varchar(32) NOT NULL,
   `descr` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`channel_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `channel_user`;
 CREATE TABLE `channel_user` (

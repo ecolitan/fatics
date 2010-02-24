@@ -35,7 +35,7 @@ class DB(object):
                 return rows
         
         def user_add(self, name, email, passwd, real_name, admin_level):
-                cursor = self.db.cursor(cursors.DictCursor)
+                cursor = self.db.cursor()
                 cursor.execute("""INSERT INTO user SET user_name=%s,user_email=%s,user_passwd=%s,user_real_name=%s,user_admin_level=%s""", (name,email,passwd,real_name,admin_level))
                 cursor.close()
 
@@ -59,24 +59,34 @@ class DB(object):
                 cursor.execute("""DELETE FROM user WHERE user_id=%s""", (id,))
                 cursor.close()
         
-        def channel_new(self, name):
-                cursor = self.db.cursor()
-                cursor.execute("""INSERT INTO channel SET name=%s,descr=NULL""", (name,))
+        def user_get_channels(self, id):
+                cursor = self.db.cursor() #cursors.DictCursor)
+                cursor.execute("""SELECT channel_id FROM channel_user WHERE user_id=%s""", (id,))
+                rows = cursor.fetchall()
                 cursor.close()
-                #return cursor.lastrowid
-                return self.db.insert_id()
+                return [r[0] for r in rows]
+        
+        def channel_new(self, id, name):
+                cursor = self.db.cursor()
+                cursor.execute("""INSERT INTO channel SET channel_id=%s,name=%s,descr=NULL""", (id, name,))
+                cursor.close()
 
         def channel_add_user(self, ch_id, user_id):
                 cursor = self.db.cursor()
                 cursor.execute("""INSERT INTO channel_user SET user_id=%s,channel_id=%s""", (user_id,ch_id))
                 cursor.close()
         
+        def channel_del_user(self, ch_id, user_id):
+                cursor = self.db.cursor()
+                cursor.execute("""DELETE FROM channel_user WHERE user_id=%s AND channel_id=%s""", (user_id,ch_id))
+                cursor.close()
+        
         def channel_list(self):
                 cursor = self.db.cursor(cursors.DictCursor)
                 cursor.execute("""SELECT channel_id,name,descr FROM channel""")
-                ret = cursor.fetchall()
+                rows = cursor.fetchall()
                 cursor.close()
-                return ret
+                return rows
         
         def channel_get_members(self, id):
                 cursor = self.db.cursor()

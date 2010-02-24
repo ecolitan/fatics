@@ -26,10 +26,18 @@ class ChannelList(UserList):
 
         def add(self, val, user):
                 try:
-                        int(val, 10)
+                        val = int(val, 10)
                 except ValueError:
                         raise ListError(_('The channel must be a number.'))
                 channel.chlist[val].add(user)
+
+        def sub(self, val, user):
+                try:
+                        val = int(val, 10)
+                except ValueError:
+                        raise ListError(_('The channel must be a number.'))
+                channel.chlist[val].remove(user)
+
 ChannelList()
 
 # admin removedcom filter ban abuser muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle, c50muzzle, c51muzzle, fm, im, gm, wgm, blind, teams, computer, td, censor, gnotify, noplay, channel, follow, remote

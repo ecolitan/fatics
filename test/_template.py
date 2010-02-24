@@ -7,4 +7,4 @@ class TestFoo(Test):
                 self.expect("bar", t)
                 self.close(t)
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent
