@@ -24,6 +24,10 @@ class Test(unittest.TestCase):
                         print "got {{%s}}" % ret
                 self.assert_(str in ret)
         
+        def expect_not(self, str, t):
+                ret = t.read_until(str, 0.3)
+                self.assert_(not str in ret)
+        
         def expect_EOF(self, t, msg):
                 def read_some(unused):
                         t.read_very_eager()

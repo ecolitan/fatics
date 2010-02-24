@@ -10,12 +10,12 @@ import session
 import var
 import list
 import channel
+import alias
 from timer import timer
 from online import online
 from reload import reload
 from server import server
 from utf8 import checker
-from alias import alias
 
 class InternalException(Exception):
         pass
@@ -120,17 +120,6 @@ class CommandList(object):
                 self._add(Command('variables', '', self.variables, admin.Level.user))
                 self._add(Command('who', 'T', self.who, admin.Level.user))
                 self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
-
-        system_aliases = {
-                'f': 'finger',
-                't': 'tell',
-                '+': 'addlist',
-                '-': 'sublist',
-                '!': 'shout',
-                '.': 'tell .',
-                ',': 'tell ,',
-                'vars': 'variables'
-        }
 
         def _add(self, cmd):
                 self.admin_cmds[cmd.name] = cmd
@@ -439,6 +428,7 @@ command_list = CommandList()
 
 class CommandParser(object):
         def run(self, s, conn):
+                s = s.lstrip()
                 if not checker.check_user_utf8(s):
                         conn.write(_("Your command contains some unprintable characters.\n"))
 
@@ -449,19 +439,21 @@ class CommandParser(object):
                 # expand aliaes. Now if you want the old behavior of neither
                 # expanding aliases nor updating idle time, use '$$$'.
                 if len(s) >= 2 and s[0:2] == '$$':
-                        s = s[2:]
+                        s = s[2:].lstrip()
                 else:
                         conn.user.session.last_command_time = time.time()
 
-                s = s.lstrip()
                 if len(s) == 0:
                         # ignore blank line
                         return
                 if s[0] == '$':
-                        s = s[1:]
+                        s = s[1:].lstrip()
                 else:
-                        s = alias.expand(s, command_list.system_aliases, conn.user.aliases)
-                s = s.lstrip()
+                        try:
+                                s = alias.alias.expand(s, alias.alias.system, conn.user.aliases, conn.user)
+                        except alias.AliasError:
+                                conn.write(_("Command failed: There was an error expanding aliases.\n"))
+                                return
 
                 if conn.user.admin_level > admin.Level.user:
                         cmds = command_list.admin_cmds
@@ -471,7 +463,7 @@ class CommandParser(object):
                 m = re.match(r'^(\S+)(?:\s+(.*))?$', s)
                 cmd = None
                 if m:
-                        word = m.group(1)
+                        word = m.group(1).lower()
                         try:
                                 cmd = cmds[word]
                         except KeyError:
@@ -489,12 +481,11 @@ class CommandParser(object):
                                 except BadCommandException:
                                         cmd.help(conn)
                 else:
-                        conn.write(_("Command not found.\n"))
+                        #conn.write(_("Command not found.\n"))
+                        assert(False)
 
-        def expand_aliases(self, s):
-                return s
 
 parser = CommandParser()
 
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent

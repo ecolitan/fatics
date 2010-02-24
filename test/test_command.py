@@ -14,6 +14,17 @@ class TestCommand(Test):
                 t.write('$$finger\n')
                 self.expect('Finger of ', t)
 
+                # commands are case-insensitive
+                t.write('DATE\n')
+                self.expect('Server time', t)
+                
+                # ignore extranous whitespace
+                t.write(' \t  date  \t \n')
+                self.expect('Server time', t)
+                
+                t.write('   \t \n')
+                self.expect_not('Bad command', t)
+
                 t.close()
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

@@ -14,3 +14,7 @@ follows the principle of "gods can do anything".
 
 * Newlines are now sent after carriage returns ('\r\n'), rather than
 vice versa ('\n\r').
+
+* If an alias contains invalid syntax (such as a bare $), the server will
+print an error message rather than trying to execute the command anyway.
+

@@ -11,4 +11,21 @@ class TestAlias(Test):
 
                 self.close(t)
 
+class TestSystemAlias(Test):
+	def test_system(self):
+		t = self.connect_as_admin()
+
+		t.write('+ch 1\n')
+		t.write('answer handle foo bar baz\n')
+                self.expect('(1): (answering handle): foo bar baz', t)
+		
+                t.write('answer\n')
+                self.expect('(1): (answering ): ', t)
+                
+                t.write('! blah blah\n')
+                self.expect('shouts: blah blah', t)
+
+                self.close(t)
+
+
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
