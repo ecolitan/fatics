@@ -14,6 +14,3 @@ follows the principle of "gods can do anything".
 
 * Newlines are now sent after carriage returns ('\r\n'), rather than
 vice versa ('\n\r').
-
-* "variables" is an alias for the official command "vars", rather than
-vice versa.

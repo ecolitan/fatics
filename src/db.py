@@ -56,9 +56,34 @@ class DB(object):
         
         def user_delete(self, id):
                 cursor = self.db.cursor()
-                cursor.execute("""DELETE FROM user WHERE user_id='%s'""", (id,))
+                cursor.execute("""DELETE FROM user WHERE user_id=%s""", (id,))
                 cursor.close()
         
+        def channel_new(self, name):
+                cursor = self.db.cursor()
+                cursor.execute("""INSERT INTO channel SET name=%s,descr=NULL""", (name,))
+                cursor.close()
+                #return cursor.lastrowid
+                return self.db.insert_id()
+
+        def channel_add_user(self, ch_id, user_id):
+                cursor = self.db.cursor()
+                cursor.execute("""INSERT INTO channel_user SET user_id=%s,channel_id=%s""", (user_id,ch_id))
+                cursor.close()
+        
+        def channel_list(self):
+                cursor = self.db.cursor(cursors.DictCursor)
+                cursor.execute("""SELECT channel_id,name,descr FROM channel""")
+                ret = cursor.fetchall()
+                cursor.close()
+                return ret
+        
+        def channel_get_members(self, id):
+                cursor = self.db.cursor()
+                cursor.execute("""SELECT user_name FROM channel_user LEFT JOIN user USING (user_id) WHERE channel_id=%s""", (id,))
+                rows = cursor.fetchall()
+                cursor.close()
+                return [r[0] for r in rows]
 
 db = DB()
 

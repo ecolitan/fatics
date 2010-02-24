@@ -9,7 +9,6 @@ class Var(object):
                 self.name = name
                 self.dbname = name
                 self.default = default
-                print 'vars[%s] = foo' % self.name
                 vars[self.name] = self
 
 class BadVarException(Exception):

@@ -19,6 +19,21 @@ CREATE TABLE `user` (
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `channel`;
+CREATE TABLE `channel` (
+  `channel_id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(32) NOT NULL,
+  `descr` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`channel_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `channel_user`;
+CREATE TABLE `channel_user` (
+  `channel_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  UNIQUE KEY (`user_id`,`channel_id`)
+) ENGINE=MyISAM;
+
 --
 -- Dumping data for table `user`
 --
@@ -28,3 +43,6 @@ LOCK TABLES `user` WRITE;
 INSERT INTO `user` VALUES (1,'admin','$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy','Admin Account','lics@openchess.dyndns.org',1000,NULL,NULL,1,0,2);
 UNLOCK TABLES;
 
+LOCK TABLES `channel` WRITE;
+INSERT INTO `channel` VALUES (1,'help','Help for new (and not-so-new) users. :-)');
+UNLOCK TABLES;

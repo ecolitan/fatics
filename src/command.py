@@ -8,6 +8,8 @@ import trie
 import admin
 import session
 import var
+import list
+import channel
 from timer import timer
 from online import online
 from reload import reload
@@ -96,6 +98,7 @@ class CommandList(object):
                 # a command given a substring
                 self.cmds = trie.Trie()
                 self.admin_cmds = trie.Trie()
+                self._add(Command('addlist', 'ww', self.addlist, admin.Level.user))
                 self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
                 self._add(Command('announce', 'S', self.announce, admin.Level.admin))
                 self._add(Command('areload', '', self.areload, admin.Level.god))
@@ -113,7 +116,7 @@ class CommandList(object):
                 self._add(Command('shout', 'S', self.shout, admin.Level.user))
                 self._add(Command('tell', 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', '', self.uptime, admin.Level.user))
-                self._add(Command('vars', '', self.vars, admin.Level.user))
+                self._add(Command('variables', '', self.variables, admin.Level.user))
                 self._add(Command('who', 'T', self.who, admin.Level.user))
                 self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
 
@@ -125,13 +128,23 @@ class CommandList(object):
                 '!': 'shout',
                 '.': 'tell .',
                 ',': 'tell ,',
-                'variables': 'vars'
+                'vars': 'variables'
         }
 
         def _add(self, cmd):
                 self.admin_cmds[cmd.name] = cmd
                 if cmd.admin_level <= admin.Level.user:
                         self.cmds[cmd.name] = cmd
+        
+        def addlist(self, args, conn):
+                try:
+                        list.lists.get(args[0]).add(args[1], conn.user)
+                except KeyError:
+                        conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
+                except trie.NeedMore as e:
+                        conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
+                except list.ListError as e:
+                        conn.write(_('Cannot add to list: %s\n') % e.reason)
 
         def addplayer(self, args, conn):
                 [name, email, real_name] = args
@@ -335,30 +348,36 @@ class CommandList(object):
                                 if u.vars['shout']:
                                         u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
                                         count += 1
-                        conn.write(_("(shouted to %d %s)\n" % (count, gettext.ngettext("player", "players", count))))
+                        #conn.write(_("(shouted to %d %s)\n" % (count, gettext.ngettext("player", "players", count))))
+                        conn.write(gettext.ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
                         if not conn.user.vars['shout']:
                                 conn.write(_("(you are not listening to shouts)\n"))
                         
 
         def tell(self, args, conn):
-                u = self._do_tell(args, conn)
-                conn.session.last_tell_user = u
-        
+                (u, ch) = self._do_tell(args, conn)
+                if u != None:
+                        conn.session.last_tell_user = u
+                else:
+                        conn.session.last_tell_ch = ch
+
         def uptime(self, args, conn):
                 conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
                 conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
                 conn.write(_("Up for: %s\n") % timer.hms(time.time() - server.start_time))
         
-        def vars(self, args, conn):
+        def variables(self, args, conn):
                 conn.write(_("Variable settings of %s:\n\n") % conn.user.name)
                 for var in conn.user.vars.keys():
                         conn.write("%s=%d\n" % (var, int(conn.user.vars[var])))
                 conn.write("\n")
         
         def xtell(self, args, conn):
-                u = self._do_tell(args, conn)
+                self._do_tell(args, conn)
 
         def _do_tell(self, args, conn):
+                u = None
+                ch = None
                 if args[0] == '.':
                         u = conn.session.last_tell_user
                         if not u:
@@ -366,31 +385,34 @@ class CommandList(object):
                         elif not u.is_online:
                                 conn.write(_('%s is no longer online.\n') % u.name)
                                 u = None
-
+                elif args[0] == ',':
+                        ch = conn.session.last_tell_ch
+                        if not ch:
+                                conn.write(_('No previous channel.\n'))
                 else:
                         try:
-                                u = user.find.by_name_or_prefix(args[0])
-                        except user.UsernameException:
-                                conn.write(_('"%s" is not a valid handle.\n') % args[0])
-                                u = None
-                        else:
-                                if not u:
-                                        conn.write(_('There is no player matching the name "%s".\n') % args[0])
-                                elif not u.is_online:
-                                        conn.write(_('%s is not logged in.') % args[0])
+                                int(args[0], 10)
+                                ch = args[0]
+                        except ValueError:
+                                try:
+                                        u = user.find.by_name_or_prefix(args[0])
+                                except user.UsernameException:
+                                        conn.write(_('"%s" is not a valid handle.\n') % args[0])
                                         u = None
+                                else:
+                                        if not u:
+                                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
+                                        elif not u.is_online:
+                                                conn.write(_('%s is not logged in.') % args[0])
+                                                u = None
 
-                if u:
-                        #if not checker.check_user_utf8(args[1]):
-                        #        conn.write(_("Your message contains one or more unprintable characters.\n"))
-                        #        u = None
-                        pass
-
-                if u:
+                if ch:
+                        channel.chlist[ch].tell(args[1])
+                elif u:
                         u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                         conn.write(_("(told %s)") % u.name + '\n')
 
-                return u
+                return (u, ch)
         
         def who(self, args, conn):
                 count = 0

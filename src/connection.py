@@ -67,9 +67,10 @@ class Connection(basic.LineReceiver):
                                         self.session.use_timeseal = True
                                         return
                         (t, dec) = timeseal.decode_zipseal(line)
-                        if t != 0 and dec[0:8] == 'zipseal|':
-                                self.session.use_zipseal = True
-                                return
+                        if t != 0:
+                                if dec[0:8] == 'zipseal|':
+                                        self.session.use_zipseal = True
+                                        return
                         # no timeseal; continue
                 name = line.strip()
                 self.user = login.get_user(name, self)

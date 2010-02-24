@@ -12,6 +12,7 @@ class Session(object):
                 self.login_time = time.time()
 	        self.last_command_time = time.time()
                 self.last_tell_user = None
+                self.last_tell_ch = None
                 self.use_timeseal = False
                 self.use_zipseal = False
                 self.check_for_timeseal = True

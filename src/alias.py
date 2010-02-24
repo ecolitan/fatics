@@ -4,7 +4,7 @@ import re
 class Alias(object):
         """Expand system and user aliases in a given command."""
         def expand(self, s, syslist, userlist):
-                m = re.match(r'''^([@!#$%^&*-+'"\/.,]+)(.*)''', s)
+                m = re.match(r'''^([@!#$%^&*\-+'"\/.,]+)(.*)''', s)
                 if m:
                         word = m.group(1)
                         rest = m.group(2)
@@ -33,4 +33,4 @@ class Alias(object):
 
 alias = Alias()
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent
