@@ -30,7 +30,7 @@ class Online(object):
                         u = None
                 return u
         
-        def find_matching(self, prefix):
+        def find_part(self, prefix):
                 assert(not self.is_online(prefix))
                 prefix = prefix.lower()
                 try:

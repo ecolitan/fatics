@@ -81,4 +81,4 @@ class OneConnectionTest(Test):
         def tearDown(self):
                 self.t.close()
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent

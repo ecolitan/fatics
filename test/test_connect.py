@@ -15,19 +15,24 @@ class LoginTest(Test):
                 self.expect('login:', t, "blank line at login prompt")
 
                 t.write('ad\n')
-                self.expect('name should be at least', t, "login username too short")
+                # login username too short
+                self.expect('name should be at least', t)
                 
+                # login username too long
                 t.write('adminabcdefghijklmno\n')
-                self.expect('names may be at most', t, "login username too long")
+                self.expect('names may be at most', t)
                 
+                # login username contains numbers
                 t.write('admin1\n')
-                self.expect('names can only consist', t, "login username contains numbers")
+                self.expect('names can only consist', t)
 
+                # anonymous guest login start
                 t.write('guest\n')
-                self.expect('Press return to enter', t, "anonymous guest login start")
+                self.expect('Press return to enter', t)
                 
+                # anonymous guest login complete
                 t.write('\n')
-                self.expect(' Starting', t, "anonymous guest login complete")
+                self.expect(' Starting', t)
                 self.close(t)
        
         """User should not actually be logged in until a correct password
@@ -80,10 +85,12 @@ class TimeoutTest(Test):
                 self.expect('TIMEOUT', t, "login timeout at password prompt", timeout=65)
                 t.close()
                 
-        """def testGuestTimeout(self):     
+        """
+        works but disabled for speed
+        def testGuestTimeout(self):     
                 t = self.connect()
                 t.write("guest\n")
                 self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
                 t.close()"""
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent

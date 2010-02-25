@@ -125,7 +125,7 @@ class CommandList(object):
                 self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
                 self._add(Command('tell', 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', '', self.uptime, admin.Level.user))
-                self._add(Command('variables', '', self.variables, admin.Level.user))
+                self._add(Command('variables', 'o', self.variables, admin.Level.user))
                 self._add(Command('who', 'T', self.who, admin.Level.user))
                 self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
 
@@ -133,6 +133,27 @@ class CommandList(object):
                 self.admin_cmds[cmd.name] = cmd
                 if cmd.admin_level <= admin.Level.user:
                         self.cmds[cmd.name] = cmd
+        
+        def _find_user_part(self, name, conn, min_len=0, online_only=False):
+                u = None
+                try:
+                        if len(name) < min_len:
+                                conn.write(_('You need to specify at least %d characters of the name.\n') % min_len)
+                        else:
+                                u = user.find.by_name_or_prefix(name, online_only=online_only)
+                                if online_only:
+                                        if not u:
+                                                conn.write(_('No user named "%s" is logged in.\n') % name)
+                                                u = None
+                                        else:
+                                                assert(u.is_online)
+                                elif not u:
+                                        conn.write(_('There is no player matching the name "%s".\n') % name)
+                except user.UsernameException:
+                        conn.write(_('"%s" is not a valid handle.\n') % name)
+                except user.AmbiguousException as e:
+                        conn.write("""Ambiguous name "%s". Matches: %s\n""" % (name, ' '.join(e.names)))
+                return u
 
         def _find_user_exact(self, name, conn):
                 u = None
@@ -220,45 +241,34 @@ class CommandList(object):
                 conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
 
         def finger(self, args, conn):
-                try:
-                        u = None
-                        if args[0] != None:
-                                if len(args[0]) < 2:
-                                        conn.write(_('You need to specify at least two characters of the name.\n'))
+                u = None
+                if args[0] != None:
+                        u = self._find_user_part(args[0], conn, min_len=2)
+                else:
+                        u = conn.user
+                if u:
+                        conn.write(_('Finger of %s:\n\n') % u.get_display_name())
+                        
+                        if u.is_online:
+                                conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
+
+                                if u.session.use_timeseal:
+                                        conn.write(_('Timeseal: On\n\n'))
+                                elif u.session.use_zipseal:
+                                        conn.write(_('Zipseal: On\n\n'))
                                 else:
-                                        u = user.find.by_name_or_prefix(args[0])
-                                        if not u:
-                                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
-                        else:
-                                u = conn.user
-                        if u:
-                                conn.write(_('Finger of %s:\n\n') % u.get_display_name())
+                                        conn.write(_('Zipseal: Off\n\n'))
                                 
-                                if u.is_online:
-                                        conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
-
-                                        if u.session.use_timeseal:
-                                                conn.write(_('Timeseal: On\n\n'))
-                                        elif u.session.use_zipseal:
-                                                conn.write(_('Zipseal: On\n\n'))
-                                        else:
-                                                conn.write(_('Zipseal: Off\n\n'))
-                                        
+                        else:
+                                if u.last_logout == None:
+                                        conn.write(_('%s has never connected.\n\n') % u.name)
                                 else:
-                                        if u.last_logout == None:
-                                                conn.write(_('%s has never connected.\n\n') % u.name)
-                                        else:
-                                                #conn.write(_('Last disconnected: %s\n\n') % u.last_logout)
-                                                conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
-                                if u.is_guest:
-                                        conn.write(_('%s is NOT a registered player.\n') % u.name)
-                                if u.admin_level > admin.Level.user:
-                                        conn.write(_('Admin Level: %s\n') % admin.level.to_str(u.admin_level))
-                except user.UsernameException:
-                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
-                except user.AmbiguousException as e:
-                        conn.write("""Ambiguous name "%s". Matches: %s\n""" % (args[0], ' '.join(e.names)))
-
+                                        #conn.write(_('Last disconnected: %s\n\n') % u.last_logout)
+                                        conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
+                        if u.is_guest:
+                                conn.write(_('%s is NOT a registered player.\n') % u.name)
+                        if u.admin_level > admin.Level.user:
+                                conn.write(_('Admin Level: %s\n') % admin.level.to_str(u.admin_level))
         
         def follow(self, args, conn):
                 conn.write('FOLLOW\n')
@@ -297,7 +307,7 @@ class CommandList(object):
                         if not admin.checker.check_users(conn.user, u):
 		                conn.write(_("You need a higher adminlevel to nuke %s!\n") % u.name)
                         elif not u.is_online:
-                                conn.write(_("%s is not logged in." ) % u.name)
+                                conn.write(_("%s is not logged in.\n" ) % u.name)
                         else:
                                 u.write(_('\n\n**** You have been kicked out by %s! ****\n\n') % conn.user.name)
                                 u.session.conn.loseConnection('nuked')
@@ -405,10 +415,16 @@ class CommandList(object):
                 conn.write(_("Up for: %s\n") % timer.hms(time.time() - server.start_time))
         
         def variables(self, args, conn):
-                conn.write(_("Variable settings of %s:\n\n") % conn.user.name)
-                for var in conn.user.vars.keys():
-                        conn.write("%s=%s\n" % (var, conn.user.vars[var]))
-                conn.write("\n")
+                if args[0] == None:
+                        u = conn.user
+                else:
+                        u = self._find_user_part(args[0], conn)
+
+                if u:
+                        conn.write(_("Variable settings of %s:\n\n") % u.name)
+                        for var in u.vars.keys():
+                                conn.write("%s=%s\n" % (var, conn.user.vars[var]))
+                        conn.write("\n")
         
         def xtell(self, args, conn):
                 self._do_tell(args, conn)
@@ -438,17 +454,7 @@ class CommandList(object):
                                                 conn.user.write(_('''(You're not in channel %s.)\n''') % ch.id)
                                                 ch = None
                         else:
-                                try:
-                                        u = user.find.by_name_or_prefix(args[0])
-                                except user.UsernameException:
-                                        conn.write(_('"%s" is not a valid handle.\n') % args[0])
-                                        u = None
-                                else:
-                                        if not u:
-                                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
-                                        elif not u.is_online:
-                                                conn.write(_('%s is not logged in.') % args[0])
-                                                u = None
+                                u = self._find_user_part(args[0], conn, online_only=True)
 
                 if ch:
                         count = ch.tell(args[1], conn.user)

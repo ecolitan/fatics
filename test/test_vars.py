@@ -1,5 +1,18 @@
 from test import *
 
+class TestVarsCommand(Test):
+	def test_self_vars(self):
+		t = self.connect_as_admin()
+                t.write('vars\n')
+                self.expect('Variable settings of admin:', t)
+                self.close(t) 
+
+	def test_other_vars(self):
+                t = self.connect_as_guest()
+                t.write('vars admin\n')
+                self.expect('Variable settings of admin:', t)
+                self.close(t)
+
 class TestVars(Test):
 	def test_vars(self):
 		t = self.connect_as_guest()

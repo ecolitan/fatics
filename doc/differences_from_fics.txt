@@ -27,3 +27,8 @@ pgn (games are always mailed as pgn), tolerance, echo
 * The following are now aliases rather than commands: "open", "bell", "flip",
 "simopen", "style", "promote".  
 
+* When attempting to send a tell to a name that does not exist or user who
+is not online, the error message is "No user named HANDLE is logged in",
+rather than "HANDLE is not logged in".  This is is an attempt to clarify
+that the name may or may not be a registered handle.
+
