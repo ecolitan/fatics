@@ -15,7 +15,14 @@ class BadVarException(Exception):
         pass
         
 class StringVar(Var):
-        pass
+        max_len = 1023
+        def parse_val(self, val):
+                assert(len(val) <= self.max_len)
+                return ret
+        
+        def get_message(self, val):
+                return _('''%s set to "%s."''') % (self.name, val)
+
 class IntVar(Var):
         def parse_val(self, val):
                 try:

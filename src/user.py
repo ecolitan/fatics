@@ -74,6 +74,9 @@ class BaseUser(object):
         def remove_channel(self, id):
                 assert(type(id) == type(1) or type(id) == type(1l))
                 self.channels.remove(id)
+                
+        def set_admin_level(self, level):
+                self.admin_level = level
 
 
 # a registered user
@@ -98,8 +101,8 @@ class User(BaseUser):
                 db.user_set_passwd(self.id, self.passwd_hash)
 
         def set_admin_level(self, level):
+                BaseUser.set_admin_level(self, level)
                 db.user_set_admin_level(self.id, level)
-                self.admin_level = level
         
         # check if an unencrypted password is correct
         def check_passwd(self, passwd):

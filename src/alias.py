@@ -150,7 +150,15 @@ class Alias(object):
                 'sit': 'ptell sit! $@',
                 'nosit': 'ptell go! $@',
                 'mateme': 'ptell $1 mates me! $@',
-                'mates': 'ptell $1 mates $o! $@'
+                'mates': 'ptell $1 mates $o! $@',
+
+                # former commands
+                'open': 'set open $@',
+                'bell': 'set bell $@',
+                'flip': 'set flip $@',
+                'simopen': 'set simopen $@',
+                'style': 'set style $@',
+                'promote': 'set promote $@'
         }
 
         """Expand system and user aliases in a given command."""

@@ -115,6 +115,7 @@ class CommandList(object):
                 self._add(Command('follow', 'w', self.follow, admin.Level.user))
                 self._add(Command('help', 'o', self.help, admin.Level.user))
                 self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
+                self._add(Command('nuke', 'w', self.nuke, admin.Level.admin))
                 self._add(Command('password', 'WW', self.password, admin.Level.user))
                 self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
                 self._add(Command('quit', '', self.quit, admin.Level.user))
@@ -132,6 +133,17 @@ class CommandList(object):
                 self.admin_cmds[cmd.name] = cmd
                 if cmd.admin_level <= admin.Level.user:
                         self.cmds[cmd.name] = cmd
+
+        def _find_user_exact(self, name, conn):
+                u = None
+                try:
+                        u = user.find.by_name_exact(name)
+                except user.UsernameException:
+                        conn.write(_('"%s" is not a valid handle\n.') % name)
+                else:
+                        if not u:
+                                conn.write(_('There is no player matching the name "%s".\n') % name)
+                return u
         
         def addlist(self, args, conn):
                 try:
@@ -170,17 +182,12 @@ class CommandList(object):
 
         def asetadmin(self, args, conn):
                 [name, level] = args
-                try:
-                        u = user.find.by_name_exact(name)
-                except user.UsernameException:
-                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
-                else:
-                        if not u:
-                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
+                u = self._find_user_exact(name, conn)
+                if u:
                         # It seems to be possible to set the admin level
                         # of a guest. I'm not sure if it's by accident or
                         # design, but I see no reason to change it.
-                        elif not admin.checker.check_users(conn.user, u):
+                        if not admin.checker.check_users(conn.user, u):
                                 conn.write(_('You can only set the adminlevel for players below your adminlevel.'))
                         elif not admin.checker.check_level(conn.user.admin_level, level):
                                 conn.write(_('''You can't promote someone to or above your adminlevel.\n'''))
@@ -192,14 +199,9 @@ class CommandList(object):
 
         def asetpasswd(self, args, conn):
                 [name, passwd] = args
-                try:
-                        u = user.find.by_name_exact(name)
-                except user.UsernameException:
-                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
-                else:
-                        if not u:
-                                conn.write(_('There is no player matching the name "%s".\n') % args[0])
-                        elif u.is_guest:
+                u = self._find_user_exact(name, conn)
+                if u:
+                        if u.is_guest:
                                 conn.write(_('You cannot set the password of an unregistered player!\n'))
                         elif not admin.checker.check_users(conn.user, u):
                                 conn.write(_('You can only set the password of players below your admin level.')) 
@@ -289,6 +291,18 @@ class CommandList(object):
                                 if len(on) > 0:
                                         conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
         
+        def nuke(self, args, conn):
+                u = self._find_user_exact(args[0], conn)
+                if u:
+                        if not admin.checker.check_users(conn.user, u):
+		                conn.write(_("You need a higher adminlevel to nuke %s!\n") % u.name)
+                        elif not u.is_online:
+                                conn.write(_("%s is not logged in." ) % u.name)
+                        else:
+                                u.write(_('\n\n**** You have been kicked out by %s! ****\n\n') % conn.user.name)
+                                u.session.conn.loseConnection('nuked')
+                                conn.write(_('Nuked: %s\n') % u.name)
+                
         def password(self, args, conn):
                 if conn.user.is_guest:
                         conn.write(_("Setting a password is only for registered players.\n"))
@@ -327,17 +341,12 @@ class CommandList(object):
         
         def remplayer(self, args, conn):
                 name = args[0]
-                try:
-                        u = user.find.by_name_exact(name)
-                except user.UsernameException:
-                        conn.write(_('"%s" is not a valid handle\n.') % args[0])
-                else:
-                        if not u:
-                                conn.write(_("No player by the name %s is registered.\n") % name)
-                        elif not admin.checker.check_users(conn.user, u):
+                u = self._find_user_exact(name, conn)
+                if u:
+                        if not admin.checker.check_users(conn.user, u):
                                 conn.write(_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
                         elif u.is_online:
-                                conn.write(_("A player by that name is logged in.\n"))
+                                conn.write(_("%s is logged in.\n") % u.name)
                         else:
                                 u.remove()
                                 conn.write(_("Player %s removed.\n") % name)
@@ -413,7 +422,7 @@ class CommandList(object):
                 if args[0] == '.':
                         u = conn.session.last_tell_user
                         if not u:
-                                conn.write(_("I don't know whom to tell that to.\n"))
+                                conn.write(_("No previous tell.\n"))
                         elif not u.is_online:
                                 conn.write(_('%s is no longer online.\n') % u.name)
                                 u = None
@@ -469,7 +478,8 @@ class CommandParser(object):
         def run(self, s, conn):
                 s = s.lstrip()
                 if not checker.check_user_utf8(s):
-                        conn.write(_("Your command contains some unprintable characters.\n"))
+                        conn.write(_("Command ignored: invalid characters.\n"))
+                        return
 
                 update_idle = True
                 # previously the prefix '$' was used to not expand aliases

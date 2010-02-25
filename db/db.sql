@@ -4,12 +4,12 @@
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
-  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(8) NOT NULL AUTO_INCREMENT,
   `user_name` varchar(32) NOT NULL,
   `user_passwd` char(64) DEFAULT NULL,
   `user_real_name` varchar(64) NOT NULL,
   `user_email` varchar(32) NOT NULL,
-  `user_admin_level` smallint(11) unsigned NOT NULL,
+  `user_admin_level` smallint(4) unsigned NOT NULL,
   `user_fics_name` varchar(18) DEFAULT NULL,
   `user_last_logout` datetime DEFAULT NULL,
 
@@ -63,14 +63,37 @@ CREATE TABLE `user` (
 
   -- other flags
   `admin_light` BOOLEAN DEFAULT NULL COMMENT 'whether to show the (*) tag',
+  `simopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for simul',
+  `lang` VARCHAR(3) NOT NULL DEFAULT 'en' COMMENT 'user language',
+  `prompt` varchar(16) NOT NULL DEFAULT 'fics% ' COMMENT 'command prompt',
 
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `formula`;
+CREATE TABLE formula (
+  `formula_id` int(8) NOT NULL,
+  `user_id` int(8) NOT NULL,
+  `num` tinyint(1) NOT NULL COMMENT 'the variable number; formula=0, f1=1',
+  `f` VARCHAR(1024) NOT NULL COMMENT 'formula text',
+  UNIQUE KEY (`user_id`, `num`),
+  PRIMARY KEY (`formula_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `note`;
+CREATE TABLE note (
+  `note_id` int(8) NOT NULL,
+  `user_id` int(8) NOT NULL,
+  `num` tinyint(1) NOT NULL COMMENT 'the note number',
+  `txt` VARCHAR(1024) NOT NULL COMMENT 'note text',
+  UNIQUE KEY (`user_id`, `num`),
+  PRIMARY KEY (`note_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `channel`;
 CREATE TABLE `channel` (
-  `channel_id` int(11) NOT NULL,
+  `channel_id` int(8) NOT NULL,
   `name` varchar(32) DEFAULT NULL,
   `descr` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`channel_id`)
@@ -78,8 +101,8 @@ CREATE TABLE `channel` (
 
 DROP TABLE IF EXISTS `channel_user`;
 CREATE TABLE `channel_user` (
-  `channel_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `channel_id` int(8) NOT NULL,
+  `user_id` int(8) NOT NULL,
   UNIQUE KEY (`user_id`,`channel_id`)
 ) ENGINE=MyISAM;
 

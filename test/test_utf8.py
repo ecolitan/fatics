@@ -6,10 +6,10 @@ class TestUtf8(Test):
 	def test_unprintable(self):
 		t = self.connect_as_admin()
 		t.write('t admin \x07test\n')
-                self.expect("unprintable characters", t)
+                self.expect("invalid characters", t)
 		
                 t.write('fi \xffadmin\n')
-                self.expect("unprintable characters", t)
+                self.expect("invalid characters", t)
                 
                 self.close(t)
 		

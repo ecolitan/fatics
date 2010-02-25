@@ -19,10 +19,39 @@ class CommandTest(Test):
                 self.expect('**ANNOUNCEMENT** from admin: foo bar baz', t2)
                 self.close(t)
                 self.close(t2)
+        
+        def test_nuke(self):
+                t = self.connect_as_admin()
+
+                t.write('nuke 123\n')
+                self.expect('not a valid handle', t)
+
+                t.write('nuke guesttest\n')
+                self.expect('no player matching', t)
+
+                t2 = self.connect_as_user('GuestTest', '')
+                t.write('nuke guesttest\n')
+                self.expect('You have been kicked out', t2)
+                self.expect('Nuked: GuestTest', t)
+                t2.close()
+
+                t2 = self.connect_as_user('GuestTest', '')
+                t.write('asetadmin guesttest 100\n')
+                t2.write('nuke admin\n')
+                self.expect('need a higher adminlevel', t2)
+                self.close(t2)
+
+                self.close(t)
 
         def test_asetpass(self):
                 self.adduser('testplayer', 'passwd')
                 t = self.connect_as_admin()
+
+                t2 = self.connect_as_user('GuestTest', '')
+                t.write('asetpass GuestTest pass\n')
+                self.expect('cannot set the password', t)
+                self.close(t2)
+
                 t2 = self.connect_as_user('testplayer', 'passwd')
                 t.write('asetpass testplayer test\n')
                 self.expect("Password of testplayer changed", t)
@@ -35,6 +64,7 @@ class CommandTest(Test):
                 self.expect('fics%', t2)
                 self.close(t2)
                 self.deluser('testplayer')
+                
         
         def test_asetadmin(self):
                 self.adduser('testplayer', 'passwd')
