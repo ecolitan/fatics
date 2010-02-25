@@ -1,3 +1,9 @@
+# originally by David Hain <dhain at spideroak com>
+# licensed under GPLv3
+# modified by Wil Mahan <wmahan at gmail.com>: add a simpler interface
+# that returns a list of child nodes when there is no matching node,
+# and a method to get all children of a given key
+
 class NeedMore(Exception):
     def __init__(self, matches=None):
         self.matches = matches
@@ -13,13 +19,13 @@ class Node(object):
         self.nodes = nodes
         self.value = value
 
-    @property
+    """@property
     def keypath(self):
         n = self
         keypath = [n.key for n in iter(lambda: n.parent, None) if n.key]
         keypath.reverse()
         keypath.append(self.key)
-        return keypath
+        return keypath"""
 
     def walk(self):
         nodes = [self]
@@ -164,7 +170,7 @@ class Trie(object):
 	self._all_children_help(n, ret)
 	return ret
 
-    def __iter__(self):
+    '''def __iter__(self):
         """Yield the keys in order."""
         for node in self.root.walk():
             yield node.keypath
@@ -172,7 +178,7 @@ class Trie(object):
     def iteritems(self):
         """Yield (key, value) pairs in order."""
         for node in self.root.walk():
-            yield node.keypath, node.value
+            yield node.keypath, node.value'''
 
     def itervalues(self):
         """Yield values in order."""

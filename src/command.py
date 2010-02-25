@@ -113,7 +113,7 @@ class CommandList(object):
                 self._add(Command('date', '', self.date, admin.Level.user))
                 self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
                 self._add(Command('follow', 'w', self.follow, admin.Level.user))
-                self._add(Command('help', 'w', self.help, admin.Level.user))
+                self._add(Command('help', 'o', self.help, admin.Level.user))
                 self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
                 self._add(Command('password', 'WW', self.password, admin.Level.user))
                 self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
@@ -262,7 +262,11 @@ class CommandList(object):
                 conn.write('FOLLOW\n')
 
         def help(self, args, conn):
-                conn.write('help\n')
+                if conn.user.admin_level > admin.level.user:
+                        cmds = [c.name for c in command_list.admin_cmds.itervalues()]
+                else:
+                        cmds = [c.name for c in command_list.cmds.itervalues()]
+                conn.write('This server is under development.  Recognized commands: %s\n' % ' '.join(cmds))
         
         def inchannel(self, args, conn):
                 if args[0] != None:

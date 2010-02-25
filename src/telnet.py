@@ -1,5 +1,12 @@
 # Copyright (C) 2010 Wil Mahan <wmahan at gmail.com>
 
+# Very loosely based on conch.telnet from twisted.  To be safe, here
+# is the copyright header for that code:
+#       Copyright (c) 2001-2007 Twisted Matrix Laboratories.
+#       See LICENSE for details.
+#       @author: Jp Calderone
+#
+
 """ Telnet protocol implementation. """
 
 """The original FICS server supports a very limited subset of the telnet
