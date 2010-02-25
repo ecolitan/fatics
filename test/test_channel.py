@@ -37,6 +37,9 @@ class TestChannel(Test):
                 t.write(', a b c d\n')
                 self.expect("(100): a b c d", t)
                 
+                t.write('+ch foo\n')
+                self.expect("must be a number", t)
+                
                 t.write('+ch -1\n')
                 self.expect("Invalid channel", t)
                 

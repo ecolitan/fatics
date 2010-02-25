@@ -101,17 +101,17 @@ void getfromfics(int fd, char *buff, int *rd)
 {
 	int n,m;
 	while(*rd>0) {
-		if(!strncmp(buff,"[G]",*rd<3?*rd:3)) {
-			if(*rd<3) {
+		if(!memcmp(buff,"[G]",*rd<4?*rd:4)) {
+			if(*rd<4) {
 				break;
 			}
 			else {
 				char reply[20]="\x2""9";
 				n = crypt(reply,2);
 				mywrite(fd, reply, n);
-				for(n = 3; n < *rd; n++)
-					buff[n-3] = buff[n];
-				*rd -= 3;
+				for(n = 4; n < *rd; n++)
+					buff[n-4] = buff[n];
+				*rd -= 4;
 				continue;
 			}
 		}

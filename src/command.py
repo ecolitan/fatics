@@ -352,22 +352,19 @@ class CommandList(object):
                                 conn.write(_("Player %s removed.\n") % name)
 
         def set(self, args, conn):
+                # val can be None if the user gave no value
                 [name, val] = args
                 try:
                         v = var.vars.get(name)
-                        val = v.parse_val(val)
+                        msg = v.set(conn.user, val)
+                        conn.write("%s\n" % msg)
                 except trie.NeedMore as e:
                         assert(len(e.matches) >= 2)
                         conn.write(_('Ambiguous variable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))
                 except KeyError:
                         conn.write(_('No such variable "%s".\n') % name)
-                except var.BadVarException:
-                        conn.write(_('Bad value given for variable "%s".\n') % name)
-                else:
-                        conn.user.set_var(v, val)
-                        msg = v.get_message(val)
-                        if msg:
-                                conn.write("%s\n" % msg)
+                except var.BadVarError:
+                        conn.write(_('Bad value given for variable "%s".\n') % v.name)
 
         def shout(self, args, conn):
                 if conn.user.is_guest:
@@ -410,7 +407,7 @@ class CommandList(object):
         def variables(self, args, conn):
                 conn.write(_("Variable settings of %s:\n\n") % conn.user.name)
                 for var in conn.user.vars.keys():
-                        conn.write("%s=%d\n" % (var, int(conn.user.vars[var])))
+                        conn.write("%s=%s\n" % (var, conn.user.vars[var]))
                 conn.write("\n")
         
         def xtell(self, args, conn):

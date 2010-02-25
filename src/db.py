@@ -1,7 +1,5 @@
 from MySQLdb import *
 
-import var
-
 class DB(object):
 	def __init__(self):
 		self.db = connect(host="localhost", db="chess", user="chess", passwd="Luu9yae7")
@@ -13,7 +11,7 @@ class DB(object):
                 cursor.close()
                 return row
         
-        def user_load_vars(self, user_id):
+        def user_get_vars(self, user_id):
                 cursor = self.db.cursor(cursors.DictCursor)
                 cursor.execute("""SELECT tell,shout FROM user WHERE user_id=%s""", (user_id,))
                 row = cursor.fetchone()
@@ -21,10 +19,19 @@ class DB(object):
                 return row
         
         def user_set_var(self, user_id, name, val):
-                assert(var.vars[name].name == name)
                 cursor = self.db.cursor()
-                up = """UPDATE user SET %s""" % (var.vars[name].dbname)
+                up = """UPDATE user SET %s""" % name
                 cursor.execute(up + """=%s WHERE user_id=%s""", (val,user_id))
+                cursor.close()
+        
+        def user_set_formula(self, user_id, name, val):
+                # ON DUPLICATE KEY UPDATE is probably not very portable to
+                # other databases, but this shouldn't be hard to rewrite
+                dbkeys = {'formula': 0, 'f1': 1, 'f2': 2, 'f3': 3, 'f4': 4, 'f5': 5, 'f6': 6, 'f7': 7, 'f8': 8, 'f9': 9}
+                assert(name in dbkeys.keys())
+                num = dbkeys[name]
+                cursor = self.db.cursor()
+                cursor.execute("""INSERT INTO formula SET user_id=%s,num=%d,f=%s ON DUPLICATE KEY UPDATE""" % (user_id,num,val))
                 cursor.close()
 
         def user_get_matching(self, prefix):
