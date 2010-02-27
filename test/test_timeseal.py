@@ -16,7 +16,7 @@ class TestTimeseal(Test):
                         # python 2.7
                         #self.skip()
                         return
-                process = subprocess.Popen([seal_prog, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+                process = subprocess.Popen([seal_prog, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
                 process.stdin.write('admin\n')
                 process.stdin.write('%s\n' % admin_passwd)
                 process.stdin.write('finger\n')
@@ -33,7 +33,7 @@ class TestTimesealWindows(Test):
                 if not os.path.exists(seal_prog_win):
                         #self.skip()
                         return
-                process = subprocess.Popen(['/usr/bin/wine', seal_prog_win, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+                process = subprocess.Popen(['/usr/bin/wine', seal_prog_win, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 
                 process.stdin.write('admin\r\n')
                 process.stdin.write('%s\r\n' % admin_passwd)
