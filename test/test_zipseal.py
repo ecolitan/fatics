@@ -6,7 +6,7 @@ import time
 
 from test import *
         
-seal_prog = 'timeseal/zipseal'
+seal_prog = '../timeseal/zipseal'
 
 class TestTimeseal(Test):
 	def test_timeseal(self):

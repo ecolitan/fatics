@@ -116,6 +116,7 @@ void getfromfics(int fd, char *buff, int *rd)
 			}
 		}
 		for(n=0;n<*rd && buff[n]!='\n';n++);
+		//for(n=0;n<*rd && buff[n]!='\r';n++);
 		if(n<*rd) n++;
 		mywrite(1,buff,n);
 		for(m=n;m<*rd;m++) {
@@ -169,7 +170,8 @@ int main(int argc, char **argv)
 		if(FD_ISSET(fd,&fds)) {
 			static int rd=0;
 			static char buff[BSIZE];
-			rd+=n=read(fd,buff+rd,BSIZE-rd);
+			rd+=(n=read(fd,buff+rd,BSIZE-rd));
+			//rd+=n=read(fd,buff,BSIZE-rd);
 			if(!n) {
 				fprintf(stderr,"Connection closed by ICS\n");
 				exit(0);

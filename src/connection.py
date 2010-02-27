@@ -47,8 +47,10 @@ class Connection(basic.LineReceiver):
                 #print '((%s,%s))\n' % (self.state, repr(line))
                 if self.session.use_timeseal:
                         (t, line) = timeseal.decode_timeseal(line)
+                        assert(t != 0)
                 elif self.session.use_zipseal:
-                        (t, line) = zipseal.decode_timeseal(line)
+                        (t, line) = timeseal.decode_zipseal(line)
+                        assert(t != 0)
                 if self.state:
                         getattr(self, "lineReceived_" + self.state)(line)
 
