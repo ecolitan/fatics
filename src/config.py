@@ -6,6 +6,8 @@ class Config:
         db_user = "chess"
         db_passwd = "Luu9yae7"
 
+        min_login_name_len = 3
+
 
 config = Config()
 

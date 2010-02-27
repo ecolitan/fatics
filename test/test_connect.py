@@ -16,15 +16,15 @@ class LoginTest(Test):
 
                 t.write('ad\n')
                 # login username too short
-                self.expect('name should be at least', t)
+                self.expect(' should be at least ', t)
                 
                 # login username too long
                 t.write('adminabcdefghijklmno\n')
-                self.expect('names may be at most', t)
+                self.expect(' should be at most ', t)
                 
                 # login username contains numbers
                 t.write('admin1\n')
-                self.expect('names can only consist', t)
+                self.expect(' should only consist of ', t)
 
                 # anonymous guest login start
                 t.write('guest\n')

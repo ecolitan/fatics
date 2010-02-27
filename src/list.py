@@ -13,18 +13,30 @@ class ListError(Exception):
                 self.reason = reason
 
 class TitleList(MyList):
-        def add(self, val, user):
+        def __init__(self, name):
+                MyList.__init__(self, name)
+                self.members = []
+
+        def add(self, args, user):
                 if user.admin_level < admin.level.admin:
-                        pass
+                        raise ListError(_("You don't have permission to do that."))
+                self.members.append(args[1])
                 
+        def show(self, args, user):
+                user.write('%s: ' % self.name.upper())
+
         def sub(self, val, user):
                 if user.admin_level < admin.level.admin:
-                        pass
+                        raise ListError(_("You don't have permission to do that."))
+                try:
+                        self.members.remove(user.name)
+                except KeyError:
+                        raise ListError(_("%s is not in the %s list.") % (user.name, self.name.upper()))
 
 class ChannelList(MyList):
-        def add(self, val, user):
+        def add(self, args, user):
                 try:
-                        val = int(val, 10)
+                        val = int(args[1], 10)
                         channel.chlist[val].add(user)
                 except ValueError:
                         raise ListError(_('The channel must be a number.'))
@@ -32,9 +44,9 @@ class ChannelList(MyList):
                         raise ListError(_('Invalid channel number.'))
 
 
-        def sub(self, val, user):
+        def sub(self, args, user):
                 try:
-                        val = int(val, 10)
+                        val = int(args[1], 10)
                         channel.chlist[val].remove(user)
                 except ValueError:
                         raise ListError(_('The channel must be a number.'))

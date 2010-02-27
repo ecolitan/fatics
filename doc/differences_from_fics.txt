@@ -1,3 +1,7 @@
+* The error messages given when logging in (for names that are
+too short, too long, or contain disallowed characters) have been
+reworded for consiceness and to be more consistent with one another.
+
 * It may take slightly longer to log in.  This is a security feature;
 the password hashing algorithm is harder to crack because it requires
 more computation.
@@ -8,9 +12,6 @@ rather than "I don't know who to tell that to".
 
 * The "(shouted to N players)" given by the shout command includes the
 user doing the shout (assuming that user has shouts enabled).
-
-* Gods can now set their own adminlevel. Not sure if it's useful, but it
-follows the principle of "gods can do anything".
 
 * Newlines are now sent after carriage returns ('\r\n'), rather than
 vice versa ('\n\r').
@@ -31,4 +32,14 @@ pgn (games are always mailed as pgn), tolerance, echo
 is not online, the error message is "No user named HANDLE is logged in",
 rather than "HANDLE is not logged in".  This is is an attempt to clarify
 that the name may or may not be a registered handle.
+
+===
+
+Admin differences:
+* The following commands now require an exact login and do not accept
+abbreviations of names:  "asetadminlevel", "asetpasswd", "nuke".
+
+for removal:
+* Gods can now set their own adminlevel. Not sure if it's useful, but it
+follows the principle of "gods can do anything".
 

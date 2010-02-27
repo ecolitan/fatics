@@ -122,6 +122,7 @@ class CommandList(object):
                 self._add(Command('remplayer', 'w', self.remplayer, admin.Level.admin))
                 self._add(Command('set', 'wT', self.set, admin.Level.user))
                 self._add(Command('shout', 'S', self.shout, admin.Level.user))
+                self._add(Command('showlist', 'o', self.showlist, admin.Level.user))
                 self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
                 self._add(Command('tell', 'nS', self.tell, admin.Level.user))
                 self._add(Command('uptime', '', self.uptime, admin.Level.user))
@@ -134,47 +135,15 @@ class CommandList(object):
                 if cmd.admin_level <= admin.Level.user:
                         self.cmds[cmd.name] = cmd
         
-        def _find_user_part(self, name, conn, min_len=0, online_only=False):
-                u = None
-                try:
-                        if len(name) < min_len:
-                                conn.write(_('You need to specify at least %d characters of the name.\n') % min_len)
-                        else:
-                                u = user.find.by_name_or_prefix(name, online_only=online_only)
-                                if online_only:
-                                        if not u:
-                                                conn.write(_('No user named "%s" is logged in.\n') % name)
-                                                u = None
-                                        else:
-                                                assert(u.is_online)
-                                elif not u:
-                                        conn.write(_('There is no player matching the name "%s".\n') % name)
-                except user.UsernameException:
-                        conn.write(_('"%s" is not a valid handle.\n') % name)
-                except user.AmbiguousException as e:
-                        conn.write("""Ambiguous name "%s". Matches: %s\n""" % (name, ' '.join(e.names)))
-                return u
-
-        def _find_user_exact(self, name, conn):
-                u = None
-                try:
-                        u = user.find.by_name_exact(name)
-                except user.UsernameException:
-                        conn.write(_('"%s" is not a valid handle\n.') % name)
-                else:
-                        if not u:
-                                conn.write(_('There is no player matching the name "%s".\n') % name)
-                return u
-        
         def addlist(self, args, conn):
                 try:
-                        list.lists.get(args[0]).add(args[1], conn.user)
+                        list.lists.get(args[0]).add(args, conn.user)
                 except KeyError:
                         conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
                 except trie.NeedMore as e:
                         conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
                 except list.ListError as e:
-                        conn.write(_('Cannot add to list: %s\n') % e.reason)
+                        conn.write('%s\n' % e.reason)
 
         def addplayer(self, args, conn):
                 [name, email, real_name] = args
@@ -203,9 +172,10 @@ class CommandList(object):
 
         def asetadmin(self, args, conn):
                 [name, level] = args
-                u = self._find_user_exact(name, conn)
+                u = user.find.by_name_exact_for_user(name, conn)
                 if u:
-                        # It's possible to set the admin level of a guest.
+                        # Note: it's possible to set the admin level
+                        # of a guest.
                         if not admin.checker.check_user_operation(conn.user, u):
                                 conn.write(_('You can only set the adminlevel for players below your adminlevel.'))
                         elif not admin.checker.check_level(conn.user.admin_level, level):
@@ -218,7 +188,7 @@ class CommandList(object):
 
         def asetpasswd(self, args, conn):
                 [name, passwd] = args
-                u = self._find_user_exact(name, conn)
+                u = user.find.by_name_exact_for_user(name, conn)
                 if u:
                         if u.is_guest:
                                 conn.write(_('You cannot set the password of an unregistered player!\n'))
@@ -241,7 +211,7 @@ class CommandList(object):
         def finger(self, args, conn):
                 u = None
                 if args[0] != None:
-                        u = self._find_user_part(args[0], conn, min_len=2)
+                        u = user.find.by_name_or_prefix_for_user(args[0], conn, min_len=2)
                 else:
                         u = conn.user
                 if u:
@@ -300,7 +270,7 @@ class CommandList(object):
                                         conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
         
         def nuke(self, args, conn):
-                u = self._find_user_exact(args[0], conn)
+                u = user.find.by_name_exact_for_user(args[0], conn)
                 if u:
                         if not admin.checker.check_user_operation(conn.user, u):
 		                conn.write(_("You need a higher adminlevel to nuke %s!\n") % u.name)
@@ -349,7 +319,7 @@ class CommandList(object):
         
         def remplayer(self, args, conn):
                 name = args[0]
-                u = self._find_user_exact(name, conn)
+                u = user.find.by_name_exact_for_user(name, conn)
                 if u:
                         if not admin.checker.check_user_operation(conn.user, u):
                                 conn.write(_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
@@ -389,16 +359,30 @@ class CommandList(object):
                         if not conn.user.vars['shout']:
                                 conn.write(_("(you are not listening to shouts)\n"))
                         
-        
-        def sublist(self, args, conn):
+        def showlist(self, args, conn):
+                if args[0] == None:
+                        for cur in list.lists.itervalues():
+                                conn.write('%s\n', cur.name)
+                        return
+
                 try:
-                        list.lists.get(args[0]).sub(args[1], conn.user)
+                        list.lists.get(args[0]).showlist(args, conn.user)
                 except KeyError:
                         conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
                 except trie.NeedMore as e:
                         conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
                 except list.ListError as e:
-                        conn.write(_('Cannot remove from list: %s\n') % e.reason)
+                        conn.write('%s\n' % e.reason)
+        
+        def sublist(self, args, conn):
+                try:
+                        list.lists.get(args[0]).sub(args, conn.user)
+                except KeyError:
+                        conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
+                except trie.NeedMore as e:
+                        conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
+                except list.ListError as e:
+                        conn.write('%s\n' % e.reason)
 
         def tell(self, args, conn):
                 (u, ch) = self._do_tell(args, conn)
@@ -416,7 +400,7 @@ class CommandList(object):
                 if args[0] == None:
                         u = conn.user
                 else:
-                        u = self._find_user_part(args[0], conn)
+                        u = user.find.by_name_or_prefix_for_user(args[0], conn)
 
                 if u:
                         conn.write(_("Variable settings of %s:\n\n") % u.name)
@@ -452,7 +436,7 @@ class CommandList(object):
                                                 conn.user.write(_('''(You're not in channel %s.)\n''') % ch.id)
                                                 ch = None
                         else:
-                                u = self._find_user_part(args[0], conn, online_only=True)
+                                u = user.find.by_name_or_prefix_for_user(args[0], conn, online_only=True)
 
                 if ch:
                         count = ch.tell(args[1], conn.user)
