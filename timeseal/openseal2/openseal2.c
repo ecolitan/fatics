@@ -1,8 +1,10 @@
 /* 
- * zipseal -- An open-source timeseal
+ * OPENSEAL --- An open-source replacement for timeseal
  *
  * Usage:
- *   zipseal ICS-host [ICS-port]
+ *   openseal ICS-host [ICS-port]
+ *   e.g.
+ *   openseal freechess.org
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License as
@@ -10,9 +12,9 @@
  * the License, or (at your option) any later version.
  *
  *     Marcello Mamino (vacaboja on FICS)
- *
- * Modified by Wil Mahan <wmahan at gmail.com>: support international
- * characters; remove obfuscation; add compression.
+ * 
+ * Modifed for timeseali 2 and ported to win32
+ * by Wil Mahan <wmahan at gmail.com>
  */
 
 #include <stdio.h>
@@ -25,11 +27,11 @@
 #include <string.h>
 #include <sys/select.h>
 #include <netinet/in.h>
-#include <unistd.h>
 #define BSIZE 1024
 
 char *key="Timestamp (FICS) v1.0 - programmed by Henrik Gram.";
-char hello[]="zipseal|zipseal|Running on an operating system|";
+//char hello[100]="TIMESTAMP|javaboard|Blackdown Java-Linux Team 1.3.1 Linux|";
+char hello[100]="TIMESEAL2|openseal|Running on an operating system|";
 
 int crypt(char *s,int l)
 {
@@ -41,6 +43,9 @@ int crypt(char *s,int l)
 	s[l++]='\x19';
 	for(;l%12;l++)
 		s[l]='1';
+#define SC(A,B) s[B]^=s[A]^=s[B],s[A]^=s[B]
+	for(n=0;n<l;n+=12)
+		SC(n,n+11), SC(n+2,n+9), SC(n+4,n+7);
 	for(n=0;n<l;n++)
 		s[n]=((s[n]|0x80)^key[n%50])-32;
 	s[l++]='\x80';
@@ -99,28 +104,34 @@ void sendtofics(int fd, char *buff, int *rd)
 
 void getfromfics(int fd, char *buff, int *rd)
 {
-	int n,m;
+	static int c=0;
+	int n,m,got_g = 0;
 	while(*rd>0) {
-		if(!memcmp(buff,"[G]",*rd<4?*rd:4)) {
-			if(*rd<4) {
-				break;
-			}
-			else {
+		for(n=0;n<*rd && buff[n]!='\r';n++) {
+			if (buff[n] == '\0' && n >= 3
+				&& !strncmp(buff + n - 3, "[G]",3))
+			{
 				char reply[20]="\x2""9";
-				n = crypt(reply,2);
-				mywrite(fd, reply, n);
-				for(n = 4; n < *rd; n++)
+
+				for(n++; n < *rd; n++)
 					buff[n-4] = buff[n];
 				*rd -= 4;
-				continue;
+				
+				n = crypt(reply,2);
+				mywrite(fd, reply, n);
+
+				got_g = 1;
+				break;
 			}
+                }
+		if (got_g) {
+			got_g = 0;
+			continue;
 		}
-		for(n=0;n<*rd && buff[n]!='\n';n++);
 		if(n<*rd) n++;
 		mywrite(1,buff,n);
-		for(m=n;m<*rd;m++) {
+		for(m=n;m<*rd;m++)
 			buff[m-n]=buff[m];
-		}
 		*rd-=n;
 	}
 }
@@ -186,4 +197,3 @@ int main(int argc, char **argv)
 		}
 	}
 }
-

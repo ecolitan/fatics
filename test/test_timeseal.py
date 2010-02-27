@@ -6,7 +6,8 @@ import time
 
 from test import *
         
-seal_prog = 'timeseal/openseal'
+seal_prog = '../timeseal/openseal'
+seal_prog_win = '/home/wmahan/chess/timeseal.exe'
 
 class TestTimeseal(Test):
 	def test_timeseal(self):
@@ -24,7 +25,25 @@ class TestTimeseal(Test):
                 [out, err] = process.communicate()
                 self.assert_('fics%' in out)
                 self.assert_('Finger of admin' in out)
-                self.assert_('Timeseal: On' in out)
+                self.assert_('Timeseal: On\r\n' in out)
+                self.assert_('Thank you for using' in out)
+
+class TestTimesealWindows(Test):
+	def test_timeseal_windows(self):
+                if not os.path.exists(seal_prog_win):
+                        #self.skip()
+                        return
+                process = subprocess.Popen(['/usr/bin/wine', seal_prog_win, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+
+                process.stdin.write('admin\r\n')
+                process.stdin.write('%s\r\n' % admin_passwd)
+                process.stdin.write('finger\n')
+                process.stdin.write('quit\n')
+                time.sleep(2)
+                [out, err] = process.communicate()
+                self.assert_('fics%' in out)
+                self.assert_('Finger of admin' in out)
+                self.assert_('Timeseal: On\r\n' in out)
                 self.assert_('Thank you for using' in out)
 
 # vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python

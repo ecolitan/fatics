@@ -205,10 +205,8 @@ class CommandList(object):
                 [name, level] = args
                 u = self._find_user_exact(name, conn)
                 if u:
-                        # It seems to be possible to set the admin level
-                        # of a guest. I'm not sure if it's by accident or
-                        # design, but I see no reason to change it.
-                        if not admin.checker.check_users(conn.user, u):
+                        # It's possible to set the admin level of a guest.
+                        if not admin.checker.check_user_operation(conn.user, u):
                                 conn.write(_('You can only set the adminlevel for players below your adminlevel.'))
                         elif not admin.checker.check_level(conn.user.admin_level, level):
                                 conn.write(_('''You can't promote someone to or above your adminlevel.\n'''))
@@ -224,7 +222,7 @@ class CommandList(object):
                 if u:
                         if u.is_guest:
                                 conn.write(_('You cannot set the password of an unregistered player!\n'))
-                        elif not admin.checker.check_users(conn.user, u):
+                        elif not admin.checker.check_user_operation(conn.user, u):
                                 conn.write(_('You can only set the password of players below your admin level.')) 
                         elif not user.is_legal_passwd(passwd):
                                 conn.write(_('"%s" is not a valid password.\n') % passwd)
@@ -304,7 +302,7 @@ class CommandList(object):
         def nuke(self, args, conn):
                 u = self._find_user_exact(args[0], conn)
                 if u:
-                        if not admin.checker.check_users(conn.user, u):
+                        if not admin.checker.check_user_operation(conn.user, u):
 		                conn.write(_("You need a higher adminlevel to nuke %s!\n") % u.name)
                         elif not u.is_online:
                                 conn.write(_("%s is not logged in.\n" ) % u.name)
@@ -353,7 +351,7 @@ class CommandList(object):
                 name = args[0]
                 u = self._find_user_exact(name, conn)
                 if u:
-                        if not admin.checker.check_users(conn.user, u):
+                        if not admin.checker.check_user_operation(conn.user, u):
                                 conn.write(_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
                         elif u.is_online:
                                 conn.write(_("%s is logged in.\n") % u.name)

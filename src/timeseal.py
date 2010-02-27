@@ -1,7 +1,7 @@
 import re
 import subprocess
 
-class TimesealException(Exception):
+class TimesealError(Exception):
         pass
 
 class Timeseal(object):
@@ -14,7 +14,7 @@ class Timeseal(object):
                 dec = self.timeseal.stdout.readline()
                 m = re.match('^(\d+): (.*)\n$', dec)
                 if not m:
-                        raise TimesealException()
+                        raise TimesealError()
                 return (m.group(1), m.group(2))
         
         def decode_zipseal(self, line):
@@ -22,7 +22,7 @@ class Timeseal(object):
                 dec = self.zipseal.stdout.readline()
                 m = re.match('^(\d+): (.*)\n$', dec)
                 if not m:
-                        raise TimesealException()
+                        raise TimesealError()
                 return (m.group(1), m.group(2))
 timeseal = Timeseal()
 

@@ -1,8 +1,9 @@
 from MySQLdb import *
+from config import config
 
 class DB(object):
 	def __init__(self):
-		self.db = connect(host="localhost", db="chess", user="chess", passwd="Luu9yae7")
+		self.db = connect(host=config.db_host, db=config.db_db, user=config.db_user, passwd=config.db_passwd)
 
         def user_get(self, name):
                 cursor = self.db.cursor(cursors.DictCursor)
