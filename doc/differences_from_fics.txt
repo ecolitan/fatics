@@ -33,6 +33,8 @@ is not online, the error message is "No user named HANDLE is logged in",
 rather than "HANDLE is not logged in".  This is is an attempt to clarify
 that the name may or may not be a registered handle.
 
+* The "teams" list has been removed.
+
 ===
 
 Admin differences:
@@ -42,4 +44,7 @@ abbreviations of names:  "asetadminlevel", "asetpasswd", "nuke".
 for removal:
 * Gods can now set their own adminlevel. Not sure if it's useful, but it
 follows the principle of "gods can do anything".
+
+* It's no longer possible go give a guest a title (athough it is still
+possible to set a guest's adminlevel).
 

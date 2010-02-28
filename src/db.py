@@ -1,6 +1,11 @@
 from MySQLdb import *
 from config import config
 
+class DuplicateKeyError(Exception):
+        pass
+class DeleteError(Exception):
+        pass
+
 class DB(object):
 	def __init__(self):
 		self.db = connect(host=config.db_host, db=config.db_db, user=config.db_user, passwd=config.db_passwd)
@@ -65,6 +70,9 @@ class DB(object):
         def user_delete(self, id):
                 cursor = self.db.cursor()
                 cursor.execute("""DELETE FROM user WHERE user_id=%s""", (id,))
+                if cursor.rowcount != 1:
+                        cursor.close()
+                        raise DeleteError()
                 cursor.close()
         
         def user_get_channels(self, id):
@@ -87,6 +95,9 @@ class DB(object):
         def channel_del_user(self, ch_id, user_id):
                 cursor = self.db.cursor()
                 cursor.execute("""DELETE FROM channel_user WHERE user_id=%s AND channel_id=%s""", (user_id,ch_id))
+                if cursor.rowcount != 1:
+                        cursor.close()
+                        raise DeleteError()
                 cursor.close()
         
         def channel_list(self):
@@ -102,7 +113,45 @@ class DB(object):
                 rows = cursor.fetchall()
                 cursor.close()
                 return [r[0] for r in rows]
+        
+        def user_add_title(self, user_id, title_id):
+                cursor = self.db.cursor()
+                try:
+                        cursor.execute("""INSERT INTO user_title SET user_id=%s,title_id=%s""", (user_id,title_id))
+                        cursor.close()
+                except IntegrityError:
+                        cursor.close()
+                        raise DuplicateKeyError()
+        
+        def user_del_title(self, user_id, title_id):
+                cursor = self.db.cursor()
+                cursor.execute("""DELETE FROM user_title WHERE user_id=%s AND title_id=%s""", (user_id,title_id))
+                if cursor.rowcount != 1:
+                        cursor.close()
+                        raise DeleteError()
+                cursor.close()
+        
+        def user_get_titles(self, user_id):
+                cursor = self.db.cursor(cursors.DictCursor)
+                cursor.execute("""SELECT title_flag,display FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s""", user_id)
+                rows = cursor.fetchall()
+                cursor.close()
+                return rows
+
+        def title_get_all(self):
+                cursor = self.db.cursor(cursors.DictCursor)
+                cursor.execute("""SELECT title_id,title_name,title_descr,title_flag FROM title""")
+                rows = cursor.fetchall()
+                cursor.close()
+                return rows
+        
+        def title_get_users(self, title_id):
+                cursor = self.db.cursor()
+                cursor.execute("""SELECT user_name FROM user LEFT JOIN user_title USING(user_id) WHERE title_id=%s""", title_id)
+                rows = cursor.fetchall()
+                cursor.close()
+                return [r[0] for r in rows]
 
 db = DB()
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent

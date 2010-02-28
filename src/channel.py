@@ -45,8 +45,6 @@ class Channel(object):
                         return
                 if user.is_online:
                         self.online.remove(user)
-                if not user.is_guest:
-                        db.channel_del_user(self.id, user.id)
                 user.remove_channel(self.id)
                 user.write(_('[%s] removed from your channel list.\n') % self.id)
 

@@ -59,12 +59,7 @@ class BaseUser(object):
                 self.session.conn.write('fics% ')
         
         def get_display_name(self):
-                ret = self.name
-                if self.admin_level >= admin.Level.admin:
-                         ret += '(*)'
-                if self.is_guest:
-                        ret += '(U)'
-                return ret
+                return self.name + self.title_str
 
         def set_var(self, v, val):
                 self.vars[v.name] = val
@@ -93,7 +88,15 @@ class User(BaseUser):
                 self.is_guest = False
                 self.channels = db.user_get_channels(self.id)
                 self.vars = db.user_get_vars(self.id)
-               
+                self.make_title_str()
+
+        def make_title_str(self):
+                self.title_str = ''
+                titles =  db.user_get_titles(self.id)
+                for title in titles:
+                        if title['display']:
+                                self.title_str += '(%s)' % title['title_flag']
+
         def log_on(self, conn):
                 BaseUser.log_on(self, conn)
                
@@ -157,6 +160,7 @@ class GuestUser(BaseUser):
                 self.admin_level = admin.Level.user
                 self.channels = channel.chlist.get_default_guest_channels()
                 self.vars = var.varlist.get_default_vars()
+                self.title_str = '(U)'
         
         def log_on(self, conn):
                 BaseUser.log_on(self, conn)

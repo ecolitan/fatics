@@ -137,7 +137,7 @@ class CommandList(object):
         
         def addlist(self, args, conn):
                 try:
-                        list.lists.get(args[0]).add(args, conn.user)
+                        list.lists.get(args[0]).add(args, conn)
                 except KeyError:
                         conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
                 except trie.NeedMore as e:
@@ -361,12 +361,12 @@ class CommandList(object):
                         
         def showlist(self, args, conn):
                 if args[0] == None:
-                        for cur in list.lists.itervalues():
-                                conn.write('%s\n', cur.name)
+                        for c in list.lists.itervalues():
+                                conn.write('%s\n' % c.name)
                         return
 
                 try:
-                        list.lists.get(args[0]).showlist(args, conn.user)
+                        list.lists.get(args[0]).show(args, conn)
                 except KeyError:
                         conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
                 except trie.NeedMore as e:
@@ -376,7 +376,7 @@ class CommandList(object):
         
         def sublist(self, args, conn):
                 try:
-                        list.lists.get(args[0]).sub(args, conn.user)
+                        list.lists.get(args[0]).sub(args, conn)
                 except KeyError:
                         conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
                 except trie.NeedMore as e:

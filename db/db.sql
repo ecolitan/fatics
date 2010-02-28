@@ -62,10 +62,12 @@ CREATE TABLE `user` (
   `notakeback` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'automatically reject takeback requests',
 
   -- other flags
-  `admin_light` BOOLEAN DEFAULT NULL COMMENT 'whether to show the (*) tag',
+  -- `admin_light` BOOLEAN DEFAULT NULL COMMENT 'whether to show the (*) tag',
   `simopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for simul',
   `lang` VARCHAR(3) NOT NULL DEFAULT 'en' COMMENT 'user language',
   `prompt` varchar(16) NOT NULL DEFAULT 'fics% ' COMMENT 'command prompt',
+  `abuser` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'is an abuser?',
+  `banned` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'banned from logging in?',
 
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
@@ -73,31 +75,31 @@ CREATE TABLE `user` (
 
 DROP TABLE IF EXISTS `formula`;
 CREATE TABLE formula (
-  `formula_id` int(8) NOT NULL,
+  `formula_id` int(8) NOT NULL AUTO_INCREMENT,
   `user_id` int(8) NOT NULL,
   `num` tinyint(1) NOT NULL COMMENT 'the variable number; formula=0, f1=1',
   `f` VARCHAR(1024) NOT NULL COMMENT 'formula text',
   UNIQUE KEY (`user_id`, `num`),
   PRIMARY KEY (`formula_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `note`;
 CREATE TABLE note (
-  `note_id` int(8) NOT NULL,
+  `note_id` int(8) NOT NULL AUTO_INCREMENT,
   `user_id` int(8) NOT NULL,
   `num` tinyint(1) NOT NULL COMMENT 'the note number',
   `txt` VARCHAR(1024) NOT NULL COMMENT 'note text',
   UNIQUE KEY (`user_id`, `num`),
   PRIMARY KEY (`note_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `channel`;
 CREATE TABLE `channel` (
-  `channel_id` int(8) NOT NULL,
+  `channel_id` int(8) NOT NULL AUTO_INCREMENT,
   `name` varchar(32) DEFAULT NULL,
   `descr` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`channel_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `channel_user`;
 CREATE TABLE `channel_user` (
@@ -106,15 +108,54 @@ CREATE TABLE `channel_user` (
   UNIQUE KEY (`user_id`,`channel_id`)
 ) ENGINE=MyISAM;
 
---
--- Dumping data for table `user`
---
+-- titles
+DROP TABLE IF EXISTS `title`;
+CREATE TABLE `title` (
+  `title_id` int(8) NOT NULL AUTO_INCREMENT,
+  `title_name` varchar(32) COMMENT 'the corresponding list name',
+  `title_descr` varchar(48) NOT NULL COMMENT 'a human-readable description',
+  `title_flag` varchar(3) COMMENT 'e.g. * for admins or TM for tourney manager', 
+  PRIMARY KEY (`title_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `user_title`;
+CREATE TABLE `user_title` (
+  `user_id` int(8) NOT NULL,
+  `title_id` int(8) NOT NULL,
+  `display` BOOLEAN DEFAULT 1 COMMENT 'admin light, tm light, etc.',
+  UNIQUE INDEX(`user_id`,`title_id`)
+);
+
+
+-- data
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
-INSERT INTO `user` SET user_id=1,user_name='admin',user_passwd='$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy',user_real_name='Admin Account',user_email='lics@openchess.dyndns.org',user_admin_level=1000;
+INSERT INTO `user` SET user_id=1,user_name='admin',user_passwd='$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy',user_real_name='Admin Account',user_email='ics@openchess.dyndns.org',user_admin_level=1000;
 UNLOCK TABLES;
 
 LOCK TABLES `channel` WRITE;
 INSERT INTO `channel` VALUES (1,'help','Help for new (and not-so-new) users. :-)');
 UNLOCK TABLES;
+
+LOCK TABLES `title` WRITE;
+INSERT INTO `title` VALUES (NULL,'admin','Administrator','*');
+INSERT INTO `title` VALUES (NULL,'CM','Candidate Master','CM');
+INSERT INTO `title` VALUES (NULL,'FM','FIDE Master','FM');
+INSERT INTO `title` VALUES (NULL,'IM','International Master','IM');
+INSERT INTO `title` VALUES (NULL,'GM','Grandmaster','GM');
+INSERT INTO `title` VALUES (NULL,'WCM','Woman Candidate Master','WCM');
+INSERT INTO `title` VALUES (NULL,'WFM','Woman FIDE Master','WFM');
+INSERT INTO `title` VALUES (NULL,'WIM','Woman International Master','WIM');
+INSERT INTO `title` VALUES (NULL,'WGM','Woman Grandmaster','WGM');
+INSERT INTO `title` VALUES (NULL,'blind','Blind','B');
+INSERT INTO `title` VALUES (NULL,'computer','Computer','C');
+INSERT INTO `title` VALUES (NULL,'CA','Chess Advisor','CA');
+INSERT INTO `title` VALUES (NULL,'TM','Tournament Manager','TM');
+INSERT INTO `title` VALUES (NULL,'TD','Technical Device','TD');
+INSERT INTO `title` VALUES (NULL,'SR','Service Representative','SR');
+UNLOCK TABLES;
+
+LOCK TABLES `user_title` WRITE;
+INSERT INTO `user_title` VALUES (1,1,1);
+UNLOCK TABLES;
+
