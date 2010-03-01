@@ -28,10 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <zlib.h>
 
 #define BSIZE 1024
-
-char *key="Timestamp (FICS) v1.0 - programmed by Henrik Gram.";
 
 void decrypt(char *s)
 {
@@ -45,7 +44,7 @@ void decrypt(char *s)
 	// decode the string
 	strcpy(tmp,s);
 	for(n=0;n<l;n++) {
-		tmp[n]=(tmp[n]+32)^key[(n+offset-0x80)%50];
+		tmp[n]=(tmp[n]+32);
 		if(!(tmp[n]&0x80)) goto malformed_message;
 		tmp[n]^=0x80;
 	}

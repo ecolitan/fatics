@@ -5,4 +5,4 @@ partial implementation
 new features:
 annotate journal games
 forward abusive tells to admins
-
+correspondence games

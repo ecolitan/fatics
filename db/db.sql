@@ -139,7 +139,7 @@ CREATE TABLE `user_notify` (
 -- data
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
-INSERT INTO `user` SET user_id=1,user_name='admin',user_passwd='$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy',user_real_name='Admin Account',user_email='ics@openchess.dyndns.org',user_admin_level=1000;
+INSERT INTO `user` SET user_id=1,user_name='admin',user_passwd='$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy',user_real_name='Admin Account',user_email='ics@openchess.dyndns.org',user_admin_level=10000;
 UNLOCK TABLES;
 
 LOCK TABLES `channel` WRITE;

@@ -26,9 +26,9 @@
 #include <sys/select.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <zlib.h>
 #define BSIZE 1024
 
-char *key="Timestamp (FICS) v1.0 - programmed by Henrik Gram.";
 char hello[]="zipseal|zipseal|Running on an operating system|";
 
 int crypt(char *s,int l)
@@ -42,7 +42,7 @@ int crypt(char *s,int l)
 	for(;l%12;l++)
 		s[l]='1';
 	for(n=0;n<l;n++)
-		s[n]=((s[n]|0x80)^key[n%50])-32;
+		s[n]=((s[n]|0x80))-32;
 	s[l++]='\x80';
 	s[l++]='\x0a';
 	return l;
