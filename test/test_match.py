@@ -22,7 +22,7 @@ class TestMatch(Test):
         self.expect('now open to receive match requests', t)
         self.expect('Issuing: ', t)
         self.expect('Challenge: ', t2)
-       
+
         self.close(t)
         self.close(t2)
 

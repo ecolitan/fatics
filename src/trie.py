@@ -113,22 +113,22 @@ class Trie(object):
             else:
                 raise KeyError(k)
         return n.value
-   
+
     """like __getitem__, but returns the matches"""
     def get(self, k):
         n = self._getnode(k)
         if n.value is Node.no_value:
             if n.nodes:
-		children = self.all_children(k)
+                children = self.all_children(k)
                 assert(len(children) > 0)
-		if len(children) == 1:
-		    ret = children[0]
-		elif len(children) > 0:
-		    raise NeedMore(children)
+                if len(children) == 1:
+                    ret = children[0]
+                elif len(children) > 0:
+                    raise NeedMore(children)
             else:
                 raise KeyError(k)
         else:
-	    ret = n.value
+            ret = n.value
         return ret
 
     def __delitem__(self, k):
@@ -156,19 +156,19 @@ class Trie(object):
         return dict((k, n.nodes[k].value)
                     for k in n.nodes
                     if n.nodes[k].value is not Node.no_value)
-    
+
     def _all_children_help(self, n, ret):
         if n.value is not Node.no_value:
-		ret.append(n.value)
+            ret.append(n.value)
         for k in n.nodes:
-		self._all_children_help(n.nodes[k], ret)
+            self._all_children_help(n.nodes[k], ret)
 
     def all_children(self, k):
         """Return a list of all children of the given key."""
         n = self._getnode(k)
-	ret = []
-	self._all_children_help(n, ret)
-	return ret
+        ret = []
+        self._all_children_help(n, ret)
+        return ret
 
     '''def __iter__(self):
         """Yield the keys in order."""
@@ -189,3 +189,5 @@ class Trie(object):
 if __name__ == '__main__':
     import doctest
     doctest.testmod()
+
+# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

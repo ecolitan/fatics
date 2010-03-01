@@ -113,7 +113,7 @@ class TelnetTransport(protocol.Protocol):
                 elif b == IAC:
                     # IAC isn't really allowed after \r, according to the
                     # RFC, but handling it this way is less surprising than
-                    # delivering the IAC to the app as application data. 
+                    # delivering the IAC to the app as application data.
                     # The purpose of the restriction is to allow terminals
                     # to unambiguously interpret the behavior of the CR
                     # after reading only one more byte.  CR LF is supposed
@@ -145,13 +145,13 @@ class TelnetTransport(protocol.Protocol):
 
     def telnet_DO(self, option):
         if option == TM:
-                self.will(TM)
+            self.will(TM)
         elif option == SGA:
-                self.will(SGA)
+            self.will(SGA)
 
     def telnet_DONT(self, option):
         pass
-    
+
     def telnet_IP(self, option):
         self.loseConnection()
 
@@ -197,4 +197,4 @@ class TelnetTransport(protocol.Protocol):
     def getPeer(self):
         return self.transport.getPeer()
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
