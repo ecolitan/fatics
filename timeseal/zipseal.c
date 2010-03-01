@@ -39,8 +39,6 @@ int crypt(char *s,int l)
 	gettimeofday(&tv,NULL);
 	l+=sprintf(&s[l],"%ld",(tv.tv_sec%10000)*1000+tv.tv_usec/1000);
 	s[l++]='\x19';
-	for(;l%12;l++)
-		s[l]='1';
 	for(n=0;n<l;n++)
 		s[n]=((s[n]|0x80))-32;
 	s[l++]='\x80';

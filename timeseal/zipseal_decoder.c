@@ -34,13 +34,10 @@
 
 void decrypt(char *s)
 {
-	int n,offset,l=strlen(s);
+	int n,l=strlen(s);
 	char *tmp_time,*tmp_end,*num_end;
 	static char tmp[BSIZE];
 	// first a consistency check
-	if(l%12!=1) goto malformed_message;
-	// we need this one...
-	offset=(unsigned char)s[l-1];
 	// decode the string
 	strcpy(tmp,s);
 	for(n=0;n<l;n++) {
