@@ -34,11 +34,9 @@ char hello[]="zipseal|zipseal|Running on an operating system|";
 int crypt(char *s,int l)
 {
 	struct timeval tv;
-	s[l++]='\x18';
 	gettimeofday(&tv,NULL);
+	s[l++]='\xfe';
 	l+=sprintf(&s[l],"%ld",(tv.tv_sec%10000)*1000+tv.tv_usec/1000);
-	s[l++]='\x19';
-	//s[l++]='\x00';
 	s[l++]='\x0a';
 	return l;
 }

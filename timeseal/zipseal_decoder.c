@@ -34,24 +34,16 @@
 
 void decrypt(char *s)
 {
-	int n;
 	char *tmp_time,*tmp_end,*num_end;
 	static char tmp[BSIZE];
 	// first a consistency check
 	// decode the string
 	strcpy(tmp,s);
-	// find the timestamp beginning
-	tmp_time=strchr(tmp,'\x18');
-	if(!tmp_time) goto malformed_message;
-	*tmp_time=0;
-	tmp_time++;
+	tmp_time=strrchr(tmp,'\xfe');
+	*tmp_time++ = 0;
 	// find the timestamp end
-	tmp_end=strchr(tmp_time,'\x19');
-	if(!tmp_end) goto malformed_message;
+	tmp_end = tmp_time + strlen(tmp_time) - 1;
 	*tmp_end=0;
-	// check that every character in the message is printable
-	for(n=0;tmp[n];n++)
-		if(!tmp[n]>>5) goto malformed_message;
 	// check that the timestamp actually is a number
 	strtol(tmp_time,&num_end,10);
 	if(num_end!=tmp_end) goto malformed_message;
