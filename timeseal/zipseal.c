@@ -33,15 +33,12 @@ char hello[]="zipseal|zipseal|Running on an operating system|";
 
 int crypt(char *s,int l)
 {
-	int n;
 	struct timeval tv;
 	s[l++]='\x18';
 	gettimeofday(&tv,NULL);
 	l+=sprintf(&s[l],"%ld",(tv.tv_sec%10000)*1000+tv.tv_usec/1000);
 	s[l++]='\x19';
-	for(n=0;n<l;n++)
-		s[n]=((s[n]|0x80))-32;
-	s[l++]='\x80';
+	//s[l++]='\x00';
 	s[l++]='\x0a';
 	return l;
 }

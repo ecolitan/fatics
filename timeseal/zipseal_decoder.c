@@ -34,17 +34,12 @@
 
 void decrypt(char *s)
 {
-	int n,l=strlen(s);
+	int n;
 	char *tmp_time,*tmp_end,*num_end;
 	static char tmp[BSIZE];
 	// first a consistency check
 	// decode the string
 	strcpy(tmp,s);
-	for(n=0;n<l;n++) {
-		tmp[n]=(tmp[n]+32);
-		if(!(tmp[n]&0x80)) goto malformed_message;
-		tmp[n]^=0x80;
-	}
 	// find the timestamp beginning
 	tmp_time=strchr(tmp,'\x18');
 	if(!tmp_time) goto malformed_message;
