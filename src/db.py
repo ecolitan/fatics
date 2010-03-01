@@ -19,7 +19,7 @@ class DB(object):
         
         def user_get_vars(self, user_id):
                 cursor = self.db.cursor(cursors.DictCursor)
-                cursor.execute("""SELECT tell,shout FROM user WHERE user_id=%s""", (user_id,))
+                cursor.execute("""SELECT tell,shout,open,silence,bell,time,inc FROM user WHERE user_id=%s""", (user_id,))
                 row = cursor.fetchone()
                 cursor.close()
                 return row
@@ -38,6 +38,13 @@ class DB(object):
                 num = dbkeys[name]
                 cursor = self.db.cursor()
                 cursor.execute("""INSERT INTO formula SET user_id=%s,num=%d,f=%s ON DUPLICATE KEY UPDATE""" % (user_id,num,val))
+                cursor.close()
+        
+        def user_set_note(self, user_id, name, val):
+                num = int(name, 10)
+                assert(num >= 1 and num <= 10)
+                cursor = self.db.cursor()
+                cursor.execute("""INSERT INTO note SET user_id=%s,num=%d,txt=%s ON DUPLICATE KEY UPDATE""" % (user_id,num,val))
                 cursor.close()
 
         def user_get_matching(self, prefix):

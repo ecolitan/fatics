@@ -55,7 +55,7 @@ CREATE TABLE `user` (
   `autoflag` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'automatically flag opp',
   `unobserve` TINYINT NOT NULL DEFAULT 0 COMMENT 'automatically unobserve games',
   -- `echo`
-  `examine` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'automatically examine after a game',
+  -- `examine` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'automatically examine after a game',
   `minmovetime` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'use minimum move time in games',
   -- `tolerance`
   `noescape` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'agree to forfeit on disconnect',

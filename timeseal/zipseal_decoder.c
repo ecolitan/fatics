@@ -40,6 +40,7 @@ void decrypt(char *s)
 	// decode the string
 	strcpy(tmp,s);
 	tmp_time=strrchr(tmp,'\xfe');
+	if (!tmp_time) goto malformed_message;
 	*tmp_time++ = 0;
 	// find the timestamp end
 	tmp_end = tmp_time + strlen(tmp_time) - 1;

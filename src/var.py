@@ -38,10 +38,9 @@ class StringVar(Var):
                 assert(val == None or len(val) <= self.max_len)
                 user.set_var(self, val)
                 if val == None:
-                        msg = (_('''%s unset.''') % self.name)
+                        user.write(_('''%s unset.\n''') % self.name)
                 else:
-                        msg = (_('''%s set to "%s".''') % (self.name, val))
-                return msg
+                        user.write((_('''%s set to "%s".\n''') % (self.name, val)))
 
 """An integer variable."""
 class IntVar(Var):
@@ -51,7 +50,7 @@ class IntVar(Var):
                 except ValueError:
                         raise BadVarError
                 user.set_var(self, val)
-                return _("%s set to %d.") % (self.name, val)
+                user.write(_("%s set to %d.\n") % (self.name, val))
 
 """A boolean variable."""
 class BoolVar(Var):
@@ -70,18 +69,25 @@ class BoolVar(Var):
                         val = int(val, 10)
                 user.set_var(self, val)
                 if val:
-                        msg = self.on_msg
+                        user.write(self.on_msg + '\n')
                 else:
-                        msg = self.off_msg
-                return msg
+                        user.write(self.off_msg + '\n')
 
 class VarList(object):
         def __init__(self):
                 BoolVar("shout", True, _("You will now hear shouts."), _("You will not hear shouts.")).persist()
                 BoolVar("tell", False, _("You will now hear direct tells from unregistered users."), _("You will not hear direct tells from unregistered users.")).persist()
+                BoolVar("open", True, _("You are now open to receive match requests."), _("You are no longer open to receive match requests.")).persist()
+                BoolVar("silence", True, _("You will now play games in silence."), _("You will not play games in silence.")).persist()
+                BoolVar("bell", True, _("You will now hear beeps."), _("You will not hear beeps.")).persist()
+
                 IntVar("time", 2).persist()
+                IntVar("inc", 12).persist()
+
                 StringVar("interface", None)
                 StringVar("formula", None).persist(db.user_set_formula)
+                StringVar("1", None).persist(db.user_set_note)
+
                 self.default_vars = {}
                 self.transient_vars = {}
                 for var in vars.itervalues():

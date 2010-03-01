@@ -78,12 +78,14 @@ class Command(object):
                                         raise BadCommandError()
                                 param = s
                                 s = None
-                        elif c == 'T':
+                        elif c == 'T' or c == 't':
                                 # optional string to end
                                 if s == None or len(s) == 0:
                                         param = None
                                 else:
                                         param = s
+                                        if c == 't':
+                                                param = param.lower()
                                 s = None
                         else:
                                 raise InternalException()
@@ -115,6 +117,7 @@ class CommandList(object):
                 self._add(Command('follow', 'w', self.follow, admin.Level.user))
                 self._add(Command('help', 'o', self.help, admin.Level.user))
                 self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
+                self._add(Command('match', 'wt', self.match, admin.Level.user))
                 self._add(Command('nuke', 'w', self.nuke, admin.Level.admin))
                 self._add(Command('password', 'WW', self.password, admin.Level.user))
                 self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
@@ -269,6 +272,27 @@ class CommandList(object):
                                 if len(on) > 0:
                                         conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
         
+        def match(self, args, conn):
+                if len(conn.user.games) != 0:
+                        conn.write(_("You can't challenge while you are examining a game.\n"))
+                        return
+                u = user.find.by_name_or_prefix_for_user(args[0], conn, online_only=True)
+                if not u:
+                        return
+                if u == conn.user:
+                        conn.write(_("You can't match yourself.\n"))
+                        return
+                if not u.vars['open']:
+                        conn.write(_("%s is not open to match requests.\n") % u.name)
+                        return
+                if len(u.games) != 0:
+                        conn.write(_("%s is playing a game.\n") % u.name)
+                if not conn.user.vars['open']:
+                        var.vars['open'].set(conn.user, '1')
+                # noplay, censor
+                conn.write('Issuing: challenge!\n')
+                u.write('Challenge: challenge!\n')
+
         def nuke(self, args, conn):
                 u = user.find.by_name_exact_for_user(args[0], conn)
                 if u:
@@ -334,8 +358,7 @@ class CommandList(object):
                 [name, val] = args
                 try:
                         v = var.vars.get(name)
-                        msg = v.set(conn.user, val)
-                        conn.write("%s\n" % msg)
+                        v.set(conn.user, val)
                 except trie.NeedMore as e:
                         assert(len(e.matches) >= 2)
                         conn.write(_('Ambiguous variable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))

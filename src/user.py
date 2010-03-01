@@ -35,6 +35,7 @@ class BaseUser(object):
                                 if count > 50:
                                         raise Exception("failed to kick off user")
                 self.vars.update(var.varlist.get_transient_vars())
+                self.games = []
                 self.is_online = True
                 self.aliases = {}
                 self.session = conn.session

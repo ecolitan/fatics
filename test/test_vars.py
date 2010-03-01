@@ -25,6 +25,11 @@ class TestVars(Test):
                 self.expect("You will not hear shouts", t)
                 t.write("set shout 1\n")
                 self.expect("You will now hear shouts", t)
+                
+                t.write("set open 0\n")
+                self.expect("no longer open to receive match requests", t)
+                t.write("set open 1\n")
+                self.expect("are now open to receive match requests", t)
 
                 self.close(t)
 
