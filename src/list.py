@@ -1,3 +1,4 @@
+import gettext
 import trie
 import channel
 import admin
@@ -69,7 +70,6 @@ class ChannelList(MyList):
                 except KeyError:
                         raise ListError(_('Invalid channel number.'))
 
-
         def sub(self, args, conn):
                 try:
                         val = int(args[1], 10)
@@ -78,6 +78,13 @@ class ChannelList(MyList):
                         raise ListError(_('The channel must be a number.'))
                 except KeyError:
                         raise ListError(_('Invalid channel number.'))
+
+        def show(self, args, conn):
+                chlist = conn.user.channels
+                conn.write(gettext.ngettext('-- channel list: %d channel --\n', '-- channel list: %d channels --\n', len(chlist)) % len(chlist))
+                for ch in chlist:
+                        conn.write('%s ' % ch)
+                conn.write('\n')
 
 """a list of lists"""
 class ListList(object):

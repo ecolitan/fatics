@@ -67,6 +67,7 @@ class BaseUser(object):
         def add_channel(self, id):
                 assert(type(id) == type(1) or type(id) == type(1l))
                 self.channels.append(id)
+                self.channels.sort()
         
         def remove_channel(self, id):
                 assert(type(id) == type(1) or type(id) == type(1l))

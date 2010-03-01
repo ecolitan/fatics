@@ -433,7 +433,7 @@ class CommandList(object):
                                         conn.write(_('Invalid channel number.\n'))
                                 else:
                                         if not conn.user in ch.online:
-                                                conn.user.write(_('''(You're not in channel %s.)\n''') % ch.id)
+                                                conn.user.write(_('''(Not sent; you are not in channel %s.)\n''') % ch.id)
                                                 ch = None
                         else:
                                 u = user.find.by_name_or_prefix_for_user(args[0], conn, online_only=True)

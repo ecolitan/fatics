@@ -1,29 +1,33 @@
 from test import *
 
 class TestChannel(Test):
-	def test_channel_guest(self):
-		t = self.connect_as_guest()
+        def test_channel_guest(self):
+                t = self.connect_as_guest()
                
                 # guests should be in 53 by default
                 t.write('+ch 53\n')
                 self.expect('is already on your channel list', t)
-	
+        
                 t.write('+ch 1\n')
                 self.expect("[1] added to your channel list", t)
                
                 t.write('t 1 foo bar baz\n')
                 self.expect("(1): foo bar baz", t)
-	
+
+                t.write('=ch\n')
+                self.expect('channel list: 3 channels', t)
+                self.expect('1 4 53', t)
+        
                 t.write('-ch 1\n')
                 self.expect("[1] removed from your channel list", t)
                 
                 t.write('t 1 foo bar baz\n')
-                self.expect("You're not ", t)
+                self.expect("not in channel", t)
 
                 self.close(t)
-	
+        
         def test_channel_admin(self):
-		t = self.connect_as_admin()
+                t = self.connect_as_admin()
 
                 t.write(', foo bar\n')
                 self.expect("No previous channel", t)
@@ -51,7 +55,11 @@ class TestChannel(Test):
                 
                 self.close(t)
                 
-		t = self.connect_as_admin()
+                t = self.connect_as_admin()
+                
+                t.write('=ch\n')
+                self.expect('channel list: 1 channel', t)
+
                 t.write('+ch 100\n')
                 self.expect('is already on your channel list', t)
                 
@@ -59,14 +67,14 @@ class TestChannel(Test):
                 self.expect("[100] removed from your channel list", t)
                 self.close(t)
                 
-		t = self.connect_as_admin()
+                t = self.connect_as_admin()
                 t.write('-ch 100\n')
                 self.expect("is not on your channel list", t)
                 self.close(t)
 
 class TestInchannel(Test):
         def test_inchannel(self):
-		t = self.connect_as_guest()
+                t = self.connect_as_guest()
                 t.write('inch\n')
                 self.expect("4: Guest", t)
                 

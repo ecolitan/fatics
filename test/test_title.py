@@ -4,7 +4,7 @@ class TestTitle(Test):
         def test_bad_name(self):
                 t = self.connect_as_admin()
                 t.write('+gm nonexistentname\n')
-                self.expect("", t)
+                self.expect("no player matching", t)
                 self.close(t)
 
         def test_title(self):
