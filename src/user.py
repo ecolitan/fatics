@@ -4,12 +4,13 @@ import random
 import string
 
 import admin
-from db import db
 import session
-from online import online
-from config import config
 import var
 import channel
+import notify
+from db import db
+from online import online
+from config import config
 
 class UsernameException(Exception):
         def __init__(self, reason):
@@ -76,7 +77,6 @@ class BaseUser(object):
         def set_admin_level(self, level):
                 self.admin_level = level
 
-
 # a registered user
 class User(BaseUser):
 	def __init__(self, u):
@@ -89,9 +89,9 @@ class User(BaseUser):
                 self.is_guest = False
                 self.channels = db.user_get_channels(self.id)
                 self.vars = db.user_get_vars(self.id)
-                self.make_title_str()
+                self._make_title_str()
 
-        def make_title_str(self):
+        def _make_title_str(self):
                 self.title_str = ''
                 titles =  db.user_get_titles(self.id)
                 for title in titles:
@@ -100,9 +100,15 @@ class User(BaseUser):
 
         def log_on(self, conn):
                 BaseUser.log_on(self, conn)
+                notify.notify.users(self.id, _("Notification: %s has arrived.\n") % self.name)
+                notifiers = db.user_get_notifiers(self.id)
+                notifiers = [dbu['user_name'] for dbu in notifiers if online.is_online(dbu['user_name'])]
+                if len(notifiers) > 0:
+                        self.write(_('Present company includes: %s\n') % ' '.join(notifiers))
                
         def log_off(self):
                 BaseUser.log_off(self)
+                notify.notify.users(self.id, _("Notification: %s has departed.\n") % self.name)
                 db.user_set_last_logout(self.id)
 
         def set_passwd(self, passwd):
@@ -137,6 +143,20 @@ class User(BaseUser):
         def remove_channel(self, id):
                 BaseUser.remove_channel(self, id)
                 db.channel_del_user(id, self.id)
+                
+        def add_title(self, id):
+                db.user_add_title(self.id, id)
+                self._make_title_str()
+        
+        def remove_title(self, id):
+                db.user_del_title(self.id, id)
+                self._make_title_str()
+        
+        def add_notification(self, user):
+                db.user_add_notification(self.id, user.id)
+        
+        def remove_notification(self, user):
+                db.user_del_notification(self.id, user.id)
 
 class GuestUser(BaseUser):
         def __init__(self, name):
@@ -258,7 +278,7 @@ find = Find()
 def is_legal_passwd(passwd):
         if len(passwd) > 32:
                 return False
-        if len(passwd) < 4:
+        if len(passwd) < 3:
                 return False
         # passwords may not contain spaces because they are set
         # using a command

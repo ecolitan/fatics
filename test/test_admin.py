@@ -4,9 +4,9 @@ class CommandTest(Test):
         def test_addplayer(self):
                 t = self.connect_as_admin()
                 t.write('addplayer testplayer nobody@example.com Foo Bar\n')
-                self.expect('Added:', t, 'addplayer')
+                self.expect('Added:', t)
                 t.write('addplayer testplayer nobody@example.com Foo Bar\n')
-                self.expect('already registered', t, 'addplayer duplicate player')
+                self.expect('already registered', t)
                 t.write('remplayer testplayer\n')
                 t.close()
 
@@ -111,4 +111,4 @@ class AreloadTest(Test):
                 t.close()
 """
 
-# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent ft=python
+# vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent

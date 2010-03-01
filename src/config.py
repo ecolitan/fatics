@@ -1,4 +1,4 @@
-class Config:
+class Config(object):
         port = 5001
 
         db_host = "localhost"
@@ -6,8 +6,8 @@ class Config:
         db_user = "chess"
         db_passwd = "Luu9yae7"
 
+        login_timeout = 5
         min_login_name_len = 3
-
 
 config = Config()
 

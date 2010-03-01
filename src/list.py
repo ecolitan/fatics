@@ -7,8 +7,9 @@ from db import *
 
 lists = trie.Trie()
 
+"""A list as operated on by addlist, sublist, and showlist.  Subclasses
+should implement add, sub, and show methods."""
 class MyList(object):
-        #[perm_head, perm_god, perm_admin, perm_public, perm_personal] = range(5)
         def __init__(self, name):
                 self.name = name
                 lists[name.lower()] = self
@@ -29,18 +30,16 @@ class TitleList(MyList):
                 u = user.find.by_name_or_prefix_for_user(args[1], conn)
                 if u:
                         if u.is_guest:
-                                raise ListError(_("You cannot give a guest a title."))
+                                raise ListError(_("Only registered users may have titles."))
                         try:
-                                db.user_add_title(u.id, self.id)
+                                u.add_title(self.id)
                         except DuplicateKeyError:
                                 raise ListError(_('%s is already in the %s list.') % (u.name, self.name))
                         else:
-                                if u.is_online:
-                                        u.make_title_str()
                                 conn.write(_('%s added to the %s list.\n') % (u.name, self.name))
 
         def show(self, args, conn):
-                conn.write('%s: ' % self.name.upper())
+                conn.write('%s: ' % self.name)
                 for user_name in db.title_get_users(self.id):
                         conn.write('%s ' % user_name)
                 conn.write('\n')
@@ -50,15 +49,51 @@ class TitleList(MyList):
                         raise ListError(_("You don't have permission to do that."))
                 u = user.find.by_name_or_prefix_for_user(args[1], conn)
                 if u:
-                        assert(not u.is_guest)
+                        if u.is_guest:
+                                raise ListError(_("Only registered users may have titles."))
                         try:
-                                db.user_del_title(u.id, self.id)
+                                u.remove_title(self.id)
                         except DeleteError:
                                 raise ListError(_("%s is not in the %s list.") % (u.name, self.name))
                         else:
-                                if u.is_online:
-                                        u.make_title_str()
                                 conn.write(_('%s removed from the %s list.\n') % (u.name, self.name))
+
+class NotifyList(MyList):
+        def add(self, args, conn):
+                if conn.user.is_guest:
+                        raise ListError(_('Sorry, only registered users can use notification lists.'))
+                u = user.find.by_name_or_prefix_for_user(args[1], conn)
+                if u:
+                        if u.is_guest:
+                                raise ListError(_('Sorry, you can only add registered users to your notify list.'))
+                        try:
+                                conn.user.add_notification(u)
+                        except DuplicateKeyError:
+                                raise ListError(_('%s is already on your notify list.') % u.name)
+                        else:
+                                conn.write(_('%s added to your notify list.\n') % (u.name))
+
+                
+        def sub(self, args, conn):
+                if conn.user.is_guest:
+                        raise ListError(_('Sorry, only registered users can use notification lists.'))
+                u = user.find.by_name_or_prefix_for_user(args[1], conn)
+                if u:
+                        if u.is_guest:
+                                raise ListError(_('Sorry, you can only remove registered users from your notify list.'))
+                        try:
+                                conn.user.remove_notification(u)
+                        except DeleteError:
+                                raise ListError(_('%s is not on your notify list.') % u.name)
+                        else:
+                                conn.write(_('%s removed from your notify list.\n') % (u.name))
+                
+        def show(self, args, conn):
+                notlist = db.user_get_notifiers(conn.user.id)
+                conn.write(gettext.ngettext('-- notify list: %d name --\n', '-- notify list: %d names --\n', len(notlist)) % len(notlist))
+                for dbu in notlist:
+                        conn.write('%s ' % dbu['user_name'])
+                conn.write('\n')
 
 class ChannelList(MyList):
         def add(self, args, conn):
@@ -90,6 +125,7 @@ class ChannelList(MyList):
 class ListList(object):
         def __init__(self):
                 ChannelList("channel")
+                NotifyList("notify")
                
                 for title in db.title_get_all():
                         TitleList(title['title_id'], title['title_name'], title['title_descr'])

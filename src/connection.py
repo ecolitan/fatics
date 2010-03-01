@@ -7,11 +7,10 @@ from zope.interface import implements
 import telnet
 import user
 import command
+from config import config
 from timeseal import timeseal
 from session import Session
 from login import login
-
-login_timeout = 5
 
 class Connection(basic.LineReceiver):
         implements(twisted.internet.interfaces.IProtocol)
@@ -29,7 +28,7 @@ class Connection(basic.LineReceiver):
                 self.login()
                 self.session = Session(self)
                 self.session.login_last_command = time.time()
-                self.timeout_check = reactor.callLater(login_timeout, self.login_timeout)
+                self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
 
         def login_timeout(self):
                 assert(self.state in ['login', 'passwd'])
@@ -56,7 +55,7 @@ class Connection(basic.LineReceiver):
 
         def lineReceived_login(self, line):
                 self.timeout_check.cancel() 
-                self.timeout_check = reactor.callLater(login_timeout, self.login_timeout)
+                self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
                 self.session.login_last_command = time.time()
                 if self.session.check_for_timeseal:
                         self.session.check_for_timeseal = False
@@ -84,7 +83,7 @@ class Connection(basic.LineReceiver):
         
         def lineReceived_passwd(self, line):
                 self.timeout_check.cancel() 
-                self.timeout_check = reactor.callLater(login_timeout, self.login_timeout)
+                self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
                 self.session.login_last_command = time.time()
                 self.transport.wont(telnet.ECHO)
                 self.write('\n')

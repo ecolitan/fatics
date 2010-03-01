@@ -14,7 +14,7 @@ class TestTitle(Test):
 	
                 t = self.connect_as_admin()
                 t.write('+gm guest\n')
-                self.expect('cannot give a guest a title', t)
+                self.expect('nly registered users may', t)
                 self.close(t2)
 
 		t.write('+gm admin\n')

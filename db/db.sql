@@ -66,9 +66,9 @@ CREATE TABLE `user` (
   `simopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for simul',
   `lang` VARCHAR(3) NOT NULL DEFAULT 'en' COMMENT 'user language',
   `prompt` varchar(16) NOT NULL DEFAULT 'fics% ' COMMENT 'command prompt',
-  `abuser` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'is an abuser?',
-  `banned` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'banned from logging in?',
-
+  `is_abuser` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'is an abuser?',
+  `is_banned` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'banned from logging in?',
+  -- `is_online` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'logged in?',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
@@ -125,6 +125,15 @@ CREATE TABLE `user_title` (
   `display` BOOLEAN DEFAULT 1 COMMENT 'admin light, tm light, etc.',
   UNIQUE INDEX(`user_id`,`title_id`)
 );
+
+-- notifications
+DROP TABLE IF EXISTS `user_notify`;
+CREATE TABLE `user_notify` (
+  `notified` int(8) NOT NULL COMMENT 'id of the user receiving the notification',
+  `notifier` int(8) NOT NULL COMMENT 'id of the user causing the notification',
+  UNIQUE INDEX(`notified`, `notifier`)
+);
+  
 
 
 -- data

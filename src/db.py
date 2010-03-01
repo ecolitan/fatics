@@ -138,6 +138,37 @@ class DB(object):
                 cursor.close()
                 return rows
 
+        # notifications
+        def user_add_notification(self, notified, notifier):
+                cursor = self.db.cursor()
+                try:
+                        cursor.execute("""INSERT INTO user_notify SET notified=%s,notifier=%s""", (notified,notifier))
+                except IntegrityError:
+                        cursor.close()
+                        raise DuplicateKeyError()
+                cursor.close()
+        
+        def user_del_notification(self, notified, notifier):
+                cursor = self.db.cursor()
+                cursor.execute("""DELETE FROM user_notify WHERE notified=%s AND notifier=%s""", (notified,notifier))
+                if cursor.rowcount != 1:
+                        cursor.close()
+                        raise DeleteError()
+                cursor.close()
+
+        def user_get_notified(self, user_id):
+                cursor = self.db.cursor(cursors.DictCursor)
+                cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notified) WHERE notifier=%s""", user_id)
+                rows = cursor.fetchall()
+                cursor.close()
+                return rows
+        
+        def user_get_notifiers(self, user_id):
+                cursor = self.db.cursor(cursors.DictCursor)
+                cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notifier) WHERE notified=%s""", user_id)
+                rows = cursor.fetchall()
+                return rows
+
         def title_get_all(self):
                 cursor = self.db.cursor(cursors.DictCursor)
                 cursor.execute("""SELECT title_id,title_name,title_descr,title_flag FROM title""")

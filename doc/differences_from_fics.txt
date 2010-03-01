@@ -35,6 +35,11 @@ that the name may or may not be a registered handle.
 
 * The "teams" list has been removed.
 
+* Unregistered users can no longer have notification lists, nor can they be
+added to notification lists. I didn't think such a feature would be useful
+enough to warrant the extra complexity that would be required to implement
+it.
+
 ===
 
 Admin differences:

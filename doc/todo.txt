@@ -1,2 +1,8 @@
 * maybe implement the telnet protocol correctly, rather than mimicking FICS's
 partial implementation
+
+--
+new features:
+annotate journal games
+forward abusive tells to admins
+
