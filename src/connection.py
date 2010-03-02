@@ -22,6 +22,8 @@ class Connection(basic.LineReceiver):
     user = None
 
     def connectionMade(self):
+        self.factory.langs['en'].install(names=['ngettext'])
+
         self.factory.connections.append(self)
         f = open("messages/welcome.txt")
         self.write(f.read())
@@ -109,6 +111,7 @@ class Connection(basic.LineReceiver):
         self.state = 'online'
 
     def lineReceived_online(self, line):
+        self.factory.langs[self.user.vars['lang']].install(names=['ngettext'])
         try:
             command.parser.run(line, self)
             self.write('fics% ')

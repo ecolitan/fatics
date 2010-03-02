@@ -41,7 +41,17 @@ class StringVar(Var):
         if val == None:
             user.write(_('''%s unset.\n''') % self.name)
         else:
-            user.write((_('''%s set to "%s".\n''') % (self.name,val)))
+            user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
+
+    def get_display_str(self, val):
+        return '''%s="%s"''' % (self.name, val)
+
+class LangVar(Var):
+    def set(self, user, val):
+        if not val in user.session.conn.factory.langs:
+            raise BadVarError()
+        user.set_var(self, val)
+        user.write(_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val})
 
     def get_display_str(self, val):
         return '''%s="%s"''' % (self.name, val)
@@ -54,7 +64,7 @@ class FormulaVar(Var):
         if val == None:
             user.write(_('''%s unset.\n''') % self.name)
         else:
-            user.write((_('''%s set to "%s".\n''') % (self.name,val)))
+            user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
 
     def get_display_str(self, val):
         return '''%s=%s''' % (self.name, val)
@@ -72,7 +82,7 @@ class NoteVar(Var):
         if val == None:
             user.write(_('''Note %s unset.\n''') % self.name)
         else:
-            user.write((_('''Note %s set: %s\n''') % (self.name,val)))
+            user.write((_('''Note %(name)s set: %(val)s\n''') % {'name': self.name, 'val': val}))
 
 """An integer variable."""
 class IntVar(Var):
@@ -80,9 +90,9 @@ class IntVar(Var):
         try:
             val = int(val, 10)
         except ValueError:
-            raise BadVarError
+            raise BadVarError()
         user.set_var(self, val)
-        user.write(_("%s set to %d.\n") % (self.name, val))
+        user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
     
     def get_display_str(self, val):
         return '''%s=%d''' % (self.name, val)
@@ -100,19 +110,20 @@ class BoolVar(Var):
             val = not user.vars[self.name]
         else:
             if not val in ['0', '1']:
-                raise BadVarError
+                raise BadVarError()
             val = int(val, 10)
         user.set_var(self, val)
         if val:
-            user.write(self.on_msg + '\n')
+            user.write(_(self.on_msg) + '\n')
         else:
-            user.write(self.off_msg + '\n')
+            user.write(_(self.off_msg) + '\n')
     
     def get_display_str(self, val):
         return '''%s=%d''' % (self.name, int(val))
 
 class VarList(object):
     def __init__(self):
+        def _(message): return message
         BoolVar("shout", True, _("You will now hear shouts."), _("You will not hear shouts.")).persist()
         BoolVar("tell", False, _("You will now hear direct tells from unregistered users."), _("You will not hear direct tells from unregistered users.")).persist()
         BoolVar("open", True, _("You are now open to receive match requests."), _("You are no longer open to receive match requests.")).persist()
@@ -123,6 +134,8 @@ class VarList(object):
         IntVar("inc", 12).persist()
 
         StringVar("interface", None)
+
+        LangVar("lang", "en").persist()
 
         FormulaVar("formula", None).persist()
         for i in range(1, 10):

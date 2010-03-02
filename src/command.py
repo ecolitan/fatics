@@ -157,7 +157,7 @@ class CommandList(object):
             conn.write(e.reason + '\n')
         else:
             if u:
-                conn.write(_('A player named %s is already registered.\n') % name)
+                conn.write('A player named %s is already registered.\n' % name)
             else:
                 passwd = user.create.passwd()
                 user.create.new(name, email, passwd, real_name)
@@ -165,11 +165,12 @@ class CommandList(object):
 
     def announce(self, args, conn):
         count = 0
+        # the announcement message isn't localized
         for u in online.itervalues():
             if u != conn.user:
                 count = count + 1
-                u.write_prompt(_("\n\n    **ANNOUNCEMENT** from %s: %s\n\n") % (conn.user.name, args[0]))
-        conn.write(_("(%d) **ANNOUNCEMENT** from %s: %s\n\n") % (count, conn.user.name, args[0]))
+                u.write_prompt("\n\n    **ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
+        conn.write("(%d) **ANNOUNCEMENT** from %s: %s\n\n" % (count, conn.user.name, args[0]))
 
     def areload(self, args, conn):
         reload.reload_all(conn)
@@ -181,28 +182,28 @@ class CommandList(object):
             # Note: it's possible to set the admin level
             # of a guest.
             if not admin.checker.check_user_operation(conn.user, u):
-                conn.write(_('You can only set the adminlevel for players below your adminlevel.'))
+                conn.write('You can only set the adminlevel for players below your adminlevel.\n')
             elif not admin.checker.check_level(conn.user.admin_level, level):
-                conn.write(_('''You can't promote someone to or above your adminlevel.\n'''))
+                conn.write('''You can't promote someone to or above your adminlevel.\n''')
             else:
                 u.set_admin_level(level)
-                conn.write(_('''Admin level of %s set to %d.\n''' % (name, level)))
+                conn.write('''Admin level of %s set to %d.\n''' % (name, level))
                 if u.is_online:
-                    u.write_prompt(_('''\n\n%s has set your admin level to %d.\n\n''') % (conn.user.name, level))
+                    u.write_prompt('''\n\n%s has set your admin level to %d.\n\n''' % (conn.user.name, level))
 
     def asetpasswd(self, args, conn):
         [name, passwd] = args
         u = user.find.by_name_exact_for_user(name, conn)
         if u:
             if u.is_guest:
-                conn.write(_('You cannot set the password of an unregistered player!\n'))
+                conn.write('You cannot set the password of an unregistered player!\n')
             elif not admin.checker.check_user_operation(conn.user, u):
-                conn.write(_('You can only set the password of players below your admin level.'))
+                conn.write('You can only set the password of players below your admin level.')
             elif not user.is_legal_passwd(passwd):
-                conn.write(_('"%s" is not a valid password.\n') % passwd)
+                conn.write('"%s" is not a valid password.\n' % passwd)
             else:
                 u.set_passwd(passwd)
-                conn.write(_('Password of %s changed to %s.\n') % (name, '*' * len(passwd)))
+                conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
                 if u.is_online:
                     u.write_prompt(_('\n%s has changed your password.\n') % conn.user.name)
 
@@ -283,7 +284,7 @@ class CommandList(object):
                     if len(on) > 0:
                         conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
                     count = len(on)
-                    conn.write(gettext.ngettext('There is %d player in channel %d.\n', 'There are %d players in channel %d.\n', count) % (count, args[0]))
+                    conn.write(ngettext('There is %d player in channel %d.\n', 'There are %d players in channel %d.\n', count) % (count, args[0]))
             else:
                 conn.write("INCHANNEL USER\n")
         else:
@@ -317,13 +318,13 @@ class CommandList(object):
         u = user.find.by_name_exact_for_user(args[0], conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
-                conn.write(_("You need a higher adminlevel to nuke %s!\n") % u.name)
+                conn.write("You need a higher adminlevel to nuke %s!\n" % u.name)
             elif not u.is_online:
-                conn.write(_("%s is not logged in.\n" ) % u.name)
+                conn.write("%s is not logged in.\n"  % u.name)
             else:
-                u.write(_('\n\n**** You have been kicked out by %s! ****\n\n') % conn.user.name)
+                u.write('\n\n**** You have been kicked out by %s! ****\n\n' % conn.user.name)
                 u.session.conn.loseConnection('nuked')
-                conn.write(_('Nuked: %s\n') % u.name)
+                conn.write('Nuked: %s\n' % u.name)
 
     def password(self, args, conn):
         if conn.user.is_guest:
@@ -366,12 +367,12 @@ class CommandList(object):
         u = user.find.by_name_exact_for_user(name, conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
-                conn.write(_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
+                conn.write('''You can't remove an admin with a level higher than or equal to yourself.\n''')
             elif u.is_online:
-                conn.write(_("%s is logged in.\n") % u.name)
+                conn.write("%s is logged in.\n" % u.name)
             else:
                 u.remove()
-                conn.write(_("Player %s removed.\n") % name)
+                conn.write("Player %s removed.\n" % name)
 
     def set(self, args, conn):
         # val can be None if the user gave no value
@@ -398,7 +399,7 @@ class CommandList(object):
                     u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
                     count += 1
             #conn.write(_("(shouted to %d %s)\n" % (count, gettext.ngettext("player", "players", count))))
-            conn.write(gettext.ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
+            conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
             if not conn.user.vars['shout']:
                 conn.write(_("(you are not listening to shouts)\n"))
 
@@ -485,7 +486,7 @@ class CommandList(object):
 
         if ch:
             count = ch.tell(args[1], conn.user)
-            conn.write(gettext.ngettext('(told %d player in channel %d)\n', '(told %d players in channel %d)\n', count) % (count, ch.id))
+            conn.write(ngettext('(told %d player in channel %d)\n', '(told %d players in channel %d)\n', count) % (count, ch.id))
         elif u:
             u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
             conn.write(_("(told %s)") % u.name + '\n')
@@ -498,9 +499,7 @@ class CommandList(object):
             conn.write(u.get_display_name() + '\n')
             count = count + 1
         conn.write('\n')
-        # assume plural
-        #conn.write(_('%d players displayed.\n\n') % count)
-        conn.write(_('%d Players Displayed.\n\n') % count)
+        conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
 
 command_list = CommandList()
 
@@ -546,14 +545,14 @@ class CommandParser(object):
             try:
                 cmd = cmds[word]
             except KeyError:
-                conn.write("%s: Command not found.\n" % word)
+                conn.write(_("%s: Command not found.\n") % word)
             except trie.NeedMore:
                 matches = cmds.all_children(word)
                 assert(len(matches) > 0)
                 if len(matches) == 1:
                     cmd = matches[0]
                 else:
-                    conn.write("""Ambiguous command "%s". Matches: %s\n""" % (word, ' '.join([c.name for c in matches])))
+                    conn.write(_("""Ambiguous command "%s". Matches: %s\n""") % (word, ' '.join([c.name for c in matches])))
             if cmd:
                 try:
                     cmd.run(cmd.parse_params(m.group(2)), conn)

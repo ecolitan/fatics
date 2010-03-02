@@ -90,7 +90,7 @@ class NotifyList(MyList):
 
     def show(self, args, conn):
         notlist = db.user_get_notifiers(conn.user.id)
-        conn.write(gettext.ngettext('-- notify list: %d name --\n', '-- notify list: %d names --\n', len(notlist)) % len(notlist))
+        conn.write(ngettext('-- notify list: %d name --\n', '-- notify list: %d names --\n', len(notlist)) % len(notlist))
         for dbu in notlist:
             conn.write('%s ' % dbu['user_name'])
         conn.write('\n')
@@ -116,7 +116,7 @@ class ChannelList(MyList):
 
     def show(self, args, conn):
         chlist = conn.user.channels
-        conn.write(gettext.ngettext('-- channel list: %d channel --\n', '-- channel list: %d channels --\n', len(chlist)) % len(chlist))
+        conn.write(ngettext('-- channel list: %d channel --\n', '-- channel list: %d channels --\n', len(chlist)) % len(chlist))
         for ch in chlist:
             conn.write('%s ' % ch)
         conn.write('\n')

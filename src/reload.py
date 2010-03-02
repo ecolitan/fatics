@@ -12,9 +12,9 @@ class Reload(object):
             try:
                 twisted.python.rebuild.rebuild(mod)
             except twisted.python.rebuild.RebuildError:
-                conn.write(_("failed to reload %s\n") % mod.__name__)
+                conn.write("failed to reload %s\n" % mod.__name__)
             else:
-                conn.write(_("reloaded %s\n") % mod.__name__)
+                conn.write("reloaded %s\n" % mod.__name__)
 reload = Reload()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

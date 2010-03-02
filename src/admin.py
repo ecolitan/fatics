@@ -6,13 +6,13 @@ class Level(object):
     
     def to_str(self, level):
         if level == self.head:
-            return 'Head Administrator'
+            return _('Head Administrator')
         elif level == self.god:
-            return 'Super User'
+            return _('Super User')
         elif level == self.admin:
-            return 'Administrator'
+            return _('Administrator')
         else:
-            return 'Unknown (%d)' % level
+            return _('Unknown (%d)') % level
 level = Level()
 
 class Checker(object):

@@ -180,7 +180,7 @@ class TelnetTransport(protocol.Protocol):
         self.protocol.dataReceived(bytes)
 
     def write(self, data):
-        data = data.replace('\xff','\xff\xff')
+        data = data.replace('''\xff''', '''\xff\xff''')
         data = data.replace('\n', '\r\n')
         #data = data.replace('\n', '\n\r')
         self.transport.write(data)

@@ -7,3 +7,5 @@ annotate journal games
 forward abusive tells to admins
 correspondence games
 multi-command aliases
+
+consolidate user vars and other things like email, name
