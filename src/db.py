@@ -12,7 +12,7 @@ class DB(object):
 
     def user_get(self, name):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout,user_admin_level FROM user WHERE user_name=%s""", (name,))
+        cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout,user_admin_level,user_email FROM user WHERE user_name=%s""", (name,))
         row = cursor.fetchone()
         cursor.close()
         return row
@@ -49,7 +49,7 @@ class DB(object):
 
     def user_get_matching(self, prefix):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout,user_admin_level FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
+        cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout,user_admin_level,user_email FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
         rows = cursor.fetchall()
         cursor.close()
         return rows

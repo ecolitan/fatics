@@ -223,6 +223,19 @@ class CommandList(object):
             if u.is_online:
                 conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 
+            else:
+                if u.last_logout == None:
+                    conn.write(_('%s has never connected.\n\n') % u.name)
+                else:
+                    conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
+            if u.is_guest:
+                conn.write(_('%s is NOT a registered player.\n') % u.name)
+            if u.admin_level > admin.Level.user:
+                conn.write(_('Admin Level: %s\n') % admin.level.to_str(u.admin_level))
+            if not u.is_guest and conn.user.admin_level > admin.Level.user:
+                conn.write(_('Email:       %s\n') % u.email)
+               
+            if u.is_online:
                 if u.session.use_timeseal:
                     conn.write(_('Timeseal: On\n\n'))
                 elif u.session.use_zipseal:
@@ -230,16 +243,6 @@ class CommandList(object):
                 else:
                     conn.write(_('Zipseal: Off\n\n'))
 
-            else:
-                if u.last_logout == None:
-                    conn.write(_('%s has never connected.\n\n') % u.name)
-                else:
-                    #conn.write(_('Last disconnected: %s\n\n') % u.last_logout)
-                    conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
-            if u.is_guest:
-                conn.write(_('%s is NOT a registered player.\n') % u.name)
-            if u.admin_level > admin.Level.user:
-                conn.write(_('Admin Level: %s\n') % admin.level.to_str(u.admin_level))
 
     def follow(self, args, conn):
         conn.write('FOLLOW\n')

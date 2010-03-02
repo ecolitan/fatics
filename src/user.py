@@ -85,6 +85,7 @@ class User(BaseUser):
         self.id = u['user_id']
         self.name = u['user_name']
         self.passwd_hash = u['user_passwd']
+        self.email = u['user_email']
         self.last_logout = u['user_last_logout']
         self.admin_level = u['user_admin_level']
         self.is_guest = False
