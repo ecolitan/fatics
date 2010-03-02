@@ -36,13 +36,13 @@ class BaseUser(object):
                     raise Exception("failed to kick off user")
         self.vars.update(var.varlist.get_transient_vars())
         self.games = []
-        self.is_online = True
         self.aliases = {}
         self.session = conn.session
         self.session.set_user(self)
-        online.add(self)
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
+        online.add(self)
+        self.is_online = True
         conn.write(_('**** Starting session as %s ****\n\n') % self.name)
 
     def log_off(self):
@@ -64,7 +64,29 @@ class BaseUser(object):
         return self.name + self.title_str
 
     def set_var(self, v, val):
-        self.vars[v.name] = val
+        if val != None:
+            self.vars[v.name] = val
+        else:
+            if v.name in self.vars:
+                del self.vars[v.name]
+    
+    def set_formula(self, v, val):
+        if val != None:
+            self.formula[v.name] = val
+        else:
+            if v.name in self.formula:
+                del self.formula[v.name]
+    
+    def set_note(self, v, val):
+        num = int(v.name, 10)
+        if val != None:
+            self.notes[num] = val
+        else:
+            if num in self.notes:
+                del self.notes[num]
+    
+    """def unset_var(self, v):
+        del self.vars[v.name]"""
 
     def add_channel(self, id):
         assert(type(id) == type(1) or type(id) == type(1l))
@@ -91,6 +113,12 @@ class User(BaseUser):
         self.is_guest = False
         self.channels = db.user_get_channels(self.id)
         self.vars = db.user_get_vars(self.id)
+        self.formula = {}
+        for f in db.user_get_formula(self.id):
+            self.formula[f['num']] = f['f']
+        self.notes = {}
+        for note in db.user_get_notes(self.id):
+            self.notes[note['num']] = note['txt']
         self._make_title_str()
 
     def _make_title_str(self):
@@ -112,7 +140,7 @@ class User(BaseUser):
         BaseUser.log_off(self)
         notify.notify.users(self.id, _("Notification: %s has departed.\n") % self.name)
         db.user_set_last_logout(self.id)
-
+   
     def set_passwd(self, passwd):
         self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
         db.user_set_passwd(self.id, self.passwd_hash)
@@ -136,7 +164,19 @@ class User(BaseUser):
 
     def set_var(self, v, val):
         BaseUser.set_var(self, v, val)
-        v.db_store(self.id, v.name, val)
+        db.user_set_var(self.id, v.name, val)
+    
+    def set_formula(self, v, val):
+        BaseUser.set_formula(self, v, val)
+        db.user_set_formula(self.id, v.name, val)
+    
+    def set_note(self, v, val):
+        BaseUser.set_note(self, v, val)
+        db.user_set_note(self.id, v.name, val)
+    
+    """def unset_var(self, v):
+        BaseUser.unset_var(self, v)
+        v.db_clear(self.id, v.name)"""
 
     def add_channel(self, id):
         BaseUser.add_channel(self, id)
@@ -184,10 +224,12 @@ class GuestUser(BaseUser):
         self.channels = channel.chlist.get_default_guest_channels()
         self.vars = var.varlist.get_default_vars()
         self.title_str = '(U)'
+        self.notes = {}
+        self.formula = {}
 
     def log_on(self, conn):
         BaseUser.log_on(self, conn)
-
+    
 class AmbiguousException(Exception):
     def __init__(self, names):
         self.names = names

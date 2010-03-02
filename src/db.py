@@ -29,6 +29,13 @@ class DB(object):
         up = """UPDATE user SET %s""" % name
         cursor.execute(up + """=%s WHERE user_id=%s""", (val,user_id))
         cursor.close()
+    
+    def user_get_formula(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT num,f FROM formula WHERE user_id=%s ORDER BY num ASC""", (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
 
     def user_set_formula(self, user_id, name, val):
         # ON DUPLICATE KEY UPDATE is probably not very portable to
@@ -37,14 +44,33 @@ class DB(object):
         assert(name in dbkeys.keys())
         num = dbkeys[name]
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO formula SET user_id=%s,num=%d,f=%s ON DUPLICATE KEY UPDATE""" % (user_id,num,val))
+        if val != None:
+            cursor.execute("""INSERT INTO formula SET user_id=%s,num=%d,f=%s ON DUPLICATE KEY UPDATE""", (user_id,num,val))
+        else:
+            cursor.execute("""DELETE FROM formula WHERE user_id=%s AND num=%d""", (user_id,num,val))
+            if cursor.rowcount != 1:
+                cursor.close()
+                raise DeleteError()
         cursor.close()
+    
+    def user_get_notes(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT num,txt FROM note WHERE user_id=%s ORDER BY num ASC""", (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
 
     def user_set_note(self, user_id, name, val):
         num = int(name, 10)
         assert(num >= 1 and num <= 10)
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO note SET user_id=%s,num=%d,txt=%s ON DUPLICATE KEY UPDATE""" % (user_id,num,val))
+        if val != None:
+            cursor.execute("""INSERT INTO note SET user_id=%s,num=%s,txt=%s ON DUPLICATE KEY UPDATE txt=%s""" , (user_id,num,val,val))
+        else:
+            cursor.execute("""DELETE FROM note WHERE user_id=%s AND num=%s""", (user_id,num))
+            if cursor.rowcount != 1:
+                cursor.close()
+                raise DeleteError()
         cursor.close()
 
     def user_get_matching(self, prefix):
@@ -140,7 +166,7 @@ class DB(object):
 
     def user_get_titles(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT title_flag,display FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s""", user_id)
+        cursor.execute("""SELECT title_flag,display FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows
@@ -165,14 +191,14 @@ class DB(object):
 
     def user_get_notified(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notified) WHERE notifier=%s""", user_id)
+        cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notified) WHERE notifier=%s""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows
 
     def user_get_notifiers(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notifier) WHERE notified=%s""", user_id)
+        cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notifier) WHERE notified=%s""", (user_id,))
         rows = cursor.fetchall()
         return rows
 
@@ -185,7 +211,7 @@ class DB(object):
 
     def title_get_users(self, title_id):
         cursor = self.db.cursor()
-        cursor.execute("""SELECT user_name FROM user LEFT JOIN user_title USING(user_id) WHERE title_id=%s""", title_id)
+        cursor.execute("""SELECT user_name FROM user LEFT JOIN user_title USING(user_id) WHERE title_id=%s""", (title_id,))
         rows = cursor.fetchall()
         cursor.close()
         return [r[0] for r in rows]

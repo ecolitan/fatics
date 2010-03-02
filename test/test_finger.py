@@ -4,9 +4,9 @@ class FingerTest(Test):
     def test_finger(self):
         t = self.connect_as_admin()
         t.write('finger\r\n')
-        self.expect('Finger of admin(*):', t, "finger")
-        self.expect('On for:', t, "finger of online user")
-        self.expect('Email:', t, "finger of online user")
+        self.expect('Finger of admin(*):', t)
+        self.expect('On for:', t)
+        self.expect('Email:', t)
 
         # finger with trailing space
         t.write('finger \r\n')

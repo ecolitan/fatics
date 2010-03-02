@@ -16,12 +16,13 @@ class Var(object):
         vars[self.name] = self
         self.db_store = lambda user_id, name, val: None
         self.is_persistent = False
+        # display in vars output
+        self.display_in_vars = True
 
     """Make a variable persistent with the given key in the
     user table."""
-    def persist(self, func=db.user_set_var):
+    def persist(self):
         self.is_persistent = True
-        self.db_store = func
 
     """This checks whether the given value for a var is legal and
     sets a user's value of the var.  Returns the message to display to
@@ -40,7 +41,38 @@ class StringVar(Var):
         if val == None:
             user.write(_('''%s unset.\n''') % self.name)
         else:
-            user.write((_('''%s set to "%s".\n''') % (self.name, val)))
+            user.write((_('''%s set to "%s".\n''') % (self.name,val)))
+
+    def get_display_str(self, val):
+        return '''%s="%s"''' % (self.name, val)
+
+class FormulaVar(Var):
+    max_len = 1023
+    def set(self, user, val):
+        assert(val == None or len(val) <= self.max_len)
+        user.set_formula(self, val)
+        if val == None:
+            user.write(_('''%s unset.\n''') % self.name)
+        else:
+            user.write((_('''%s set to "%s".\n''') % (self.name,val)))
+
+    def get_display_str(self, val):
+        return '''%s=%s''' % (self.name, val)
+
+class NoteVar(Var):
+    max_len = 1023
+
+    def __init__(self, name, default):
+        Var.__init__(self, name, default)
+        self.display_in_vars = False # don't display in "vars" output
+
+    def set(self, user, val):
+        assert(val == None or len(val) <= self.max_len)
+        user.set_note(self, val)
+        if val == None:
+            user.write(_('''Note %s unset.\n''') % self.name)
+        else:
+            user.write((_('''Note %s set: %s\n''') % (self.name,val)))
 
 """An integer variable."""
 class IntVar(Var):
@@ -51,6 +83,9 @@ class IntVar(Var):
             raise BadVarError
         user.set_var(self, val)
         user.write(_("%s set to %d.\n") % (self.name, val))
+    
+    def get_display_str(self, val):
+        return '''%s=%d''' % (self.name, val)
 
 """A boolean variable."""
 class BoolVar(Var):
@@ -72,6 +107,9 @@ class BoolVar(Var):
             user.write(self.on_msg + '\n')
         else:
             user.write(self.off_msg + '\n')
+    
+    def get_display_str(self, val):
+        return '''%s=%d''' % (self.name, int(val))
 
 class VarList(object):
     def __init__(self):
@@ -85,8 +123,13 @@ class VarList(object):
         IntVar("inc", 12).persist()
 
         StringVar("interface", None)
-        StringVar("formula", None).persist(db.user_set_formula)
-        StringVar("1", None).persist(db.user_set_note)
+
+        FormulaVar("formula", None).persist()
+        for i in range(1, 10):
+            FormulaVar("f%d" % i, None).persist()
+
+        for i in range(1, 11):
+            NoteVar(str(i), None).persist()
 
         self.default_vars = {}
         self.transient_vars = {}

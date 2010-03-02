@@ -6,3 +6,4 @@ new features:
 annotate journal games
 forward abusive tells to admins
 correspondence games
+multi-command aliases

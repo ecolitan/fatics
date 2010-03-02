@@ -2,6 +2,7 @@ import re
 import time
 import socket
 import gettext
+import operator
 
 import user
 import trie
@@ -237,11 +238,27 @@ class CommandList(object):
                
             if u.is_online:
                 if u.session.use_timeseal:
-                    conn.write(_('Timeseal: On\n\n'))
+                    conn.write(_('Timeseal: On\n'))
                 elif u.session.use_zipseal:
-                    conn.write(_('Zipseal: On\n\n'))
+                    conn.write(_('Zipseal: On\n'))
                 else:
-                    conn.write(_('Zipseal: Off\n\n'))
+                    conn.write(_('Zipseal: Off\n'))
+
+            notes = u.notes
+            if len(notes) > 0:
+                conn.write('\n')
+                prev_max = 0
+                for (num, txt) in sorted(notes.iteritems()):
+                    num = int(num)
+                    assert(num >= prev_max + 1)
+                    assert(num <= 10)
+                    if num > prev_max + 1:
+                        # fill in blank lines
+                        for j in range(prev_max + 1, num):
+                            conn.write(_("%2d: %s\n") % (j, ''))
+                    conn.write(_("%2d: %s\n") % (num, txt))
+                    prev_max = num
+                conn.write('\n')
 
 
     def follow(self, args, conn):
@@ -430,8 +447,10 @@ class CommandList(object):
 
         if u:
             conn.write(_("Variable settings of %s:\n\n") % u.name)
-            for var in u.vars.keys():
-                conn.write("%s=%s\n" % (var, conn.user.vars[var]))
+            for (vname, val) in u.vars.iteritems():
+                v = var.vars[vname]
+                if val != None and v.display_in_vars:
+                    conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
 
     def xtell(self, args, conn):
