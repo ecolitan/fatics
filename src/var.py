@@ -1,5 +1,7 @@
 import copy
+
 import trie
+import lang
 from db import db
 
 vars = trie.Trie()
@@ -48,7 +50,7 @@ class StringVar(Var):
 
 class LangVar(Var):
     def set(self, user, val):
-        if not val in user.session.conn.factory.langs:
+        if not val in lang.langs:
             raise BadVarError()
         user.set_var(self, val)
         user.write(_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val})

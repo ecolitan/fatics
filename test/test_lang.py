@@ -5,6 +5,9 @@ class TestLang(Test):
         t = self.connect_as_guest()
         t.write("who\n")
         self.expect("1 player displayed", t)
+        
+        t.write('set lang arst\n')
+        self.expect('Bad value', t)
 
         t.write('set lang compat\n')
         t.write("who\n")

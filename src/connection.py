@@ -7,6 +7,7 @@ from zope.interface import implements
 import telnet
 import user
 import command
+import lang
 from config import config
 from timeseal import timeseal
 from session import Session
@@ -22,7 +23,7 @@ class Connection(basic.LineReceiver):
     user = None
 
     def connectionMade(self):
-        self.factory.langs['en'].install(names=['ngettext'])
+        lang.langs['en'].install(names=['ngettext'])
 
         self.factory.connections.append(self)
         f = open("messages/welcome.txt")
@@ -111,7 +112,7 @@ class Connection(basic.LineReceiver):
         self.state = 'online'
 
     def lineReceived_online(self, line):
-        self.factory.langs[self.user.vars['lang']].install(names=['ngettext'])
+        lang.langs[self.user.vars['lang']].install(names=['ngettext'])
         try:
             command.parser.run(line, self)
             self.write('fics% ')

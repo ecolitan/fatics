@@ -7,14 +7,6 @@ import sys
 from twisted.application import service, internet
 from twisted.internet.protocol import ServerFactory
 from twisted.internet import reactor
-import gettext
-
-langs = {
-    'en': gettext.NullTranslations(),
-    'es': gettext.translation('chessd', languages=['es'], localedir='./locale'),
-    'compat': gettext.translation('chessd', languages=['compat'], localedir='./locale')
-}
-#gettext.install('chessd', './locale')
 
 from config import config
 import telnet
@@ -26,7 +18,6 @@ if os.geteuid() == 0:
 
 class IcsFactory(ServerFactory):
     connections = []
-    langs = langs
     def buildProtocol(self, addr):
         conn = telnet.TelnetTransport(connection.Connection)
         conn.factory = self
