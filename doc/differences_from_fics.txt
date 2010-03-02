@@ -40,6 +40,11 @@ added to notification lists. I didn't think such a feature would be useful
 enough to warrant the extra complexity that would be required to implement
 it.
 
+* The the behavior of empty finger note lines is different. For example,
+if you have only note 1 set, and you set note 5, notes 2-4 will
+automatically be filled with blank lines.  Subsequently deleting
+note 5 will clear notes 2-4 again.
+
 ===
 
 Admin differences:
