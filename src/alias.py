@@ -163,7 +163,7 @@ class Alias(object):
 
     """Expand system and user aliases in a given command."""
     def expand(self, s, syslist, userlist, user):
-        m = re.match(r'''^([@!#$%^&*\-+'"\/.,=]+)(.*)''', s)
+        m = re.match(r'''^([@!#$%^&*\-+'"\/.,=]+)\s*(.*)''', s)
         if m:
             word = m.group(1)
             rest = m.group(2)
@@ -238,6 +238,10 @@ class Alias(object):
                     if user.last_tell_ch == None:
                         raise AliasError()
                     ret += '%s' % user.last_tell_ch
+                elif char == '_':
+                    # from help new_features: $_ in an alias goes to -,
+                    # this allows handling of '$2-' vs '$2'-
+                    ret += '-'
                 elif char == '$':
                     ret += '$'
                 else:

@@ -9,3 +9,5 @@ correspondence games
 multi-command aliases
 
 consolidate user vars and other things like email, name
+country var for displaying a flag
+

@@ -23,7 +23,7 @@ print an error message rather than trying to execute the command anyway.
 "There are 0 players in channel N", rather than "Channel N is empty".
 
 * Vars intentionally not implemented: availinfo, availmin, availmax, rated,
-pgn (games are always mailed as pgn), tolerance, echo
+pgn (games are always mailed as pgn), tolerance, echo, ropen
 
 * The following are now aliases rather than commands: "open", "bell", "flip",
 "simopen", "style", "promote".  

@@ -12,6 +12,7 @@ import var
 import list
 import channel
 import alias
+import match
 from timer import timer
 from online import online
 from reload import reload
@@ -40,7 +41,8 @@ class Command(object):
                 if s == None:
                     raise BadCommandError()
                 else:
-                    m = re.split(r'\s+', s, 1)
+                    s = s.lstrip()
+                    m = re.split(r'\s', s, 1)
                     assert(len(m) > 0)
                     param = m[0]
                     if len(param) == 0:
@@ -60,7 +62,8 @@ class Command(object):
                 if s == None:
                     param = None
                 else:
-                    m = re.split(r'\s+', s, 1)
+                    s = s.lstrip()
+                    m = re.split(r'\s', s, 1)
                     assert(len(m) > 0)
                     param = m[0].lower()
                     if len(param) == 0:
@@ -310,9 +313,12 @@ class CommandList(object):
             conn.write(_("%s is playing a game.\n") % u.name)
         if not conn.user.vars['open']:
             var.vars['open'].set(conn.user, '1')
+
+
         # noplay, censor
-        conn.write('Issuing: challenge!\n')
-        u.write('Challenge: challenge!\n')
+        # adjourned games
+
+        match.Request(conn.user, u, args[1])
 
     def nuke(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)

@@ -6,6 +6,9 @@ class TellTest(Test):
         t = self.connect_as_admin()
         t.write('tell admin Hello there!\n')
         self.expect('admin(*) tells you: Hello there!', t, "tell self")
+        
+        t.write('tell admin \t  space  test\t\n')
+        self.expect('tells you: \t  space  test\t', t)
 
         t2 = self.connect_as_guest()
         t2.write('tell admin Guest tell\n')

@@ -20,6 +20,9 @@ class BaseUser(object):
     def __init__(self):
         self.is_online = False
 
+    def __eq__(self, other):
+        return self.name == other.name
+
     def log_on(self, conn):
         if not self.is_guest:
             if online.is_online(self.name):
