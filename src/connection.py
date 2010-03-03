@@ -26,8 +26,7 @@ class Connection(basic.LineReceiver):
         lang.langs['en'].install(names=['ngettext'])
 
         self.factory.connections.append(self)
-        f = open("messages/welcome.txt")
-        self.write(f.read())
+        self.write(config.welcome_msg)
         self.login()
         self.session = Session(self)
         self.session.login_last_command = time.time()
@@ -41,8 +40,7 @@ class Connection(basic.LineReceiver):
     def login(self):
         #assert(self.state == 'login')
         self.state = 'login'
-        f = open("messages/login.txt")
-        self.write(f.read())
+        self.write(config.login_msg)
         self.write("login: ")
 
     def lineReceived(self, line):
@@ -117,8 +115,7 @@ class Connection(basic.LineReceiver):
             command.parser.run(line, self)
             self.write('fics% ')
         except command.QuitException:
-            f = open("messages/logout.txt")
-            self.write(f.read())
+            self.write(config.logout_msg)
             self.loseConnection('quit')
 
     def loseConnection(self, reason):
