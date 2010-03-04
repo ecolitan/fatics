@@ -1,15 +1,23 @@
+"""Define admin levels and provide routines that
+check them."""
+
 class Level(object):
+    """represents admin levels"""
     user = 10
     admin = 100
     god = 1000
     head = 10000
-    
-    def to_str(self, level):
-        if level == self.head:
+
+    def __init__(self):
+        pass
+   
+    def to_str(self, lvl):
+        """convert the level to a string"""
+        if lvl == self.head:
             return _('Head Administrator')
-        elif level == self.god:
+        elif lvl == self.god:
             return _('Super User')
-        elif level == self.admin:
+        elif lvl == self.admin:
             return _('Administrator')
         else:
             return _('Unknown (%d)') % level

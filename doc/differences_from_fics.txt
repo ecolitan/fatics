@@ -35,6 +35,9 @@ that the name may or may not be a registered handle.
 
 * The "teams" list has been removed.
 
+* Time odds are supported again (it appears they were removed from the
+old FICS, but I could not find a posted explanation of why).
+
 * Unregistered users can no longer have notification lists, nor can they be
 added to notification lists. I didn't think such a feature would be useful
 enough to warrant the extra complexity that would be required to implement
@@ -45,11 +48,15 @@ if you have only note 1 set, and you set note 5, notes 2-4 will
 automatically be filled with blank lines.  Subsequently deleting
 note 5 will clear notes 2-4 again.
 
+* If you prefix a command with "$$" to avoid updating your idle time,
+aliases are now expanded.  To avoid expanding aliases (the old behavior
+of "$$"), use "$$$".
+
 ===
 
 Admin differences:
 * The following commands now require an exact login and do not accept
-abbreviations of names:  "asetadminlevel", "asetpasswd", "nuke".
+abbreviations of player names:  "asetadminlevel", "asetpasswd", "nuke".
 
 for removal:
 * Gods can now set their own adminlevel. Not sure if it's useful, but it

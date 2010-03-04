@@ -145,12 +145,16 @@ class CommandList(object):
             self.cmds[cmd.name] = cmd
     
     def accept(self, args, conn):
-        if len(conn.user.pending_received) == 0:
+        if len(conn.user.session.pending_received) == 0:
             conn.write(_('You have no pending offers from other players.\n'))
             return
-        if len(conn.user.pending_received) > 1 and args[0] == None:
-            conn.write(_('You have more than one pending offer. Use "pending" to see them and "accept n" to choose one.\n'))
-            return
+        if args[0] == None:
+            if len(conn.user.session.pending_received) > 1:
+                conn.write(_('You have more than one pending offer. Use "pending" to see them and "accept n" to choose one.\n'))
+                return
+            conn.user.session.pending_received.values()[0].accept()
+        else:
+            conn.write('ACCEPT PARAM\n')
 
     def addlist(self, args, conn):
         try:
@@ -228,10 +232,10 @@ class CommandList(object):
     
     
     def decline(self, args, conn):
-        if len(conn.user.pending_received) == 0:
+        if len(conn.user.session.pending_received) == 0:
             conn.write(_('You have no pending offers from other players.\n'))
             return
-        if len(conn.user.pending_received) > 1 and args[0] == None:
+        if len(conn.user.session.pending_received) > 1 and args[0] == None:
             conn.write(_('You have more than one pending offer. Use "pending" to see them and "decline n" to choose one.\n'))
             return
 
@@ -337,7 +341,7 @@ class CommandList(object):
         # noplay, censor
         # adjourned games
 
-        match.Request(conn.user, u, args[1])
+        match.Challenge(conn.user, u, args[1])
 
     def nuke(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)

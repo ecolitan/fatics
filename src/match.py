@@ -3,15 +3,8 @@ import re
 import variant
 import speed
 import command
-
-(WHITE, BLACK) = range(2)
-def opp(side):
-    assert side in [WHITE, BLACK]
-    return BLACK if side==WHITE else WHITE
-
-def side_to_str(side):
-    assert side in [WHITE, BLACK]
-    return "white" if side==WHITE else "black"
+import game
+from game import WHITE, BLACK
 
 class MatchPlayer(object):
     def __init__(self, u):
@@ -19,10 +12,12 @@ class MatchPlayer(object):
         self.side = None
 
 
-"""represents a challenge from one player to another"""
-class Request(object):
-    """a is the player issuing the challenge; b receives the request"""
+class Challenge(object):
+    """represents a challenge from one player to another"""
     def __init__(self, a, b, opts):
+        """a is the player issuing the challenge; b receives the request"""
+        self.is_time_odds = False
+
         self.player_a = MatchPlayer(a)
         self.player_b = MatchPlayer(b)
 
@@ -43,7 +38,7 @@ class Request(object):
 
         #a.write('%(aname) (%(arat))%(acol) %(bname) %(brat) %(rat) %(variant)')
         if self.player_a.side != None:
-            side_str = " [%s]" % side_to_str(self.player[1])
+            side_str = " [%s]" % game.side_to_str(self.player[1])
         else:
             side_str = ''
         
@@ -52,10 +47,15 @@ class Request(object):
 
         rated_str = "rated" if self.rated else "unrated"
 
-        time_str = "%d %d" % (self.player_a.time, self.player_a.inc)
+        if not self.is_time_odds:
+            time_str = "%d %d" % (self.player_a.time, self.player_a.inc)
+        else:
+            time_str = "%d %d %d %d" % (self.player_a.time, self.player_a.inc, self.player_b.time, self.player_b.inc)
         expected_duration = self.player_a.time + self.player_a.inc * float(2) / 3
         assert(expected_duration > 0)
-        if expected_duration < 3.0:
+        if self.is_time_odds:
+            self.speed = speed.nonstandard
+        elif expected_duration < 3.0:
             self.speed = speed.lightning
         elif expected_duration < 15.0:
             self.speed = speed.blitz
@@ -94,7 +94,7 @@ class Request(object):
         if self.player_a.side != None:
             raise command.BadCommandError()
         self.player_a.side = val
-        self.player_b.side = opp(val)
+        self.player_b.side = game.opp(val)
         self.side = val
     
     def set_wild(self, val):
@@ -139,22 +139,36 @@ class Request(object):
                     do_wild = True
 
         if len(times) == 1:
-            self.w_time = self.b_time = 60*times[0]
+            self.w_time = self.b_time = times[0]
             self.w_inc = self.b_inc = 0
         elif len(times) == 2:
-            self.w_time = self.b_time = 60*times[0]
+            self.w_time = self.b_time = times[0]
             self.w_inc = self.b_inc = times[1]
         elif len(times) == 3:
-            # time odds
-            self.set_rated(False)
+            self.is_time_odds = True
             self.w_time = 60*times[0]
             self.w_inc = self.b_inc = times[1]
             self.b_time = 60*times[1]
         elif len(times) == 4:
-            self.set_rated(False)
+            self.is_time_odds = True
+            (self.w_time, self.w_inc, self.b_time, self.b_inc) = times
         else:
             assert(False)
-           
+
+    """player b accepts"""
+    def accept(self):
+        a = self.player_a.user
+        b = self.player_b.user
+
+        del a.session.pending_sent[b.name]
+        del b.session.pending_received[a.name]
+
+        b.write(_("You accept the challenge of %s.\n") % a.name)
+        a.write(_("%s accepts your challenge.\n") % b.name)
+        g = game.Game(self)
+        a.session.games[b.name] = g
+        b.session.games[a.name] = g
+
     """player b declines"""
     def decline(self): 
         a = self.player_a.user

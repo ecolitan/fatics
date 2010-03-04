@@ -5,6 +5,7 @@ class Speed(object):
     def __str__(self):
         return self.name
 
+nonstandard = Speed('nonstandard')
 lightning = Speed('lightning')
 blitz = Speed('blitz')
 standard = Speed('standard')

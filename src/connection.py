@@ -116,7 +116,6 @@ class Connection(basic.LineReceiver):
             command.parser.run(line, self)
             self.write('fics% ')
         except command.QuitException:
-            self.write(config.logout_msg)
             self.loseConnection('quit')
 
     def loseConnection(self, reason):
@@ -125,6 +124,8 @@ class Connection(basic.LineReceiver):
         if self.user and self.user.is_online:
             self.user.log_off()
         self.transport.loseConnection()
+        if reason == 'quit':
+            self.write(config.logout_msg)
 
     def connectionLost(self, reason):
         basic.LineReceiver.connectionLost(self, reason)

@@ -1,14 +1,14 @@
 from test import  *
 
 class ConnectTest(OneConnectionTest):
-    def testWelcome(self):
+    def test_welcome(self):
         self.expect('Welcome', self.t, "welcome message")
 
-    def testLogin(self):
+    def test_login(self):
         self.expect('login:', self.t, "login prompt")
 
 class LoginTest(Test):
-    def testLogin(self):
+    def test_login(self):
         t = self.connect()
         t.read_until('login:', 2)
         t.write('\n')
@@ -37,7 +37,7 @@ class LoginTest(Test):
 
     """User should not actually be logged in until a correct password
     is entered."""
-    def testHalfLogin(self):
+    def test_half_login(self):
         t = self.connect()
         t.write('admin\n')
         t2 = self.connect_as_guest()
@@ -46,7 +46,7 @@ class LoginTest(Test):
         self.close(t2)
         t.close()
 
-    def testRegisteredUserLogin(self):
+    def test_registered_user_login(self):
         # registered user
         t = self.connect()
         t.write('admin\n')
@@ -56,7 +56,7 @@ class LoginTest(Test):
         self.expect(' Starting', t, "registered user login complete")
         self.close(t)
 
-    def testDoubleLogin(self):
+    def test_double_login(self):
         t = self.connect_as_admin()
         t2 = self.connect()
         t2.write('admin\n%s\n' % admin_passwd)
@@ -69,7 +69,7 @@ class LoginTest(Test):
         self.close(t)
         self.close(t2)
 
-def LogoutTest(Test):
+class LogoutTest(Test):
     def test_unclean_disconnec(self):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
@@ -88,6 +88,14 @@ class PromptTest(Test):
         self.expect('fics%', t, "fics% prompt")
         self.close(t)
 
+class LogoutTest(Test):
+    def test_logout(self):
+        t = self.connect_as_admin()
+        t.write('quit\n')
+        self.expect('Thank you for using', t)
+        t.close()
+
+""" works but disabled for speed
 class TimeoutTest(Test):
     def test_timeout(self):
         t = self.connect()
@@ -100,12 +108,11 @@ class TimeoutTest(Test):
         self.expect('TIMEOUT', t, "login timeout at password prompt", timeout=65)
         t.close()
 
-    """
-    works but disabled for speed
-    def testGuestTimeout(self):
+    def test_guest_timeout(self):
             t = self.connect()
             t.write("guest\n")
             self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
-            t.close()"""
+            t.close()
+"""
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

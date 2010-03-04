@@ -43,14 +43,7 @@ class BaseUser(object):
     def log_off(self):
         for ch in self.channels:
             channel.chlist[ch].log_off(self)
-        for (k, v) in self.session.pending_sent.iteritems():
-            v.withdraw()
-            v.player_b.user.write(_('%s, who was challenging you, has departed.\n') % k)
-        for (k, v) in self.session.pending_received.iteritems():
-            v.decline()
-            v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % k)
-        self.session.pending_received.clear()
-        self.session.pending_sent.clear()
+        self.session.close()
         self.is_online = False
         online.remove(self)
 

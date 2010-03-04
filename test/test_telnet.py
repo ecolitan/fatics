@@ -1,7 +1,7 @@
 from test import *
 
 class TelnetTest(Test):
-    def testTelnet(self):
+    def test_telnet(self):
         t = self.connect()
         t.read_until('fics%', 2)
         os.write(t.fileno(), chr(255) + chr(244))

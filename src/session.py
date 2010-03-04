@@ -18,7 +18,7 @@ class Session(object):
         self.check_for_timeseal = True
         self.pending_sent = {}
         self.pending_received = {}
-        self.games = []
+        self.games = {}
 
     def set_user(self, user):
         self.user = user
@@ -32,5 +32,17 @@ class Session(object):
     def get_online_time(self):
         assert(self.login_time != None)
         return timer.hms(time.time() - self.login_time)
+        
+    def close(self):     
+        for (k, v) in self.pending_sent.iteritems():
+            v.withdraw()
+            v.player_b.user.write(_('%s, who was challenging you, has departed.\n') % k)
+        for (k, v) in self.pending_received.iteritems():
+            v.decline()
+            v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % k)
+        self.pending_received.clear()
+        self.pending_sent.clear()
+        if len(self.games) > 0:
+            self.conn.write('Your game will be lost because adjourning is not implemented.\n')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

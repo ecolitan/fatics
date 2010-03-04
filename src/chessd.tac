@@ -6,7 +6,7 @@ import os
 import sys
 from twisted.application import service, internet
 from twisted.internet.protocol import ServerFactory
-from twisted.internet import reactor
+from twisted.internet import epollreactor
 
 from config import config
 import telnet

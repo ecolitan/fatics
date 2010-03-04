@@ -50,4 +50,20 @@ class TestMatch(Test):
         self.expect('whom you were challenging, has departed', t)
         self.close(t)
 
+    def test_accept(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('You accept', t2)
+        self.expect('accepts your challenge', t)
+        
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.close()
+        t2.close()
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
