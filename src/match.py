@@ -1,6 +1,5 @@
 import re
 
-import variant
 import speed
 import command
 import game
@@ -21,7 +20,7 @@ class Challenge(object):
         self.player_a = MatchPlayer(a)
         self.player_b = MatchPlayer(b)
 
-        self.variant = variant.normal
+        self.variant_name = 'normal'
 
         self.player_a.time = self.player_b.time = a.vars['time']
         self.player_a.inc = self.player_b.inc = a.vars['inc']
@@ -42,8 +41,8 @@ class Challenge(object):
         else:
             side_str = ''
         
-        self.player_a.rating = a.get_rating(self.variant)
-        self.player_b.rating = b.get_rating(self.variant)
+        self.player_a.rating = a.get_rating(self.variant_name)
+        self.player_b.rating = b.get_rating(self.variant_name)
 
         rated_str = "rated" if self.rated else "unrated"
 
@@ -64,8 +63,14 @@ class Challenge(object):
         else:
             self.speed = speed.slow
 
-        # example: admin (++++) [white] hans (----) unrated blitz 5 0.
-        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.player_a.user.name, self.player_a.rating, side_str, self.player_b.user.name, self.player_b.rating, rated_str, self.speed, time_str)
+        if self.variant_name == 'normal':
+            # normal chess has no variant name, e.g. "blitz"
+            self.variant_and_speed = self.speed
+        else:
+            self.variant_and_speed = '%s %s' % (self.variant_name,self.speed)
+
+        # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
+        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.player_a.user.name, self.player_a.rating, side_str, self.player_b.user.name, self.player_b.rating, rated_str, self.variant_and_speed, time_str)
 
 
         #if self.board != None:
@@ -98,7 +103,7 @@ class Challenge(object):
         self.side = val
     
     def set_wild(self, val):
-        self.variant = None
+        self.variant_name = val
 
     def _parse_opts(self, opts):
         args = re.split(r'\s+', opts)

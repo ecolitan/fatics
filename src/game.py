@@ -1,5 +1,7 @@
 import random
 
+from variant.variant_factory import variant_factory
+
 (WHITE, BLACK) = range(2)
 def opp(side):
     assert side in [WHITE, BLACK]
@@ -31,10 +33,12 @@ class Game(object):
         self.black_clock = self.black.time*60.0
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
-        create_str = 'Creating: %s (%s) %s (%s) %s %s %s\n' % (self.white.user.name, self.white.rating, self.black.user.name, self.black.rating, rated_str, self.speed, time_str)
+        create_str = 'Creating: %s (%s) %s (%s) %s %s %s\n' % (self.white.user.name, self.white.rating, self.black.user.name, self.black.rating, rated_str, chal.variant_and_speed, time_str)
     
         self.white.user.write(create_str)
         self.black.user.write(create_str)
+
+        self.variant = variant_factory.get(chal.variant_name)
 
     def _pick_color(self, a, b): 
         return random.choice([WHITE, BLACK])
