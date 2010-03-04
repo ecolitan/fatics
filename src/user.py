@@ -4,7 +4,6 @@ import random
 import string
 
 import admin
-import session
 import var
 import channel
 import notify

@@ -1,6 +1,5 @@
 import re
 import time
-import socket
 import gettext
 import operator
 
@@ -110,6 +109,7 @@ class CommandList(object):
         # a command given a substring
         self.cmds = trie.Trie()
         self.admin_cmds = trie.Trie()
+        self._add(Command('accept', 'n', self.accept, admin.Level.user))
         self._add(Command('addlist', 'ww', self.addlist, admin.Level.user))
         self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
         self._add(Command('announce', 'S', self.announce, admin.Level.admin))
@@ -117,6 +117,7 @@ class CommandList(object):
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
         self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
         self._add(Command('date', '', self.date, admin.Level.user))
+        self._add(Command('decline', 'n', self.decline, admin.Level.user))
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
         self._add(Command('help', 'o', self.help, admin.Level.user))
@@ -135,12 +136,21 @@ class CommandList(object):
         self._add(Command('uptime', '', self.uptime, admin.Level.user))
         self._add(Command('variables', 'o', self.variables, admin.Level.user))
         self._add(Command('who', 'T', self.who, admin.Level.user))
+        self._add(Command('withdraw', 'n', self.withdraw, admin.Level.user))
         self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
 
     def _add(self, cmd):
         self.admin_cmds[cmd.name] = cmd
         if cmd.admin_level <= admin.Level.user:
             self.cmds[cmd.name] = cmd
+    
+    def accept(self, args, conn):
+        if len(conn.user.pending_received) == 0:
+            conn.write(_('You have no pending offers from other players.\n'))
+            return
+        if len(conn.user.pending_received) > 1 and args[0] == None:
+            conn.write(_('You have more than one pending offer. Use "pending" to see them and "accept n" to choose one.\n'))
+            return
 
     def addlist(self, args, conn):
         try:
@@ -215,6 +225,15 @@ class CommandList(object):
         #conn.write(_("Local time     - %s\n") % )
         conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(t)))
         conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
+    
+    
+    def decline(self, args, conn):
+        if len(conn.user.pending_received) == 0:
+            conn.write(_('You have no pending offers from other players.\n'))
+            return
+        if len(conn.user.pending_received) > 1 and args[0] == None:
+            conn.write(_('You have more than one pending offer. Use "pending" to see them and "decline n" to choose one.\n'))
+            return
 
     def finger(self, args, conn):
         u = None
@@ -506,6 +525,14 @@ class CommandList(object):
             count = count + 1
         conn.write('\n')
         conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
+    
+    def withdraw(self, args, conn):
+        if len(conn.user.pending_sent) == 0:
+            conn.write(_('You have no pending offers to other players.\n'))
+            return
+        if len(conn.user.pending_sent) > 1 and args[0] == None:
+            conn.write(_('You have more than one pending offer. Use "pending" to see them and "withdraw n" to choose one.\n'))
+            return
 
 command_list = CommandList()
 

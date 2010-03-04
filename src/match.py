@@ -2,6 +2,7 @@ import re
 
 import variant
 import speed
+import command
 
 (WHITE, BLACK) = range(2)
 def opp(side):
@@ -75,7 +76,7 @@ class Request(object):
         if b.name in sent:
             a.write(_('Updating offer already made to %s.\n') % b.name)
             del sent[b.name]
-            del received[b.name]
+            del received[a.name]
         sent[b.name] = self
         received[a.name] = self
 
@@ -85,13 +86,13 @@ class Request(object):
     def set_rated(self, val):
         assert(val in [True, False])
         if self.rated != None:
-            raise Command.BadCommandError()
+            raise command.BadCommandError()
         self.rated = val
     
     def set_side(self, val):
         assert(val in [WHITE, BLACK])
         if self.player_a.side != None:
-            raise Command.BadCommandError()
+            raise command.BadCommandError()
         self.player_a.side = val
         self.player_b.side = opp(val)
         self.side = val
@@ -99,7 +100,7 @@ class Request(object):
     def set_wild(self, val):
         self.variant = None
 
-    def _parse_request(opts):
+    def _parse_opts(self, opts):
         args = re.split(r'\s+', opts)
         times = []
         do_wild = False
@@ -114,7 +115,7 @@ class Request(object):
                     self.set_wild(w)
                 if len(times) > 3:
                     # no more than 4 time values should be given
-                    raise BadCommandError()
+                    raise command.BadCommandError()
                 times.append(num)
                 continue
 

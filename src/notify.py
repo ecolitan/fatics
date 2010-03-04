@@ -1,4 +1,4 @@
-from db import *
+from db import db
 from online import online
 
 #"""A giant dict whose keys consist of every user who might potentially

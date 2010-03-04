@@ -3,7 +3,7 @@ import trie
 import channel
 import admin
 import user
-from db import *
+from db import db, DuplicateKeyError, DeleteError
 
 lists = trie.Trie()
 

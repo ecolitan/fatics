@@ -2,7 +2,6 @@ import copy
 
 import trie
 import lang
-from db import db
 
 vars = trie.Trie()
 
