@@ -2,7 +2,7 @@ import sys
 import copy
 
 from db import db
-from online import online
+#from online import online
 
 class ChannelError(Exception):
     pass

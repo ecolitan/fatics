@@ -62,24 +62,39 @@ class LoginTest(Test):
         t2.write('admin\n%s\n' % admin_passwd)
         self.expect(' is already logged in', t2)
         self.expect(' has arrived', t)
-        t.close()
-        t2.close()
 
+        t2.write('fi\n')
+        self.expect('On for: ', t2)
+
+        self.close(t)
+        self.close(t2)
+
+def LogoutTest(Test):
+    def test_unclean_disconnec(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+        t2.write('who\n')
+        self.expect('2 players', t2)
+        t.close()
+        t2.write('who\n')
+        time.sleep(0.1)
+        self.expect('1 player', t2)
+        self.close(t2)
 
 class PromptTest(Test):
-    def testPrompt(self):
+    def test_prompt(self):
         t = self.connect()
         t.write('guest\n\n')
         self.expect('fics%', t, "fics% prompt")
         self.close(t)
 
 class TimeoutTest(Test):
-    def testTimeout(self):
+    def test_timeout(self):
         t = self.connect()
         self.expect('TIMEOUT', t, "login timeout", timeout=65)
         t.close()
 
-    def testGuestTimeoutPassword(self):
+    def test_guest_timeout_password(self):
         t = self.connect()
         t.write("guest\n")
         self.expect('TIMEOUT', t, "login timeout at password prompt", timeout=65)

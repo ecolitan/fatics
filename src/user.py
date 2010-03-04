@@ -31,14 +31,7 @@ class BaseUser(object):
                 u.session.conn.write(_("**** %s has arrived; you can't both be logged in. ****\n\n") % self.name)
                 #u.session.conn.write(_("**** %s has arrived - you can't both be logged in. ****\n\n") % self.name)
                 u.session.conn.loseConnection('logged in again')
-            count = 0
-            while online.is_online(self.name):
-                time.sleep(0.1)
-                count += 1
-                if count > 50:
-                    raise Exception("failed to kick off user")
         self.vars.update(var.varlist.get_transient_vars())
-        self.games = []
         self.aliases = {}
         self.session = conn.session
         self.session.set_user(self)
@@ -51,6 +44,14 @@ class BaseUser(object):
     def log_off(self):
         for ch in self.channels:
             channel.chlist[ch].log_off(self)
+        for (k, v) in self.session.pending_sent.iteritems():
+            v.withdraw()
+            v.player_b.user.write(_('%s, who was challenging you, has departed.\n') % k)
+        for (k, v) in self.session.pending_received.iteritems():
+            v.decline()
+            v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % k)
+        self.session.pending_received.clear()
+        self.session.pending_sent.clear()
         self.is_online = False
         online.remove(self)
 
@@ -102,6 +103,12 @@ class BaseUser(object):
 
     def set_admin_level(self, level):
         self.admin_level = level
+
+    def get_rating(self, variant):
+        if self.is_guest:
+            return '++++'
+        else:
+            return '----'
 
 # a registered user
 class User(BaseUser):
@@ -272,9 +279,7 @@ class Find(object):
                 # users who also match
                 raise AmbiguousException([u.name for u in ulist])
         if u and online_only:
-            if not u.is_online:
-                print "%s is online and not online" % u.name
-                assert(False)
+            assert(u.is_online)
         if not u and not online_only:
             ulist = db.user_get_matching(name)
             if len(ulist) == 1:

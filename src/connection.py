@@ -21,6 +21,7 @@ class Connection(basic.LineReceiver):
     MAX_LENGTH = 1024
     state = 'login'
     user = None
+    logged_in_again = False
 
     def connectionMade(self):
         lang.langs['en'].install(names=['ngettext'])
@@ -119,6 +120,8 @@ class Connection(basic.LineReceiver):
             self.loseConnection('quit')
 
     def loseConnection(self, reason):
+        if reason == 'logged in again':
+            self.logged_in_again = True
         if self.user and self.user.is_online:
             self.user.log_off()
         self.transport.loseConnection()
@@ -126,7 +129,10 @@ class Connection(basic.LineReceiver):
     def connectionLost(self, reason):
         basic.LineReceiver.connectionLost(self, reason)
         try:
-            if self.user.is_online:
+            # as a special case, we don't want to remove our user name
+            # from the online list if we are losing this connection
+            # because the same user is logging in from another connection
+            if self.user.is_online and not self.logged_in_again:
                 self.user.log_off()
             self.session.close()
         except AttributeError:

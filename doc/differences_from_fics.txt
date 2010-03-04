@@ -58,3 +58,9 @@ follows the principle of "gods can do anything".
 * It's no longer possible go give a guest a title (athough it is still
 possible to set a guest's adminlevel).
 
+=== 
+Internal differences:
+
+Rather than a global array of all challenges, each player's list of
+challenges sent and received are stored separately.
+

@@ -16,6 +16,9 @@ class Session(object):
         self.use_timeseal = False
         self.use_zipseal = False
         self.check_for_timeseal = True
+        self.pending_sent = {}
+        self.pending_received = {}
+        self.games = []
 
     def set_user(self, user):
         self.user = user

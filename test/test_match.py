@@ -25,5 +25,29 @@ class TestMatch(Test):
 
         self.close(t)
         self.close(t2)
+    
+    def test_withdraw_logout(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        t2.write('match guest\n')
+        t2.write('quit\n')
+        self.expect('Withdrawing your challenge to Guest', t2)
+        t2.close()
+
+        self.expect('who was challenging you, has departed', t)
+        self.close(t)
+    
+    def test_decline_logout(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+
+        t.write('match admin\n')
+        self.expect('Challenge:', t2)
+        t2.write('quit\n')
+        self.expect('Declining the challenge from Guest', t2)
+        t2.close()
+
+        self.expect('whom you were challenging, has departed', t)
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
