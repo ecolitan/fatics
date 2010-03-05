@@ -153,7 +153,7 @@ class CommandList(object):
                 return
             conn.user.session.pending_received.values()[0].accept()
         else:
-            conn.write('ACCEPT PARAM\n')
+            conn.write('TODO: ACCEPT PARAM\n')
 
     def addlist(self, args, conn):
         try:
@@ -234,9 +234,13 @@ class CommandList(object):
         if len(conn.user.session.pending_received) == 0:
             conn.write(_('You have no pending offers from other players.\n'))
             return
-        if len(conn.user.session.pending_received) > 1 and args[0] == None:
-            conn.write(_('You have more than one pending offer. Use "pending" to see them and "decline n" to choose one.\n'))
-            return
+        if args[0] == None:
+            if len(conn.user.session.pending_received) > 1 and args[0] == None:
+                conn.write(_('You have more than one pending offer. Use "pending" to see them and "decline n" to choose one.\n'))
+                return
+            conn.user.session.pending_received.values()[0].decline()
+        else:
+            conn.write('TODO: DECLINE PARAM\n')
 
     def finger(self, args, conn):
         u = None
@@ -288,7 +292,7 @@ class CommandList(object):
 
 
     def follow(self, args, conn):
-        conn.write('FOLLOW\n')
+        conn.write('TODO: FOLLOW\n')
 
     def help(self, args, conn):
         if conn.user.admin_level > admin.level.user:
@@ -340,7 +344,7 @@ class CommandList(object):
         # noplay, censor
         # adjourned games
 
-        match.Challenge(conn.user, u, args[1])
+        match.Offer(conn.user, u, args[1])
 
     def nuke(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)
@@ -530,12 +534,16 @@ class CommandList(object):
         conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
     
     def withdraw(self, args, conn):
-        if len(conn.user.pending_sent) == 0:
+        if len(conn.user.session.pending_sent) == 0:
             conn.write(_('You have no pending offers to other players.\n'))
             return
-        if len(conn.user.pending_sent) > 1 and args[0] == None:
-            conn.write(_('You have more than one pending offer. Use "pending" to see them and "withdraw n" to choose one.\n'))
-            return
+        if args[0] == None:
+            if len(conn.user.session.pending_sent) > 1:
+                conn.write(_('You have more than one pending offer. Use "pending" to see them and "withdraw n" to choose one.\n'))
+                return
+            conn.user.session.pending_sent.values()[0].withdraw()
+        else:
+            conn.write('TODO: WITHDRAW PARAM\n')
 
 command_list = CommandList()
 

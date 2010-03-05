@@ -41,6 +41,9 @@ class Board(object):
     def valid_sq(self, sq):
         return not (sq & 0x88)
 
+    def sq_from_str(self, sq):
+        return 'abcdefgh'.index(sq[0]) + 0x10 * '12345678'.index(sq[1])
+
     def make_move(self, fr, to):
         """Raises IllegalMoveError when appropriate."""
         pc = self.board[fr]
@@ -145,21 +148,21 @@ class Normal(Variant):
         self.board = copy.copy(initial_pos)
         print 'this is normal chess'
 
-    '''def is_move(s):
+    '''def is_move(self, s):
         """check whether is a move"""
     
         # long-algebraic (e.g. "e2e4", "b7a8=Q")
         m = re.match('([a-h][1-8])([a-h][1-8])(?:=([nbrq]))', s)
         return m'''
 
-    def do_move(s, conn):
+    def do_move(self, s, conn):
         """Try to parse a move and execute it.  If it looks like a move but
         is erroneous or illegal, raise an exception.  Return True if
         the move was handled, or False if it does not look like a move
         and should be processed further."""
 
         matched = False
-        m = re.match('([a-h][1-8])([a-h][1-8])(?:=([nbrq]))', s)
+        m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([nbrq]))?', s)
         if m:
             fr = self.board.sq_from_str(m.group(1))
             to = self.board.sq_from_str(m.group(2))

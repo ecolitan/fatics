@@ -13,7 +13,7 @@ class CommandParser(object):
         s = s.strip()
 
         if len(conn.user.session.games) > 0:
-            if conn.user.session.games[0].variant.do_move(s):
+            if conn.user.session.games.values()[0].variant.do_move(s, conn):
                 return
 
         if not utf8.checker.check_user_utf8(s):

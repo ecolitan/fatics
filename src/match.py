@@ -11,10 +11,10 @@ class MatchPlayer(object):
         self.side = None
 
 
-class Challenge(object):
+class Offer(object):
     """represents a challenge from one player to another"""
     def __init__(self, a, b, opts):
-        """a is the player issuing the challenge; b receives the request"""
+        """a is the player issuing the offer; b receives the request"""
         self.is_time_odds = False
 
         self.player_a = MatchPlayer(a)
@@ -37,8 +37,8 @@ class Challenge(object):
             self.rated = True
 
         #a.write('%(aname) (%(arat))%(acol) %(bname) %(brat) %(rat) %(variant)')
-        if self.player_a.side != None:
-            side_str = " [%s]" % game.side_to_str(self.player[1])
+        if self.side != None:
+            side_str = " [%s]" % game.side_to_str(self.side)
         else:
             side_str = ''
         
@@ -80,7 +80,7 @@ class Challenge(object):
         sent = a.session.pending_sent
         received = b.session.pending_received
         if b.name in sent:
-            a.write(_('Updating offer already made to %s.\n') % b.name)
+            a.write(_('Updating the offer already made to %s.\n') % b.name)
             del sent[b.name]
             del received[a.name]
         sent[b.name] = self
@@ -144,7 +144,9 @@ class Challenge(object):
                 elif w == 'wild':
                     do_wild = True
 
-        if len(times) == 1:
+        if len(times) == 0:
+            pass
+        elif len(times) == 1:
             self.w_time = self.b_time = times[0]
             self.w_inc = self.b_inc = 0
         elif len(times) == 2:
@@ -169,22 +171,30 @@ class Challenge(object):
         del a.session.pending_sent[b.name]
         del b.session.pending_received[a.name]
 
-        b.write(_("You accept the challenge of %s.\n") % a.name)
-        a.write(_("%s accepts your challenge.\n") % b.name)
+        b.write(_("Accepting the offer from %s.\n") % a.name)
+        a.write(_("%s accepts your offer.\n") % b.name)
         g = game.Game(self)
         a.session.games[b.name] = g
         b.session.games[a.name] = g
 
     """player b declines"""
-    def decline(self): 
+    def decline(self, logout=False):
         a = self.player_a.user
-        self.player_b.user.write(_("Declining the challenge from %s.\n") % a.name)
+        b = self.player_b.user
+        b.write(_("Declining the offer from %s.\n") % a.name)
         del a.session.pending_sent[self.player_b.user.name]
+        if not logout:
+            a.write(_("%s declines the offer.\n") % b.name)
+            del b.session.pending_received[self.player_a.user.name]
 
     """player a withdraws the offer"""
-    def withdraw(self): 
+    def withdraw(self, logout=False):
+        a = self.player_a.user
         b = self.player_b.user
-        self.player_a.user.write(_("Withdrawing your challenge to %s.\n") % b.name)
+        a.write(_("Withdrawing your offer to %s.\n") % b.name)
+        if not logout:
+            b.write(_("%s withdraws the offer.\n") % a.name)
+            del a.session.pending_sent[self.player_b.user.name]
         del b.session.pending_received[self.player_a.user.name]
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

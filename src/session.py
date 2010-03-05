@@ -19,6 +19,8 @@ class Session(object):
         self.pending_sent = {}
         self.pending_received = {}
         self.games = {}
+        # should be changed to support simuls
+        self.is_white = None
 
     def set_user(self, user):
         self.user = user
@@ -33,12 +35,15 @@ class Session(object):
         assert(self.login_time != None)
         return timer.hms(time.time() - self.login_time)
         
-    def close(self):     
+    def close(self):
+        # python docs: "Using iteritems() while adding or deleting entries
+        # in the dictionary may raise a RuntimeError or fail to iterate
+        # over all entries."  So pass a flag to avoid deleting.
         for (k, v) in self.pending_sent.iteritems():
-            v.withdraw()
+            v.withdraw(logout=True)
             v.player_b.user.write(_('%s, who was challenging you, has departed.\n') % k)
         for (k, v) in self.pending_received.iteritems():
-            v.decline()
+            v.decline(logout=True)
             v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % k)
         self.pending_received.clear()
         self.pending_sent.clear()
