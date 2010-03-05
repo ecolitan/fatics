@@ -10,12 +10,15 @@ import unittest
 import time
 from twisted.conch import telnet
 from twisted.internet import protocol, epollreactor
+import cProfile
 
 from test import host, port
 
 epollreactor.install()
 
 from twisted.internet import reactor
+
+port = 5001
 
 conn_count = 3500
 start_time = time.time()
@@ -56,10 +59,15 @@ class TestLoad(unittest.TestCase):
         for i in xrange(0, conn_count):
             reactor.connectTCP(host, int(port), fact)
 
-        reactor.callLater(100, self._shut_down)
+        reactor.callLater(50, self._shut_down)
+
+        print 'ok'
 
         # Let's go
-        reactor.run()
+        if not profile:
+            reactor.run()
+        else:
+            cProfile.runctx('reactor.run()', globals(), locals())
 
         for c in conns:
             self.assert_(c.state == 'done')
