@@ -52,6 +52,10 @@ note 5 will clear notes 2-4 again.
 aliases are now expanded.  To avoid expanding aliases (the old behavior
 of "$$"), use "$$$".
 
+* If you enter a move (such as "e2e4") while you aren't playing a game,
+you'll now receive the generic "Command not found" message, rather than
+"You are not playing or examining a game".
+
 ===
 
 Admin differences:

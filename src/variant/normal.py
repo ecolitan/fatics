@@ -10,6 +10,8 @@ from variant import Variant
 
 class BadFenError(Exception):
     pass
+class IllegalMoveError(Exception):
+    pass
 
 (BP, BN, BB, BR, BQ, BK, WP, WN, WB, WR, WQ, WK, BLANK) = range(13)
 class Board(object):
@@ -38,6 +40,18 @@ class Board(object):
 
     def valid_sq(self, sq):
         return not (sq & 0x88)
+
+    def make_move(self, fr, to):
+        """Raises IllegalMoveError when appropriate."""
+        pc = self.board[fr]
+        if pc == BLANK or self.piece_is_white(pc) != self.wtm:
+            raise IllegalMoveError()
+        topc = self.board[to]
+        if topc != BLANK and self.piece_is_white(topc) == self.wtm:
+            # cannot capture own piece
+            raise IllegalMoveError()
+        self.board[to] = self.board[fr]
+        self.board[fr] = BLANK
 
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
@@ -131,10 +145,41 @@ class Normal(Variant):
         self.board = copy.copy(initial_pos)
         print 'this is normal chess'
 
-    def get_move(s):
-        """attempt to get the next move from s, returning None if it's
-        not a move"""
-        pass
+    '''def is_move(s):
+        """check whether is a move"""
+    
+        # long-algebraic (e.g. "e2e4", "b7a8=Q")
+        m = re.match('([a-h][1-8])([a-h][1-8])(?:=([nbrq]))', s)
+        return m'''
+
+    def do_move(s, conn):
+        """Try to parse a move and execute it.  If it looks like a move but
+        is erroneous or illegal, raise an exception.  Return True if
+        the move was handled, or False if it does not look like a move
+        and should be processed further."""
+
+        matched = False
+        m = re.match('([a-h][1-8])([a-h][1-8])(?:=([nbrq]))', s)
+        if m:
+            fr = self.board.sq_from_str(m.group(1))
+            to = self.board.sq_from_str(m.group(2))
+            if m.group(3) != None:
+                prom = self.board.char_to_piece(m.group(3))
+            else:
+                prom = None
+            matched = True
+
+        if matched:
+            if not conn.user.session.is_white == self.board.wtm:
+                conn.write(_('It is not your move.\n'))
+            else:
+                try:
+                    self.board.make_move(fr, to, prom)
+                except IllegalMoveError:
+                    conn.write('Illegal move (%s)\n' % s)
+
+        return matched
+
 
 
 initial_pos = Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')

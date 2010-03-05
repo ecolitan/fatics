@@ -26,6 +26,7 @@ class Challenge(object):
         self.player_a.inc = self.player_b.inc = a.vars['inc']
 
         self.rated = None
+        # the side requested by a, if any
         self.side = None
 
         if opts != None:
