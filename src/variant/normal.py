@@ -8,6 +8,7 @@ import copy
 from array import array
 
 from variant import Variant
+import globals
     
 """
 0x88 board representation; pieces are represented as ASCII,
@@ -44,6 +45,16 @@ def dir(fr, to):
     return direction_table[to - fr + 0x7f]
 
 sliding_pieces = frozenset(['b', 'r', 'q', 'B', 'R', 'Q'])
+
+piece_material = {
+    '-': 0,
+    'p': 1,
+    'n': 3,
+    'b': 3,
+    'r': 5,
+    'q': 9,
+    'k': 0
+}
 
 def to_castle_flags(w_oo, w_ooo, b_oo, b_ooo):
     return w_oo << 3 + w_ooo << 2 + b_oo << 1 + b_ooo
@@ -89,6 +100,7 @@ class Move(object):
         self.is_oo = is_oo
         self.is_ooo = is_ooo
         self.is_capture = pos.board[to] != '-'
+        self.new_ep = None
 
     def check_pseudo_legal(self):
         """Tests if a move is pseudo-legal, that is, legal ignoring the
@@ -166,9 +178,13 @@ class Move(object):
         self.pos.undo_move(self)
         return legal
 
+class Undo(object):
+    """information needed to undo a move"""
+    pass
 
 class Position(object):
     def __init__(self, fen):
+        # XXX make an array
         self.board = 0x80 * ['-']
         # indexed by 2 * wtm + i, where i=0 for O-O and i=1 for O-O-O
         self.castle_flags = 0
@@ -200,10 +216,12 @@ class Position(object):
             m = re.match(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''', fen)
             if not m:
                 raise BadFenError()
-            (pos, side, castle_flags, ep, half_moves, full_moves) = (m.group(1), m.group(2), m.group(3), m.group(4), m.group(5), m.group(6))
+            (pos, side, castle_flags, ep, fifty_count, full_moves) = [
+                m.group(i) for i in range(1, 7)]
 
             ranks = pos.split('/')
             ranks.reverse()
+            self.material = [0, 0]
             for (r, rank) in enumerate(ranks):
                 sq = 0x10 * r
                 for c in rank:
@@ -213,6 +231,8 @@ class Position(object):
                     else:
                         assert(valid_sq(sq))
                         self.board[sq] = c
+                        self.material[int(piece_is_white(c))] += \
+                            piece_material[c.lower()]
                         if c == 'k':
                             if self.kpos[0] != None:
                                 # multiple kings
@@ -245,10 +265,9 @@ class Position(object):
                 self.ep = ep[0].index('abcdefgh') + \
                     0x10 * ep[1].index('012345678')
             
-            self.half_moves = int(half_moves, 10)
-            if int(full_moves, 10) != self.half_moves / 2 + 1:
-                raise BadFenError()
-            
+            self.fifty_count = int(fifty_count, 10)
+            self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
+
             self._detect_check()
 
         except AssertionError:
@@ -256,8 +275,8 @@ class Position(object):
         # Usually I don't like using a catch-all except, but it seems to
         # be the safest default action because the FEN is supplied by
         # the user.
-        except:
-            raise BadFenError()
+        #except:
+            #raise BadFenError()
 
     def __iter__(self):
         for r in range(0, 8):
@@ -290,8 +309,8 @@ class Position(object):
                 ep_str += '3'
             else:
                 ep_str += '6'
-        move_num = self.half_moves / 2 + 1
-        return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.half_moves, move_num)
+        full_moves = self.half_moves / 2 + 1
+        return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
     
     def make_move(self, mv):
         """make the move"""
@@ -300,8 +319,10 @@ class Position(object):
 
         mv.undo = Undo()
         mv.undo.cap = self.board[mv.to]
+        mv.undo.ep = self.ep
         mv.undo.in_check = self.in_check
         mv.undo.castle_flags = self.castle_flags
+        mv.undo.fifty_count = self.fifty_count
 
         self.board[mv.fr] = '-'
         self.board[mv.to] = mv.pc if not mv.prom else mv.prom
@@ -311,15 +332,27 @@ class Position(object):
         elif mv.pc == 'k':
             self.kpos[1] = mv.to
 
+        if mv.new_ep:
+            self.ep = mv.new_ep
+        else:
+            self.ep = None
+
+        if mv.pc in ['p', 'P'] or mv.undo.cap != '-':
+            self.fifty_count = 0
+        else:
+            self.fifty_count += 1
+
         self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
     
     def undo_move(self, mv):
         """undo the move"""
         self.wtm = not self.wtm
         self.half_moves -= 1
+        self.ep = mv.undo.ep
         self.board[mv.to] = mv.undo.cap
         self.board[mv.fr] = mv.pc
         self.in_check = mv.undo.in_check
+        self.fifty_count = mv.undo.fifty_count
         
         if mv.pc == 'k':
             self.kpos[0] = mv.fr
@@ -389,13 +422,10 @@ class Position(object):
 
         return False
 
-class Undo(object):
-    """information needed to undo a move"""
-    pass
-
 class Normal(Variant):
     """normal chess"""
-    def __init__(self, fen=None):
+    def __init__(self, game):
+        self.game = game
         self.pos = copy.deepcopy(initial_pos)
 
     def do_move(self, s, conn):
@@ -440,23 +470,57 @@ class Normal(Variant):
                     self.pos.attempt_move(mv)
                 except IllegalMoveError as e:
                     conn.write('Illegal move (%s)\n' % s)
+                else:
+                    s12 = self.to_style12()
+                    self.game.white.user.write(s12)
+                    self.game.black.user.write(s12)
 
         return mv != None
+    
+    def to_style12(self):
+        """returns a style12 string"""
+        # <12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 473 GuestPPMD GuestCWVQ -1 1 0 39 39 60000 60000 1 none (0:00.000) none 1 0 0
+        board_str = ''
+        for r in range(7, -1, -1):
+            board_str += ' '
+            for f in range(8):
+                board_str += self.pos.board[0x10 * r + f]
+        side_str = 'W' if self.pos.wtm else 'B'
+        ep = -1 if not self.pos.ep else file(self.pos.ep)
+        w_oo = int(check_castle_flags(self.pos.castle_flags, True, True))
+        w_ooo = int(check_castle_flags(self.pos.castle_flags, True, False))
+        b_oo = int(check_castle_flags(self.pos.castle_flags, False, True))
+        b_ooo = int(check_castle_flags(self.pos.castle_flags, False, False))
+        relation = 1
+        full_moves = self.pos.half_moves / 2 + 1
+        last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
+            self.game.last_move_secs)
+        # board_str begins with a space
+        s = '<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d' % (
+            board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
+            self.pos.fifty_count, self.game.number, self.game.white.user.name,
+            self.game.black.user.name, relation, self.game.white.time,
+            self.game.white.inc, self.pos.material[1], self.pos.material[0],
+            self.game.white_clock, self.game.black_clock,
+            full_moves, self.game.last_move_verbose, last_move_time_str,
+            self.game.last_move_san, int(self.game.flip))
+        return s
 
 def init_direction_table():
-    pos = copy.deepcopy(initial_pos)
-    for (sq, dummy) in pos:
-        for d in piece_moves['q']:
-            cur_sq = sq + d
-            while valid_sq(cur_sq):
-                assert(0 <= cur_sq - sq + 0x7f <= 0xff)
-                if direction_table[cur_sq - sq + 0x7f] != 0:
-                    assert(d == direction_table[cur_sq - sq + 0x7f])
-                else:
-                    direction_table[cur_sq - sq + 0x7f] = d
-                cur_sq += d
+    for r in range(8):
+        for f in range(8):
+            sq = 0x10 * r + f
+            for d in piece_moves['q']:
+                cur_sq = sq + d
+                while valid_sq(cur_sq):
+                    assert(0 <= cur_sq - sq + 0x7f <= 0xff)
+                    if direction_table[cur_sq - sq + 0x7f] != 0:
+                        assert(d == direction_table[cur_sq - sq + 0x7f])
+                    else:
+                        direction_table[cur_sq - sq + 0x7f] = d
+                    cur_sq += d
+init_direction_table()
 
 initial_pos = Position('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-init_direction_table()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

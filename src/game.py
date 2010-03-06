@@ -1,5 +1,7 @@
 import random
 
+import globals
+
 from variant.variant_factory import variant_factory
 
 (WHITE, BLACK) = range(2)
@@ -11,8 +13,20 @@ def side_to_str(side):
     assert side in [WHITE, BLACK]
     return "white" if side==WHITE else "black"
 
+def find_free_slot():
+    """Find the first available game number."""
+    # This is O(n) in the number of games, but it's simple and should
+    # be more than efficient enough.
+    i = 1
+    while True:
+        if not i in globals.games:
+            return i
+        i += 1
+
 class Game(object):
     def __init__(self, offer):
+        self.number = find_free_slot()
+        globals.games[self.number] = self
         side = offer.side
         if side == None:
             side = self._pick_color(offer.player_a.user, offer.player_b.user)
@@ -36,13 +50,24 @@ class Game(object):
         self.white_clock = self.white.time*60.0
         self.black_clock = self.black.time*60.0
 
+        self.last_move_verbose = 'none'
+        self.last_move_san = 'none'
+        self.last_move_mins = 0
+        self.last_move_secs = 0.0
+        self.flip = False
+
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = 'Creating: %s (%s) %s (%s) %s %s %s\n' % (self.white.user.name, self.white.rating, self.black.user.name, self.black.rating, rated_str, offer.variant_and_speed, time_str)
     
         self.white.user.write(create_str)
         self.black.user.write(create_str)
 
-        self.variant = variant_factory.get(offer.variant_name)
+        self.variant = variant_factory.get(offer.variant_name, self)
+
+        s12 = self.variant.to_style12()
+        #print s12
+        self.white.user.write(s12)
+        self.black.user.write(s12)
 
     def _pick_color(self, a, b): 
         return random.choice([WHITE, BLACK])
