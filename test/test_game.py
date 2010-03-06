@@ -14,6 +14,9 @@ class TestGame(Test):
         t2.write('e7e5\n')
         self.expect('not your move', t2)
 
+        t.write('e2e5\n')
+        self.expect('Illegal move (e2e5)\n', t)
+
         self.close(t)
         self.close(t2)
 

@@ -44,7 +44,7 @@ class Board(object):
     def sq_from_str(self, sq):
         return 'abcdefgh'.index(sq[0]) + 0x10 * '12345678'.index(sq[1])
 
-    def make_move(self, fr, to):
+    def make_move(self, fr, to, prom):
         """Raises IllegalMoveError when appropriate."""
         pc = self.board[fr]
         if pc == BLANK or self.piece_is_white(pc) != self.wtm:
@@ -174,6 +174,7 @@ class Normal(Variant):
 
         if matched:
             if not conn.user.session.is_white == self.board.wtm:
+                #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.board.wtm)
                 conn.write(_('It is not your move.\n'))
             else:
                 try:

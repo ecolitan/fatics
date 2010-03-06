@@ -24,8 +24,8 @@ class Game(object):
             self.white = offer.player_b
             self.black = offer.player_a
 
-        self.white.user.is_white = True
-        self.black.user.is_white = False
+        self.white.user.session.is_white = True
+        self.black.user.session.is_white = False
 
         self.speed = offer.speed
         rated_str = 'rated' if offer.rated else 'unrated'
