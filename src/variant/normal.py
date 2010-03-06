@@ -8,11 +8,27 @@ import copy
 from array import array
 
 from variant import Variant
+    
+"""
+0x88 board representation; pieces are represented as ASCII,
+the same as FEN. A blank square is '-'.
+
+"""
+
+[A8, B8, C8, D8, E8, F8, G8, H8] = range(0x70, 0x78)
+[A7, B7, C7, D7, E7, F7, G7, H7] = range(0x60, 0x68)
+[A6, B6, C6, D6, E6, F6, G6, H6] = range(0x50, 0x58)
+[A5, B5, C5, D5, E5, F5, G5, H5] = range(0x40, 0x48)
+[A4, B4, C4, D4, E4, F4, G4, H4] = range(0x30, 0x38)
+[A3, B3, C3, D3, E3, F3, G3, H3] = range(0x20, 0x28)
+[A2, B2, C2, D2, E2, F2, G2, H2] = range(0x10, 0x18)
+[A1, B1, C1, D1, E1, F1, G1, H1] = range(0x00, 0x08)
 
 class BadFenError(Exception):
     pass
 class IllegalMoveError(Exception):
-    pass
+    def __init__(self, reason):
+        self.reason = reason
 
 piece_moves = {
     'n': [-0x21, -0x1f, -0xe, -0x12, 0x12, 0xe, 0x1f, 0x21],
@@ -29,12 +45,19 @@ def dir(fr, to):
 
 sliding_pieces = frozenset(['b', 'r', 'q', 'B', 'R', 'Q'])
 
-C1 = 2
-E1 = 4
-G1 = 6
-C8 = 0x72
-E8 = 0x74
-G8 = 0x76
+def to_castle_flags(w_oo, w_ooo, b_oo, b_ooo):
+    return w_oo << 3 + w_ooo << 2 + b_oo << 1 + b_ooo
+
+def check_castle_flags(mask, wtm, is_oo):
+    return mask & (1 << (2 * int(wtm) + int(is_oo)))
+
+castle_mask = array('i', [0 for i in range(0x80)])
+castle_mask[A8] = to_castle_flags(True, True, True, False)
+castle_mask[E8] = to_castle_flags(True, True, False, False)
+castle_mask[H8] = to_castle_flags(True, True, False, True)
+castle_mask[A1] = to_castle_flags(True, False, True, True)
+castle_mask[E1] = to_castle_flags(False, False, True, True)
+castle_mask[H1] = to_castle_flags(False, True, True, True)
 
 def rank(sq):
     return sq / 0x10
@@ -73,8 +96,6 @@ class Move(object):
         flags for this move."""
         diff = self.to - self.fr
         if self.pc == 'p':
-            #print 'fr %s, to %s' % (sq_to_str(self.fr), sq_to_str(self.to))
-            #print 'diff %d' % diff
             if self.pos.board[self.to] == '-':
                 if diff == -0x10:
                     return True
@@ -120,14 +141,16 @@ class Move(object):
     def is_legal(self):
         if self.is_oo:
             return (not self.pos.in_check
-                and self.pos.oo[int(self.pos.wtm)]
+                and check_castle_flags(self.pos.castle_flags,
+                    self.pos.wtm, True)
                 and self.pos.board[self.fr + 1] == '-'
                 and not self.pos.under_attack(self.fr + 1, not self.pos.wtm)
                 and not self.pos.under_attack(self.to, not self.pos.wtm))
 
         if self.is_ooo:
             return (not self.pos.in_check
-                and self.pos.ooo[int(self.pos.wtm)]
+                and check_castle_flags(self.pos.castle_flags,
+                    self.pos.wtm, False)
                 and self.pos.board[self.fr - 1] == '-'
                 and not self.pos.under_attack(self.fr - 1, not self.pos.wtm)
                 and not self.pos.under_attack(self.to, not self.pos.wtm))
@@ -145,29 +168,25 @@ class Move(object):
 
 
 class Position(object):
-    """
-    0x88 board representation; pieces are represented as ASCII,
-    the same as FEN. A blank square is '-'.
-    
-    """
-
     def __init__(self, fen):
         self.board = 0x80 * ['-']
-        self.oo = [None, None]
-        self.ooo = [None, None]
+        # indexed by 2 * wtm + i, where i=0 for O-O and i=1 for O-O-O
+        self.castle_flags = 0
         self.kpos = [None, None]
         self.set_pos(fen)
 
     def attempt_move(self, mv):
         """Raises IllegalMoveError when appropriate."""
 
+        if mv.pc == '-' or piece_is_white(mv.pc) != self.wtm:
+            raise IllegalMoveError('can only move own pieces: ' + mv.pc + ';' + sq_to_str(mv.fr))
+
         topc = self.board[mv.to]
         if topc != '-' and piece_is_white(topc) == self.wtm:
-            # cannot capture own piece
-            raise IllegalMoveError()
+            raise IllegalMoveError('cannot capture own piece')
 
         if not mv.is_legal():
-            raise IllegalMoveError()
+            raise IllegalMoveError('is not legal')
 
         self.make_move(mv)
         self._detect_check()
@@ -217,15 +236,14 @@ class Position(object):
 
             # This doesn't give an error on repeated flags (like "qq"),
             # but I think that's OK, since it's still unambiguous.
-            self.oo[0] = 'k' in castle_flags
-            self.ooo[0] = 'K' in castle_flags
-            self.oo[1] = 'K' in castle_flags
-            self.ooo[1] = 'Q' in castle_flags
+            self.castle_flags = to_castle_flags('K' in castle_flags,
+                'Q' in castle_flags, 'k' in castle_flags, 'q' in castle_flags)
 
             if ep == '-':
                 self.ep = None
             else:
-                self.ep = ep[0].index('abcdefgh') + 0x10 * ep[1].index('012345678')
+                self.ep = ep[0].index('abcdefgh') + \
+                    0x10 * ep[1].index('012345678')
             
             self.half_moves = int(half_moves, 10)
             if int(full_moves, 10) != self.half_moves / 2 + 1:
@@ -253,13 +271,13 @@ class Position(object):
             pos_str += pc
         stm_str = 'w' if self.wtm else 'b'
         castling = ''
-        if self.white_oo:
+        if self.castle_flags[2]:
             castling += 'K'
-        if self.white_ooo:
+        if self.castle_flags[3]:
             castling += 'Q'
-        if self.black_oo:
+        if self.self.castle_flags[0]:
             castling += 'k'
-        if self.black_ooo:
+        if self.black_castle_flags[1]:
             castling += 'q'
         if castling == '':
             castling = '-'
@@ -283,6 +301,7 @@ class Position(object):
         mv.undo = Undo()
         mv.undo.cap = self.board[mv.to]
         mv.undo.in_check = self.in_check
+        mv.undo.castle_flags = self.castle_flags
 
         self.board[mv.fr] = '-'
         self.board[mv.to] = mv.pc if not mv.prom else mv.prom
@@ -291,6 +310,8 @@ class Position(object):
             self.kpos[0] = mv.to
         elif mv.pc == 'k':
             self.kpos[1] = mv.to
+
+        self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
     
     def undo_move(self, mv):
         """undo the move"""
@@ -375,7 +396,7 @@ class Undo(object):
 class Normal(Variant):
     """normal chess"""
     def __init__(self, fen=None):
-        self.pos = copy.copy(initial_pos)
+        self.pos = copy.deepcopy(initial_pos)
 
     def do_move(self, s, conn):
         """Try to parse a move and execute it.  If it looks like a move but
@@ -417,13 +438,13 @@ class Normal(Variant):
             else:
                 try:
                     self.pos.attempt_move(mv)
-                except IllegalMoveError:
+                except IllegalMoveError as e:
                     conn.write('Illegal move (%s)\n' % s)
 
         return mv != None
 
 def init_direction_table():
-    pos = copy.copy(initial_pos)
+    pos = copy.deepcopy(initial_pos)
     for (sq, dummy) in pos:
         for d in piece_moves['q']:
             cur_sq = sq + d

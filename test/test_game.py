@@ -17,6 +17,12 @@ class TestGame(Test):
         # plain illegal move
         t.write('e2e5\n')
         self.expect('Illegal move (e2e5)', t)
+        
+        t.write('e7e5\n')
+        self.expect('Illegal move (e7e5)', t)
+        
+        t.write('e3e4\n')
+        self.expect('Illegal move (e3e4)', t)
 
         # square occpied by own piece
         t.write('a1a2\n')
@@ -42,6 +48,17 @@ class TestGame(Test):
         # castling blocked
         t.write('O-O\n')
         self.expect('Illegal move', t)
+        t.write('O-O-O\n')
+        self.expect('Illegal move', t)
+        
+        t.write('f1c4\n')
+        self.expect_not('Illegal move', t2)
+        
+        t2.write('g8f6\n')
+        self.expect_not('Illegal move', t2)
+        
+        t.write('O-O\n')
+        self.expect_not('Illegal move', t2)
 
         self.close(t)
         self.close(t2)
