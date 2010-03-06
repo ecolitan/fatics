@@ -45,8 +45,11 @@ def file(sq):
 def valid_sq(sq):
     return not (sq & 0x88)
 
-def sq_from_str(sq):
-    return 'abcdefgh'.index(sq[0]) + 0x10 * '12345678'.index(sq[1])
+def str_to_sq(s):
+    return 'abcdefgh'.index(s[0]) + 0x10 * '12345678'.index(s[1])
+
+def sq_to_str(sq):
+    return 'abcdefgh'[file(sq)] + '12345678'[rank(sq)]
 
 def piece_is_white(pc):
     assert(len(pc) == 1)
@@ -64,17 +67,19 @@ class Move(object):
         self.is_ooo = is_ooo
         self.is_capture = pos.board[to] != '-'
 
-    def is_pseudo_legal(self):
+    def check_pseudo_legal(self):
         """Tests if a move is pseudo-legal, that is, legal ignoring the
         fact that the king cannot be left in check. Also sets en passant
         flags for this move."""
         diff = self.to - self.fr
         if self.pc == 'p':
+            #print 'fr %s, to %s' % (sq_to_str(self.fr), sq_to_str(self.to))
+            #print 'diff %d' % diff
             if self.pos.board[self.to] == '-':
                 if diff == -0x10:
                     return True
                 elif diff == -0x20 and rank(self.fr) == 6:
-                    self.new_ep = self.to + -0x10
+                    self.new_ep = self.fr + -0x10
                     return self.pos.board[self.new_ep] == '-'
                 elif self.to == self.pos.ep:
                     return True
@@ -87,7 +92,7 @@ class Move(object):
                 if diff == 0x10:
                     return True
                 elif diff == 0x20 and rank(self.fr) == 1:
-                    self.new_ep = self.to + 0x10
+                    self.new_ep = self.fr + 0x10
                     return self.pos.board[self.new_ep] == '-'
                 elif self.to == self.pos.ep:
                     return True
@@ -115,19 +120,19 @@ class Move(object):
     def is_legal(self):
         if self.is_oo:
             return (not self.pos.in_check
-                and self.oo[int(self.pos.wtm)]
+                and self.pos.oo[int(self.pos.wtm)]
                 and self.pos.board[self.fr + 1] == '-'
                 and not self.pos.under_attack(self.fr + 1, not self.pos.wtm)
                 and not self.pos.under_attack(self.to, not self.pos.wtm))
 
         if self.is_ooo:
             return (not self.pos.in_check
-                and self.ooo[int(self.pos.wtm)]
+                and self.pos.ooo[int(self.pos.wtm)]
                 and self.pos.board[self.fr - 1] == '-'
                 and not self.pos.under_attack(self.fr - 1, not self.pos.wtm)
                 and not self.pos.under_attack(self.to, not self.pos.wtm))
 
-        if not self.is_pseudo_legal():
+        if not self.check_pseudo_legal():
             return False
 
         legal = True
@@ -181,7 +186,6 @@ class Position(object):
             ranks = pos.split('/')
             ranks.reverse()
             for (r, rank) in enumerate(ranks):
-                assert(not '/' in rank)
                 sq = 0x10 * r
                 for c in rank:
                     d = '12345678'.find(c)
@@ -202,6 +206,7 @@ class Position(object):
                             self.kpos[1] = sq
                         sq += 1
                 if sq & 0xf != 8:
+                    # wrong row length
                     raise BadFenError()
 
             if None in self.kpos:
@@ -233,8 +238,8 @@ class Position(object):
         # Usually I don't like using a catch-all except, but it seems to
         # be the safest default action because the FEN is supplied by
         # the user.
-        #except:
-        #    raise BadFenError()
+        except:
+            raise BadFenError()
 
     def __iter__(self):
         for r in range(0, 8):
@@ -382,8 +387,8 @@ class Normal(Variant):
 
         m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?', s)
         if m:
-            fr = sq_from_str(m.group(1))
-            to = sq_from_str(m.group(2))
+            fr = str_to_sq(m.group(1))
+            to = str_to_sq(m.group(2))
             prom = m.group(3)
             if prom == None:
                 mv = Move(self.pos, fr, to)
