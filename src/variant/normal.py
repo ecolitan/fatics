@@ -22,18 +22,6 @@ piece_moves = {
     'k': [-0x11, -0xf, 0xf, 0x11, -0x10, -1, 1, 0x10]
 }
 direction_table = array('i', [0 for i in range(0, 0x100)])
-def init_direction_table():
-    b = Position()
-    for (sq, dummy) in b:
-        for d in piece_moves['q']:
-            cur_sq = sq + d
-            while valid_sq(cur_sq):
-                assert(0 <= cur_sq - sq + 0x7f <= 0xff)
-                if direction_table[cur_sq - sq + 0x7f] != 0:
-                    assert(d == direction_table[cur_sq - sq + 0x7f])
-                else:
-                    direction_table[cur_sq - sq + 0x7f] = d
-                cur_sq += d
 def dir(fr, to):
     """Returns the direction a queen needs to go to get from TO to FR,
     or 0 if it's not possible."""
@@ -65,6 +53,91 @@ def piece_is_white(pc):
     assert(pc in 'pnbrqkPNBRQK')
     return pc.isupper()
 
+class Move(object):
+    def __init__(self, pos, fr, to, prom=None, is_oo=False, is_ooo=False):
+        self.pos = pos
+        self.fr = fr
+        self.to = to
+        self.pc = self.pos.board[self.fr]
+        self.prom = prom
+        self.is_oo = is_oo
+        self.is_ooo = is_ooo
+        self.is_capture = pos.board[to] != '-'
+
+    def is_pseudo_legal(self):
+        """Tests if a move is pseudo-legal, that is, legal ignoring the
+        fact that the king cannot be left in check. Also sets en passant
+        flags for this move."""
+        diff = self.to - self.fr
+        if self.pc == 'p':
+            if self.pos.board[self.to] == '-':
+                if diff == -0x10:
+                    return True
+                elif diff == -0x20 and rank(self.fr) == 6:
+                    self.new_ep = self.to + -0x10
+                    return self.pos.board[self.new_ep] == '-'
+                elif self.to == self.pos.ep:
+                    return True
+                else:
+                    return False
+            else:
+                return diff in [-0x11, -0xf]
+        elif self.pc == 'P':
+            if self.pos.board[self.to] == '-':
+                if diff == 0x10:
+                    return True
+                elif diff == 0x20 and rank(self.fr) == 1:
+                    self.new_ep = self.to + 0x10
+                    return self.pos.board[self.new_ep] == '-'
+                elif self.to == self.pos.ep:
+                    return True
+                else:
+                    return False
+            else:
+                return diff in [0x11, 0xf]
+        else:
+            if self.pc in sliding_pieces:
+                d = dir(self.fr, self.to)
+                if d == 0 or not d in piece_moves[self.pc.lower()]:
+                    # the piece cannot make that move
+                    return False
+                # now check if there are any pieces in the way
+                for d in piece_moves[self.pc.lower()]:
+                    cur_sq = self.fr + d
+                    while cur_sq != self.to:
+                        if self.pos.board[cur_sq] != '-':
+                            return False
+                        cur_sq += d
+                    return True
+            else:
+                return self.to - self.fr in piece_moves[self.pc.lower()]
+
+    def is_legal(self):
+        if self.is_oo:
+            return (not self.pos.in_check
+                and self.oo[int(self.pos.wtm)]
+                and self.pos.board[self.fr + 1] == '-'
+                and not self.pos.under_attack(self.fr + 1, not self.pos.wtm)
+                and not self.pos.under_attack(self.to, not self.pos.wtm))
+
+        if self.is_ooo:
+            return (not self.pos.in_check
+                and self.ooo[int(self.pos.wtm)]
+                and self.pos.board[self.fr - 1] == '-'
+                and not self.pos.under_attack(self.fr - 1, not self.pos.wtm)
+                and not self.pos.under_attack(self.to, not self.pos.wtm))
+
+        if not self.is_pseudo_legal():
+            return False
+
+        legal = True
+        self.pos.make_move(self)
+        if self.pos.under_attack(self.pos.kpos[int(not self.pos.wtm)],
+                self.pos.wtm):
+            legal = False
+        self.pos.undo_move(self)
+        return legal
+
 
 class Position(object):
     """
@@ -73,14 +146,12 @@ class Position(object):
     
     """
 
-    def __init__(self, fen=None):
+    def __init__(self, fen):
         self.board = 0x80 * ['-']
-        if fen != None:
-            self.set_pos(fen)
-        else:
-            pass
-            #self.white_oo = False
-            #self.white_ooo = False
+        self.oo = [None, None]
+        self.ooo = [None, None]
+        self.kpos = [None, None]
+        self.set_pos(fen)
 
     def attempt_move(self, mv):
         """Raises IllegalMoveError when appropriate."""
@@ -94,6 +165,7 @@ class Position(object):
             raise IllegalMoveError()
 
         self.make_move(mv)
+        self._detect_check()
 
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
@@ -118,18 +190,32 @@ class Position(object):
                     else:
                         assert(valid_sq(sq))
                         self.board[sq] = c
+                        if c == 'k':
+                            if self.kpos[0] != None:
+                                # multiple kings
+                                raise BadFenError()
+                            self.kpos[0] = sq
+                        elif c == 'K':
+                            if self.kpos[1] != None:
+                                # multiple kings
+                                raise BadFenError()
+                            self.kpos[1] = sq
                         sq += 1
                 if sq & 0xf != 8:
                     raise BadFenError()
+
+            if None in self.kpos:
+                # missing king
+                raise BadFenError()
 
             self.wtm = side == 'w'
 
             # This doesn't give an error on repeated flags (like "qq"),
             # but I think that's OK, since it's still unambiguous.
-            self.w_oo = 'K' in castle_flags
-            self.w_ooo = 'Q' in castle_flags
-            self.b_oo = 'k' in castle_flags
-            self.b_ooo = 'K' in castle_flags
+            self.oo[0] = 'k' in castle_flags
+            self.ooo[0] = 'K' in castle_flags
+            self.oo[1] = 'K' in castle_flags
+            self.ooo[1] = 'Q' in castle_flags
 
             if ep == '-':
                 self.ep = None
@@ -139,6 +225,8 @@ class Position(object):
             self.half_moves = int(half_moves, 10)
             if int(full_moves, 10) != self.half_moves / 2 + 1:
                 raise BadFenError()
+            
+            self._detect_check()
 
         except AssertionError:
             raise
@@ -186,129 +274,103 @@ class Position(object):
         """make the move"""
         self.wtm = not self.wtm
         self.half_moves += 1
+
+        mv.undo = Undo()
+        mv.undo.cap = self.board[mv.to]
+        mv.undo.in_check = self.in_check
+
         self.board[mv.fr] = '-'
         self.board[mv.to] = mv.pc if not mv.prom else mv.prom
-        mv.make_extra()
+
+        if mv.pc == 'k':
+            self.kpos[0] = mv.to
+        elif mv.pc == 'k':
+            self.kpos[1] = mv.to
     
     def undo_move(self, mv):
         """undo the move"""
         self.wtm = not self.wtm
         self.half_moves -= 1
-        self.board[mv.to] = mv.cap
+        self.board[mv.to] = mv.undo.cap
         self.board[mv.fr] = mv.pc
-        mv.undo_extra()
+        self.in_check = mv.undo.in_check
+        
+        if mv.pc == 'k':
+            self.kpos[0] = mv.fr
+        elif mv.pc == 'k':
+            self.kpos[1] = mv.fr
 
-class Move(object):
-    def is_pseudo_legal(self):
-        """Tests if a move is pseudo-legal, that is, legal ignoring the
-        fact that the king cannot be left in check. Also sets en passant
-        flags for this move."""
-        diff = self.to - self.fr
-        pc = self.pos.board[self.fr]
-        if pc == 'p':
-            if self.pos.board[self.to] == '-':
-                if diff == -0x10:
-                    return True
-                elif diff == -0x20 and rank(self.fr) == 6:
-                    self.new_ep = self.to + -0x10
-                    return self.pos.board[self.new_ep] == '-'
-                elif self.to == self.pos.ep:
-                    return True
-                else:
-                    return False
-            else:
-                return diff in [-0x11, -0xf]
-        elif pc == 'P':
-            if self.pos.board[self.to] == '-':
-                if diff == 0x10:
-                    return True
-                elif diff == 0x20 and rank(self.fr) == 1:
-                    self.new_ep = self.to + 0x10
-                    return self.pos.board[self.new_ep] == '-'
-                elif self.to == self.pos.ep:
-                    return True
-                else:
-                    return False
-            else:
-                return diff in [0x11, 0xf]
-        else:
-            if pc in sliding_pieces:
-                d = dir(self.fr, self.to)
-                if d == 0 or not d in piece_moves[pc.lower()]:
-                    # the piece cannot make that move
-                    return False
-                # now check if there are any pieces in the way
-                for d in piece_moves[pc.lower()]:
-                    cur_sq = self.fr + d
-                    while cur_sq != self.to:
-                        if self.pos.board[cur_sq] != '-':
-                            return False
-                        cur_sq += d
-                    return True
-            else:
-                return self.to - self.fr in piece_moves[pc.lower()]
-
-    def is_legal(self):
-        if not self.is_pseudo_legal():
-            return False
-
-        self.pos.make_move(self)
-
-        self.pos.undo_move(self)
-        return True
-
-    def make_extra(self):
-        """Extra things to do when making a move, like promoting a
-        pawn or moving a rook when castling."""
-        pass
+    def _detect_check(self):
+        self.in_check = self.under_attack(self.kpos[int(self.wtm)],
+            not self.wtm)
     
-    def undo_extra(self):
-        """Counterpart of make_extra()."""
-        pass
+    def _is_pc_at(self, pc, sq):
+        return valid_sq(sq) and self.board[sq] == pc
 
-class Move(Move):
-    def __init__(self, pos, fr, to, prom=None, is_oo=False, is_ooo=False):
-        self.pos = pos
-        self.fr = fr
-        self.to = to
-        self.prom = prom
-        self.is_oo = is_oo
-        self.is_ooo = is_ooo
-        self.is_capture = pos.board[to] != '-'
-        self.pc = self.pos.board[self.fr]
-        self.cap = self.pos.board[self.to]
-
-'''class OOMove(Move):
-    def __init__(self, pos):
-        self.pos = pos
-        if pos.wtm:
-            (self.fr, self.to) = (E1, G1)
+    def under_attack(self, sq, wtm):
+        # pawn attacks
+        if wtm:
+            if (self._is_pc_at('P', sq + -0x11)
+                    or self._is_pc_at('P', sq + -0xf)):
+                return True
         else:
-            (self.fr, self.to) = (E8, G8)
-        self.pc = self.pos.board[self.fr]
-        self.cap = '-'
+            if (self._is_pc_at('p', sq + 0x11)
+                    or self._is_pc_at('p', sq + 0xf)):
+                return True
 
-class OOOMove(Move):
-    def __init__(self, pos):
-        self.pos = pos
-        if pos.wtm:
-            (self.fr, self.to) = (E1, C1)
-        else:
-            (self.fr, self.to) = (E8, C8)
-        self.pc = self.pos.board[self.fr]
-        self.cap = '-' '''
+        #  knight attacks
+        npc = 'N' if wtm else 'n'
+        for d in piece_moves['n']:
+            if self._is_pc_at(npc, sq + d):
+                return True
+
+        # king attacks
+        kpc = 'K' if wtm else 'k'
+        for d in piece_moves['k']:
+            if self._is_pc_at(kpc, sq + d):
+                return True
+
+        # bishop/queen attacks
+        for d in piece_moves['b']:
+            cur_sq = sq
+            while valid_sq(cur_sq):
+                if self.board[cur_sq] != '-':
+                    if wtm:
+                        if self.board[cur_sq] in ['B', 'Q']:
+                            return True
+                    else:
+                        if self.board[cur_sq] in ['b', 'q']:
+                            return True
+                    # square blocked
+                    break
+                cur_sq += d
+
+
+        # rook/queen attacks
+        for d in piece_moves['r']:
+            cur_sq = sq
+            while valid_sq(cur_sq):
+                if self.board[cur_sq] != '-':
+                    if wtm:
+                        if self.board[cur_sq] in ['R', 'Q']:
+                            return True
+                    else:
+                        if self.board[cur_sq] in ['r', 'q']:
+                            return True
+                    # square blocked
+                    break
+                cur_sq += d
+
+        return False
+
+class Undo(object):
+    """information needed to undo a move"""
+    pass
 
 class Normal(Variant):
     """normal chess"""
     def __init__(self, fen=None):
         self.pos = copy.copy(initial_pos)
-
-    '''def is_move(self, s):
-        """check whether is a move"""
-    
-        # long-algebraic (e.g. "e2e4", "b7a8=Q")
-        m = re.match('([a-h][1-8])([a-h][1-8])(?:=([nbrq]))', s)
-        return m'''
 
     def do_move(self, s, conn):
         """Try to parse a move and execute it.  If it looks like a move but
@@ -355,7 +417,18 @@ class Normal(Variant):
 
         return mv != None
 
-
+def init_direction_table():
+    pos = copy.copy(initial_pos)
+    for (sq, dummy) in pos:
+        for d in piece_moves['q']:
+            cur_sq = sq + d
+            while valid_sq(cur_sq):
+                assert(0 <= cur_sq - sq + 0x7f <= 0xff)
+                if direction_table[cur_sq - sq + 0x7f] != 0:
+                    assert(d == direction_table[cur_sq - sq + 0x7f])
+                else:
+                    direction_table[cur_sq - sq + 0x7f] = d
+                cur_sq += d
 
 initial_pos = Position('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 init_direction_table()
