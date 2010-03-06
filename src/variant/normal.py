@@ -23,11 +23,11 @@ piece_moves = {
 }
 direction_table = array('i', [0 for i in range(0, 0x100)])
 def init_direction_table():
-    b = Board()
+    b = Position()
     for (sq, dummy) in b:
         for d in piece_moves['q']:
             cur_sq = sq + d
-            while b.valid_sq(cur_sq):
+            while valid_sq(cur_sq):
                 assert(0 <= cur_sq - sq + 0x7f <= 0xff)
                 if direction_table[cur_sq - sq + 0x7f] != 0:
                     assert(d == direction_table[cur_sq - sq + 0x7f])
@@ -41,7 +41,32 @@ def dir(fr, to):
 
 sliding_pieces = frozenset(['b', 'r', 'q', 'B', 'R', 'Q'])
 
-class Board(object):
+C1 = 2
+E1 = 4
+G1 = 6
+C8 = 0x72
+E8 = 0x74
+G8 = 0x76
+
+def rank(sq):
+    return sq / 0x10
+
+def file(sq):
+    return sq % 8
+
+def valid_sq(sq):
+    return not (sq & 0x88)
+
+def sq_from_str(sq):
+    return 'abcdefgh'.index(sq[0]) + 0x10 * '12345678'.index(sq[1])
+
+def piece_is_white(pc):
+    assert(len(pc) == 1)
+    assert(pc in 'pnbrqkPNBRQK')
+    return pc.isupper()
+
+
+class Position(object):
     """
     0x88 board representation; pieces are represented as ASCII,
     the same as FEN. A blank square is '-'.
@@ -57,81 +82,18 @@ class Board(object):
             #self.white_oo = False
             #self.white_ooo = False
 
-    def rank(self, sq):
-        return sq / 0x10
-
-    def file(self, sq):
-        return sq % 8
-
-    def valid_sq(self, sq):
-        return not (sq & 0x88)
-
-    def sq_from_str(self, sq):
-        return 'abcdefgh'.index(sq[0]) + 0x10 * '12345678'.index(sq[1])
-
-    def piece_is_white(self, pc):
-        assert(len(pc) == 1)
-        assert(pc in 'pnbrqkPNBRQK')
-        return pc.isupper()
-
-    def _move_is_legal(self, pc, fr, to):
-        diff = to - fr
-        if pc == 'p':
-            if self.board[to] == '-':
-                if diff == -0x10:
-                    return True
-                elif diff == -0x20 and self.rank(fr) == 6:
-                    return True
-                elif to == self.ep:
-                    return True
-                else:
-                    return False
-            else:
-                return diff in [-0x11, -0xf]
-        elif pc == 'P':
-            if self.board[to] == '-':
-                if diff == 0x10:
-                    return True
-                elif diff == 0x20 and self.rank(fr) == 1:
-                    return True
-                elif to == self.ep:
-                    return True
-                else:
-                    return False
-            else:
-                return diff in [0x11, 0xf]
-        else:
-            if pc in sliding_pieces:
-                d = dir(fr, to)
-                if d == 0 or not d in piece_moves[pc.lower()]:
-                    # the piece cannot make that move
-                    return False
-                # now check if there are any pieces in the way
-                for d in piece_moves[pc.lower()]:
-                    cur_sq = fr + d
-                    while cur_sq != to:
-                        if self.board[cur_sq] != '-':
-                            return False
-                        cur_sq += d
-                    return True
-            else:
-                return to - fr in piece_moves[pc.lower()]
-
-    def make_move(self, fr, to, prom):
+    def attempt_move(self, mv):
         """Raises IllegalMoveError when appropriate."""
-        pc = self.board[fr]
-        if pc == '-' or self.piece_is_white(pc) != self.wtm:
-            raise IllegalMoveError()
-        topc = self.board[to]
-        if topc != '-' and self.piece_is_white(topc) == self.wtm:
+
+        topc = self.board[mv.to]
+        if topc != '-' and piece_is_white(topc) == self.wtm:
             # cannot capture own piece
             raise IllegalMoveError()
 
-        if not self._move_is_legal(pc, fr, to):
-                raise IllegalMoveError()
+        if not mv.is_legal():
+            raise IllegalMoveError()
 
-        self.board[to] = self.board[fr]
-        self.board[fr] = '-'
+        self.make_move(mv)
 
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
@@ -154,7 +116,7 @@ class Board(object):
                     if d > 0:
                         sq += d + 1
                     else:
-                        assert(self.valid_sq(sq))
+                        assert(valid_sq(sq))
                         self.board[sq] = c
                         sq += 1
                 if sq & 0xf != 8:
@@ -219,10 +181,127 @@ class Board(object):
                 ep_str += '6'
         move_num = self.half_moves / 2 + 1
         return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.half_moves, move_num)
+    
+    def make_move(self, mv):
+        """make the move"""
+        self.wtm = not self.wtm
+        self.half_moves += 1
+        self.board[mv.fr] = '-'
+        self.board[mv.to] = mv.pc if not mv.prom else mv.prom
+        mv.make_extra()
+    
+    def undo_move(self, mv):
+        """undo the move"""
+        self.wtm = not self.wtm
+        self.half_moves -= 1
+        self.board[mv.to] = mv.cap
+        self.board[mv.fr] = mv.pc
+        mv.undo_extra()
+
+class Move(object):
+    def is_pseudo_legal(self):
+        """Tests if a move is pseudo-legal, that is, legal ignoring the
+        fact that the king cannot be left in check. Also sets en passant
+        flags for this move."""
+        diff = self.to - self.fr
+        pc = self.pos.board[self.fr]
+        if pc == 'p':
+            if self.pos.board[self.to] == '-':
+                if diff == -0x10:
+                    return True
+                elif diff == -0x20 and rank(self.fr) == 6:
+                    self.new_ep = self.to + -0x10
+                    return self.pos.board[self.new_ep] == '-'
+                elif self.to == self.pos.ep:
+                    return True
+                else:
+                    return False
+            else:
+                return diff in [-0x11, -0xf]
+        elif pc == 'P':
+            if self.pos.board[self.to] == '-':
+                if diff == 0x10:
+                    return True
+                elif diff == 0x20 and rank(self.fr) == 1:
+                    self.new_ep = self.to + 0x10
+                    return self.pos.board[self.new_ep] == '-'
+                elif self.to == self.pos.ep:
+                    return True
+                else:
+                    return False
+            else:
+                return diff in [0x11, 0xf]
+        else:
+            if pc in sliding_pieces:
+                d = dir(self.fr, self.to)
+                if d == 0 or not d in piece_moves[pc.lower()]:
+                    # the piece cannot make that move
+                    return False
+                # now check if there are any pieces in the way
+                for d in piece_moves[pc.lower()]:
+                    cur_sq = self.fr + d
+                    while cur_sq != self.to:
+                        if self.pos.board[cur_sq] != '-':
+                            return False
+                        cur_sq += d
+                    return True
+            else:
+                return self.to - self.fr in piece_moves[pc.lower()]
+
+    def is_legal(self):
+        if not self.is_pseudo_legal():
+            return False
+
+        self.pos.make_move(self)
+
+        self.pos.undo_move(self)
+        return True
+
+    def make_extra(self):
+        """Extra things to do when making a move, like promoting a
+        pawn or moving a rook when castling."""
+        pass
+    
+    def undo_extra(self):
+        """Counterpart of make_extra()."""
+        pass
+
+class Move(Move):
+    def __init__(self, pos, fr, to, prom=None, is_oo=False, is_ooo=False):
+        self.pos = pos
+        self.fr = fr
+        self.to = to
+        self.prom = prom
+        self.is_oo = is_oo
+        self.is_ooo = is_ooo
+        self.is_capture = pos.board[to] != '-'
+        self.pc = self.pos.board[self.fr]
+        self.cap = self.pos.board[self.to]
+
+'''class OOMove(Move):
+    def __init__(self, pos):
+        self.pos = pos
+        if pos.wtm:
+            (self.fr, self.to) = (E1, G1)
+        else:
+            (self.fr, self.to) = (E8, G8)
+        self.pc = self.pos.board[self.fr]
+        self.cap = '-'
+
+class OOOMove(Move):
+    def __init__(self, pos):
+        self.pos = pos
+        if pos.wtm:
+            (self.fr, self.to) = (E1, C1)
+        else:
+            (self.fr, self.to) = (E8, C8)
+        self.pc = self.pos.board[self.fr]
+        self.cap = '-' '''
 
 class Normal(Variant):
+    """normal chess"""
     def __init__(self, fen=None):
-        self.board = copy.copy(initial_pos)
+        self.pos = copy.copy(initial_pos)
 
     '''def is_move(self, s):
         """check whether is a move"""
@@ -237,35 +316,48 @@ class Normal(Variant):
         the move was handled, or False if it does not look like a move
         and should be processed further."""
 
-        matched = False
+        mv = None
+
         m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?', s)
         if m:
-            fr = self.board.sq_from_str(m.group(1))
-            to = self.board.sq_from_str(m.group(2))
-            if m.group(3) != None:
-                if self.board.wtm:
-                    prom = m.group(3).upper()
-                else:
-                    prom = m.group(3).lower()
+            fr = sq_from_str(m.group(1))
+            to = sq_from_str(m.group(2))
+            prom = m.group(3)
+            if prom == None:
+                mv = Move(self.pos, fr, to)
             else:
-                prom = None
-            matched = True
+                if self.pos.wtm:
+                    mv = Move(self.pos, fr, to, prom=prom.upper())
+                else:
+                    mv = Move(self.pos, fr, to, prom=prom.lower())
 
-        if matched:
-            if not conn.user.session.is_white == self.board.wtm:
-                #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.board.wtm)
+        if not mv and s in ['O-O', 'OO']:
+            if self.pos.wtm:
+                mv = Move(self.pos, E1, G1, is_oo=True)
+            else:
+                mv = Move(self.pos, E8, G8, is_ooo=True)
+        
+        if not mv and s in ['O-O-O', 'OOO']:
+            if self.pos.wtm:
+                mv = Move(self.pos, E1, C1, is_oo=True)
+            else:
+                mv = Move(self.pos, E8, C8, is_ooo=True)
+
+        if mv:
+            if not conn.user.session.is_white == self.pos.wtm:
+                #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.pos.wtm)
                 conn.write(_('It is not your move.\n'))
             else:
                 try:
-                    self.board.make_move(fr, to, prom)
+                    self.pos.attempt_move(mv)
                 except IllegalMoveError:
                     conn.write('Illegal move (%s)\n' % s)
 
-        return matched
+        return mv != None
 
 
 
-initial_pos = Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+initial_pos = Position('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 init_direction_table()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
