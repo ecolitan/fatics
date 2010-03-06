@@ -5,6 +5,7 @@ I didn't want to privilege it over variants, so it is here. """
 
 import re
 import copy
+from array import array
 
 from variant import Variant
 
@@ -13,24 +14,48 @@ class BadFenError(Exception):
 class IllegalMoveError(Exception):
     pass
 
-(BP, BN, BB, BR, BQ, BK, WP, WN, WB, WR, WQ, WK, BLANK) = range(13)
-class Board(object):
-    """0x88 board representation"""
+piece_moves = {
+    'n': [-0x21, -0x1f, -0xe, -0x12, 0x12, 0xe, 0x1f, 0x21],
+    'b': [-0x11, -0xf, 0xf, 0x11],
+    'r': [-0x10, -1, 1, 0x10],
+    'q': [-0x11, -0xf, 0xf, 0x11, -0x10, -1, 1, 0x10],
+    'k': [-0x11, -0xf, 0xf, 0x11, -0x10, -1, 1, 0x10]
+}
+direction_table = array('i', [0 for i in range(0, 0x100)])
+def init_direction_table():
+    b = Board()
+    for (sq, dummy) in b:
+        for d in piece_moves['q']:
+            cur_sq = sq + d
+            while b.valid_sq(cur_sq):
+                assert(0 <= cur_sq - sq + 0x7f <= 0xff)
+                if direction_table[cur_sq - sq + 0x7f] != 0:
+                    assert(d == direction_table[cur_sq - sq + 0x7f])
+                else:
+                    direction_table[cur_sq - sq + 0x7f] = d
+                cur_sq += d
+def dir(fr, to):
+    """Returns the direction a queen needs to go to get from TO to FR,
+    or 0 if it's not possible."""
+    return direction_table[to - fr + 0x7f]
 
-    char_to_piece = {
-        'p': BP, 'n': BN, 'b': BB, 'r': BR, 'q': BQ, 'k': BK,
-        'P': WP, 'N': WN, 'B': WB, 'R': WR, 'Q': WQ, 'K': WK
-    }
-    piece_to_char = dict([(p, c) for (c, p) in char_to_piece.iteritems()])
+sliding_pieces = frozenset(['b', 'r', 'q', 'B', 'R', 'Q'])
+
+class Board(object):
+    """
+    0x88 board representation; pieces are represented as ASCII,
+    the same as FEN. A blank square is '-'.
+    
+    """
 
     def __init__(self, fen=None):
-        self.board = 0x80 * [BLANK]
+        self.board = 0x80 * ['-']
         if fen != None:
             self.set_pos(fen)
         else:
-            assert(False)
-            self.white_oo = False
-            self.white_ooo = False
+            pass
+            #self.white_oo = False
+            #self.white_ooo = False
 
     def rank(self, sq):
         return sq / 0x10
@@ -44,17 +69,69 @@ class Board(object):
     def sq_from_str(self, sq):
         return 'abcdefgh'.index(sq[0]) + 0x10 * '12345678'.index(sq[1])
 
+    def piece_is_white(self, pc):
+        assert(len(pc) == 1)
+        assert(pc in 'pnbrqkPNBRQK')
+        return pc.isupper()
+
+    def _move_is_legal(self, pc, fr, to):
+        diff = to - fr
+        if pc == 'p':
+            if self.board[to] == '-':
+                if diff == -0x10:
+                    return True
+                elif diff == -0x20 and self.rank(fr) == 6:
+                    return True
+                elif to == self.ep:
+                    return True
+                else:
+                    return False
+            else:
+                return diff in [-0x11, -0xf]
+        elif pc == 'P':
+            if self.board[to] == '-':
+                if diff == 0x10:
+                    return True
+                elif diff == 0x20 and self.rank(fr) == 1:
+                    return True
+                elif to == self.ep:
+                    return True
+                else:
+                    return False
+            else:
+                return diff in [0x11, 0xf]
+        else:
+            if pc in sliding_pieces:
+                d = dir(fr, to)
+                if d == 0 or not d in piece_moves[pc.lower()]:
+                    # the piece cannot make that move
+                    return False
+                # now check if there are any pieces in the way
+                for d in piece_moves[pc.lower()]:
+                    cur_sq = fr + d
+                    while cur_sq != to:
+                        if self.board[cur_sq] != '-':
+                            return False
+                        cur_sq += d
+                    return True
+            else:
+                return to - fr in piece_moves[pc.lower()]
+
     def make_move(self, fr, to, prom):
         """Raises IllegalMoveError when appropriate."""
         pc = self.board[fr]
-        if pc == BLANK or self.piece_is_white(pc) != self.wtm:
+        if pc == '-' or self.piece_is_white(pc) != self.wtm:
             raise IllegalMoveError()
         topc = self.board[to]
-        if topc != BLANK and self.piece_is_white(topc) == self.wtm:
+        if topc != '-' and self.piece_is_white(topc) == self.wtm:
             # cannot capture own piece
             raise IllegalMoveError()
+
+        if not self._move_is_legal(pc, fr, to):
+                raise IllegalMoveError()
+
         self.board[to] = self.board[fr]
-        self.board[fr] = BLANK
+        self.board[fr] = '-'
 
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
@@ -78,7 +155,7 @@ class Board(object):
                         sq += d + 1
                     else:
                         assert(self.valid_sq(sq))
-                        self.board[sq] = self.char_to_piece[c]
+                        self.board[sq] = c
                         sq += 1
                 if sq & 0xf != 8:
                     raise BadFenError()
@@ -118,7 +195,7 @@ class Board(object):
     def to_fen(self):
         pos_str = ''
         for (sq, pc) in self:
-            pos_str += self.piece_to_char[pc]
+            pos_str += pc
         stm_str = 'w' if self.wtm else 'b'
         castling = ''
         if self.white_oo:
@@ -146,7 +223,6 @@ class Board(object):
 class Normal(Variant):
     def __init__(self, fen=None):
         self.board = copy.copy(initial_pos)
-        print 'this is normal chess'
 
     '''def is_move(self, s):
         """check whether is a move"""
@@ -162,12 +238,15 @@ class Normal(Variant):
         and should be processed further."""
 
         matched = False
-        m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([nbrq]))?', s)
+        m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?', s)
         if m:
             fr = self.board.sq_from_str(m.group(1))
             to = self.board.sq_from_str(m.group(2))
             if m.group(3) != None:
-                prom = self.board.char_to_piece(m.group(3))
+                if self.board.wtm:
+                    prom = m.group(3).upper()
+                else:
+                    prom = m.group(3).lower()
             else:
                 prom = None
             matched = True
@@ -187,5 +266,6 @@ class Normal(Variant):
 
 
 initial_pos = Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
+init_direction_table()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
