@@ -90,8 +90,10 @@ def piece_is_white(pc):
     assert(pc in 'pnbrqkPNBRQK')
     return pc.isupper()
 
+
 class Move(object):
-    def __init__(self, pos, fr, to, prom=None, is_oo=False, is_ooo=False):
+    def __init__(self, pos, fr, to, prom=None, is_oo=False,
+            is_ooo=False, new_ep=None):
         self.pos = pos
         self.fr = fr
         self.to = to
@@ -99,87 +101,105 @@ class Move(object):
         self.prom = prom
         self.is_oo = is_oo
         self.is_ooo = is_ooo
-        self.is_capture = pos.board[to] != '-'
+        self.capture = pos.board[to]
+        self.is_capture = self.capture != '-'
         self.is_ep = False
-        self.new_ep = None
+        self.new_ep = new_ep
 
     def check_pseudo_legal(self):
         """Tests if a move is pseudo-legal, that is, legal ignoring the
         fact that the king cannot be left in check. Also sets en passant
-        flags for this move."""
+        flags for this move. This is used for long algebraic moves,
+        but not san, which does these checks implicitly."""
+        
+        if self.pc == '-' or piece_is_white(self.pc) != self.pos.wtm:
+            raise IllegalMoveError('can only move own pieces')
+       
+        if self.is_capture and piece_is_white(self.capture) == self.pos.wtm:
+            raise IllegalMoveError('cannot capture own piece')
+
+        if self.is_oo or self.is_ooo:
+            return
+
         diff = self.to - self.fr
         if self.pc == 'p':
             if self.pos.board[self.to] == '-':
                 if diff == -0x10:
-                    return True
+                    pass
                 elif diff == -0x20 and rank(self.fr) == 6:
                     self.new_ep = self.fr + -0x10
-                    return self.pos.board[self.new_ep] == '-'
+                    if self.pos.board[self.new_ep] != '-':
+                        raise IllegalMoveError('bad en passant')
                 elif diff in [-0x11, -0xf] and self.to == self.pos.ep:
                     self.is_ep = True
-                    return True
                 else:
-                    return False
+                    raise IllegalMoveError('bad pawn push')
             else:
-                return diff in [-0x11, -0xf]
+                if not diff in [-0x11, -0xf]:
+                    raise IllegalMoveError('bad pawn capture')
         elif self.pc == 'P':
             if self.pos.board[self.to] == '-':
                 if diff == 0x10:
-                    return True
+                    pass
                 elif diff == 0x20 and rank(self.fr) == 1:
                     self.new_ep = self.fr + 0x10
-                    return self.pos.board[self.new_ep] == '-'
+                    if self.pos.board[self.new_ep] != '-':
+                        raise IllegalMoveError('bad en passant')
                 elif diff in [0x11, 0xf] and self.to == self.pos.ep:
                     self.is_ep = True
-                    return True
                 else:
-                    return False
+                    raise IllegalMoveError('bad pawn push')
             else:
-                return diff in [0x11, 0xf]
+                if not diff in [0x11, 0xf]:
+                    raise IllegalMoveError('bad pawn capture')
         else:
             if self.pc in sliding_pieces:
                 d = dir(self.fr, self.to)
                 if d == 0 or not d in piece_moves[self.pc.lower()]:
-                    # the piece cannot make that move
-                    return False
+                    raise IllegalMoveError('piece cannot make that move')
                 # now check if there are any pieces in the way
-                for d in piece_moves[self.pc.lower()]:
-                    cur_sq = self.fr + d
-                    while cur_sq != self.to:
-                        if self.pos.board[cur_sq] != '-':
-                            return False
-                        cur_sq += d
-                    return True
+                cur_sq = self.fr + d
+                while cur_sq != self.to:
+                    assert(valid_sq(cur_sq))
+                    if self.pos.board[cur_sq] != '-':
+                        raise IllegalMoveError('sliding piece blocked')
+                    cur_sq += d
             else:
-                return self.to - self.fr in piece_moves[self.pc.lower()]
+                if not diff in piece_moves[self.pc.lower()]:
+                    raise IllegalMoveError('piece cannot make that move')
 
-    def is_legal(self):
+    def check_legal(self):
+        """Test whether a move leaves the king in check, or if
+        castling if blocked or otherwise unavailable.  These
+        tests are grouped together because they are common
+        to all move formats."""
         if self.is_oo:
-            return (not self.pos.in_check
-                and check_castle_flags(self.pos.castle_flags,
-                    self.pos.wtm, True)
-                and self.pos.board[self.fr + 1] == '-'
-                and not self.pos.under_attack(self.fr + 1, not self.pos.wtm)
-                and not self.pos.under_attack(self.to, not self.pos.wtm))
+            if (self.pos.in_check
+                    or not check_castle_flags(self.pos.castle_flags,
+                        self.pos.wtm, True)
+                    or self.pos.board[self.fr + 1] != '-'
+                    or self.pos.under_attack(self.fr + 1, not self.pos.wtm)
+                    or self.pos.under_attack(self.to, not self.pos.wtm)):
+                raise IllegalMoveError('illegal castling')
+            return
 
         if self.is_ooo:
-            return (not self.pos.in_check
-                and check_castle_flags(self.pos.castle_flags,
-                    self.pos.wtm, False)
-                and self.pos.board[self.fr - 1] == '-'
-                and not self.pos.under_attack(self.fr - 1, not self.pos.wtm)
-                and not self.pos.under_attack(self.to, not self.pos.wtm))
+            if (self.pos.in_check
+                    or not check_castle_flags(self.pos.castle_flags,
+                        self.pos.wtm, False)
+                    or self.pos.board[self.fr - 1] != '-'
+                    or self.pos.under_attack(self.fr - 1, not self.pos.wtm)
+                    or self.pos.under_attack(self.to, not self.pos.wtm)):
+                raise IllegalMoveError('illegal castling')
+            return
 
-        if not self.check_pseudo_legal():
-            return False
-
-        legal = True
         self.pos.make_move(self)
-        if self.pos.under_attack(self.pos.kpos[int(not self.pos.wtm)],
-                self.pos.wtm):
-            legal = False
-        self.pos.undo_move(self)
-        return legal
+        try:
+            if self.pos.under_attack(self.pos.kpos[int(not self.pos.wtm)],
+                    self.pos.wtm):
+                raise IllegalMoveError('leaves king in check')
+        finally:
+            self.pos.undo_move(self)
 
     def to_san(self):
         if self.is_oo:
@@ -243,23 +263,6 @@ class Position(object):
         self.kpos = [None, None]
         self.set_pos(fen)
 
-    def attempt_move(self, mv):
-        """Raises IllegalMoveError when appropriate."""
-
-        if mv.pc == '-' or piece_is_white(mv.pc) != self.wtm:
-            raise IllegalMoveError('can only move own pieces: ' + mv.pc + ';' + sq_to_str(mv.fr))
-
-        topc = self.board[mv.to]
-        if topc != '-' and piece_is_white(topc) == self.wtm:
-            raise IllegalMoveError('cannot capture own piece')
-
-        if not mv.is_legal():
-            raise IllegalMoveError('is not legal')
-
-        mv.san = mv.to_san()
-        self.make_move(mv)
-        self._detect_check()
-
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
         is intentionally interpreted strictly; better to give the user an
@@ -315,13 +318,14 @@ class Position(object):
             if ep == '-':
                 self.ep = None
             else:
+
                 self.ep = ep[0].index('abcdefgh') + \
                     0x10 * ep[1].index('012345678')
 
             self.fifty_count = int(fifty_count, 10)
             self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
 
-            self._detect_check()
+            self.detect_check()
 
         except AssertionError:
             raise
@@ -371,14 +375,19 @@ class Position(object):
         self.half_moves += 1
 
         mv.undo = Undo()
-        mv.undo.cap = self.board[mv.to]
         mv.undo.ep = self.ep
         mv.undo.in_check = self.in_check
         mv.undo.castle_flags = self.castle_flags
         mv.undo.fifty_count = self.fifty_count
+        mv.undo.material = self.material[:]
 
         self.board[mv.fr] = '-'
-        self.board[mv.to] = mv.pc if not mv.prom else mv.prom
+        if not mv.prom:
+            self.board[mv.to] = mv.pc
+        else:
+            self.board[mv.to] = mv.prom
+            self.material[not self.wtm] += piece_material[mv.prom.lower()] - \
+                piece_material['p']
 
         if mv.pc == 'k':
             self.kpos[0] = mv.to
@@ -390,10 +399,15 @@ class Position(object):
         else:
             self.ep = None
 
-        if mv.pc in ['p', 'P'] or mv.undo.cap != '-':
+        if mv.pc in ['p', 'P'] or mv.is_capture:
             self.fifty_count = 0
         else:
             self.fifty_count += 1
+       
+        if mv.is_capture:
+            self.material[self.wtm] -= piece_material[mv.cap.lower()]
+        
+        # TODO: ep
 
         self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
     
@@ -402,7 +416,7 @@ class Position(object):
         self.wtm = not self.wtm
         self.half_moves -= 1
         self.ep = mv.undo.ep
-        self.board[mv.to] = mv.undo.cap
+        self.board[mv.to] = mv.capture
         self.board[mv.fr] = mv.pc
         self.in_check = mv.undo.in_check
         self.fifty_count = mv.undo.fifty_count
@@ -412,7 +426,7 @@ class Position(object):
         elif mv.pc == 'k':
             self.kpos[1] = mv.fr
 
-    def _detect_check(self):
+    def detect_check(self):
         self.in_check = self.under_attack(self.kpos[int(self.wtm)],
             not self.wtm)
     
@@ -476,30 +490,78 @@ class Position(object):
         return False
 
     def move_from_lalg(self, s):
-        mv = None
         m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?', s)
-        if m:
-            fr = str_to_sq(m.group(1))
-            to = str_to_sq(m.group(2))
-            prom = m.group(3)
-            if prom == None:
-                mv = Move(self, fr, to)
+        if not m:
+            return None
+
+        fr = str_to_sq(m.group(1))
+        to = str_to_sq(m.group(2))
+        prom = m.group(3)
+        if prom == None:
+            mv = Move(self, fr, to)
+        else:
+            if self.wtm:
+                mv = Move(self, fr, to, prom=prom.upper())
             else:
-                if self.wtm:
-                    mv = Move(self, fr, to, prom=prom.upper())
-                else:
-                    mv = Move(self, fr, to, prom=prom.lower())
+                mv = Move(self, fr, to, prom=prom.lower())
+       
+        if mv:
+            mv.check_pseudo_legal()
+            mv.check_legal()
+
         return mv
 
-    '''def move_from_san(self, s):
+    def move_from_san(self, s):
         s = re.sub(r'/[\+#\?\!]+$/', '', s)
         matched = False
-        
+        mv = None
+    
+        # examples: e4 e8=Q
         m = re.match(r'^([a-h][1-8])(?:=([NBRQ]))?', s)
         if m:
             matched = True
-            if self.wtm:'''
+            to = str_to_sq(m.group(1))
+            prom = m.group(2)
+            new_ep = None
+            if self.wtm:
+                fr = to - 0x10
+                if rank(to) == 3 and self.board[fr] == '-':
+                    fr = to - 0x20
+                if self.board[fr] != 'P':
+                    raise IllegalMoveError('illegal white pawn move')
+                if prom:
+                    if rank(to) == 7:
+                        mv = Move(self, fr, to, prom=prom)
+                    else:
+                        raise IllegalMoveError('illegal promotion')
+                else:
+                    mv = Move(self, fr, to, new_ep=new_ep)
 
+        if mv:
+            mv.check_pseudo_legal() # testing only
+            mv.check_legal()
+
+        return mv
+
+    def move_from_castle(self, s):
+        mv = None
+        if not mv and s in ['O-O', 'OO']:
+            if self.wtm:
+                mv = Move(self, E1, G1, is_oo=True)
+            else:
+                mv = Move(self, E8, G8, is_ooo=True)
+        
+        if not mv and s in ['O-O-O', 'OOO']:
+            if self.wtm:
+                mv = Move(self, E1, C1, is_oo=True)
+            else:
+                mv = Move(self, E8, C8, is_ooo=True)
+
+        if mv:
+            mv.check_pseudo_legal()
+            mv.check_legal()
+
+        return mv
 
 class Normal(Variant):
     """normal chess"""
@@ -514,38 +576,34 @@ class Normal(Variant):
         and should be processed further."""
 
         mv = None
+        illegal = False
 
-        # long algebraic
-        mv = self.pos.move_from_lalg(s)
+        try:
+            # castling
+            mv = self.pos.move_from_castle(s)
 
-        if not mv and s in ['O-O', 'OO']:
-            if self.pos.wtm:
-                mv = Move(self.pos, E1, G1, is_oo=True)
-            else:
-                mv = Move(self.pos, E8, G8, is_ooo=True)
-        
-        if not mv and s in ['O-O-O', 'OOO']:
-            if self.pos.wtm:
-                mv = Move(self.pos, E1, C1, is_oo=True)
-            else:
-                mv = Move(self.pos, E8, C8, is_ooo=True)
-        
-        # san
-        #if not mv:
-        #    mv = self.pos.move_from_san(s)
-
-        if mv:
-            if not conn.user.session.is_white == self.pos.wtm:
+            # long algebraic
+            if not mv:
+                mv = self.pos.move_from_lalg(s)
+            
+            # san
+            if not mv:
+                mv = self.pos.move_from_san(s)
+        except IllegalMoveError as e:
+            illegal = True
+            
+        if mv or illegal:
+            if conn.user.session.is_white != self.pos.wtm:
                 #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.pos.wtm)
                 conn.write(_('It is not your move.\n'))
+            elif illegal:
+                conn.write('Illegal move (%s)\n' % s)
             else:
-                try:
-                    self.pos.attempt_move(mv)
-                except IllegalMoveError as e:
-                    conn.write('Illegal move (%s)\n' % s)
-                else:
-                    self.game.last_move_san = mv.san
-                    self.game.next_move()
+                mv.san = mv.to_san()
+                self.pos.make_move(mv)
+                self.pos.detect_check()
+                self.game.last_move_san = mv.san
+                self.game.next_move()
 
         return mv != None
     
