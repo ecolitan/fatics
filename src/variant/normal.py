@@ -310,10 +310,37 @@ class Position(object):
 
             self.wtm = side == 'w'
 
-            # This doesn't give an error on repeated flags (like "qq"),
-            # but I think that's OK, since it's still unambiguous.
-            self.castle_flags = to_castle_flags('K' in castle_flags,
-                'Q' in castle_flags, 'k' in castle_flags, 'q' in castle_flags)
+            if castle_flags == '-':
+                self.castle_flags = 0
+            else:
+                (w_oo, w_ooo, b_oo, b_ooo) = (False, False, False, False)
+                for c in castle_flags:
+                    if c == 'K':
+                        if self.board[E1] != 'K' or self.board[H1] != 'R':
+                            raise BadFenError()
+                        if w_oo:
+                            raise BadFenError()
+                        w_oo = True
+                    elif c == 'Q':
+                        if self.board[E1] != 'K' or self.board[A1] != 'R':
+                            raise BadFenError()
+                        if w_ooo:
+                            raise BadFenError()
+                        w_ooo = True
+                    elif c == 'k':
+                        if self.board[E8] != 'k' or self.board[H8] != 'r':
+                            raise BadFenError()
+                        if b_oo:
+                            raise BadFenError()
+                        b_oo = True
+                    elif c == 'q':
+                        if self.board[E8] != 'k' or self.board[A8] != 'r':
+                            raise BadFenError()
+                        if b_ooo:
+                            raise BadFenError()
+                        b_ooo = True
+
+                self.castle_flags = to_castle_flags(w_oo, w_ooo, b_oo, b_ooo)
 
             if ep == '-':
                 self.ep = None
@@ -406,8 +433,35 @@ class Position(object):
        
         if mv.is_capture:
             self.material[self.wtm] -= piece_material[mv.cap.lower()]
-        
-        # TODO: ep
+       
+        if mv.is_ep:
+            # remove the captured pawn
+            if self.wtm:
+                assert(self.board[mv.to + -0x10] == 'p')
+                self.board[mv.to + -0x10] = '-'
+            else:
+                assert(self.board[mv.to + 0x10] == 'P')
+                self.board[mv.to + 0x10] = '-'
+        elif mv.is_oo:
+            # move the rook
+            if self.wtm:
+                assert(self.board[H1] == 'R')
+                self.board[F1] = 'R'
+                self.board[H1] = '-'
+            else:
+                assert(self.board[H8] == 'r')
+                self.board[F8] = 'r'
+                self.board[H8] = '-'
+        elif mv.is_ooo:
+            # move the rook
+            if self.wtm:
+                assert(self.board[A1] == 'R')
+                self.board[D1] = 'R'
+                self.board[A1] = '-'
+            else:
+                assert(self.board[A8] == 'r')
+                self.board[D8] = 'r'
+                self.board[A8] = '-'
 
         self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
     
@@ -419,12 +473,40 @@ class Position(object):
         self.board[mv.to] = mv.capture
         self.board[mv.fr] = mv.pc
         self.in_check = mv.undo.in_check
+        self.castle_flags = mv.undo.castle_flags
         self.fifty_count = mv.undo.fifty_count
+        self.material = mv.undo.material
         
         if mv.pc == 'k':
             self.kpos[0] = mv.fr
         elif mv.pc == 'k':
             self.kpos[1] = mv.fr
+        
+        if mv.is_ep:
+            if not self.wtm:
+                assert(self.board[mv.to + -0x10] == '-')
+                self.board[mv.to + -0x10] = 'p'
+            else:
+                assert(self.board[mv.to + 0x10] == '-')
+                self.board[mv.to + 0x10] = 'P'
+        elif mv.is_oo:
+            if self.wtm:
+                assert(self.board[F1] == 'R')
+                self.board[H1] = 'R'
+                self.board[F1] = '-'
+            else:
+                assert(self.board[F8] == 'r')
+                self.board[H8] = 'r'
+                self.board[F8] = '-'
+        elif mv.is_ooo:
+            if self.wtm:
+                assert(self.board[D1] == 'R')
+                self.board[A1] = 'R'
+                self.board[D1] = '-'
+            else:
+                assert(self.board[D8] == 'r')
+                self.board[A8] = 'r'
+                self.board[D8] = '-'
 
     def detect_check(self):
         self.in_check = self.under_attack(self.kpos[int(self.wtm)],
@@ -519,13 +601,15 @@ class Position(object):
         # examples: e4 e8=Q
         m = re.match(r'^([a-h][1-8])(?:=([NBRQ]))?', s)
         if m:
-            matched = True
             to = str_to_sq(m.group(1))
+            if self.board[to] != '-':
+                raise IllegalMoveError('pawn push blocked')
             prom = m.group(2)
             new_ep = None
             if self.wtm:
                 fr = to - 0x10
                 if rank(to) == 3 and self.board[fr] == '-':
+                    new_ep = fr
                     fr = to - 0x20
                 if self.board[fr] != 'P':
                     raise IllegalMoveError('illegal white pawn move')
@@ -536,9 +620,66 @@ class Position(object):
                         raise IllegalMoveError('illegal promotion')
                 else:
                     mv = Move(self, fr, to, new_ep=new_ep)
+            else:
+                fr = to + 0x10
+                if rank(to) == 4 and self.board[fr] == '-':
+                    new_ep = fr
+                    fr = to + 0x20
+                if self.board[fr] != 'p':
+                    raise IllegalMoveError('illegal black pawn move')
+                if prom:
+                    if rank(to) == 0:
+                        mv = Move(self, fr, to, prom=prom)
+                    else:
+                        raise IllegalMoveError('illegal promotion')
+                else:
+                    mv = Move(self, fr, to, new_ep=new_ep)
+                
+        
+        # examples: dxe4 dxe8=Q
+        m = None
+        if not mv:
+            m = re.match(r'^([a-h])x([a-h][1-8])(?:=([NBRQ]))?$', s)
+        if m:
+            to = str_to_sq(m.group(2))
+            prom = m.group(3)
+            is_ep = to == self.ep
+            if is_ep:
+                assert(self.board[to] == '-')
+            else:
+                topc = self.board[to]
+                if topc == '-' or piece_color(topc) == self.wtm:
+                    raise BadFenError('bad pawn capture')
 
+            f = 'abcdefgh'.index(m.group(1))
+            if f == file(to) - 1:
+                if self.wtm:
+                    fr = to + -0x11
+                    if self.board[fr] != 'P':
+                        raise BadFenError('bad pawn capture')
+                else:
+                    fr = to + 0xf
+                    if self.board[fr] != 'p':
+                        raise BadFenError('bad pawn capture')
+            elif f == file(to) + 1:
+                if self.wtm:
+                    fr = to + -0xf
+                    if self.board[fr] != 'P':
+                        raise BadFenError('bad pawn capture')
+                else:
+                    fr = to + 0x11
+                    if self.board[fr] != 'p':
+                        raise BadFenError('bad pawn capture')
+            else:
+                raise BadFenError('bad pawn capture file')
+                
+            mv = Move(self, fr, to, prom=prom)
+                
         if mv:
-            mv.check_pseudo_legal() # testing only
+            try:
+                mv.check_pseudo_legal()
+            except IllegalMoveError:
+                raise RuntimeError('san inconsistency')
             mv.check_legal()
 
         return mv

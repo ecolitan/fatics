@@ -63,7 +63,7 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
 
-    '''def test_san(self):
+    def test_san(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
         
@@ -72,12 +72,15 @@ class TestGame(Test):
         t2.write('accept\n')
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
+        
+        t.write('e5\n')
+        self.expect('Illegal move', t)
 
         t.write('e4\n')
         self.expect_not('Illegal move', t)
 
         self.close(t)
-        self.close(t2)'''
+        self.close(t2)
         
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
