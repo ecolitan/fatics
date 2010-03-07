@@ -5,7 +5,7 @@ class TestGame(Test):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
         
-        t.write('match admin white\n')
+        t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
         self.expect('Creating: ', t)

@@ -147,19 +147,20 @@ class Offer(object):
         if len(times) == 0:
             pass
         elif len(times) == 1:
-            self.w_time = self.b_time = times[0]
-            self.w_inc = self.b_inc = 0
+            self.player_a.time = self.player_b.time = times[0]
+            self.player_a.inc = self.player_b.inc = 0
         elif len(times) == 2:
-            self.w_time = self.b_time = times[0]
-            self.w_inc = self.b_inc = times[1]
+            self.player_a.time = self.player_b.time = times[0]
+            self.player_a.inc = self.player_b_inc = times[1]
         elif len(times) == 3:
             self.is_time_odds = True
-            self.w_time = 60*times[0]
-            self.w_inc = self.b_inc = times[1]
-            self.b_time = 60*times[1]
+            self.player_a.time = 60*times[0]
+            self.player_a.inc = self.player_b.inc = times[1]
+            self.player_b.time = 60*times[1]
         elif len(times) == 4:
             self.is_time_odds = True
-            (self.w_time, self.w_inc, self.b_time, self.b_inc) = times
+            (self.player_a.time, player_a.inc,
+                self.player_b.time, self.player_b.inc) = times
         else:
             assert(False)
 

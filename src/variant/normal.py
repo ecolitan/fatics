@@ -57,10 +57,10 @@ piece_material = {
 }
 
 def to_castle_flags(w_oo, w_ooo, b_oo, b_ooo):
-    return w_oo << 3 + w_ooo << 2 + b_oo << 1 + b_ooo
+    return (w_oo << 3) + (w_ooo << 2) + (b_oo << 1) + b_ooo
 
 def check_castle_flags(mask, wtm, is_oo):
-    return mask & (1 << (2 * int(wtm) + int(is_oo)))
+    return bool(mask & (1 << (2 * int(wtm) + int(is_oo))))
 
 castle_mask = array('i', [0 for i in range(0x80)])
 castle_mask[A8] = to_castle_flags(True, True, True, False)
@@ -258,6 +258,7 @@ class Position(object):
             # but I think that's OK, since it's still unambiguous.
             self.castle_flags = to_castle_flags('K' in castle_flags,
                 'Q' in castle_flags, 'k' in castle_flags, 'q' in castle_flags)
+            print 'cf %d' % self.castle_flags
 
             if ep == '-':
                 self.ep = None
@@ -471,14 +472,12 @@ class Normal(Variant):
                 except IllegalMoveError as e:
                     conn.write('Illegal move (%s)\n' % s)
                 else:
-                    s12 = self.to_style12()
-                    self.game.white.user.write(s12)
-                    self.game.black.user.write(s12)
+                    self.game.next_move()
 
         return mv != None
     
-    def to_style12(self):
-        """returns a style12 string"""
+    def to_style12(self, user):
+        """returns a style12 string for a given user"""
         # <12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 473 GuestPPMD GuestCWVQ -1 1 0 39 39 60000 60000 1 none (0:00.000) none 1 0 0
         board_str = ''
         for r in range(7, -1, -1):
@@ -491,19 +490,26 @@ class Normal(Variant):
         w_ooo = int(check_castle_flags(self.pos.castle_flags, True, False))
         b_oo = int(check_castle_flags(self.pos.castle_flags, False, True))
         b_ooo = int(check_castle_flags(self.pos.castle_flags, False, False))
+        if self.game.white.user == user:
+            relation = 1 if self.pos.wtm else -1
+        elif self.game.black.user == user:
+            relation = 1 if not self.pos.wtm else -1
+        else:
+            raise RuntimeError('unknown relation')
         relation = 1
         full_moves = self.pos.half_moves / 2 + 1
         last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
             self.game.last_move_secs)
         # board_str begins with a space
-        s = '<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d' % (
+        s = '<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d %d %d' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, self.game.white.user.name,
             self.game.black.user.name, relation, self.game.white.time,
             self.game.white.inc, self.pos.material[1], self.pos.material[0],
-            self.game.white_clock, self.game.black_clock,
+            int(1000 * self.game.white_clock), int(1000 * self.game.black_clock),
             full_moves, self.game.last_move_verbose, last_move_time_str,
-            self.game.last_move_san, int(self.game.flip))
+            self.game.last_move_san, int(self.game.flip),
+            int(self.game.clock_is_ticking), int(1000 * user.lag))
         return s
 
 def init_direction_table():

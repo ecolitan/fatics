@@ -55,6 +55,7 @@ class Game(object):
         self.last_move_mins = 0
         self.last_move_secs = 0.0
         self.flip = False
+        self.clock_is_ticking = False
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = 'Creating: %s (%s) %s (%s) %s %s %s\n' % (self.white.user.name, self.white.rating, self.black.user.name, self.black.rating, rated_str, offer.variant_and_speed, time_str)
@@ -64,12 +65,16 @@ class Game(object):
 
         self.variant = variant_factory.get(offer.variant_name, self)
 
-        s12 = self.variant.to_style12()
-        #print s12
-        self.white.user.write(s12)
-        self.black.user.write(s12)
+        #print(self.variant.to_style12(self.white.user))
+        self.white.user.send_board(self.variant)
+        self.black.user.send_board(self.variant)
 
     def _pick_color(self, a, b): 
         return random.choice([WHITE, BLACK])
+
+    def next_move(self):
+        self.clock_is_ticking = True
+        self.white.user.send_board(self.variant)
+        self.black.user.send_board(self.variant)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

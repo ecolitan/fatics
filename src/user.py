@@ -38,6 +38,7 @@ class BaseUser(object):
             channel.chlist[ch].log_on(self)
         online.add(self)
         self.is_online = True
+        self.lag = 0
         conn.write(_('**** Starting session as %s ****\n\n') % self.name)
 
     def log_off(self):
@@ -101,6 +102,9 @@ class BaseUser(object):
             return '++++'
         else:
             return '----'
+    
+    def send_board(self, vari):
+        self.write(vari.to_style12(self))
 
 # a registered user
 class User(BaseUser):
