@@ -73,6 +73,7 @@ class Game(object):
         return random.choice([WHITE, BLACK])
 
     def next_move(self):
+        #print(self.variant.to_style12(self.white.user))
         self.clock_is_ticking = True
         self.white.user.send_board(self.variant)
         self.black.user.send_board(self.variant)

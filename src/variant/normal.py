@@ -100,6 +100,7 @@ class Move(object):
         self.is_oo = is_oo
         self.is_ooo = is_ooo
         self.is_capture = pos.board[to] != '-'
+        self.is_ep = False
         self.new_ep = None
 
     def check_pseudo_legal(self):
@@ -114,7 +115,8 @@ class Move(object):
                 elif diff == -0x20 and rank(self.fr) == 6:
                     self.new_ep = self.fr + -0x10
                     return self.pos.board[self.new_ep] == '-'
-                elif self.to == self.pos.ep:
+                elif diff in [-0x11, -0xf] and self.to == self.pos.ep:
+                    self.is_ep = True
                     return True
                 else:
                     return False
@@ -127,7 +129,8 @@ class Move(object):
                 elif diff == 0x20 and rank(self.fr) == 1:
                     self.new_ep = self.fr + 0x10
                     return self.pos.board[self.new_ep] == '-'
-                elif self.to == self.pos.ep:
+                elif diff in [0x11, 0xf] and self.to == self.pos.ep:
+                    self.is_ep = True
                     return True
                 else:
                     return False
@@ -178,6 +181,55 @@ class Move(object):
         self.pos.undo_move(self)
         return legal
 
+    def to_san(self):
+        if self.is_oo:
+            san = 'O-O'
+        elif self.is_ooo:
+            san = 'O-O-O'
+        elif self.pc in ['P', 'p']:
+            san = ''
+            if self.is_capture or self.is_ep:
+                san += '12345678'[file(self.fr)] + 'x'
+            san += sq_to_str(self.to)
+            if self.prom:
+                san += '=' + self.prom.upper()
+        else:
+            assert(not self.is_ep)
+            san = self.pc.upper()
+            ambigs = self._get_from_sqs(self.pc, self.to)
+            assert(len(ambigs) >= 1)
+            if len(ambigs) > 1:
+                r = rank(self.fr)
+                f = file(self.fr)
+                # try disambiguating with file
+                if len(filter(lambda sq: file(sq) == f)) == 1:
+                    san += '12345678'[f]
+                elif len(filter(lambda sq: rank(sq) == r)) == 1:
+                    san += 'abcdefgh'[r]
+                else:
+                    san += sq_to_str(self.fr)
+            if self.is_capture:
+                san += 'x'
+            san += sq_to_str(self.to)
+        return san
+
+    def _get_from_sqs(self, pc, sq):
+        '''given a piece (not including a pawn) and a destination square,
+        return a list of all pseudo-legal source squares'''
+        ret = []
+        is_sliding = pc in sliding_pieces
+        for d in piece_moves[pc.lower()]:
+            cur_sq = sq
+            while True:
+                cur_sq += d
+                if not valid_sq(cur_sq):
+                    break
+                if self.pos.board[cur_sq] == pc:
+                    ret.append(cur_sq)
+                if not (self.pos.board[cur_sq] == '-' and is_sliding):
+                    break
+        return ret
+
 class Undo(object):
     """information needed to undo a move"""
     pass
@@ -204,6 +256,7 @@ class Position(object):
         if not mv.is_legal():
             raise IllegalMoveError('is not legal')
 
+        mv.san = mv.to_san()
         self.make_move(mv)
         self._detect_check()
 
@@ -258,14 +311,13 @@ class Position(object):
             # but I think that's OK, since it's still unambiguous.
             self.castle_flags = to_castle_flags('K' in castle_flags,
                 'Q' in castle_flags, 'k' in castle_flags, 'q' in castle_flags)
-            print 'cf %d' % self.castle_flags
 
             if ep == '-':
                 self.ep = None
             else:
                 self.ep = ep[0].index('abcdefgh') + \
                     0x10 * ep[1].index('012345678')
-            
+
             self.fifty_count = int(fifty_count, 10)
             self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
 
@@ -423,6 +475,32 @@ class Position(object):
 
         return False
 
+    def move_from_lalg(self, s):
+        mv = None
+        m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?', s)
+        if m:
+            fr = str_to_sq(m.group(1))
+            to = str_to_sq(m.group(2))
+            prom = m.group(3)
+            if prom == None:
+                mv = Move(self, fr, to)
+            else:
+                if self.wtm:
+                    mv = Move(self, fr, to, prom=prom.upper())
+                else:
+                    mv = Move(self, fr, to, prom=prom.lower())
+        return mv
+
+    '''def move_from_san(self, s):
+        s = re.sub(r'/[\+#\?\!]+$/', '', s)
+        matched = False
+        
+        m = re.match(r'^([a-h][1-8])(?:=([NBRQ]))?', s)
+        if m:
+            matched = True
+            if self.wtm:'''
+
+
 class Normal(Variant):
     """normal chess"""
     def __init__(self, game):
@@ -437,18 +515,8 @@ class Normal(Variant):
 
         mv = None
 
-        m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?', s)
-        if m:
-            fr = str_to_sq(m.group(1))
-            to = str_to_sq(m.group(2))
-            prom = m.group(3)
-            if prom == None:
-                mv = Move(self.pos, fr, to)
-            else:
-                if self.pos.wtm:
-                    mv = Move(self.pos, fr, to, prom=prom.upper())
-                else:
-                    mv = Move(self.pos, fr, to, prom=prom.lower())
+        # long algebraic
+        mv = self.pos.move_from_lalg(s)
 
         if not mv and s in ['O-O', 'OO']:
             if self.pos.wtm:
@@ -461,6 +529,10 @@ class Normal(Variant):
                 mv = Move(self.pos, E1, C1, is_oo=True)
             else:
                 mv = Move(self.pos, E8, C8, is_ooo=True)
+        
+        # san
+        #if not mv:
+        #    mv = self.pos.move_from_san(s)
 
         if mv:
             if not conn.user.session.is_white == self.pos.wtm:
@@ -472,6 +544,7 @@ class Normal(Variant):
                 except IllegalMoveError as e:
                     conn.write('Illegal move (%s)\n' % s)
                 else:
+                    self.game.last_move_san = mv.san
                     self.game.next_move()
 
         return mv != None
