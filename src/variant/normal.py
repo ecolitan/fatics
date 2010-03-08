@@ -8,8 +8,7 @@ import copy
 from array import array
 
 from variant import Variant
-import globals
-    
+
 """
 0x88 board representation; pieces are represented as ASCII,
 the same as FEN. A blank square is '-'.
@@ -62,7 +61,7 @@ def to_castle_flags(w_oo, w_ooo, b_oo, b_ooo):
 def check_castle_flags(mask, wtm, is_oo):
     return bool(mask & (1 << (2 * int(wtm) + int(is_oo))))
 
-castle_mask = array('i', [0 for i in range(0x80)])
+castle_mask = array('i', [0xf for i in range(0x80)])
 castle_mask[A8] = to_castle_flags(True, True, True, False)
 castle_mask[E8] = to_castle_flags(True, True, False, False)
 castle_mask[H8] = to_castle_flags(True, True, False, True)
@@ -232,6 +231,21 @@ class Move(object):
                 san += 'x'
             san += sq_to_str(self.to)
         return san
+    
+    def to_verbose_alg(self):
+        """convert to the verbose notation used in style12"""
+        if self.is_oo:
+            ret = 'O-O'
+        elif self.is_ooo:
+            ret = 'O-O-O'
+        else:
+            ret = self.pc.upper() + '/'
+            ret += sq_to_str(self.fr)
+            ret += '-'
+            ret += sq_to_str(self.to)
+            if self.prom:
+                ret += '=' + self.prom.upper()
+        return ret
 
     def _get_from_sqs(self, pc, sq):
         '''given a piece (not including a pawn) and a destination square,
@@ -368,7 +382,7 @@ class Position(object):
                 sq = 0x10 * r + f
                 yield (sq, self.board[sq])
 
-    def to_fen(self):
+    '''def to_fen(self):
         pos_str = ''
         for (sq, pc) in self:
             pos_str += pc
@@ -394,7 +408,7 @@ class Position(object):
             else:
                 ep_str += '6'
         full_moves = self.half_moves / 2 + 1
-        return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
+        return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves) '''
     
     def make_move(self, mv):
         """make the move"""
@@ -583,7 +597,8 @@ class Position(object):
             mv = Move(self, fr, to)
         else:
             if self.wtm:
-                mv = Move(self, fr, to, prom=prom.upper())
+                assert(prom == prom.upper())
+                mv = Move(self, fr, to, prom=prom)
             else:
                 mv = Move(self, fr, to, prom=prom.lower())
        
@@ -604,7 +619,14 @@ class Position(object):
             to = str_to_sq(m.group(1))
             if self.board[to] != '-':
                 raise IllegalMoveError('pawn push blocked')
-            prom = m.group(2)
+            if not m.group(2):
+                prom = None
+            else:
+                if self.wtm:
+                    prom = m.group(2)
+                    assert(prom == prom.upper())
+                else:
+                    prom = m.group(2).lower()
             new_ep = None
             if self.wtm:
                 fr = to - 0x10
@@ -647,7 +669,7 @@ class Position(object):
                 assert(self.board[to] == '-')
             else:
                 topc = self.board[to]
-                if topc == '-' or piece_color(topc) == self.wtm:
+                if topc == '-' or piece_is_white(topc) == self.wtm:
                     raise IllegalMoveError('bad pawn capture')
 
             f = 'abcdefgh'.index(m.group(1))
@@ -699,7 +721,7 @@ class Position(object):
                 r = '12345678'.index(m.group(3))
                 if froms.length <= 1:
                     raise IllegalMoveError('unnecessary disambiguation')
-                froms = filter(lambda sq: row(sq) == r, froms)
+                froms = filter(lambda sq: rank(sq) == r, froms)
 
             if froms.length != 1:
                 raise IllegalMoveError('illegal or ambiguous move')
@@ -775,6 +797,7 @@ class Normal(Variant):
                 self.pos.make_move(mv)
                 self.pos.detect_check()
                 self.game.last_move_san = mv.san
+                self.game.last_move_verbose = mv.to_verbose_alg()
                 self.game.next_move()
 
         return mv != None
@@ -799,7 +822,6 @@ class Normal(Variant):
             relation = 1 if not self.pos.wtm else -1
         else:
             raise RuntimeError('unknown relation')
-        relation = 1
         full_moves = self.pos.half_moves / 2 + 1
         last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
             self.game.last_move_secs)
@@ -812,7 +834,7 @@ class Normal(Variant):
             int(1000 * self.game.white_clock), int(1000 * self.game.black_clock),
             full_moves, self.game.last_move_verbose, last_move_time_str,
             self.game.last_move_san, int(self.game.flip),
-            int(self.game.clock_is_ticking), int(1000 * user.lag))
+            int(user.clock_is_ticking), int(1000 * user.lag))
         return s
 
 def init_direction_table():

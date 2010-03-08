@@ -55,7 +55,8 @@ class Game(object):
         self.last_move_mins = 0
         self.last_move_secs = 0.0
         self.flip = False
-        self.clock_is_ticking = False
+        self.white.user.clock_is_ticking = False
+        self.black.user.clock_is_ticking = False
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = 'Creating: %s (%s) %s (%s) %s %s %s\n' % (self.white.user.name, self.white.rating, self.black.user.name, self.black.rating, rated_str, offer.variant_and_speed, time_str)
@@ -72,9 +73,18 @@ class Game(object):
     def _pick_color(self, a, b): 
         return random.choice([WHITE, BLACK])
 
+    def abort(self):
+        del self.white.user.session.games[self.black.user.name]
+        del self.black.user.session.games[self.white.user.name]
+        del globals.games[self.number]
+
     def next_move(self):
         #print(self.variant.to_style12(self.white.user))
-        self.clock_is_ticking = True
+        if self.variant.pos.half_moves > 1:
+            if self.variant.pos.wtm:
+                self.white.user.clock_is_ticking = True
+            else:
+                self.black.user.clock_is_ticking = True
         self.white.user.send_board(self.variant)
         self.black.user.send_board(self.variant)
 
