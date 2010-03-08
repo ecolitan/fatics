@@ -121,6 +121,8 @@ class CommandList(object):
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
         self._add(Command('help', 'o', self.help, admin.Level.user))
         self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
+        self._add(Command('iset', 'wS', self.iset, admin.Level.user))
+        self._add(Command('ivariables', 'o', self.ivariables, admin.Level.user))
         self._add(Command('match', 'wt', self.match, admin.Level.user))
         self._add(Command('nuke', 'w', self.nuke, admin.Level.admin))
         self._add(Command('password', 'WW', self.password, admin.Level.user))
@@ -321,6 +323,33 @@ class CommandList(object):
                 on = ch.get_online()
                 if len(on) > 0:
                     conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
+    
+    def iset(self, args, conn):
+        [name, val] = args
+        try:
+            v = var.ivars.get(name)
+            v.set(conn.user, val)
+        except trie.NeedMore as e:
+            assert(len(e.matches) >= 2)
+            conn.write(_('Ambiguous ivariable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))
+        except KeyError:
+            conn.write(_('No such ivariable "%s".\n') % name)
+        except var.BadVarError:
+            conn.write(_('Bad value given for ivariable "%s".\n') % v.name)
+    
+    def ivariables(self, args, conn):
+        if args[0] == None:
+            u = conn.user
+        else:
+            u = user.find.by_name_or_prefix_for_user(args[0], conn)
+
+        if u:
+            conn.write(_("Interface variable settings of %s:\n\n") % u.name)
+            for (vname, val) in u.ivars.iteritems():
+                v = var.ivars[vname]
+                if val != None and v.display_in_vars:
+                    conn.write("%s\n" % v.get_display_str(val))
+            conn.write("\n")
 
     def match(self, args, conn):
         if len(conn.user.session.games) != 0:

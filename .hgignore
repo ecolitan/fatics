@@ -5,5 +5,7 @@ syntax: glob
 *.bak
 *.orig
 *~
+*.mo
+*.po
 timeseal/*seal
 timeseal/*seal_decoder

@@ -4,35 +4,44 @@ import trie
 import lang
 
 vars = trie.Trie()
+ivars = trie.Trie()
 
-"""This class represents the form of a variable but does not hold
-a specific value.  For example, the server has one global instance of
-this class (actually, a subclass of this class) for the "tell" variable,
-not a separate instance for each user."""
+class BadVarError(Exception):
+    pass
+
 class Var(object):
+    """This class represents the form of a variable but does not hold
+    a specific value.  For example, the server has one global instance of
+    this class (actually, a subclass of this class) for the "tell" variable,
+    not a separate instance for each user."""
     def __init__(self, name, default):
         assert(name == name.lower())
         self.name = name
         self.default = default
-        vars[self.name] = self
         self.db_store = lambda user_id, name, val: None
         self.is_persistent = False
         # display in vars output
         self.display_in_vars = True
+        
+    def add_as_var(self): 
+        vars[self.name] = self
+        return self
+    
+    def add_as_ivar(self): 
+        ivars[self.name] = self
+        return self
 
-    """Make a variable persistent with the given key in the
-    user table."""
     def persist(self):
+        """Make a variable persistent with the given key in the
+        user table."""
         self.is_persistent = True
+        return self
 
-    """This checks whether the given value for a var is legal and
-    sets a user's value of the var.  Returns the message to display to
-    the user. On an error, raises BadVarError."""
     def set(self, user, val):
+        """This checks whether the given value for a var is legal and
+        sets a user's value of the var.  Returns the message to display to
+        the user. On an error, raises BadVarError."""
         pass
-
-class BadVarError(Exception):
-    pass
 
 class StringVar(Var):
     max_len = 1023
@@ -124,26 +133,30 @@ class BoolVar(Var):
 
 class VarList(object):
     def __init__(self):
+        self.init_vars()
+        self.init_ivars()
+
+    def init_vars(self):
         def _(message): return message
-        BoolVar("shout", True, _("You will now hear shouts."), _("You will not hear shouts.")).persist()
-        BoolVar("tell", False, _("You will now hear direct tells from unregistered users."), _("You will not hear direct tells from unregistered users.")).persist()
-        BoolVar("open", True, _("You are now open to receive match requests."), _("You are no longer open to receive match requests.")).persist()
-        BoolVar("silence", True, _("You will now play games in silence."), _("You will not play games in silence.")).persist()
-        BoolVar("bell", True, _("You will now hear beeps."), _("You will not hear beeps.")).persist()
+        BoolVar("shout", True, _("You will now hear shouts."), _("You will not hear shouts.")).persist().add_as_var()
+        BoolVar("tell", False, _("You will now hear direct tells from unregistered users."), _("You will not hear direct tells from unregistered users.")).persist().add_as_var()
+        BoolVar("open", True, _("You are now open to receive match requests."), _("You are no longer open to receive match requests.")).persist().add_as_var()
+        BoolVar("silence", True, _("You will now play games in silence."), _("You will not play games in silence.")).persist().add_as_var()
+        BoolVar("bell", True, _("You will now hear beeps."), _("You will not hear beeps.")).persist().add_as_var()
 
-        IntVar("time", 2).persist()
-        IntVar("inc", 12).persist()
+        IntVar("time", 2).persist().add_as_var()
+        IntVar("inc", 12).persist().add_as_var()
 
-        StringVar("interface", None)
+        StringVar("interface", None).add_as_var()
 
-        LangVar("lang", "en").persist()
+        LangVar("lang", "en").persist().add_as_var()
 
-        FormulaVar("formula", None).persist()
+        FormulaVar("formula", None).persist().add_as_var()
         for i in range(1, 10):
-            FormulaVar("f%d" % i, None).persist()
+            FormulaVar("f%d" % i, None).persist().add_as_var()
 
         for i in range(1, 11):
-            NoteVar(str(i), None).persist()
+            NoteVar(str(i), None).persist().add_as_var()
 
         self.default_vars = {}
         self.transient_vars = {}
@@ -153,12 +166,42 @@ class VarList(object):
             else:
                 self.transient_vars[var.name] = var.default
 
+    def init_ivars(self):
+        def _(message): return message
+        BoolVar("smartmove", False, "smartmove set.", "smartmove unset.").add_as_ivar()
+        self.default_ivars = {}
+        for ivar in ivars.itervalues():
+            self.default_ivars[ivar.name] = ivar.default
+
     def get_default_vars(self):
         return copy.copy(self.default_vars)
 
     def get_transient_vars(self):
         return copy.copy(self.transient_vars)
+    
+    def get_default_ivars(self):
+        return copy.copy(self.default_ivars)
 
 varlist = VarList()
+
+
+'''
+ivars:
+allresults atomic audiochat
+block boardinfo
+compressmove crazyhousea
+defprompt
+extascii extuserinfo
+fr
+gameinfo graph
+lock losers
+nohighlight nowrap
+pendinfo pin pinginfo premove
+seekca seekinfo seekremove showownseek showserver singleboard smartmove startpos suicide
+vthighlight
+wildcastle
+xml ?
+'''
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

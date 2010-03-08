@@ -826,7 +826,7 @@ class Normal(Variant):
         last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
             self.game.last_move_secs)
         # board_str begins with a space
-        s = '<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d %d %d' % (
+        s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, self.game.white.user.name,
             self.game.black.user.name, relation, self.game.white.time,

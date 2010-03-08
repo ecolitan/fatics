@@ -12,15 +12,16 @@ class TestStyle12(Test):
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
 
-        #<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 270 GuestJJCG Chessstyles 1 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0
-        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0', t)
-        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0', t2)
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0\r\n', t)
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0\r\n', t2)
 
         t.write('d4\n')
 
-        #<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B 3 1 1 1 1 0 270 GuestJJCG Chessstyles -1 1 0 39 39 60000 60000 1 P/d2-d4 (0:00.000) d4 0 0 0
-        self.expect('<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B 3 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60000 60000 1 P/d2-d4 (0:00.000) d4 0 0 0', t)
-        self.expect('<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B 3 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 60000 60000 1 P/d2-d4 (0:00.000) d4 0 0 0', t2)
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B 3 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60000 60000 1 P/d2-d4 (0:00.000) d4 0 0 0\r\n', t)
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B 3 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 60000 60000 1 P/d2-d4 (0:00.000) d4 0 0 0', t2)
+        
+        t2.write('d5\n')
+        #<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W 3 1 1 1 1 0 270 GuestJJCG Chessstyles 1 1 0 39 39 60000 60000 2 P/d7-d5 (0:00.000) d5 0 1 0
 
         self.close(t)
         self.close(t2)
@@ -28,8 +29,5 @@ class TestStyle12(Test):
         self.deluser('testplayer')
 
 
-        #<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B 3 1 1 1 1 0 270 GuestJJCG Chessstyles -1 1 0 39 39 60000 60000 1 P/d2-d4 (0:00.000) d4 0 0 0
-
-        #<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W 3 1 1 1 1 0 270 GuestJJCG Chessstyles 1 1 0 39 39 60000 60000 2 P/d7-d5 (0:00.000) d5 0 1 0
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

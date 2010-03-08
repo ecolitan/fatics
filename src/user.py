@@ -18,6 +18,7 @@ class UsernameException(Exception):
 class BaseUser(object):
     def __init__(self):
         self.is_online = False
+        self.ivars = var.varlist.get_default_ivars()
 
     def __eq__(self, other):
         return self.name == other.name

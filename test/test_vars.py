@@ -5,12 +5,28 @@ class TestVarsCommand(Test):
         t = self.connect_as_admin()
         t.write('vars\n')
         self.expect('Variable settings of admin:', t)
+        self.expect('shout=1', t)
         self.close(t)
 
     def test_other_vars(self):
         t = self.connect_as_guest()
         t.write('vars admin\n')
         self.expect('Variable settings of admin:', t)
+        self.expect('shout=1', t)
+        self.close(t)
+    
+    def test_self_ivars(self):
+        t = self.connect_as_admin()
+        t.write('ivars\n')
+        self.expect('Interface variable settings of admin:', t)
+        self.expect('smartmove=0', t)
+        self.close(t)
+
+    def test_other_ivars(self):
+        t = self.connect_as_guest()
+        t.write('ivars admin\n')
+        self.expect('Interface variable settings of admin:', t)
+        self.expect('smartmove=0', t)
         self.close(t)
 
 class TestVars(Test):
@@ -30,6 +46,18 @@ class TestVars(Test):
         self.expect("no longer open to receive match requests", t)
         t.write("set open 1\n")
         self.expect("are now open to receive match requests", t)
+
+        self.close(t)
+
+class TestIvars(Test):
+    def test_ivars(self):
+        t = self.connect_as_guest()
+
+        t.write("iset smartmove 1\n")
+        self.expect("smartmove set", t)
+
+        t.write("iset smartmove 0\n")
+        self.expect("smartmove unset", t)
 
         self.close(t)
 
