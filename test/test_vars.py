@@ -46,6 +46,17 @@ class TestVars(Test):
         self.expect("no longer open to receive match requests", t)
         t.write("set open 1\n")
         self.expect("are now open to receive match requests", t)
+        t.write("set open 2\n")
+        self.expect('Bad value given for variable "open"', t)
+
+        t.write("set style -1\n")
+        self.expect('Bad value given for variable "style"', t)
+        
+        t.write("set lang Klingon\n")
+        self.expect('Bad value given for variable "lang"', t)
+        
+        t.write("set style 100\n")
+        self.expect('Bad value given for variable "style"', t)
 
         self.close(t)
 

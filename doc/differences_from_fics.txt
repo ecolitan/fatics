@@ -30,16 +30,18 @@ the shout.
 print an error message rather than trying to execute the command anyway.
 Rationale: Avoid hiding user errors.
 
-* The following are now aliases rather than commands: "open", "bell", "flip",
-"simopen", "style", "promote".
+* These commands are deprecated: "open", "bell", "flip", "simopen",
+"style", "promote".
 Rationale: for interface consistency, encourage always using the "set"
-command to change vars.
+command to change vars. (I'm not firm on this.  Removing these commands
+might cause too many problems for users and interfaces, but I thought
+I would suggest it for discussion.)
 
 * When attempting to send a tell to a name that does not exist or user who
 is not online, the error message is "No user named HANDLE is logged in",
 rather than "HANDLE is not logged in".
 Rationale: This is is an attempt to clarify that the name may or may not be
-a registered handle.
+a registered user.
 
 * The "teams" list has been removed.
 Rationale: It's obsolete.
@@ -69,7 +71,8 @@ without updating idle time.
 * If you enter a move (such as "e2e4") while you aren't playing a game,
 you'll now receive the generic "Command not found" message, rather than
 "You are not playing or examining a game".
-Rationale: more informative to the user.
+Rationale: simplifies the server implementation slightly; hopefully
+won't cause any user confusion.
 
 * If you use the "." command to tell the last told player, and that player
 has logged off, you now get the error message "PLAYER is no longer online",
@@ -77,7 +80,8 @@ rather than "I don't know who to tell that to".
 Rationale: more informative.
 
 * Newlines are now sent after carriage returns ('\r\n'), rather than
-vice versa ('\n\r').
+vice versa ('\n\r'). (This affects some bots and interfaces, but typical
+users should not have to worry about it.)
 Rationale: Dating back to the original teletype machines, the order is
 conventionally '\r\n'.
 

@@ -31,8 +31,8 @@ class Command(object):
         self.run = run
         self.admin_level = admin_level
 
-    def parse_params(self, s):
-        params = []
+    def parse_args(self, s):
+        args = []
         for c in self.param_str:
             if c in ['d', 'i', 'w', 'W']:
                 # required argument
@@ -91,13 +91,13 @@ class Command(object):
                 s = None
             else:
                 raise InternalException()
-            params.append(param)
+            args.append(param)
 
         if not (s == None or re.match(r'^\s*$', s)):
             # extraneous data at the end
             raise BadCommandError()
 
-        return params
+        return args
 
     def help(self, conn):
         conn.write("help for %s\n" % self.name)
@@ -133,6 +133,7 @@ class CommandList(object):
         self._add(Command('shout', 'S', self.shout, admin.Level.user))
         self._add(Command('showlist', 'o', self.showlist, admin.Level.user))
         self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
+        self._add(Command('style', 'd', self.style, admin.Level.user)) # deprecated
         self._add(Command('tell', 'nS', self.tell, admin.Level.user))
         self._add(Command('uptime', '', self.uptime, admin.Level.user))
         self._add(Command('variables', 'o', self.variables, admin.Level.user))
@@ -488,6 +489,10 @@ class CommandList(object):
             conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
         except list.ListError as e:
             conn.write('%s\n' % e.reason)
+    
+    def style(self, args, conn):
+        conn.write('Warning: the "style" command is deprecated.  Please use "set style" instead.\n')
+        var.vars['style'].set(conn.user, str(args[0]))
 
     def tell(self, args, conn):
         (u, ch) = self._do_tell(args, conn)

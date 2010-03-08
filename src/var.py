@@ -96,10 +96,17 @@ class NoteVar(Var):
 
 """An integer variable."""
 class IntVar(Var):
+    def __init__(self, name, default, min=-99999, max=99999):
+        Var.__init__(self, name, default)
+        self.min = min
+        self.max = max
+
     def set(self, user, val):
         try:
             val = int(val, 10)
         except ValueError:
+            raise BadVarError()
+        if val < self.min or val > self.max:
             raise BadVarError()
         user.set_var(self, val)
         user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
@@ -144,8 +151,10 @@ class VarList(object):
         BoolVar("silence", True, _("You will now play games in silence."), _("You will not play games in silence.")).persist().add_as_var()
         BoolVar("bell", True, _("You will now hear beeps."), _("You will not hear beeps.")).persist().add_as_var()
 
-        IntVar("time", 2).persist().add_as_var()
-        IntVar("inc", 12).persist().add_as_var()
+        IntVar("time", 2, min=0).persist().add_as_var()
+        IntVar("inc", 12, min=0).persist().add_as_var()
+        
+        IntVar("style", 12, min=0, max=12).add_as_var()
 
         StringVar("interface", None).add_as_var()
 
@@ -200,6 +209,7 @@ pendinfo pin pinginfo premove
 seekca seekinfo seekremove showownseek showserver singleboard smartmove startpos suicide
 vthighlight
 wildcastle
+ms ?
 xml ?
 '''
 

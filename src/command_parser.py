@@ -65,7 +65,7 @@ class CommandParser(object):
                     conn.write(_("""Ambiguous command "%s". Matches: %s\n""") % (word, ' '.join([c.name for c in matches])))
             if cmd:
                 try:
-                    cmd.run(cmd.parse_params(m.group(2)), conn)
+                    cmd.run(cmd.parse_args(m.group(2)), conn)
                 except command.BadCommandError:
                     cmd.help(conn)
         else:
