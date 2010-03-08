@@ -1,68 +1,96 @@
-* The error messages given when logging in (for names that are
-too short, too long, or contain disallowed characters) have been
-reworded for consiceness and to be more consistent with one another.
-
-* It may take slightly longer to log in.  This is a security feature;
-the password hashing algorithm is harder to crack because it requires
-more computation.
-
-* If you use the "." command to tell the last told player, and that player
-has logged off, you now get the error message "PLAYER is no longer online",
-rather than "I don't know who to tell that to".
-
-* The "(shouted to N players)" given by the shout command includes the
-user doing the shout (assuming that user has shouts enabled).
-
-* Newlines are now sent after carriage returns ('\r\n'), rather than
-vice versa ('\n\r').
-
-* If an alias contains invalid syntax (such as a bare $), the server will
-print an error message rather than trying to execute the command anyway.
-
-* The "inchannel" command, when invoked on an emtpy channel, prints
-"There are 0 players in channel N", rather than "Channel N is empty".
-
-* Vars intentionally not implemented: availinfo, availmin, availmax, rated,
-pgn (games are always mailed as pgn), tolerance, echo, ropen
-
-* The following are now aliases rather than commands: "open", "bell", "flip",
-"simopen", "style", "promote".  
-
-* When attempting to send a tell to a name that does not exist or user who
-is not online, the error message is "No user named HANDLE is logged in",
-rather than "HANDLE is not logged in".  This is is an attempt to clarify
-that the name may or may not be a registered handle.
-
-* The "teams" list has been removed.
+* The server is stricter about the format of moves entered.  Moves should
+be in Standard Algebraic Notation or long algebraic notation.  In particular,
+moves are now case-sensitive, so that a move like bxb3 (pawn capture) is
+unambiguous with Bxb3 (bishop capture).  Users of graphical clients (that
+is, the vast majority of users) should not notice this change.
+Rationale: Standard algebraic notation is, well, standard, but the current
+case-insensitivity violates the standard.  This change will make the
+server more compatible with programs that produce SAN.
 
 * Time odds are supported again (it appears they were removed from the
 old FICS, but I could not find a posted explanation of why).
+Rationale: new feature.
+
+* Vars intentionally not implemented: availinfo, availmin, availmax, rated,
+pgn (games are always mailed as pgn), tolerance, ropen.
+Rationale: I hope they have few enough users that they can be marked
+obsolete and not implemented.
+
+* The error messages given when logging in (for names that are
+too short, too long, or contain disallowed characters) have been
+reworded.
+Rationale: consiceness and consistency of messages.
+
+* The "(shouted to N players)" given by the shout command includes the
+user doing the shout (assuming that user has shouts enabled).
+Rationale: To me, it is logical to count the shouter if he or she sees
+the shout.
+
+* If an alias contains invalid syntax (such as a bare $), the server will
+print an error message rather than trying to execute the command anyway.
+Rationale: Avoid hiding user errors.
+
+* The following are now aliases rather than commands: "open", "bell", "flip",
+"simopen", "style", "promote".
+Rationale: for interface consistency, encourage always using the "set"
+command to change vars.
+
+* When attempting to send a tell to a name that does not exist or user who
+is not online, the error message is "No user named HANDLE is logged in",
+rather than "HANDLE is not logged in".
+Rationale: This is is an attempt to clarify that the name may or may not be
+a registered handle.
+
+* The "teams" list has been removed.
+Rationale: It's obsolete.
 
 * Unregistered users can no longer have notification lists, nor can they be
-added to notification lists. I didn't think such a feature would be useful
-enough to warrant the extra complexity that would be required to implement
-it.
+added to notification lists.
+Rationale: I didn't think such a feature would be useful enough to warrant
+the extra complexity that would be required to implement it.
 
-* The the behavior of empty finger note lines is different. For example,
+* The behavior of empty finger note lines is different. For example,
 if you have only note 1 set, and you set note 5, notes 2-4 will
 automatically be filled with blank lines.  Subsequently deleting
 note 5 will clear notes 2-4 again.
+Rationale: intended to be more intuitive.
+
+* The "inchannel" command, when invoked on an emtpy channel, prints
+"There are 0 players in channel N", rather than "Channel N is empty".
+Rationale: easier for the server to generate and easier for a bot to
+parse.
 
 * If you prefix a command with "$$" to avoid updating your idle time,
-aliases are now expanded.  To avoid expanding aliases (the old behavior
+aliases are now used.  To avoid using aliases (the old behavior
 of "$$"), use "$$$".
+Rationale: allow executing a command with aliases,
+without updating idle time.
 
 * If you enter a move (such as "e2e4") while you aren't playing a game,
 you'll now receive the generic "Command not found" message, rather than
 "You are not playing or examining a game".
+Rationale: more informative to the user.
+
+* If you use the "." command to tell the last told player, and that player
+has logged off, you now get the error message "PLAYER is no longer online",
+rather than "I don't know who to tell that to".
+Rationale: more informative.
+
+* Newlines are now sent after carriage returns ('\r\n'), rather than
+vice versa ('\n\r').
+Rationale: Dating back to the original teletype machines, the order is
+conventionally '\r\n'.
+
 
 ===
 
 Admin differences:
 * The following commands now require an exact login and do not accept
 abbreviations of player names:  "asetadminlevel", "asetpasswd", "nuke".
+Rationale: These commands should be used with great care.
 
-for removal:
+on second thought, I changed my mind about these:
+===
 * Gods can now set their own adminlevel. Not sure if it's useful, but it
 follows the principle of "gods can do anything".
 
@@ -72,6 +100,9 @@ possible to set a guest's adminlevel).
 === 
 Internal differences:
 
-Rather than a global array of all challenges, each player's list of
-challenges sent and received are stored separately.
+* Rather using than a global array of all challenges, the server
+stores each player's lists of challenges sent and received separately.
+
+* Noplay and censor lists are stored as python sets, which allows tests
+for set membership in O(1) average time.
 

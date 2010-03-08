@@ -635,7 +635,6 @@ class Position(object):
                 else:
                     mv = Move(self, fr, to, new_ep=new_ep)
                 
-        
         # examples: dxe4 dxe8=Q
         m = None
         if not mv:
@@ -649,32 +648,64 @@ class Position(object):
             else:
                 topc = self.board[to]
                 if topc == '-' or piece_color(topc) == self.wtm:
-                    raise BadFenError('bad pawn capture')
+                    raise IllegalMoveError('bad pawn capture')
 
             f = 'abcdefgh'.index(m.group(1))
             if f == file(to) - 1:
                 if self.wtm:
                     fr = to + -0x11
                     if self.board[fr] != 'P':
-                        raise BadFenError('bad pawn capture')
+                        raise IllegalMoveError('bad pawn capture')
                 else:
                     fr = to + 0xf
                     if self.board[fr] != 'p':
-                        raise BadFenError('bad pawn capture')
+                        raise IllegalMoveError('bad pawn capture')
             elif f == file(to) + 1:
                 if self.wtm:
                     fr = to + -0xf
                     if self.board[fr] != 'P':
-                        raise BadFenError('bad pawn capture')
+                        raise IllegalMoveError('bad pawn capture')
                 else:
                     fr = to + 0x11
                     if self.board[fr] != 'p':
-                        raise BadFenError('bad pawn capture')
+                        raise IllegalMoveError('bad pawn capture')
             else:
-                raise BadFenError('bad pawn capture file')
+                raise IllegalMoveError('bad pawn capture file')
                 
             mv = Move(self, fr, to, prom=prom)
-                
+   
+        # examples: Nf3 Nxf3 Ng1xf3 
+        m = None
+        if not mv:
+            m = re.match(r'([NBRQK])([a-h])?([1-8])?(x)?([a-h][1-8])', s)
+        if m:
+            to = str_to_sq(m.group(5))
+            if m.group(4):
+                if self.board[to] == '-':
+                    raise IllegalMoveError('capture on blank square')
+            else:
+                if self.board[to] != '-':
+                    raise IllegalMoveError('missing "x" to indicate capture')
+
+            froms = self._get_from_sqs(m.group(1), to)
+
+            if m.group(2):
+                if froms.length <= 1:
+                    raise IllegalMoveError('unnecessary disambiguation')
+                f = 'abcdefgh'.index(m.group(2))
+                froms = filter(lambda sq: file(sq) == f, froms)
+
+            if m.group(3):
+                r = '12345678'.index(m.group(3))
+                if froms.length <= 1:
+                    raise IllegalMoveError('unnecessary disambiguation')
+                froms = filter(lambda sq: row(sq) == r, froms)
+
+            if froms.length != 1:
+                raise IllegalMoveError('illegal or ambiguous move')
+
+            mv = Move(self, froms[0], to)
+
         if mv:
             try:
                 mv.check_pseudo_legal()
