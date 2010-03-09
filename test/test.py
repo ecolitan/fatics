@@ -8,6 +8,8 @@ host = '127.0.0.1'
 port = '5001'
 admin_passwd = 'admin'
 
+sys.path.append('src/')
+
 def connect():
     try:
         t = telnetlib.Telnet(host, port, 120)

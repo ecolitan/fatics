@@ -1,7 +1,9 @@
 from test import *
 
+from pgn import Pgn
+
 class TestGame(Test):
-    def test_game(self):
+    def test_game_basics(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
         
@@ -62,6 +64,35 @@ class TestGame(Test):
 
         self.close(t)
         self.close(t2)
+    
+    def test_games(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+    
+        f = open('../data/test1.pgn', 'r')
+
+        pgn = Pgn(f.read())
+        for g in pgn.games:
+            wtm = True
+            for (mv, decorator) in g.moves:                
+                if wtm:
+                    #print 'sending %s to white' % mv
+                    t.write('%s\n' % mv)
+                else:
+                    #print 'sending %s to black' % mv
+                    t2.write('%s\n' % mv)
+                self.expect('<12> ', t)
+                self.expect('<12> ', t2)
+                wtm = not wtm 
+
+        self.close(t)
+        self.close(t2)
 
     def test_san(self):
         t = self.connect_as_guest()
@@ -82,5 +113,4 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
         
-
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

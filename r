@@ -1,1 +1,1 @@
-PYTHONPATH=src twistd -r epoll -noy src/chessd.tac
+twistd -r epoll -noy src/chessd.tac

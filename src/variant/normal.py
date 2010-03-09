@@ -194,7 +194,7 @@ class Move(object):
 
         self.pos.make_move(self)
         try:
-            if self.pos.under_attack(self.pos.kpos[int(not self.pos.wtm)],
+            if self.pos.under_attack(self.pos.kpos[not self.pos.wtm],
                     self.pos.wtm):
                 raise IllegalMoveError('leaves king in check')
         finally:
@@ -215,15 +215,15 @@ class Move(object):
         else:
             assert(not self.is_ep)
             san = self.pc.upper()
-            ambigs = self._get_from_sqs(self.pc, self.to)
+            ambigs = self.pos.get_from_sqs(self.pc, self.to)
             assert(len(ambigs) >= 1)
             if len(ambigs) > 1:
                 r = rank(self.fr)
                 f = file(self.fr)
                 # try disambiguating with file
-                if len(filter(lambda sq: file(sq) == f)) == 1:
+                if len(filter(lambda sq: file(sq) == f, ambigs)) == 1:
                     san += '12345678'[f]
-                elif len(filter(lambda sq: rank(sq) == r)) == 1:
+                elif len(filter(lambda sq: rank(sq) == r, ambigs)) == 1:
                     san += 'abcdefgh'[r]
                 else:
                     san += sq_to_str(self.fr)
@@ -235,9 +235,10 @@ class Move(object):
     def to_verbose_alg(self):
         """convert to the verbose notation used in style12"""
         if self.is_oo:
-            ret = 'O-O'
+            # why fics, why?
+            ret = 'o-o'
         elif self.is_ooo:
-            ret = 'O-O-O'
+            ret = 'o-o-o'
         else:
             ret = self.pc.upper() + '/'
             ret += sq_to_str(self.fr)
@@ -245,23 +246,6 @@ class Move(object):
             ret += sq_to_str(self.to)
             if self.prom:
                 ret += '=' + self.prom.upper()
-        return ret
-
-    def _get_from_sqs(self, pc, sq):
-        '''given a piece (not including a pawn) and a destination square,
-        return a list of all pseudo-legal source squares'''
-        ret = []
-        is_sliding = pc in sliding_pieces
-        for d in piece_moves[pc.lower()]:
-            cur_sq = sq
-            while True:
-                cur_sq += d
-                if not valid_sq(cur_sq):
-                    break
-                if self.pos.board[cur_sq] == pc:
-                    ret.append(cur_sq)
-                if not (self.pos.board[cur_sq] == '-' and is_sliding):
-                    break
         return ret
 
 class Undo(object):
@@ -301,7 +285,7 @@ class Position(object):
                     else:
                         assert(valid_sq(sq))
                         self.board[sq] = c
-                        self.material[int(piece_is_white(c))] += \
+                        self.material[piece_is_white(c)] += \
                             piece_material[c.lower()]
                         if c == 'k':
                             if self.kpos[0] != None:
@@ -373,8 +357,8 @@ class Position(object):
         # Usually I don't like using a catch-all except, but it seems to
         # be the safest default action because the FEN is supplied by
         # the user.
-        #except:
-            #raise BadFenError()
+        except:
+            raise BadFenError()
 
     def __iter__(self):
         for r in range(0, 8):
@@ -412,7 +396,6 @@ class Position(object):
     
     def make_move(self, mv):
         """make the move"""
-        self.wtm = not self.wtm
         self.half_moves += 1
 
         mv.undo = Undo()
@@ -427,8 +410,8 @@ class Position(object):
             self.board[mv.to] = mv.pc
         else:
             self.board[mv.to] = mv.prom
-            self.material[not self.wtm] += piece_material[mv.prom.lower()] - \
-                piece_material['p']
+            self.material[not self.wtm] += piece_material[mv.prom.lower()]\
+                - piece_material['p']
 
         if mv.pc == 'k':
             self.kpos[0] = mv.to
@@ -446,9 +429,10 @@ class Position(object):
             self.fifty_count += 1
        
         if mv.is_capture:
-            self.material[self.wtm] -= piece_material[mv.cap.lower()]
+            self.material[self.wtm] -= piece_material[mv.capture.lower()]
        
         if mv.is_ep:
+            self.material[not self.wtm] -= piece_material['p']
             # remove the captured pawn
             if self.wtm:
                 assert(self.board[mv.to + -0x10] == 'p')
@@ -478,6 +462,7 @@ class Position(object):
                 self.board[A8] = '-'
 
         self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
+        self.wtm = not self.wtm
     
     def undo_move(self, mv):
         """undo the move"""
@@ -523,7 +508,7 @@ class Position(object):
                 self.board[D8] = '-'
 
     def detect_check(self):
-        self.in_check = self.under_attack(self.kpos[int(self.wtm)],
+        self.in_check = self.under_attack(self.kpos[self.wtm],
             not self.wtm)
     
     def _is_pc_at(self, pc, sq):
@@ -709,22 +694,23 @@ class Position(object):
                 if self.board[to] != '-':
                     raise IllegalMoveError('missing "x" to indicate capture')
 
-            froms = self._get_from_sqs(m.group(1), to)
+            pc = m.group(1) if self.wtm else m.group(1).lower()
+            froms = self.get_from_sqs(pc, to)
 
             if m.group(2):
-                if froms.length <= 1:
+                if len(froms) <= 1:
                     raise IllegalMoveError('unnecessary disambiguation')
                 f = 'abcdefgh'.index(m.group(2))
                 froms = filter(lambda sq: file(sq) == f, froms)
 
             if m.group(3):
                 r = '12345678'.index(m.group(3))
-                if froms.length <= 1:
+                if len(length) <= 1:
                     raise IllegalMoveError('unnecessary disambiguation')
                 froms = filter(lambda sq: rank(sq) == r, froms)
 
-            if froms.length != 1:
-                raise IllegalMoveError('illegal or ambiguous move')
+            if len(froms) != 1:
+                raise IllegalMoveError('illegal or ambiguous move: %d interpretations' % len(froms))
 
             mv = Move(self, froms[0], to)
 
@@ -743,11 +729,11 @@ class Position(object):
             if self.wtm:
                 mv = Move(self, E1, G1, is_oo=True)
             else:
-                mv = Move(self, E8, G8, is_ooo=True)
+                mv = Move(self, E8, G8, is_oo=True)
         
         if not mv and s in ['O-O-O', 'OOO']:
             if self.wtm:
-                mv = Move(self, E1, C1, is_oo=True)
+                mv = Move(self, E1, C1, is_ooo=True)
             else:
                 mv = Move(self, E8, C8, is_ooo=True)
 
@@ -756,6 +742,24 @@ class Position(object):
             mv.check_legal()
 
         return mv
+    
+    def get_from_sqs(self, pc, sq):
+        '''given a piece (not including a pawn) and a destination square,
+        return a list of all pseudo-legal source squares'''
+        ret = []
+        is_sliding = pc in sliding_pieces
+        for d in piece_moves[pc.lower()]:
+            cur_sq = sq
+            while True:
+                cur_sq += d
+                if not valid_sq(cur_sq):
+                    break
+                if self.board[cur_sq] == pc:
+                    ret.append(cur_sq)
+                if not (self.board[cur_sq] == '-' and is_sliding):
+                    break
+        return ret
+
 
 class Normal(Variant):
     """normal chess"""
@@ -800,8 +804,8 @@ class Normal(Variant):
                 self.game.last_move_verbose = mv.to_verbose_alg()
                 self.game.next_move()
 
-        return mv != None
-    
+        return mv or illegal
+
     def to_style12(self, user):
         """returns a style12 string for a given user"""
         # <12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 473 GuestPPMD GuestCWVQ -1 1 0 39 39 60000 60000 1 none (0:00.000) none 1 0 0

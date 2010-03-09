@@ -8,6 +8,8 @@ from twisted.application import service, internet
 from twisted.internet.protocol import ServerFactory
 from twisted.internet import epollreactor
 
+sys.path.insert(0, 'src/')
+
 from config import config
 import telnet
 import connection
