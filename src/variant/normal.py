@@ -415,7 +415,7 @@ class Position(object):
 
         if mv.pc == 'k':
             self.kpos[0] = mv.to
-        elif mv.pc == 'k':
+        elif mv.pc == 'K':
             self.kpos[1] = mv.to
 
         if mv.new_ep:
@@ -788,10 +788,11 @@ class Normal(Variant):
             if not mv:
                 mv = self.pos.move_from_san(s)
         except IllegalMoveError as e:
+            #raise
             illegal = True
             
         if mv or illegal:
-            if conn.user.session.is_white != self.pos.wtm:
+            if self.game.get_user_side(conn.user) != self.pos.wtm:
                 #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.pos.wtm)
                 conn.write(_('It is not your move.\n'))
             elif illegal:

@@ -74,6 +74,12 @@ class PgnGame(object):
             if m:
                 i = m.end()
                 continue
+            
+            m = result_re.match(s, i)
+            if m:
+                self.result = m.group(1)
+                i = m.end()
+                continue
 
             # The move_num re should come before the move re because
             # a move cannot start with a number.
@@ -99,12 +105,6 @@ class PgnGame(object):
                 #comments.append(m.group(1))
                 continue
 
-            m = result_re.match(s, i)
-            if m:
-                self.result = m.group(1)
-                i = m.end()
-                continue
-            
             m = nag_re.match(s, i)
             if m:
                 i = m.end()

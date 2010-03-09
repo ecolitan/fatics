@@ -108,6 +108,7 @@ class CommandList(object):
         # a command given a substring
         self.cmds = trie.Trie()
         self.admin_cmds = trie.Trie()
+        self._add(Command('abort', 'n', self.abort, admin.Level.user))
         self._add(Command('accept', 'n', self.accept, admin.Level.user))
         self._add(Command('addlist', 'ww', self.addlist, admin.Level.user))
         self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
@@ -145,6 +146,24 @@ class CommandList(object):
         self.admin_cmds[cmd.name] = cmd
         if cmd.admin_level <= admin.Level.user:
             self.cmds[cmd.name] = cmd
+    
+    def abort(self, args, conn):
+        if len(conn.user.session.games) == 0:
+            conn.write(_("You are not playing a game.\n"))
+            return
+        if len(conn.user.session.games) > 1:
+            conn.write(_('Please use "simabort" for simuls.\n'))
+            return
+        g = conn.user.session.games.values()[0]
+        side = g.get_user_side(conn.user)
+        if g.variant.pos.half_moves < 2:
+            g.abort('Game aborted on move 1 by %s' % conn.user.name)
+        elif g.abort_offered[not side]:
+            g.abort('Game aborted by agreement')
+        else:
+            # XXX should not substitute name till translation
+            g.get_side_user(not side).write(N_('%s requests to abort the game; type "abort" to accept.\n') % conn.user.name)
+            g.abort_offered[side] = True
     
     def accept(self, args, conn):
         if len(conn.user.session.pending_received) == 0:

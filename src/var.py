@@ -144,12 +144,11 @@ class VarList(object):
         self.init_ivars()
 
     def init_vars(self):
-        def _(message): return message
-        BoolVar("shout", True, _("You will now hear shouts."), _("You will not hear shouts.")).persist().add_as_var()
-        BoolVar("tell", False, _("You will now hear direct tells from unregistered users."), _("You will not hear direct tells from unregistered users.")).persist().add_as_var()
-        BoolVar("open", True, _("You are now open to receive match requests."), _("You are no longer open to receive match requests.")).persist().add_as_var()
-        BoolVar("silence", True, _("You will now play games in silence."), _("You will not play games in silence.")).persist().add_as_var()
-        BoolVar("bell", True, _("You will now hear beeps."), _("You will not hear beeps.")).persist().add_as_var()
+        BoolVar("shout", True, N_("You will now hear shouts."), N_("You will not hear shouts.")).persist().add_as_var()
+        BoolVar("tell", False, N_("You will now hear direct tells from unregistered users."), N_("You will not hear direct tells from unregistered users.")).persist().add_as_var()
+        BoolVar("open", True, N_("You are now open to receive match requests."), N_("You are no longer open to receive match requests.")).persist().add_as_var()
+        BoolVar("silence", True, N_("You will now play games in silence."), N_("You will not play games in silence.")).persist().add_as_var()
+        BoolVar("bell", True, N_("You will now hear beeps."), N_("You will not hear beeps.")).persist().add_as_var()
 
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
@@ -176,8 +175,7 @@ class VarList(object):
                 self.transient_vars[var.name] = var.default
 
     def init_ivars(self):
-        def _(message): return message
-        BoolVar("smartmove", False, "smartmove set.", "smartmove unset.").add_as_ivar()
+        BoolVar("smartmove", False, N_("smartmove set."), N_("smartmove unset.")).add_as_ivar()
         self.default_ivars = {}
         for ivar in ivars.itervalues():
             self.default_ivars[ivar.name] = ivar.default

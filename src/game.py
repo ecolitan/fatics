@@ -58,6 +58,11 @@ class Game(object):
         self.white.user.clock_is_ticking = False
         self.black.user.clock_is_ticking = False
 
+        self.abort_offered = [False, False]
+        self.draw_offered = [False, False]
+        self.adjourn_offered = [False, False]
+        self.pause_offered = [False, False]
+
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = 'Creating: %s (%s) %s (%s) %s %s %s\n' % (self.white.user.name, self.white.rating, self.black.user.name, self.black.rating, rated_str, offer.variant_and_speed, time_str)
     
@@ -73,11 +78,6 @@ class Game(object):
     def _pick_color(self, a, b): 
         return random.choice([WHITE, BLACK])
 
-    def abort(self):
-        del self.white.user.session.games[self.black.user.name]
-        del self.black.user.session.games[self.white.user.name]
-        del globals.games[self.number]
-
     def next_move(self):
         #print(self.variant.to_style12(self.white.user))
         if self.variant.pos.half_moves > 1:
@@ -87,5 +87,36 @@ class Game(object):
                 self.black.user.clock_is_ticking = True
         self.white.user.send_board(self.variant)
         self.black.user.send_board(self.variant)
+
+    def get_user_side(self, user):
+        if user == self.white.user:
+            return True
+        elif user == self.black.user:
+            return False
+        else:
+            raise RuntimeError('Game.get_side(): got a non-player')
+
+    def get_side_user(self, side):
+        if side:
+            return self.white.user
+        else:
+            return self.black.user
+    
+    def abort(self, msg):
+        self.white.clock_is_ticking = False
+        self.black.clock_is_ticking = False
+        self.result(msg, '*')
+        self.free()
+
+    def free(self):
+        del globals.games[self.number]
+        del self.white.user.session.games[self.black.user.name]
+        del self.black.user.session.games[self.white.user.name]
+
+    def result(self, msg, code):
+        line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
+            self.white.user.name, self.black.user.name, msg, code)
+        self.white.user.write(line)
+        self.black.user.write(line)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

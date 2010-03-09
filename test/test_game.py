@@ -69,16 +69,16 @@ class TestGame(Test):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
         
-        t.write('match admin white 1 0\n')
-        self.expect('Challenge:', t2)
-        t2.write('accept\n')
-        self.expect('<12> ', t)
-        self.expect('<12> ', t2)
-    
         f = open('../data/test1.pgn', 'r')
 
         pgn = Pgn(f.read())
         for g in pgn.games:
+            t.write('match admin white 1 0\n')
+            self.expect('Challenge:', t2)
+            t2.write('accept\n')
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+    
             wtm = True
             for (mv, decorator) in g.moves:                
                 if wtm:
@@ -90,6 +90,16 @@ class TestGame(Test):
                 self.expect('<12> ', t)
                 self.expect('<12> ', t2)
                 wtm = not wtm 
+        
+            if g.result == '*':
+                t.write('abort\n')
+                t2.write('abort\n')
+                self.expect('Game aborted', t)
+                self.expect('Game aborted', t2)
+            elif g.result == '1-0':
+                pass
+            else:
+                self.assert_(False)
 
         self.close(t)
         self.close(t2)
@@ -109,6 +119,100 @@ class TestGame(Test):
 
         t.write('e4\n')
         self.expect_not('Illegal move', t)
+
+        self.close(t)
+        self.close(t2)
+
+class TestAbort(Test):
+    def test_abort_white_ply_0(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('abort\n')
+        self.expect('Game aborted on move 1 by Guest', t)
+        self.expect('Game aborted on move 1 by Guest', t2)
+
+        self.close(t)
+        self.close(t2)
+    
+    def test_abort_white_ply_0(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('abort\n')
+        self.expect('Game aborted on move 1 by Guest', t)
+        self.expect('Game aborted on move 1 by Guest', t2)
+
+        self.close(t)
+        self.close(t2)
+    
+    def test_abort_ply_0(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('abort\n')
+        self.expect('Game aborted on move 1 by Guest', t)
+        self.expect('Game aborted on move 1 by Guest', t2)
+
+        self.close(t)
+        self.close(t2)
+    
+    def test_abort_ply_1(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('e4\n')
+        self.expect('P/e2-e4', t2)
+        t2.write('abort\n')
+        self.expect('Game aborted on move 1 by admin', t)
+        self.expect('Game aborted on move 1 by admin', t2)
+
+        self.close(t)
+        self.close(t2)
+    
+    def test_abort_agreement(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('e4\n')
+        t2.write('e5\n')
+        t.write('abort\n')
+
+        self.expect('requests to abort the game', t2)
+
+        t2.write('abort\n')
+        self.expect('Game aborted by agreement', t)
+        self.expect('Game aborted by agreement', t2)
 
         self.close(t)
         self.close(t2)

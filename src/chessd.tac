@@ -10,6 +10,11 @@ from twisted.internet import epollreactor
 
 sys.path.insert(0, 'src/')
 
+# add a builtin to mark strings for translation that should not
+# automatically be translated dynamically.
+import __builtin__
+__builtin__.__dict__['N_'] = lambda s: s
+
 from config import config
 import telnet
 import connection

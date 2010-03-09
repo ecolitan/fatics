@@ -88,7 +88,7 @@ class Offer(object):
 
         a.write('Issuing: %s\n' % challenge_str)
         b.write('Challenge: %s\n' % challenge_str)
-        b.write(_('You can "accept", "decline", or propose different parameters.\n'))
+        b.write(N_('You can "accept", "decline", or propose different parameters.\n'))
     def set_rated(self, val):
         assert(val in [True, False])
         if self.rated != None:

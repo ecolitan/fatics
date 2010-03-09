@@ -21,8 +21,6 @@ class Session(object):
         self.pending_sent = {}
         self.pending_received = {}
         self.games = {}
-        # should be changed to support simuls
-        self.is_white = None
 
     def set_user(self, user):
         self.user = user
@@ -48,7 +46,7 @@ class Session(object):
             v.decline(logout=True)
             v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % k)
         for (k, v) in copy.copy(self.games).iteritems():
-            v.abort()
+            v.abort('%s aborted by disconnection' % self.user.name)
         self.pending_received.clear()
         self.pending_sent.clear()
         if len(self.games) > 0:

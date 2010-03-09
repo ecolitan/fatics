@@ -7,10 +7,6 @@ Rationale: Standard algebraic notation is, well, standard, but the current
 case-insensitivity violates the standard.  This change will make the
 server more compatible with programs that produce SAN.
 
-* Time odds are supported again (it appears they were removed from the
-old FICS, but I could not find a posted explanation of why).
-Rationale: new feature.
-
 * Vars intentionally not implemented: availinfo, availmin, availmax, rated,
 pgn (games are always mailed as pgn), tolerance, ropen.
 Rationale: I hope they have few enough users that they can be marked
@@ -20,6 +16,9 @@ obsolete and not implemented.
 too short, too long, or contain disallowed characters) have been
 reworded.
 Rationale: consiceness and consistency of messages.
+
+* "Drawn by mutual agreement" has been shortened to "Drawn by agreement".
+Rationale: conciseness.
 
 * The "(shouted to N players)" given by the shout command includes the
 user doing the shout (assuming that user has shouts enabled).
@@ -85,6 +84,9 @@ users should not have to worry about it.)
 Rationale: Dating back to the original teletype machines, the order is
 conventionally '\r\n'.
 
+* If a game is aborted on move 1, the printed result now includes the
+name of the player who requested the abort.
+Rationale: more informative.
 
 ===
 
@@ -92,6 +94,12 @@ Admin differences:
 * The following commands now require an exact login and do not accept
 abbreviations of player names:  "asetadminlevel", "asetpasswd", "nuke".
 Rationale: These commands should be used with great care.
+
+New features
+============
+* Time odds are supported again (it appears they were removed from the
+old FICS, but I could not find a posted explanation of why).
+
 
 on second thought, I changed my mind about these:
 ===
