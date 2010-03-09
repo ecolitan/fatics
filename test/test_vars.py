@@ -59,6 +59,12 @@ class TestVars(Test):
         self.expect('Bad value given for variable "style"', t)
 
         self.close(t)
+    
+    def test_transient_var_user(self):
+        t = self.connect_as_admin()
+        t.write('set interface Thief 1.23 Midget edition\n')
+        self.expect('interface set to "Thief 1.23 Midget edition"', t)
+        self.close(t)
 
 class TestIvars(Test):
     def test_ivars(self):

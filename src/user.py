@@ -171,7 +171,8 @@ class User(BaseUser):
 
     def set_var(self, v, val):
         BaseUser.set_var(self, v, val)
-        db.user_set_var(self.id, v.name, val)
+        if v.is_persistent:
+            db.user_set_var(self.id, v.name, val)
     
     def set_formula(self, v, val):
         BaseUser.set_formula(self, v, val)

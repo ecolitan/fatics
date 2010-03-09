@@ -47,11 +47,16 @@ class LoginTest(Test):
         t.close()
 
     def test_registered_user_login(self):
-        # registered user
         t = self.connect()
+        # registered login start
         t.write('admin\n')
-        self.expect('is a registered', t, "registered user login start")
+        self.expect('is a registered', t)
+        
+        t.write('not the password\n')
+        self.expect('*** Incorrect password ***', t)
 
+        t.write('admin\n')
+        self.expect('is a registered', t)
         t.write(admin_passwd + '\n')
         self.expect(' Starting', t, "registered user login complete")
         self.close(t)
