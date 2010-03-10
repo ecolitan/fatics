@@ -8,6 +8,7 @@ import copy
 from array import array
 
 from variant import Variant
+import game
 
 """
 0x88 board representation; pieces are represented as ASCII,
@@ -104,6 +105,12 @@ class Move(object):
         self.is_capture = self.capture != '-'
         self.is_ep = False
         self.new_ep = new_ep
+
+    def __str__(self):
+        s = '%s%s' % (sq_to_str(self.fr), sq_to_str(self.to))
+        if self.prom:
+            s += '=%s' % self.prom
+        return s
 
     def check_pseudo_legal(self):
         """Tests if a move is pseudo-legal, that is, legal ignoring the
@@ -248,6 +255,14 @@ class Move(object):
                 ret += '=' + self.prom.upper()
         return ret
 
+    def is_legal(self):
+        try:
+            self.check_legal()
+        except IllegalMoveError:
+            return False
+        else:
+            return True
+
 class Undo(object):
     """information needed to undo a move"""
     pass
@@ -256,10 +271,11 @@ class Position(object):
     def __init__(self, fen):
         # XXX make an array
         self.board = 0x80 * ['-']
-        # indexed by 2 * wtm + i, where i=0 for O-O and i=1 for O-O-O
         self.castle_flags = 0
         self.kpos = [None, None]
         self.set_pos(fen)
+        self.is_stalemate = False
+        self.is_checkmate = False
 
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
@@ -276,9 +292,9 @@ class Position(object):
             ranks = pos.split('/')
             ranks.reverse()
             self.material = [0, 0]
-            for (r, rank) in enumerate(ranks):
+            for (r, rank_str) in enumerate(ranks):
                 sq = 0x10 * r
-                for c in rank:
+                for c in rank_str:
                     d = '12345678'.find(c)
                     if d > 0:
                         sq += d + 1
@@ -297,6 +313,10 @@ class Position(object):
                                 # multiple kings
                                 raise BadFenError()
                             self.kpos[1] = sq
+                        elif c.lower() == 'p':
+                            if rank(sq) in [0, 7]:
+                                # pawn on 1st or 8th rank
+                                raise BadFenError()
                         sq += 1
                 if sq & 0xf != 8:
                     # wrong row length
@@ -478,7 +498,7 @@ class Position(object):
         
         if mv.pc == 'k':
             self.kpos[0] = mv.fr
-        elif mv.pc == 'k':
+        elif mv.pc == 'K':
             self.kpos[1] = mv.fr
         
         if mv.is_ep:
@@ -508,13 +528,81 @@ class Position(object):
                 self.board[D8] = '-'
 
     def detect_check(self):
+        """detect whether the player to move is in check, checkmated,
+        or stalemated"""
         self.in_check = self.under_attack(self.kpos[self.wtm],
             not self.wtm)
+        if self.in_check:
+            self.is_checkmate = not self._any_legal_moves()
+        else:
+            self.is_stalemate = not self._any_legal_moves()
+
+    def _any_legal_moves(self):
+        for (sq, pc) in self:
+            if pc != '-' and piece_is_white(pc) == self.wtm:
+                cur_sq = sq
+                if self._any_pc_moves(sq, pc):
+                    return True
+        return False
+
+    def _pawn_cap_at(self, sq, wtm):
+        if not valid_sq(sq):
+            return False
+        pc = self.board[sq]
+        return (pc != '-' and piece_is_white(pc) != wtm) or self.ep == sq
+
+    def _any_pc_moves(self, sq, pc):
+        if pc == 'P':
+            if self.board[sq + 0x10] == '-':
+                if Move(self, sq, sq + 0x10).is_legal():
+                    return True
+                if rank(sq) == 1 and self.board[sq + 0x20] == '-' and Move(
+                        self, sq, sq + 0x10).is_legal():
+                    return True
+            if self._pawn_cap_at(sq + 0xf, self.wtm) and Move(
+                    self, sq, sq + 0xf).is_legal():
+                return True
+            if self._pawn_cap_at(sq + 0x11, self.wtm) and Move(
+                    self, sq, sq + 0x11).is_legal():
+                return True
+        elif pc == 'p':
+            if self.board[sq + -0x10] == '-':
+                if Move(self, sq, sq + -0x10).is_legal():
+                    return True
+                if rank(sq) == 1 and self.board[sq + -0x20] == '-' and Move(
+                        self, sq, sq + -0x10).is_legal():
+                    return True
+            if self._pawn_cap_at(sq + -0xf, self.wtm) and Move(
+                    self, sq, sq + -0xf).is_legal():
+                return True
+            if self._pawn_cap_at(sq + -0x11, self.wtm) and Move(
+                    self, sq, sq + -0x11).is_legal():
+                return True
+        else:
+            for d in piece_moves[pc.lower()]:
+                cur_sq = sq + d
+                # we don't need to check castling because if castling
+                # is legal, some other king move must be also
+                while valid_sq(cur_sq):
+                    topc = self.board[cur_sq]
+                    if topc == '-' or piece_is_white(topc) != self.wtm:
+                        
+                        mv = Move(self, sq, cur_sq)
+                        try:
+                            mv.check_pseudo_legal()
+                        except IllegalMoveError:
+                            raise RuntimeError('_any_pc_moves() inconsistency')
+                        if mv.is_legal():
+                            return True
+                    if not pc in sliding_pieces or self.board[cur_sq] != '-':
+                        break
+                    cur_sq += d
     
     def _is_pc_at(self, pc, sq):
         return valid_sq(sq) and self.board[sq] == pc
 
     def under_attack(self, sq, wtm):
+        """determine whether a square is attacked by the given side"""
         # pawn attacks
         if wtm:
             if (self._is_pc_at('P', sq + -0x11)
@@ -539,7 +627,7 @@ class Position(object):
 
         # bishop/queen attacks
         for d in piece_moves['b']:
-            cur_sq = sq
+            cur_sq = sq +d
             while valid_sq(cur_sq):
                 if self.board[cur_sq] != '-':
                     if wtm:
@@ -555,7 +643,7 @@ class Position(object):
 
         # rook/queen attacks
         for d in piece_moves['r']:
-            cur_sq = sq
+            cur_sq = sq + d
             while valid_sq(cur_sq):
                 if self.board[cur_sq] != '-':
                     if wtm:
@@ -750,7 +838,7 @@ class Position(object):
         is_sliding = pc in sliding_pieces
         for d in piece_moves[pc.lower()]:
             cur_sq = sq
-            while True:
+            while 1:
                 cur_sq += d
                 if not valid_sq(cur_sq):
                     break
@@ -806,6 +894,9 @@ class Normal(Variant):
                 self.game.next_move()
 
         return mv or illegal
+
+    def get_turn(self):
+        return game.WHITE if self.pos.wtm else game.BLACK
 
     def to_style12(self, user):
         """returns a style12 string for a given user"""

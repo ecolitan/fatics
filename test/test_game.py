@@ -65,6 +65,26 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
     
+
+    def test_san(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        
+        t.write('e5\n')
+        self.expect('Illegal move', t)
+
+        t.write('e4\n')
+        self.expect_not('Illegal move', t)
+
+        self.close(t)
+        self.close(t2)
+    
     def test_games(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
@@ -96,68 +116,19 @@ class TestGame(Test):
                 t2.write('abort\n')
                 self.expect('Game aborted', t)
                 self.expect('Game aborted', t2)
-            elif g.result == '1-0':
-                pass
+            elif g.result == '1-0' and '#' in decorator:
+                self.expect('admin checkmated} 1-0', t)
+                self.expect('admin checkmated} 1-0', t2)
+            elif g.result == '0-1' and '#' in decorator:
+                self.expect('checkmated} 0-1', t)
+                self.expect('checkmated} 0-1', t2)
             else:
                 self.assert_(False)
 
         self.close(t)
         self.close(t2)
 
-    def test_san(self):
-        t = self.connect_as_guest()
-        t2 = self.connect_as_admin()
-        
-        t.write('match admin white 1 0\n')
-        self.expect('Challenge:', t2)
-        t2.write('accept\n')
-        self.expect('Creating: ', t)
-        self.expect('Creating: ', t2)
-        
-        t.write('e5\n')
-        self.expect('Illegal move', t)
-
-        t.write('e4\n')
-        self.expect_not('Illegal move', t)
-
-        self.close(t)
-        self.close(t2)
-
 class TestAbort(Test):
-    def test_abort_white_ply_0(self):
-        t = self.connect_as_guest()
-        t2 = self.connect_as_admin()
-        
-        t.write('match admin white 1 0\n')
-        self.expect('Challenge:', t2)
-        t2.write('accept\n')
-        self.expect('Creating: ', t)
-        self.expect('Creating: ', t2)
-
-        t.write('abort\n')
-        self.expect('Game aborted on move 1 by Guest', t)
-        self.expect('Game aborted on move 1 by Guest', t2)
-
-        self.close(t)
-        self.close(t2)
-    
-    def test_abort_white_ply_0(self):
-        t = self.connect_as_guest()
-        t2 = self.connect_as_admin()
-        
-        t.write('match admin white 1 0\n')
-        self.expect('Challenge:', t2)
-        t2.write('accept\n')
-        self.expect('Creating: ', t)
-        self.expect('Creating: ', t2)
-
-        t.write('abort\n')
-        self.expect('Game aborted on move 1 by Guest', t)
-        self.expect('Game aborted on move 1 by Guest', t2)
-
-        self.close(t)
-        self.close(t2)
-    
     def test_abort_ply_0(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()

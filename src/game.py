@@ -80,13 +80,25 @@ class Game(object):
 
     def next_move(self):
         #print(self.variant.to_style12(self.white.user))
+        if self.variant.pos.is_checkmate or self.variant.pos.is_stalemate:
+            self.white.user.clock_is_ticking = False
+            self.black.user.clock_is_ticking = False
         if self.variant.pos.half_moves > 1:
-            if self.variant.pos.wtm:
+            if self.variant.get_turn() == WHITE:
                 self.white.user.clock_is_ticking = True
             else:
                 self.black.user.clock_is_ticking = True
+
         self.white.user.send_board(self.variant)
         self.black.user.send_board(self.variant)
+
+        if self.variant.pos.is_checkmate:
+            if self.variant.get_turn() == WHITE:
+                self.result('%s checkmated' % self.white.user.name, '0-1')
+            else:
+                self.result('%s checkmated' % self.black.user.name, '1-0')
+        elif self.variant.pos.is_stalemate:
+            self.result('Game drawn by stalemate', '1/2-1/2')
 
     def get_user_side(self, user):
         if user == self.white.user:
@@ -103,20 +115,18 @@ class Game(object):
             return self.black.user
     
     def abort(self, msg):
-        self.white.clock_is_ticking = False
-        self.black.clock_is_ticking = False
         self.result(msg, '*')
-        self.free()
-
-    def free(self):
-        del globals.games[self.number]
-        del self.white.user.session.games[self.black.user.name]
-        del self.black.user.session.games[self.white.user.name]
 
     def result(self, msg, code):
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
             self.white.user.name, self.black.user.name, msg, code)
         self.white.user.write(line)
         self.black.user.write(line)
+        self.free()
+
+    def free(self):
+        del globals.games[self.number]
+        del self.white.user.session.games[self.black.user.name]
+        del self.black.user.session.games[self.white.user.name]
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
