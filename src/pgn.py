@@ -1,5 +1,6 @@
 import re
 import string
+import copy
 
 tag_re = re.compile(r'''\[(\w+)\s+"([^\n]*?)"\]\s*$''')
 space_re = re.compile(r'''\s+''')
@@ -9,11 +10,22 @@ dots_re = re.compile(r'''\.\.\.''')
 comment_re = re.compile(r'''\{(.*?)\}''')
 nag_re = re.compile(r'''\$(\d+)''')
 result_re = re.compile(r'''(1-0|0-1|1/2-1/2|\*)''')
+checkmate_re = re.compile(r''' checkmated$''')
+stalemate_re = re.compile(r''' drawn by stalemate$''')
 
 class PgnError(Exception):
     def __init__(self, reason):
         self.reason = reason
         print reason
+
+class PgnMove(object):
+    def __init__(self, text, decorator):
+        self.text = text
+        self.decorator = decorator if decorator != None else ''
+        self.comments = []
+
+    def add_comment(self, com):
+        self.comments.append(com)
 
 class Pgn(object):
     def __init__(self, s):
@@ -30,6 +42,7 @@ class Pgn(object):
 
             if skip_blank:
                 if line == '':
+                    line_num += 1
                     continue
                 else:
                     skip_blank = False
@@ -61,9 +74,13 @@ class Pgn(object):
 
 class PgnGame(object):
     def __init__(self, tags, movetext):
-        self.tags = tags
+        self.tags = copy.copy(tags)
         self.movetext = movetext
+        self.is_checkmate = False
+        self.is_stalemate = False
+        self.initial_comments = []
         self.parse(movetext)
+        assert('White' in self.tags)
 
     def parse(self, s):
         """parses moves and their comments"""
@@ -89,20 +106,31 @@ class PgnGame(object):
                 continue
             
             m = dots_re.match(s, i)
-            m = move_re.match(s, i)
             if m:
-                self.moves.append((m.group(1), m.group(2)))
                 i = m.end()
                 continue
 
+            m = move_re.match(s, i)
             if m:
+                if m.group(2) != None:
+                    if '#' in m.group(2):
+                        self.is_checkmate = True
+                        print 'got %s mate' % m.group(1)
+                self.moves.append(PgnMove(m.group(1), m.group(2)))
                 i = m.end()
                 continue
-            
+
             m = comment_re.match(s, i)
             if m:
                 i = m.end()
-                #comments.append(m.group(1))
+                if checkmate_re.search(m.group(1)):
+                    self.is_checkmate = True
+                elif stalemate_re.search(m.group(1)):
+                    self.is_stalemate = True
+                if len(self.moves) > 0:
+                    self.moves[-1].add_comment(m.group(1))
+                else:
+                    self.initial_comments.append(m.group(1))
                 continue
 
             m = nag_re.match(s, i)
@@ -111,6 +139,8 @@ class PgnGame(object):
                 continue
 
             raise PgnError('unrecognized sytax in pgn: "%s"' % s[i:i+15])
-
+        
+    def __str__(self):
+        return '%s vs. %s' % (self.tags['White'], self.tags['Black'])
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -86,44 +86,47 @@ class TestGame(Test):
         self.close(t2)
     
     def test_games(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
         
         f = open('../data/test1.pgn', 'r')
 
         pgn = Pgn(f.read())
         for g in pgn.games:
+            print 'game %s' % g
             t.write('match admin white 1 0\n')
+            self.expect('Issuing:', t)
             self.expect('Challenge:', t2)
             t2.write('accept\n')
             self.expect('<12> ', t)
             self.expect('<12> ', t2)
     
             wtm = True
-            for (mv, decorator) in g.moves:                
+            for mv in g.moves:                
                 if wtm:
-                    #print 'sending %s to white' % mv
-                    t.write('%s\n' % mv)
+                    #print 'sending %s to white' % mv.text
+                    t.write('%s\n' % mv.text)
                 else:
-                    #print 'sending %s to black' % mv
-                    t2.write('%s\n' % mv)
+                    #print 'sending %s to black' % mv.text
+                    t2.write('%s\n' % mv.text)
                 self.expect('<12> ', t)
                 self.expect('<12> ', t2)
                 wtm = not wtm 
         
-            if g.result == '*':
+            if g.result == '1-0' and g.is_checkmate:
+                self.expect('admin checkmated} 1-0', t)
+                self.expect('admin checkmated} 1-0', t2)
+            elif g.result == '0-1' and g.is_checkmate:
+                self.expect('GuestABCD checkmated} 0-1', t)
+                self.expect('GuestABCD checkmated} 0-1', t2)
+            elif g.result == '1/2-1/2' and g.is_stalemate:
+                self.expect('drawn by stalemate} 1/2-1/2', t)
+                self.expect('drawn by stalemate} 1/2-1/2', t2)
+            else:
                 t.write('abort\n')
                 t2.write('abort\n')
                 self.expect('Game aborted', t)
                 self.expect('Game aborted', t2)
-            elif g.result == '1-0' and '#' in decorator:
-                self.expect('admin checkmated} 1-0', t)
-                self.expect('admin checkmated} 1-0', t2)
-            elif g.result == '0-1' and '#' in decorator:
-                self.expect('checkmated} 0-1', t)
-                self.expect('checkmated} 0-1', t2)
-            else:
-                self.assert_(False)
 
         self.close(t)
         self.close(t2)

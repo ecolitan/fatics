@@ -93,7 +93,7 @@ def piece_is_white(pc):
 
 class Move(object):
     def __init__(self, pos, fr, to, prom=None, is_oo=False,
-            is_ooo=False, new_ep=None):
+            is_ooo=False, is_ep=False, new_ep=None):
         self.pos = pos
         self.fr = fr
         self.to = to
@@ -103,7 +103,7 @@ class Move(object):
         self.is_ooo = is_ooo
         self.capture = pos.board[to]
         self.is_capture = self.capture != '-'
-        self.is_ep = False
+        self.is_ep = is_ep
         self.new_ep = new_ep
 
     def __str__(self):
@@ -270,7 +270,7 @@ class Undo(object):
 class Position(object):
     def __init__(self, fen):
         # XXX make an array
-        self.board = 0x80 * ['-']
+        self.board = array('c', 0x80 * ['-'])
         self.castle_flags = 0
         self.kpos = [None, None]
         self.set_pos(fen)
@@ -430,7 +430,7 @@ class Position(object):
             self.board[mv.to] = mv.pc
         else:
             self.board[mv.to] = mv.prom
-            self.material[not self.wtm] += piece_material[mv.prom.lower()]\
+            self.material[self.wtm] += piece_material[mv.prom.lower()]\
                 - piece_material['p']
 
         if mv.pc == 'k':
@@ -449,7 +449,7 @@ class Position(object):
             self.fifty_count += 1
        
         if mv.is_capture:
-            self.material[self.wtm] -= piece_material[mv.capture.lower()]
+            self.material[not self.wtm] -= piece_material[mv.capture.lower()]
        
         if mv.is_ep:
             self.material[not self.wtm] -= piece_material['p']
@@ -483,6 +483,7 @@ class Position(object):
 
         self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
         self.wtm = not self.wtm
+        self._check_material()
     
     def undo_move(self, mv):
         """undo the move"""
@@ -502,7 +503,7 @@ class Position(object):
             self.kpos[1] = mv.fr
         
         if mv.is_ep:
-            if not self.wtm:
+            if self.wtm:
                 assert(self.board[mv.to + -0x10] == '-')
                 self.board[mv.to + -0x10] = 'p'
             else:
@@ -526,6 +527,14 @@ class Position(object):
                 assert(self.board[D8] == 'r')
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
+        self._check_material()
+
+    def _check_material(self):
+        bmat = sum([piece_material[pc.lower()]
+            for (sq, pc) in self if pc != '-' and not piece_is_white(pc)])
+        assert(bmat == self.material[0])
+        assert(self.material[1] == sum([piece_material[pc.lower()]   
+            for (sq, pc) in self if pc != '-' and piece_is_white(pc)]))
 
     def detect_check(self):
         """detect whether the player to move is in check, checkmated,
@@ -557,26 +566,30 @@ class Position(object):
                 if Move(self, sq, sq + 0x10).is_legal():
                     return True
                 if rank(sq) == 1 and self.board[sq + 0x20] == '-' and Move(
-                        self, sq, sq + 0x10).is_legal():
+                        self, sq, sq + 0x20).is_legal():
                     return True
             if self._pawn_cap_at(sq + 0xf, self.wtm) and Move(
-                    self, sq, sq + 0xf).is_legal():
+                    self, sq, sq + 0xf,
+                    is_ep=sq + 0xf == self.ep).is_legal():
                 return True
             if self._pawn_cap_at(sq + 0x11, self.wtm) and Move(
-                    self, sq, sq + 0x11).is_legal():
+                    self, sq, sq + 0x11,
+                    is_ep=sq + 0x11 == self.ep).is_legal():
                 return True
         elif pc == 'p':
             if self.board[sq + -0x10] == '-':
                 if Move(self, sq, sq + -0x10).is_legal():
                     return True
                 if rank(sq) == 1 and self.board[sq + -0x20] == '-' and Move(
-                        self, sq, sq + -0x10).is_legal():
+                        self, sq, sq + -0x20).is_legal():
                     return True
             if self._pawn_cap_at(sq + -0xf, self.wtm) and Move(
-                    self, sq, sq + -0xf).is_legal():
+                    self, sq, sq + -0xf,
+                    is_ep=sq + -0xf == self.ep).is_legal():
                 return True
             if self._pawn_cap_at(sq + -0x11, self.wtm) and Move(
-                    self, sq, sq + -0x11).is_legal():
+                    self, sq, sq + -0x11,
+                    is_ep=sq + -0x11 == self.ep).is_legal():
                 return True
         else:
             for d in piece_moves[pc.lower()]:
@@ -588,10 +601,6 @@ class Position(object):
                     if topc == '-' or piece_is_white(topc) != self.wtm:
                         
                         mv = Move(self, sq, cur_sq)
-                        try:
-                            mv.check_pseudo_legal()
-                        except IllegalMoveError:
-                            raise RuntimeError('_any_pc_moves() inconsistency')
                         if mv.is_legal():
                             return True
                     if not pc in sliding_pieces or self.board[cur_sq] != '-':
@@ -767,7 +776,7 @@ class Position(object):
             else:
                 raise IllegalMoveError('bad pawn capture file')
                 
-            mv = Move(self, fr, to, prom=prom)
+            mv = Move(self, fr, to, prom=prom, is_ep=is_ep)
    
         # examples: Nf3 Nxf3 Ng1xf3 
         m = None
@@ -793,21 +802,21 @@ class Position(object):
 
             if m.group(3):
                 r = '12345678'.index(m.group(3))
-                if len(length) <= 1:
+                if len(froms) <= 1:
                     raise IllegalMoveError('unnecessary disambiguation')
                 froms = filter(lambda sq: rank(sq) == r, froms)
 
             if len(froms) != 1:
-                raise IllegalMoveError('illegal or ambiguous move: %d interpretations' % len(froms))
+                raise IllegalMoveError('illegal or ambiguous move %s: %d interpretations' % (s, len(froms)))
 
             mv = Move(self, froms[0], to)
 
-        if mv:
+        '''if mv:
             try:
                 mv.check_pseudo_legal()
             except IllegalMoveError:
                 raise RuntimeError('san inconsistency')
-            mv.check_legal()
+            mv.check_legal()'''
 
         return mv
 
@@ -833,7 +842,7 @@ class Position(object):
     
     def get_from_sqs(self, pc, sq):
         '''given a piece (not including a pawn) and a destination square,
-        return a list of all pseudo-legal source squares'''
+        return a list of all legal source squares'''
         ret = []
         is_sliding = pc in sliding_pieces
         for d in piece_moves[pc.lower()]:
@@ -843,7 +852,8 @@ class Position(object):
                 if not valid_sq(cur_sq):
                     break
                 if self.board[cur_sq] == pc:
-                    ret.append(cur_sq)
+                    if Move(self, cur_sq, sq).is_legal():
+                        ret.append(cur_sq)
                 if not (self.board[cur_sq] == '-' and is_sliding):
                     break
         return ret
@@ -876,6 +886,7 @@ class Normal(Variant):
             if not mv:
                 mv = self.pos.move_from_san(s)
         except IllegalMoveError as e:
+            #print e.reason
             #raise
             illegal = True
             
