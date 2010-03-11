@@ -5,7 +5,6 @@ from twisted.internet import reactor
 from zope.interface import implements
 
 import telnet
-import user
 import command
 import command_parser
 import lang

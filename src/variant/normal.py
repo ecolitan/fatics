@@ -842,13 +842,13 @@ class Position(object):
 
     def move_from_castle(self, s):
         mv = None
-        if not mv and s in ['O-O', 'OO']:
+        if not mv and s in ['O-O', 'OO', 'o-o']:
             if self.wtm:
                 mv = Move(self, E1, G1, is_oo=True)
             else:
                 mv = Move(self, E8, G8, is_oo=True)
         
-        if not mv and s in ['O-O-O', 'OOO']:
+        if not mv and s in ['O-O-O', 'OOO', 'o-o']:
             if self.wtm:
                 mv = Move(self, E1, C1, is_ooo=True)
             else:

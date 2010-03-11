@@ -26,19 +26,20 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
     
-    """def test_withdraw_logout(self):
+    def test_withdraw_logout(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
         t2.write('match guest\n')
         t2.write('quit\n')
         self.expect('Withdrawing your offer to Guest', t2)
+        self.expect('Thank you for using', t2)
         t2.close()
 
-        self.expect('who was challenging you, has departed', t)
-        self.close(t)"""
+        self.expect('admin, who was challenging you, has departed', t)
+        self.close(t)
     
     def test_decline_logout(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin\n')
@@ -47,7 +48,7 @@ class TestMatch(Test):
         self.expect('Declining the offer from Guest', t2)
         t2.close()
 
-        self.expect('whom you were challenging, has departed', t)
+        self.expect('admin, whom you were challenging, has departed', t)
         self.close(t)
 
     def test_accept(self):

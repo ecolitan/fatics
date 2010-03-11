@@ -1,4 +1,3 @@
-import gettext
 import trie
 import channel
 import admin

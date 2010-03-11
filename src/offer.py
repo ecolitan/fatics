@@ -159,7 +159,7 @@ class Challenge(object):
             self.player_b.time = 60*times[1]
         elif len(times) == 4:
             self.is_time_odds = True
-            (self.player_a.time, player_a.inc,
+            (self.player_a.time, self.player_a.inc,
                 self.player_b.time, self.player_b.inc) = times
         else:
             assert(False)

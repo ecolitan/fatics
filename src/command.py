@@ -1,13 +1,9 @@
 import re
 import time
-import gettext
-import operator
-import time
 
 import user
 import trie
 import admin
-import session
 import var
 import list
 import channel
@@ -284,9 +280,10 @@ class CommandList(object):
             if u.is_guest:
                 conn.write(_('%s is NOT a registered player.\n') % u.name)
             if u.admin_level > admin.Level.user:
-                conn.write(_('Admin Level: %s\n') % admin.level.to_str(u.admin_level))
+                conn.write(_('Admin level: %s\n') % admin.level.to_str(u.admin_level))
             if not u.is_guest and conn.user.admin_level > admin.Level.user:
                 conn.write(_('Email:       %s\n') % u.email)
+                conn.write(_('Real name:   %s\n') % u.real_name)
                
             if u.is_online:
                 if u.session.use_timeseal:

@@ -11,6 +11,7 @@ import time
 from twisted.conch import telnet
 from twisted.internet import protocol, epollreactor
 import cProfile
+profile = 1
 
 from test import host, port
 
@@ -20,7 +21,7 @@ from twisted.internet import reactor
 
 port = 5001
 
-conn_count = 3500
+conn_count = 1000
 start_time = time.time()
 conns = []
 class TestProtocol(telnet.Telnet):
@@ -59,7 +60,7 @@ class TestLoad(unittest.TestCase):
         for i in xrange(0, conn_count):
             reactor.connectTCP(host, int(port), fact)
 
-        reactor.callLater(50, self._shut_down)
+        reactor.callLater(500, self._shut_down)
 
         print 'ok'
 

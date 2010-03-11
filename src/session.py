@@ -1,10 +1,6 @@
 import time
 import copy
 
-import user
-import db
-from online import online
-
 from timer import timer
 
 # user state that is per-session and not saved to persistent storage
@@ -41,10 +37,10 @@ class Session(object):
         # over all entries."  So pass a flag to avoid deleting.
         for (k, v) in self.pending_sent.iteritems():
             v.withdraw(logout=True)
-            v.player_b.user.write(_('%s, who was challenging you, has departed.\n') % k)
+            v.player_b.user.write(_('%s, who was challenging you, has departed.\n') % self.user.name)
         for (k, v) in self.pending_received.iteritems():
             v.decline(logout=True)
-            v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % k)
+            v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
         for (k, v) in copy.copy(self.games).iteritems():
             v.abort('%s aborted by disconnection' % self.user.name)
         self.pending_received.clear()

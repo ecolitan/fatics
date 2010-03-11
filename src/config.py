@@ -6,7 +6,7 @@ class Config(object):
     db_user = "chess"
     db_passwd = "Luu9yae7"
 
-    login_timeout = 5
+    login_timeout = 30
     min_login_name_len = 3
 
     welcome_msg = '''*** Welcome to the Open Internet Chess Server! ***\n\n'''
