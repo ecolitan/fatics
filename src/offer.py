@@ -5,13 +5,15 @@ import command
 import game
 from game import WHITE, BLACK
 
+class Offer(object):
+    pass
+
 class MatchPlayer(object):
     def __init__(self, u):
         self.user = u
         self.side = None
 
-
-class Challenge(object):
+class Challenge(Offer):
     """represents a match offer from one player to another"""
     def __init__(self, a, b, opts):
         """a is the player issuing the offer; b receives the request"""
@@ -31,10 +33,14 @@ class Challenge(object):
 
         if opts != None:
             self._parse_opts(opts)
-      
+     
         if self.rated == None:
-            # historically, this was set according to the rated var
-            self.rated = True
+            if a.is_guest or b.is_guest:
+                a.write(N_('Setting match to unrated.\n'))
+                self.rated = False
+            else:
+                # historically, this was set according to the rated var
+                self.rated = True
 
         #a.write('%(aname) (%(arat))%(acol) %(bname) %(brat) %(rat) %(variant)')
         if self.side != None:

@@ -8,6 +8,7 @@ import var
 import list
 import channel
 import offer
+import game
 from timer import timer
 from online import online
 from reload import reload
@@ -127,11 +128,12 @@ class CommandList(object):
         self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
         self._add(Command('quit', '', self.quit, admin.Level.user))
         self._add(Command('remplayer', 'w', self.remplayer, admin.Level.admin))
+        self._add(Command('resign', 'o', self.resign, admin.Level.user))
         self._add(Command('set', 'wT', self.set, admin.Level.user))
         self._add(Command('shout', 'S', self.shout, admin.Level.user))
         self._add(Command('showlist', 'o', self.showlist, admin.Level.user))
         self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
-        self._add(Command('style', 'd', self.style, admin.Level.user)) # deprecated
+        self._add(Command('style', 'd', self.style, admin.Level.user))
         self._add(Command('tell', 'nS', self.tell, admin.Level.user))
         self._add(Command('uptime', '', self.uptime, admin.Level.user))
         self._add(Command('variables', 'o', self.variables, admin.Level.user))
@@ -155,11 +157,11 @@ class CommandList(object):
         side = g.get_user_side(conn.user)
         if g.variant.pos.half_moves < 2:
             g.abort('Game aborted on move 1 by %s' % conn.user.name)
-        elif g.abort_offered[not side]:
+        elif g.abort_offered[game.opp(side)]:
             g.abort('Game aborted by agreement')
         else:
             # XXX should not substitute name till translation
-            g.get_side_user(not side).write(N_('%s requests to abort the game; type "abort" to accept.\n') % conn.user.name)
+            g.get_side_user(game.opp(side)).write(N_('%s requests to abort the game; type "abort" to accept.\n') % conn.user.name)
             g.abort_offered[side] = True
     
     def accept(self, args, conn):
@@ -466,6 +468,16 @@ class CommandList(object):
             else:
                 u.remove()
                 conn.write("Player %s removed.\n" % name)
+    
+    def resign(self, args, conn):
+        if args[0] != None:
+            conn.write('TODO: RESIGN PLAYER\n')
+            return
+        if len(conn.user.session.games) == 0:
+            conn.write(_("You are not playing a game.\n"))
+            return
+        g = conn.user.session.games.values()[0]
+        g.resign(conn.user)
 
     def set(self, args, conn):
         # val can be None if the user gave no value
@@ -521,7 +533,7 @@ class CommandList(object):
             conn.write('%s\n' % e.reason)
     
     def style(self, args, conn):
-        conn.write('Warning: the "style" command is deprecated.  Please use "set style" instead.\n')
+        #conn.write('Warning: the "style" command is deprecated.  Please use "set style" instead.\n')
         var.vars['style'].set(conn.user, str(args[0]))
 
     def tell(self, args, conn):

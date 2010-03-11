@@ -83,6 +83,11 @@ conventionally '\r\n'.
 name of the player who requested the abort.
 Rationale: more informative.
 
+* When setting a password, the server does not print the password back
+to you, but rather replaces it with asterisks.
+Rationale: make it harder from someone else to read thes password
+over your shoulder, although it is still visible when you type.
+
 ===
 
 Admin differences:

@@ -177,6 +177,7 @@ class VarList(object):
 
     def init_ivars(self):
         BoolVar("smartmove", False, N_("smartmove set."), N_("smartmove unset.")).add_as_ivar()
+        BoolVar("ms", False, N_("ms set."), N_("ms unset.")).add_as_ivar()
         self.default_ivars = {}
         for ivar in ivars.itervalues():
             self.default_ivars[ivar.name] = ivar.default

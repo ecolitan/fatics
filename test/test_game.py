@@ -4,14 +4,17 @@ from pgn import Pgn
 
 class TestGame(Test):
     def test_game_basics(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
         
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
-        self.expect('Creating: ', t)
-        self.expect('Creating: ', t2)
+        self.expect('Creating: GuestABCD (++++) admin (----) unrated lightning 1 0', t)
+        self.expect('Creating: GuestABCD (++++) admin (----) unrated lightning 1 0', t2)
+
+        self.expect('{Game 1 (GuestABCD vs. admin) Creating unrated lightning match.}', t)
+        self.expect('{Game 1 (GuestABCD vs. admin) Creating unrated lightning match.}', t2)
 
         t2.write('e7e5\n')
         self.expect('not your move', t2)
@@ -172,7 +175,7 @@ class TestAbort(Test):
         self.close(t2)
     
     def test_abort_agreement(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
         
         t.write('match admin white 1 0\n')
@@ -185,7 +188,7 @@ class TestAbort(Test):
         t2.write('e5\n')
         t.write('abort\n')
 
-        self.expect('requests to abort the game', t2)
+        self.expect('GuestABCD requests to abort the game', t2)
 
         t2.write('abort\n')
         self.expect('Game aborted by agreement', t)
@@ -194,4 +197,37 @@ class TestAbort(Test):
         self.close(t)
         self.close(t2)
         
+class TestResign(Test):
+    def test_resign_white(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('resign\n')
+        self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD resigns} 0-1', t)
+        self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD resigns} 0-1', t2)
+        self.close(t)
+        self.close(t2)
+    
+    def test_resign_black(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t2.write('resign\n')
+        self.expect('{Game 1 (GuestABCD vs. admin) admin resigns} 1-0', t)
+        self.expect('{Game 1 (GuestABCD vs. admin) admin resigns} 1-0', t2)
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

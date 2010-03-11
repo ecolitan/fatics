@@ -382,8 +382,8 @@ class Position(object):
         # Usually I don't like using a catch-all except, but it seems to
         # be the safest default action because the FEN is supplied by
         # the user.
-        #except:
-        #    raise BadFenError()
+        except:
+            raise BadFenError()
 
     def __iter__(self):
         for r in range(0, 8):
@@ -911,7 +911,8 @@ class Normal(Variant):
             illegal = True
             
         if mv or illegal:
-            if self.game.get_user_side(conn.user) != self.pos.wtm:
+            if (self.game.get_user_side(conn.user) == game.WHITE) != \
+                    self.pos.wtm:
                 #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.pos.wtm)
                 conn.write(_('It is not your move.\n'))
             elif illegal:
@@ -953,14 +954,20 @@ class Normal(Variant):
         last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
             self.game.last_move_secs)
         # board_str begins with a space
+        if user.ivars['ms'] or 1:
+            white_clock = int(1000 * self.game.white_clock)
+            black_clock = int(1000 * self.game.black_clock)
+        else:
+            white_clock = int(100 * self.game.white_clock)
+            black_clock = int(100 * self.game.black_clock)
+            
         s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, self.game.white.user.name,
             self.game.black.user.name, relation, self.game.white.time,
             self.game.white.inc, self.pos.material[1], self.pos.material[0],
-            int(1000 * self.game.white_clock), int(1000 * self.game.black_clock),
-            full_moves, self.game.last_move_verbose, last_move_time_str,
-            self.game.last_move_san, int(self.game.flip),
+            white_clock, black_clock, full_moves, self.game.last_move_verbose,
+            last_move_time_str, self.game.last_move_san, int(self.game.flip),
             int(user.clock_is_ticking), int(1000 * user.lag))
         return s
 
