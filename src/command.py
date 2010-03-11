@@ -112,6 +112,7 @@ class CommandList(object):
         self._add(Command('areload', '', self.areload, admin.Level.god))
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
         self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
+        self._add(Command('cshout', 'S', self.cshout, admin.Level.user))
         self._add(Command('date', '', self.date, admin.Level.user))
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
@@ -240,6 +241,20 @@ class CommandList(object):
                 conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
                 if u.is_online:
                     u.write_prompt(_('\n%s has changed your password.\n') % conn.user.name)
+    
+    def cshout(self, args, conn):
+        if conn.user.is_guest:
+            conn.write(_("Only registered players can use the cshout command.\n"))
+        else:
+            count = 0
+            name = conn.user.get_display_name()
+            for u in online.itervalues():
+                if u.vars['cshout']:
+                    u.write_prompt(_("%s c-shouts: %s\n") % (name, args[0]))
+                    count += 1
+            conn.write(ngettext("(c-shouted to %d player)\n", "(c-shouted to %d players)\n", count) % count)
+            if not conn.user.vars['cshout']:
+                conn.write(_("(did not cshout because you are not listening to cshouts)\n"))
 
     def date(self, args, conn):
         t = time.time()
@@ -476,10 +491,9 @@ class CommandList(object):
                 if u.vars['shout']:
                     u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
                     count += 1
-            #conn.write(_("(shouted to %d %s)\n" % (count, gettext.ngettext("player", "players", count))))
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
             if not conn.user.vars['shout']:
-                conn.write(_("(you are not listening to shouts)\n"))
+                conn.write(_("(did not shout because you are not listening to shouts)\n"))
 
     def showlist(self, args, conn):
         if args[0] == None:

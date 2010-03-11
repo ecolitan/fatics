@@ -20,11 +20,6 @@ Rationale: consiceness and consistency of messages.
 * "Drawn by mutual agreement" has been shortened to "Drawn by agreement".
 Rationale: conciseness.
 
-* The "(shouted to N players)" given by the shout command includes the
-user doing the shout (assuming that user has shouts enabled).
-Rationale: To me, it is logical to count the shouter if he or she sees
-the shout.
-
 * If an alias contains invalid syntax (such as a bare $), the server will
 print an error message rather than trying to execute the command anyway.
 Rationale: Avoid hiding user errors.
