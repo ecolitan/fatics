@@ -26,7 +26,8 @@ the same as FEN. A blank square is '-'.
 [A1, B1, C1, D1, E1, F1, G1, H1] = range(0x00, 0x08)
 
 class BadFenError(Exception):
-    pass
+    def __init__(self, reason=None):
+        self.reason = reason
 class IllegalMoveError(Exception):
     def __init__(self, reason):
         self.reason = reason
@@ -273,9 +274,10 @@ class Position(object):
         self.board = array('c', 0x80 * ['-'])
         self.castle_flags = 0
         self.kpos = [None, None]
-        self.set_pos(fen)
         self.is_stalemate = False
         self.is_checkmate = False
+        self.is_draw_nomaterial = False
+        self.set_pos(fen)
 
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
@@ -285,7 +287,7 @@ class Position(object):
             # rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
             m = re.match(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''', fen)
             if not m:
-                raise BadFenError()
+                raise BadFenError('does not look like FEN')
             (pos, side, castle_flags, ep, fifty_count, full_moves) = [
                 m.group(i) for i in range(1, 7)]
 
@@ -371,14 +373,17 @@ class Position(object):
             self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
 
             self.detect_check()
+            if self.is_checkmate or self.is_stalemate \
+                    or self.is_draw_nomaterial:
+                raise BadFenError('got a terminal position')
 
         except AssertionError:
             raise
         # Usually I don't like using a catch-all except, but it seems to
         # be the safest default action because the FEN is supplied by
         # the user.
-        except:
-            raise BadFenError()
+        #except:
+        #    raise BadFenError()
 
     def __iter__(self):
         for r in range(0, 8):
@@ -430,7 +435,7 @@ class Position(object):
             self.board[mv.to] = mv.pc
         else:
             self.board[mv.to] = mv.prom
-            self.material[self.wtm] += piece_material[mv.prom.lower()]\
+            self.material[self.wtm] += piece_material[mv.prom.lower()] \
                 - piece_material['p']
 
         if mv.pc == 'k':
@@ -541,10 +546,20 @@ class Position(object):
         or stalemated"""
         self.in_check = self.under_attack(self.kpos[self.wtm],
             not self.wtm)
+
         if self.in_check:
             self.is_checkmate = not self._any_legal_moves()
         else:
             self.is_stalemate = not self._any_legal_moves()
+
+        self.is_draw_nomaterial = self.material[0] <= 3 and \
+            self.material[1] <= 3 and self.no_pawns()
+
+    def no_pawns(self):
+        for (sq, pc) in self:
+            if pc in ['P', 'p']:
+                return False
+        return True
 
     def _any_legal_moves(self):
         for (sq, pc) in self:

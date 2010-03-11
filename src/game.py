@@ -80,7 +80,8 @@ class Game(object):
 
     def next_move(self):
         #print(self.variant.to_style12(self.white.user))
-        if self.variant.pos.is_checkmate or self.variant.pos.is_stalemate:
+        if self.variant.pos.is_checkmate or self.variant.pos.is_stalemate or \
+                self.variant.pos.is_draw_nomaterial:
             self.white.user.clock_is_ticking = False
             self.black.user.clock_is_ticking = False
         if self.variant.pos.half_moves > 1:
@@ -99,6 +100,8 @@ class Game(object):
                 self.result('%s checkmated' % self.black.user.name, '1-0')
         elif self.variant.pos.is_stalemate:
             self.result('Game drawn by stalemate', '1/2-1/2')
+        elif self.variant.pos.is_draw_nomaterial:
+            self.result('Game drawn because neither player has mating material', '1/2-1/2')
 
     def get_user_side(self, user):
         if user == self.white.user:

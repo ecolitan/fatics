@@ -122,6 +122,9 @@ class TestGame(Test):
             elif g.result == '1/2-1/2' and g.is_stalemate:
                 self.expect('drawn by stalemate} 1/2-1/2', t)
                 self.expect('drawn by stalemate} 1/2-1/2', t2)
+            elif g.result == '1/2-1/2' and g.is_draw_nomaterial:
+                self.expect('neither player has mating material} 1/2-1/2', t)
+                self.expect('neither player has mating material} 1/2-1/2', t2)
             else:
                 t.write('abort\n')
                 t2.write('abort\n')

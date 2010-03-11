@@ -10,8 +10,9 @@ dots_re = re.compile(r'''\.\.\.''')
 comment_re = re.compile(r'''\{(.*?)\}''', re.S)
 nag_re = re.compile(r'''\$(\d+)''')
 result_re = re.compile(r'''(1-0|0-1|1/2-1/2|\*)''')
-checkmate_re = re.compile(r''' checkmated\s*$''')
-stalemate_re = re.compile(r''' drawn by stalemate\s*$''')
+checkmate_re = re.compile(r'''\s+checkmated\s*$''')
+stalemate_re = re.compile(r'''\s+drawn\s+by\s+stalemate\s*$''')
+nomaterial_re = re.compile(r'''[nN]either\s+player\s+has\s+mating\s+material\s*$''')
 
 class PgnError(Exception):
     def __init__(self, reason):
@@ -78,6 +79,7 @@ class PgnGame(object):
         self.movetext = movetext
         self.is_checkmate = False
         self.is_stalemate = False
+        self.is_draw_nomaterial = False
         self.initial_comments = []
         self.parse(movetext)
         assert('White' in self.tags)
@@ -126,6 +128,8 @@ class PgnGame(object):
                     self.is_checkmate = True
                 elif stalemate_re.search(m.group(1)):
                     self.is_stalemate = True
+                elif nomaterial_re.search(m.group(1)):
+                    self.is_draw_nomaterial = True
                 if len(self.moves) > 0:
                     self.moves[-1].add_comment(m.group(1))
                 else:
