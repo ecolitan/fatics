@@ -11,7 +11,7 @@ import session
 import var
 import list
 import channel
-import match
+import offer
 from timer import timer
 from online import online
 from reload import reload
@@ -393,7 +393,7 @@ class CommandList(object):
         # noplay, censor
         # adjourned games
 
-        match.Offer(conn.user, u, args[1])
+        offer.Challenge(conn.user, u, args[1])
 
     def nuke(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)

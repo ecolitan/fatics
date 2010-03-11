@@ -11,8 +11,8 @@ class MatchPlayer(object):
         self.side = None
 
 
-class Offer(object):
-    """represents a challenge from one player to another"""
+class Challenge(object):
+    """represents a match offer from one player to another"""
     def __init__(self, a, b, opts):
         """a is the player issuing the offer; b receives the request"""
         self.is_time_odds = False
