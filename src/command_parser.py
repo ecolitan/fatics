@@ -8,7 +8,7 @@ import admin
 import command
 
 class CommandParser(object):
-    def parse(self, s, conn):
+    def run(self, s, conn):
         #s = s.lstrip()
         s = s.strip()
 

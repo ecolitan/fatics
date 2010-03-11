@@ -114,7 +114,7 @@ class Connection(basic.LineReceiver):
     def lineReceived_online(self, line):
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])
         try:
-            command_parser.parser.parse(line, self)
+            command_parser.parser.run(line, self)
             self.write('fics% ')
         except command.QuitException:
             self.loseConnection('quit')

@@ -7,11 +7,11 @@ space_re = re.compile(r'''\s+''')
 move_num_re = re.compile(r'''(\d+)\.*''')
 move_re = re.compile(r'''([NBRQK]?[a-h1-8x]{2,5}(?:=[NBRQK])?|O-O-O|O-O)([+#])?''')
 dots_re = re.compile(r'''\.\.\.''')
-comment_re = re.compile(r'''\{(.*?)\}''')
+comment_re = re.compile(r'''\{(.*?)\}''', re.S)
 nag_re = re.compile(r'''\$(\d+)''')
 result_re = re.compile(r'''(1-0|0-1|1/2-1/2|\*)''')
-checkmate_re = re.compile(r''' checkmated$''')
-stalemate_re = re.compile(r''' drawn by stalemate$''')
+checkmate_re = re.compile(r''' checkmated\s*$''')
+stalemate_re = re.compile(r''' drawn by stalemate\s*$''')
 
 class PgnError(Exception):
     def __init__(self, reason):
@@ -58,7 +58,7 @@ class Pgn(object):
                         continue
                     m = tag_re.match(line)
                     if not m:
-                        raise PgnError('missing tag section')
+                        raise PgnError('missing tag section at line %d' % line_num)
                     tags[m.group(1)] = m.group(2).replace(r'\"', '"')
             else:
                 if line == '':
@@ -115,7 +115,6 @@ class PgnGame(object):
                 if m.group(2) != None:
                     if '#' in m.group(2):
                         self.is_checkmate = True
-                        print 'got %s mate' % m.group(1)
                 self.moves.append(PgnMove(m.group(1), m.group(2)))
                 i = m.end()
                 continue

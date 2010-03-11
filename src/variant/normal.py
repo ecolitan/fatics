@@ -483,7 +483,7 @@ class Position(object):
 
         self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
         self.wtm = not self.wtm
-        self._check_material()
+        #self._check_material()
     
     def undo_move(self, mv):
         """undo the move"""
@@ -527,7 +527,7 @@ class Position(object):
                 assert(self.board[D8] == 'r')
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
-        self._check_material()
+        #self._check_material()
 
     def _check_material(self):
         bmat = sum([piece_material[pc.lower()]
@@ -580,7 +580,7 @@ class Position(object):
             if self.board[sq + -0x10] == '-':
                 if Move(self, sq, sq + -0x10).is_legal():
                     return True
-                if rank(sq) == 1 and self.board[sq + -0x20] == '-' and Move(
+                if rank(sq) == 6 and self.board[sq + -0x20] == '-' and Move(
                         self, sq, sq + -0x20).is_legal():
                     return True
             if self._pawn_cap_at(sq + -0xf, self.wtm) and Move(
@@ -701,9 +701,8 @@ class Position(object):
             to = str_to_sq(m.group(1))
             if self.board[to] != '-':
                 raise IllegalMoveError('pawn push blocked')
-            if not m.group(2):
-                prom = None
-            else:
+            prom = m.group(2)
+            if prom:
                 if self.wtm:
                     prom = m.group(2)
                     assert(prom == prom.upper())
@@ -746,6 +745,12 @@ class Position(object):
         if m:
             to = str_to_sq(m.group(2))
             prom = m.group(3)
+            if prom:
+                if self.wtm:
+                    assert(prom == prom.upper())
+                else:
+                    prom = prom.lower()
+                    
             is_ep = to == self.ep
             if is_ep:
                 assert(self.board[to] == '-')
