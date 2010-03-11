@@ -25,10 +25,12 @@ class Var(object):
         
     def add_as_var(self): 
         vars[self.name] = self
+        self.is_ivar = False
         return self
     
     def add_as_ivar(self): 
         ivars[self.name] = self
+        self.is_ivar = True
         return self
 
     def persist(self):
@@ -124,7 +126,10 @@ class BoolVar(Var):
     def set(self, user, val):
         if val == None:
             # toggle
-            val = not user.vars[self.name]
+            if self.is_ivar:
+                val = not user.ivars[self.name]
+            else:
+                val = not user.vars[self.name]
         else:
             if not val in ['0', '1']:
                 raise BadVarError()

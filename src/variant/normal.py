@@ -946,29 +946,31 @@ class Normal(Variant):
         b_ooo = int(check_castle_flags(self.pos.castle_flags, False, False))
         if self.game.white.user == user:
             relation = 1 if self.pos.wtm else -1
+            flip = 0
         elif self.game.black.user == user:
             relation = 1 if not self.pos.wtm else -1
+            flip = 1
         else:
             raise RuntimeError('unknown relation')
         full_moves = self.pos.half_moves / 2 + 1
         last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
             self.game.last_move_secs)
-        # board_str begins with a space
-        if user.ivars['ms'] or 1:
+        if user.ivars['ms']:
             white_clock = int(1000 * self.game.white_clock)
             black_clock = int(1000 * self.game.black_clock)
         else:
-            white_clock = int(100 * self.game.white_clock)
-            black_clock = int(100 * self.game.black_clock)
-            
+            white_clock = int(self.game.white_clock)
+            black_clock = int(self.game.black_clock)
+
+        # board_str begins with a space
         s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, self.game.white.user.name,
             self.game.black.user.name, relation, self.game.white.time,
             self.game.white.inc, self.pos.material[1], self.pos.material[0],
             white_clock, black_clock, full_moves, self.game.last_move_verbose,
-            last_move_time_str, self.game.last_move_san, int(self.game.flip),
-            int(user.clock_is_ticking), int(1000 * user.lag))
+            last_move_time_str, self.game.last_move_san, flip,
+            int(self.game.clock_is_ticking), int(1000 * user.lag))
         return s
 
 def init_direction_table():

@@ -40,7 +40,7 @@ class BaseUser(object):
         online.add(self)
         self.is_online = True
         self.lag = 0
-        conn.write(_('**** Starting session as %s ****\n\n') % self.name)
+        conn.write(_('**** Starting OICS session as %s ****\n\n') % self.name)
 
     def log_off(self):
         for ch in self.channels:
@@ -62,11 +62,12 @@ class BaseUser(object):
         return self.name + self.title_str
 
     def set_var(self, v, val):
+        var_dict = self.ivars if v.is_ivar else self.vars
         if val != None:
-            self.vars[v.name] = val
+            var_dict[v.name] = val
         else:
-            if v.name in self.vars:
-                del self.vars[v.name]
+            if v.name in var_dict:
+                del var_dict[v.name]
     
     def set_formula(self, v, val):
         if val != None:
@@ -83,9 +84,6 @@ class BaseUser(object):
             if num in self.notes:
                 del self.notes[num]
     
-    """def unset_var(self, v):
-        del self.vars[v.name]"""
-
     def add_channel(self, id):
         assert(type(id) == type(1) or type(id) == type(1l))
         self.channels.append(id)

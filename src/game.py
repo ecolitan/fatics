@@ -55,8 +55,7 @@ class Game(object):
         self.last_move_mins = 0
         self.last_move_secs = 0.0
         self.flip = False
-        self.white.user.clock_is_ticking = False
-        self.black.user.clock_is_ticking = False
+        self.clock_is_ticking = False
 
         self.abort_offered = [False, False]
         self.draw_offered = [False, False]
@@ -75,7 +74,8 @@ class Game(object):
 
         self.variant = variant_factory.get(chal.variant_name, self)
 
-        #print(self.variant.to_style12(self.white.user))
+        #print('white: ' + self.variant.to_style12(self.white.user))
+        #print('black: ' + self.variant.to_style12(self.black.user))
         self.white.user.send_board(self.variant)
         self.black.user.send_board(self.variant)
 
@@ -86,13 +86,9 @@ class Game(object):
         #print(self.variant.to_style12(self.white.user))
         if self.variant.pos.is_checkmate or self.variant.pos.is_stalemate or \
                 self.variant.pos.is_draw_nomaterial:
-            self.white.user.clock_is_ticking = False
-            self.black.user.clock_is_ticking = False
+            self.clock_is_ticking = False
         if self.variant.pos.half_moves > 1:
-            if self.variant.get_turn() == WHITE:
-                self.white.user.clock_is_ticking = True
-            else:
-                self.black.user.clock_is_ticking = True
+            self.clock_is_ticking = True
 
         self.white.user.send_board(self.variant)
         self.black.user.send_board(self.variant)

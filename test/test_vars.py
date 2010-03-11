@@ -8,6 +8,13 @@ class TestVarsCommand(Test):
         self.expect('shout=1', t)
         self.close(t)
 
+    def test_self_vars_guest(self):
+        t = self.connect_as_guest()
+        t.write('vars\n')
+        self.expect('Variable settings of Guest', t)
+        self.expect('shout=1', t)
+        self.close(t)
+
     def test_other_vars(self):
         t = self.connect_as_guest()
         t.write('vars admin\n')

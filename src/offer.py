@@ -157,7 +157,7 @@ class Challenge(Offer):
             self.player_a.inc = self.player_b.inc = 0
         elif len(times) == 2:
             self.player_a.time = self.player_b.time = times[0]
-            self.player_a.inc = self.player_b_inc = times[1]
+            self.player_a.inc = self.player_b.inc = times[1]
         elif len(times) == 3:
             self.is_time_odds = True
             self.player_a.time = 60*times[0]
