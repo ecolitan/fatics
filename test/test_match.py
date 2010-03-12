@@ -88,7 +88,7 @@ class TestMatch(Test):
         self.expect('Challenge:', t2)
         t2.write('decline\n')
         self.expect('Declining the match offer', t2)
-        self.expect('declines the match offer', t)
+        self.expect('declines your match offer', t)
 
         self.close(t)
         self.close(t2)
@@ -101,7 +101,7 @@ class TestMatch(Test):
         self.expect('Challenge:', t2)
         t2.write('match Guest 2 0\n')
         self.expect('Declining the offer from GuestABCD and proposing a counteroffer', t2)
-        self.expect('admin declines the offer and proposes a counteroffer', t)
+        self.expect('admin declines your offer and proposes a counteroffer', t)
 
         self.close(t)
         self.close(t2)

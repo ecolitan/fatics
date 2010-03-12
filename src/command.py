@@ -8,7 +8,6 @@ import var
 import list
 import channel
 import offer
-import game
 from timer import timer
 from online import online
 from reload import reload
@@ -116,6 +115,7 @@ class CommandList(object):
         self._add(Command('cshout', 'S', self.cshout, admin.Level.user))
         self._add(Command('date', '', self.date, admin.Level.user))
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
+        self._add(Command('draw', 'o', self.draw, admin.Level.user))
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
         self._add(Command('help', 'o', self.help, admin.Level.user))
@@ -271,6 +271,16 @@ class CommandList(object):
             conn.user.session.offers_received[0].decline()
         else:
             conn.write('TODO: DECLINE PARAM\n')
+    
+    def draw(self, args, conn):
+        if args[0] == None:
+            if len(conn.user.session.games) == 0:
+                conn.write(_("You are not playing a game.\n"))
+                return
+            g = conn.user.session.games.values()[0]
+            offer.Draw(g, conn.user)
+        else:
+            conn.write('TODO: DRAW PARAM\n')
 
     def finger(self, args, conn):
         u = None

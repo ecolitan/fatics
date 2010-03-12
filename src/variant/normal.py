@@ -202,7 +202,7 @@ class Move(object):
 
         self.pos.make_move(self)
         try:
-            if self.pos.under_attack(self.pos.kpos[not self.pos.wtm],
+            if self.pos.under_attack(self.pos.king_pos[not self.pos.wtm],
                     self.pos.wtm):
                 raise IllegalMoveError('leaves king in check')
         finally:
@@ -273,7 +273,7 @@ class Position(object):
         # XXX make an array
         self.board = array('c', 0x80 * ['-'])
         self.castle_flags = 0
-        self.kpos = [None, None]
+        self.king_pos = [None, None]
         self.is_stalemate = False
         self.is_checkmate = False
         self.is_draw_nomaterial = False
@@ -306,15 +306,15 @@ class Position(object):
                         self.material[piece_is_white(c)] += \
                             piece_material[c.lower()]
                         if c == 'k':
-                            if self.kpos[0] != None:
+                            if self.king_pos[0] != None:
                                 # multiple kings
                                 raise BadFenError()
-                            self.kpos[0] = sq
+                            self.king_pos[0] = sq
                         elif c == 'K':
-                            if self.kpos[1] != None:
+                            if self.king_pos[1] != None:
                                 # multiple kings
                                 raise BadFenError()
-                            self.kpos[1] = sq
+                            self.king_pos[1] = sq
                         elif c.lower() == 'p':
                             if rank(sq) in [0, 7]:
                                 # pawn on 1st or 8th rank
@@ -324,7 +324,7 @@ class Position(object):
                     # wrong row length
                     raise BadFenError()
 
-            if None in self.kpos:
+            if None in self.king_pos:
                 # missing king
                 raise BadFenError()
 
@@ -382,8 +382,8 @@ class Position(object):
         # Usually I don't like using a catch-all except, but it seems to
         # be the safest default action because the FEN is supplied by
         # the user.
-        except:
-            raise BadFenError()
+        #except:
+        #    raise BadFenError()
 
     def __iter__(self):
         for r in range(0, 8):
@@ -439,9 +439,9 @@ class Position(object):
                 - piece_material['p']
 
         if mv.pc == 'k':
-            self.kpos[0] = mv.to
+            self.king_pos[0] = mv.to
         elif mv.pc == 'K':
-            self.kpos[1] = mv.to
+            self.king_pos[1] = mv.to
 
         if mv.new_ep:
             self.ep = mv.new_ep
@@ -503,9 +503,9 @@ class Position(object):
         self.material = mv.undo.material
         
         if mv.pc == 'k':
-            self.kpos[0] = mv.fr
+            self.king_pos[0] = mv.fr
         elif mv.pc == 'K':
-            self.kpos[1] = mv.fr
+            self.king_pos[1] = mv.fr
         
         if mv.is_ep:
             if self.wtm:
@@ -544,7 +544,7 @@ class Position(object):
     def detect_check(self):
         """detect whether the player to move is in check, checkmated,
         or stalemated"""
-        self.in_check = self.under_attack(self.kpos[self.wtm],
+        self.in_check = self.under_attack(self.king_pos[self.wtm],
             not self.wtm)
 
         if self.in_check:
@@ -562,8 +562,12 @@ class Position(object):
         return True
 
     def _any_legal_moves(self):
+        ksq = self.king_pos[self.wtm]
+        if self._any_pc_moves(ksq, self.board[ksq]):
+            return True
         for (sq, pc) in self:
-            if pc != '-' and piece_is_white(pc) == self.wtm:
+            #if pc != '-' and piece_is_white(pc) == self.wtm:
+            if pc not in ['-', 'K', 'k'] and piece_is_white(pc) == self.wtm:
                 cur_sq = sq
                 if self._any_pc_moves(sq, pc):
                     return True
@@ -878,6 +882,11 @@ class Position(object):
                     break
         return ret
 
+    def is_draw_fifty(self):
+        return False
+    
+    def is_draw_repetition(self):
+        return False
 
 class Normal(Variant):
     """normal chess"""
@@ -944,10 +953,10 @@ class Normal(Variant):
         w_ooo = int(check_castle_flags(self.pos.castle_flags, True, False))
         b_oo = int(check_castle_flags(self.pos.castle_flags, False, True))
         b_ooo = int(check_castle_flags(self.pos.castle_flags, False, False))
-        if self.game.white.user == user:
+        if self.game.white == user:
             relation = 1 if self.pos.wtm else -1
             flip = 0
-        elif self.game.black.user == user:
+        elif self.game.black == user:
             relation = 1 if not self.pos.wtm else -1
             flip = 1
         else:
@@ -965,9 +974,9 @@ class Normal(Variant):
         # board_str begins with a space
         s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s %s %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
-            self.pos.fifty_count, self.game.number, self.game.white.user.name,
-            self.game.black.user.name, relation, self.game.white.time,
-            self.game.white.inc, self.pos.material[1], self.pos.material[0],
+            self.pos.fifty_count, self.game.number, self.game.white.name,
+            self.game.black.name, relation, self.game.white_time,
+            self.game.white_inc, self.pos.material[1], self.pos.material[0],
             white_clock, black_clock, full_moves, self.game.last_move_verbose,
             last_move_time_str, self.game.last_move_san, flip,
             int(self.game.clock_is_ticking), int(1000 * user.lag))

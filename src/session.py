@@ -32,15 +32,21 @@ class Session(object):
         return timer.hms(time.time() - self.login_time)
         
     def close(self):
+        for v in self.offers_sent[:]:
+            if not v.name in ['match offer', 'pause request']:
+                continue
+            v.withdraw(notify=False)
+            v.a.write(_('Withdrawing your match offer to %s.\n') % v.b.name)
+            v.b.write(_('%s, who was challenging you, has departed.\n') % self.user.name)
+        for v in self.offers_received[:]:
+            if not v.name in ['match offer', 'pause request']:
+                continue
+            v.decline(notify=False)
+            v.b.write(_('Declining the match offer from %s.\n') % v.a.name)
+            v.a.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
         # python docs: "Using iteritems() while adding or deleting entries
         # in the dictionary may raise a RuntimeError or fail to iterate
-        # over all entries."  So pass a flag to avoid deleting.
-        for v in self.offers_sent:
-            v.withdraw(logout=True)
-            v.player_b.user.write(_('%s, who was challenging you, has departed.\n') % self.user.name)
-        for v in self.offers_received:
-            v.decline(logout=True)
-            v.player_a.user.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
+        # over all entries."
         for (k, v) in copy.copy(self.games).iteritems():
             v.abort('%s aborted by disconnection' % self.user.name)
         del self.offers_received[:]

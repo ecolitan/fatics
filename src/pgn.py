@@ -29,18 +29,16 @@ class PgnMove(object):
         self.comments.append(com)
 
 class Pgn(object):
-    def __init__(self, s):
+    def __init__(self, f):
         in_tag_section = True
         tags = {}
         self.games = []
         line_num = 0
         i = 0
         skip_blank = True
-        lines = s.splitlines()
-   
-        while line_num < len(lines):
-            line = lines[line_num]
-
+  
+        for line in f:
+            line = line.rstrip('\r\n')
             if skip_blank:
                 if line == '':
                     line_num += 1
@@ -63,8 +61,15 @@ class Pgn(object):
                     tags[m.group(1)] = m.group(2).replace(r'\"', '"')
             else:
                 if line == '':
-                    movetext = string.joinfields(movetext, '\n')
-                    self.games.append(PgnGame(tags, movetext))
+                    # Search for the result to try to handle blank lines
+                    # within the movetext.  This doesn't account for
+                    # results within user comments, but works for now.
+                    movetext_str = string.joinfields(movetext, '\n')
+                    if not result_re.search(movetext_str):
+                        movetext.append(line)
+                        line_num += 1
+                        continue
+                    self.games.append(PgnGame(tags, movetext_str))
                     tags.clear()
                     skip_blank = True
                     in_tag_section = True

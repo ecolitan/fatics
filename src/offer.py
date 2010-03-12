@@ -12,63 +12,118 @@ class Offer(object):
 
     def accept(self):
         """player b accepts"""
-        a = self.player_a.user
-        b = self.player_b.user
+        self.a.session.offers_sent.remove(self)
+        self.b.session.offers_received.remove(self)
 
-        a.session.offers_sent.remove(self)
-        b.session.offers_received.remove(self)
+        self.b.write(_("Accepting the %s from %s.\n") % (self.name,
+            self.a.name))
+        self.a.write(_("%s accepts your %s.\n") % (self.b.name,
+            self.name))
 
-        b.write(_("Accepting the %s from %s.\n") % (self.name, a.name))
-        a.write(_("%s accepts your %s.\n") % (b.name, self.name))
-
-    def decline(self, logout=False, notify=True):
+    def decline(self, notify=True):
         """player b declines"""
-        a = self.player_a.user
-        b = self.player_b.user
         if notify:
-            b.write(_("Declining the %s from %s.\n") % (self.name, a.name))
-        a.session.offers_sent.remove(self)
-        if not logout:
-            if notify:
-                a.write(_("%s declines the %s.\n") % (b.name, self.name))
-            b.session.offers_received.remove(self)
+            self.a.write(_("%s declines your %s.\n") % (self.b.name,
+                self.name))
+            self.b.write(_("Declining the %s from %s.\n") % (self.name,
+                self.a.name))
+        self.a.session.offers_sent.remove(self)
+        self.b.session.offers_received.remove(self)
 
-    def withdraw(self, logout=False):
+    def withdraw(self, notify=True):
         """player a withdraws the offer"""
-        a = self.player_a.user
-        b = self.player_b.user
-        a.write(_("Withdrawing your %s to %s.\n") % (self.name, b.name))
-        if not logout:
-            b.write(_("%s withdraws the %s.\n") % (a.name, self.name))
-            a.session.offers_sent.remove(self)
-        b.session.offers_received.remove(self)
+        if notify:
+            self.a.write(_("Withdrawing your %s to %s.\n") % (self.name,
+                self.b.name))
+            self.b.write(_("%s withdraws the %s.\n") % (self.a.name,
+                self.name))
+        self.a.session.offers_sent.remove(self)
+        self.b.session.offers_received.remove(self)
 
 class Abort(Offer):
     def __init__(self, game, user):
         Offer.__init__(self, 'abort offer')
 
-        self.by = user
+        self.a = user
+        self.b = game.get_opp(user)
+        self.game = game
         offers = [o for o in game.pending_offers if o.name == self.name]
         if len(offers) > 1:
             raise RuntimeError('more than one abort offer in game %d' \
                 % game.number)
         if len(offers) > 0:
             o = offers[0]
-            if o.by == self.by:
+            if o.a == self.a:
                 user.write(N_('You are already offering to abort game %d.\n') % game.number)
             else:
-                game.abort('Game aborted by agreement')
+                o.accept()
         else:
             # XXX should not substitute name till translation
             game.pending_offers.append(self)
-            #side = g.get_user_side(conn.user)
-            #g.get_side_user(game.opp(side)).write(N_('%s requests to abort the game; type "abort" to accept.\n') % conn.user.name)
-            game.get_opp(user).write(N_('%s requests to abort game %d; type "abort" to accept.\n') % (user.name, game.number))
+            self.b.write(N_('%s requests to abort game %d.\n') % (user.name, game.number))
+            a_sent = user.session.offers_sent
+            b_received = self.b.session.offers_received
+            a_sent.append(self)
+            b_received.append(self)
 
-class MatchPlayer(object):
-    def __init__(self, u):
-        self.user = u
-        self.side = None
+    def decline(self, notify=True):
+        Offer.decline(self, notify)
+        self.game.pending_offers.remove(self)
+        
+    def accept(self):
+        Offer.accept(self)
+        self.game.pending_offers.remove(self)
+        self.game.abort('Game aborted by agreement')
+
+    def withdraw(self, notify=True):
+        Offer.withdraw(self, notify)
+        self.game.pending_offers.remove(self)
+
+class Draw(Offer):
+    def __init__(self, game, user):
+        Offer.__init__(self, 'draw offer')
+
+        self.a = user
+        self.b = game.get_opp(user)
+        self.game = game
+        offers = [o for o in game.pending_offers if o.name == self.name]
+        if len(offers) > 1:
+            raise RuntimeError('more than one draw offer in game %d' \
+                % game.number)
+        if len(offers) > 0:
+            o = offers[0]
+            if o.a == self.a:
+                user.write(N_('You are already offering a draw.\n'))
+            else:
+                o.accept()
+        else:
+            # check for draw by repetition, 50-move rule
+            if game.variant.pos.is_draw_repetition():
+                game.result('Game drawn by repetition', '1/2-1/2')
+            elif game.variant.pos.is_draw_fifty():
+                game.result('Game drawn by 50-move rule', '1/2-1/2')
+
+            game.pending_offers.append(self)
+            user.write(N_('Offering a draw.\n'))
+            self.b.write(N_('%s offers a draw.\n') % user.name)
+            
+            a_sent = user.session.offers_sent
+            b_received = self.b.session.offers_received
+            a_sent.append(self)
+            b_received.append(self)
+    
+    def accept(self):
+        Offer.accept(self)
+        self.game.pending_offers.remove(self)
+        self.game.result('Game drawn by agreement', '1/2-1/2')
+    
+    def decline(self, notify=True):
+        Offer.decline(self, notify)
+        self.game.pending_offers.remove(self)
+        
+    def withdraw(self, notify=True):
+        if notify:
+            self.a.write(_('You cannot withdraw a draw offer.\n'))
 
 class Challenge(Offer):
     """represents a match offer from one player to another"""
@@ -77,13 +132,13 @@ class Challenge(Offer):
         Offer.__init__(self, "match offer")
         self.is_time_odds = False
 
-        self.player_a = MatchPlayer(a)
-        self.player_b = MatchPlayer(b)
+        self.a = a
+        self.b = b
 
         self.variant_name = 'normal'
 
-        self.player_a.time = self.player_b.time = a.vars['time']
-        self.player_a.inc = self.player_b.inc = a.vars['inc']
+        self.a_time = self.b_time = a.vars['time']
+        self.a_inc = self.b_inc = a.vars['inc']
 
         self.rated = None
         # the side requested by a, if any
@@ -94,7 +149,7 @@ class Challenge(Offer):
      
         if self.rated == None:
             if a.is_guest or b.is_guest:
-                a.write(N_('Setting match to unrated.\n'))
+                a.write(N_('Setting match offer to unrated.\n'))
                 self.rated = False
             else:
                 # historically, this was set according to the rated var
@@ -106,16 +161,16 @@ class Challenge(Offer):
         else:
             side_str = ''
         
-        self.player_a.rating = a.get_rating(self.variant_name)
-        self.player_b.rating = b.get_rating(self.variant_name)
+        self.a_rating = a.get_rating(self.variant_name)
+        self.b_rating = b.get_rating(self.variant_name)
 
         rated_str = "rated" if self.rated else "unrated"
 
         if not self.is_time_odds:
-            time_str = "%d %d" % (self.player_a.time, self.player_a.inc)
+            time_str = "%d %d" % (self.a_time, self.a_inc)
         else:
-            time_str = "%d %d %d %d" % (self.player_a.time, self.player_a.inc, self.player_b.time, self.player_b.inc)
-        expected_duration = self.player_a.time + self.player_a.inc * float(2) / 3
+            time_str = "%d %d %d %d" % (self.a_time, self.a_inc, self.b_time, self.b_inc)
+        expected_duration = self.a_time + self.a_inc * float(2) / 3
         assert(expected_duration > 0)
         if self.is_time_odds:
             self.speed = speed.nonstandard
@@ -135,7 +190,7 @@ class Challenge(Offer):
             self.variant_and_speed = '%s %s' % (self.variant_name,self.speed)
 
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
-        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.player_a.user.name, self.player_a.rating, side_str, self.player_b.user.name, self.player_b.rating, rated_str, self.variant_and_speed, time_str)
+        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.variant_and_speed, time_str)
 
 
         #if self.board != None:
@@ -160,7 +215,7 @@ class Challenge(Offer):
         o = next((o for o in b_sent if o.name == self.name), None)
         if o:
             a.write(N_('Declining the offer from %s and proposing a counteroffer.\n') % b.name)
-            b.write(N_('%s declines the offer and proposes a counteroffer.\n') % a.name)
+            b.write(N_('%s declines your offer and proposes a counteroffer.\n') % a.name)
             o.decline(notify=False)
 
         o = next((o for o in a_sent if o.name == self.name), None)
@@ -178,12 +233,12 @@ class Challenge(Offer):
         b.write(N_('You can "accept", "decline", or propose different parameters.\n'))
        
     def __eq__(self, other):
-        if (self.player_a.user == other.player_a.user and
-                self.player_b.user == other.player_b.user and
-                self.player_a.time == other.player_a.time and
-                self.player_b.time == other.player_b.time and
-                self.player_a.inc == other.player_a.inc and
-                self.player_b.inc == other.player_b.inc and
+        if (self.a == other.a and
+                self.b == other.b and
+                self.a_time == other.a_time and
+                self.b_time == other.b_time and
+                self.a_inc == other.a_inc and
+                self.b_inc == other.b_inc and
                 self.side == other.side):
             return True
         return False
@@ -193,12 +248,12 @@ class Challenge(Offer):
             return False
 
         # opposite but equivalent?
-        if (self.player_a.user == other.player_b.user and
-                self.player_b.user == other.player_a.user and
-                self.player_a.time == other.player_b.time and
-                self.player_b.time == other.player_a.time and
-                self.player_a.inc == other.player_b.inc and
-                self.player_b.inc == other.player_a.inc and (
+        if (self.a == other.b and
+                self.b == other.a and
+                self.a_time == other.b_time and
+                self.b_time == other.a_time and
+                self.a_inc == other.b_inc and
+                self.b_inc == other.a_inc and (
                 (self.side == None and other.side == None) or
                 (self.side in [WHITE, BLACK] and
                     other.side in [WHITE, BLACK] and
@@ -210,12 +265,9 @@ class Challenge(Offer):
     def accept(self):
         Offer.accept(self)
         
-        a = self.player_a.user
-        b = self.player_b.user
-
         g = game.Game(self)
-        a.session.games[b.name] = g
-        b.session.games[a.name] = g
+        self.a.session.games[self.b.name] = g
+        self.b.session.games[self.a.name] = g
 
     def _set_rated(self, val):
         assert(val in [True, False])
@@ -225,10 +277,8 @@ class Challenge(Offer):
     
     def _set_side(self, val):
         assert(val in [WHITE, BLACK])
-        if self.player_a.side != None:
+        if self.side != None:
             raise command.BadCommandError()
-        self.player_a.side = val
-        self.player_b.side = game.opp(val)
         self.side = val
     
     def _set_wild(self, val):
@@ -275,20 +325,20 @@ class Challenge(Offer):
         if len(times) == 0:
             pass
         elif len(times) == 1:
-            self.player_a.time = self.player_b.time = times[0]
-            self.player_a.inc = self.player_b.inc = 0
+            self.a_time = self.b_time = times[0]
+            self.a_inc = self.b_inc = 0
         elif len(times) == 2:
-            self.player_a.time = self.player_b.time = times[0]
-            self.player_a.inc = self.player_b.inc = times[1]
+            self.a_time = self.b_time = times[0]
+            self.a_inc = self.b_inc = times[1]
         elif len(times) == 3:
             self.is_time_odds = True
-            self.player_a.time = 60*times[0]
-            self.player_a.inc = self.player_b.inc = times[1]
-            self.player_b.time = 60*times[1]
+            self.a_time = 60*times[0]
+            self.a_inc = self.b_inc = times[1]
+            self.b_time = 60*times[1]
         elif len(times) == 4:
             self.is_time_odds = True
-            (self.player_a.time, self.player_a.inc,
-                self.player_b.time, self.player_b.inc) = times
+            (self.a_time, self.a_inc,
+                self.b_time, self.b_inc) = times
         else:
             assert(False)
 
