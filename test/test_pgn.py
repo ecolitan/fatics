@@ -1,3 +1,5 @@
+import random
+
 from test import *
 
 from pgn import Pgn
@@ -20,7 +22,7 @@ class TestPgn(Test):
             self.expect('<12> ', t2)
     
             wtm = True
-            for mv in g.moves:                
+            for mv in g.moves:
                 if wtm:
                     #print 'sending %s to white' % mv.text
                     t.write('%s\n' % mv.text)
@@ -43,6 +45,11 @@ class TestPgn(Test):
             elif g.result == '1/2-1/2' and g.is_draw_nomaterial:
                 self.expect('neither player has mating material} 1/2-1/2', t)
                 self.expect('neither player has mating material} 1/2-1/2', t2)
+            elif g.result == '1/2-1/2' and g.is_repetition:
+                random.choice([t, t2]).write('draw\n')
+                self.expect('drawn by repetition} 1/2-1/2', t)
+                self.expect('drawn by repetition} 1/2-1/2', t2)
+            #elif g.result == '1/2-1/2' and g.is_fifty:
             else:
                 t.write('abort\n')
                 t2.write('abort\n')

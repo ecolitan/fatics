@@ -100,8 +100,10 @@ class Draw(Offer):
             # check for draw by repetition, 50-move rule
             if game.variant.pos.is_draw_repetition():
                 game.result('Game drawn by repetition', '1/2-1/2')
+                return
             elif game.variant.pos.is_draw_fifty():
                 game.result('Game drawn by 50-move rule', '1/2-1/2')
+                return
 
             game.pending_offers.append(self)
             user.write(N_('Offering a draw.\n'))
@@ -197,7 +199,7 @@ class Challenge(Offer):
         #    challenge_str = 'Loaded from a board'
 
         o = next((o for o in a.session.offers_received if
-            o.equivalent_to(self)), None)
+            o.name == self.name and o.equivalent_to(self)), None)
         if o:
             # a already received an identical offer, so just accept it
             o.accept()
@@ -233,7 +235,8 @@ class Challenge(Offer):
         b.write(N_('You can "accept", "decline", or propose different parameters.\n'))
        
     def __eq__(self, other):
-        if (self.a == other.a and
+        if (self.name == other.name and
+                self.a == other.a and
                 self.b == other.b and
                 self.a_time == other.a_time and
                 self.b_time == other.b_time and

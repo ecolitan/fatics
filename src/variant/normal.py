@@ -5,6 +5,7 @@ I didn't want to privilege it over variants, so it is here. """
 
 import re
 import copy
+import random
 from array import array
 
 from variant import Variant
@@ -72,7 +73,7 @@ castle_mask[E1] = to_castle_flags(False, False, True, True)
 castle_mask[H1] = to_castle_flags(False, True, True, True)
 
 def rank(sq):
-    return sq / 0x10
+    return sq // 0x10
 
 def file(sq):
     return sq % 8
@@ -91,6 +92,42 @@ def piece_is_white(pc):
     assert(pc in 'pnbrqkPNBRQK')
     return pc.isupper()
 
+class Zobrist(object):
+    _piece_index = {
+        'p': 0, 'n': 1, 'b': 2, 'r': 3, 'q': 4, 'k': 5,
+        'P': 6, 'N': 7, 'B': 8, 'R': 9, 'Q': 10, 'K': 11
+    }
+
+    """Zobrist keys for low-overhead repetition detection"""
+    # Note: using 64-bit keys, the expected number of positions
+    # before a collision is 2^32.  Given that a collision has to
+    # occur within one game to be meaningful, and games are no
+    # longer than 5949 moves, the chance of any affect should be
+    # negligible.
+    def __init__(self):
+        random.seed(2010)
+        self.side_hash = random.getrandbits(64)
+        self._piece = self._rand_list(0x10 * 0x80)
+        self._ep = self._rand_list(8)
+        self._castle = self._rand_list(0x10)
+        random.seed()
+
+    def piece_hash(self, sq, pc):
+        assert((0xf << 7) & sq == 0)
+        assert(valid_sq(sq))
+        return self._piece[(self._piece_index[pc] << 7) | sq]
+
+    def ep_hash(self, ep):
+        return self._ep[file(ep)]
+
+    def castle_hash(self, flags):
+        assert(flags & ~0xf == 0)
+        return self._castle[flags]
+
+    def _rand_list(self, len):
+        return [random.getrandbits(64) for i in xrange(0, len)]
+
+zobrist = Zobrist()
 
 class Move(object):
     def __init__(self, pos, fr, to, prom=None, is_oo=False,
@@ -268,6 +305,20 @@ class Undo(object):
     """information needed to undo a move"""
     pass
 
+class MoveHistory(object):
+    """keeps past of previous moves and positions for repetition
+    detection and undoing"""
+    def __init__(self):
+        self.h = [None] * 2
+
+    def set_hash(self, ply, hash):
+        if ply >= len(self.h):
+            self.h.extend([None] * (ply - len(self.h) + 1))
+        self.h[ply] = hash
+
+    def get_hash(self, ply):
+        return self.h[ply]
+
 class Position(object):
     def __init__(self, fen):
         # XXX make an array
@@ -277,6 +328,7 @@ class Position(object):
         self.is_stalemate = False
         self.is_checkmate = False
         self.is_draw_nomaterial = False
+        self.history = MoveHistory()
         self.set_pos(fen)
 
     def set_pos(self, fen):
@@ -293,6 +345,7 @@ class Position(object):
 
             ranks = pos.split('/')
             ranks.reverse()
+            self.hash = 0
             self.material = [0, 0]
             for (r, rank_str) in enumerate(ranks):
                 sq = 0x10 * r
@@ -303,6 +356,7 @@ class Position(object):
                     else:
                         assert(valid_sq(sq))
                         self.board[sq] = c
+                        self.hash ^= zobrist.piece_hash(sq, c)
                         self.material[piece_is_white(c)] += \
                             piece_material[c.lower()]
                         if c == 'k':
@@ -329,6 +383,8 @@ class Position(object):
                 raise BadFenError()
 
             self.wtm = side == 'w'
+            if self.wtm:
+                self.hash ^= zobrist.side_hash
 
             if castle_flags == '-':
                 self.castle_flags = 0
@@ -360,17 +416,23 @@ class Position(object):
                             raise BadFenError()
                         b_ooo = True
 
-                self.castle_flags = to_castle_flags(w_oo, w_ooo, b_oo, b_ooo)
+                self.castle_flags = to_castle_flags(w_oo, w_ooo,
+                    b_oo, b_ooo)
+
+            self.hash ^= zobrist.castle_hash(self.castle_flags)
 
             if ep == '-':
                 self.ep = None
             else:
-
                 self.ep = ep[0].index('abcdefgh') + \
                     0x10 * ep[1].index('012345678')
+                self.hash ^= zobrist.ep_hash(self.ep)
 
             self.fifty_count = int(fifty_count, 10)
             self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
+            self.start_half_moves = self.half_moves
+            assert(self.hash == self._compute_hash())
+            self.history.set_hash(self.half_moves, self.hash)
 
             self.detect_check()
             if self.is_checkmate or self.is_stalemate \
@@ -391,34 +453,6 @@ class Position(object):
                 sq = 0x10 * r + f
                 yield (sq, self.board[sq])
 
-    '''def to_fen(self):
-        pos_str = ''
-        for (sq, pc) in self:
-            pos_str += pc
-        stm_str = 'w' if self.wtm else 'b'
-        castling = ''
-        if self.castle_flags[2]:
-            castling += 'K'
-        if self.castle_flags[3]:
-            castling += 'Q'
-        if self.self.castle_flags[0]:
-            castling += 'k'
-        if self.black_castle_flags[1]:
-            castling += 'q'
-        if castling == '':
-            castling = '-'
-
-        if self.ep == None:
-            ep_str = '-'
-        else:
-            ep_str = chr(ord('a') + ep)
-            if self.wtm:
-                ep_str += '3'
-            else:
-                ep_str += '6'
-        full_moves = self.half_moves / 2 + 1
-        return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves) '''
-    
     def make_move(self, mv):
         """make the move"""
         self.half_moves += 1
@@ -429,12 +463,21 @@ class Position(object):
         mv.undo.castle_flags = self.castle_flags
         mv.undo.fifty_count = self.fifty_count
         mv.undo.material = self.material[:]
+        mv.undo.hash = self.hash
+
+        if self.ep:
+            # clear old en passant hash
+            self.hash ^= zobrist.ep_hash(self.ep)
 
         self.board[mv.fr] = '-'
         if not mv.prom:
             self.board[mv.to] = mv.pc
+            self.hash ^= zobrist.piece_hash(mv.fr, mv.pc) ^ \
+                zobrist.piece_hash(mv.to, mv.pc)
         else:
             self.board[mv.to] = mv.prom
+            self.hash ^= zobrist.piece_hash(mv.fr, mv.pc) ^\
+                zobrist.piece_hash(mv.to, mv.prom)
             self.material[self.wtm] += piece_material[mv.prom.lower()] \
                 - piece_material['p']
 
@@ -443,10 +486,9 @@ class Position(object):
         elif mv.pc == 'K':
             self.king_pos[1] = mv.to
 
-        if mv.new_ep:
-            self.ep = mv.new_ep
-        else:
-            self.ep = None
+        self.ep = mv.new_ep
+        if self.ep:
+            self.hash ^= zobrist.ep_hash(self.ep)
 
         if mv.pc in ['p', 'P'] or mv.is_capture:
             self.fifty_count = 0
@@ -454,6 +496,7 @@ class Position(object):
             self.fifty_count += 1
        
         if mv.is_capture:
+            self.hash ^= zobrist.piece_hash(mv.to, mv.capture)
             self.material[not self.wtm] -= piece_material[mv.capture.lower()]
        
         if mv.is_ep:
@@ -461,9 +504,11 @@ class Position(object):
             # remove the captured pawn
             if self.wtm:
                 assert(self.board[mv.to + -0x10] == 'p')
+                self.hash ^= zobrist.piece_hash(mv.to + -0x10, 'p')
                 self.board[mv.to + -0x10] = '-'
             else:
                 assert(self.board[mv.to + 0x10] == 'P')
+                self.hash ^= zobrist.piece_hash(mv.to + 0x10, 'P')
                 self.board[mv.to + 0x10] = '-'
         elif mv.is_oo:
             # move the rook
@@ -471,24 +516,50 @@ class Position(object):
                 assert(self.board[H1] == 'R')
                 self.board[F1] = 'R'
                 self.board[H1] = '-'
+                self.hash ^= zobrist.piece_hash(F1, 'R') ^ \
+                    zobrist.piece_hash(H1, 'R')
             else:
                 assert(self.board[H8] == 'r')
                 self.board[F8] = 'r'
                 self.board[H8] = '-'
+                self.hash ^= zobrist.piece_hash(F8, 'r') ^ \
+                    zobrist.piece_hash(H8, 'r')
         elif mv.is_ooo:
             # move the rook
             if self.wtm:
                 assert(self.board[A1] == 'R')
                 self.board[D1] = 'R'
                 self.board[A1] = '-'
+                self.hash ^= zobrist.piece_hash(D1, 'R') ^ \
+                    zobrist.piece_hash(A1, 'R')
             else:
                 assert(self.board[A8] == 'r')
                 self.board[D8] = 'r'
                 self.board[A8] = '-'
+                self.hash ^= zobrist.piece_hash(A8, 'r') ^ \
+                    zobrist.piece_hash(D8, 'r')
 
         self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
+        if self.castle_flags != mv.undo.castle_flags:
+            self.hash ^= zobrist.castle_hash(self.castle_flags) ^ \
+                zobrist.castle_hash(mv.undo.castle_flags)
         self.wtm = not self.wtm
+        self.hash ^= zobrist.side_hash
         #self._check_material()
+        assert(self.hash == self._compute_hash())
+        self.history.set_hash(self.half_moves, self.hash)
+
+    def _compute_hash(self):
+        hash = 0
+        if self.wtm:
+            hash ^= zobrist.side_hash
+        for (sq, pc) in self:
+            if pc != '-':
+                hash ^= zobrist.piece_hash(sq, pc)
+        if self.ep:
+            hash ^= zobrist.ep_hash(self.ep)
+        hash ^= zobrist.castle_hash(self.castle_flags)
+        return hash
     
     def undo_move(self, mv):
         """undo the move"""
@@ -501,6 +572,7 @@ class Position(object):
         self.castle_flags = mv.undo.castle_flags
         self.fifty_count = mv.undo.fifty_count
         self.material = mv.undo.material
+        self.hash = mv.undo.hash
         
         if mv.pc == 'k':
             self.king_pos[0] = mv.fr
@@ -533,6 +605,7 @@ class Position(object):
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
         #self._check_material()
+        assert(self.hash == self._compute_hash())
 
     def _check_material(self):
         bmat = sum([piece_material[pc.lower()]
@@ -886,7 +959,68 @@ class Position(object):
         return False
     
     def is_draw_repetition(self):
+        """check for draw by repetition"""
+
+        # Note that the most recent possible identical position is
+        # 4 ply ago, and we only have to check every other move.
+        # This is a well-known chess engine optimization.
+        if self.half_moves < 8:
+            return False
+        count = 0
+        stop = max(self.half_moves - self.fifty_count, self.start_half_moves)
+        i = self.half_moves - 4
+        hash = self.history.get_hash(self.half_moves)
+        while i >= stop:
+            if self.history.get_hash(i) == hash:
+                count += 1
+                if count == 2:
+                    return True
+            i -= 4
         return False
+    
+    def to_fen(self):
+        p = []
+        for r in range(7, -1, -1):
+            num_empty = 0
+            for f in range(0, 8):
+                sq = 0x10 * r + f
+                pc = self.board[sq]
+                if pc == '-':
+                    num_empty += 1
+                else:
+                    if num_empty > 0:
+                        p.append(str(num_empty))
+                        num_empty = 0
+                    p.append(pc)
+            if num_empty > 0:
+                p.append(str(num_empty))
+                num_empty = 0
+            if r != 0:
+                p.append('/')
+        pos_str = ''.join(p)
+
+        stm_str = 'w' if self.wtm else 'b'
+
+        castling = ''
+        if check_castle_flags(self.castle_flags, True, True):
+            castling += 'K'
+        if check_castle_flags(self.castle_flags, True, False):
+            castling += 'Q'
+        if check_castle_flags(self.castle_flags, False, True):
+            castling += 'k'
+        if check_castle_flags(self.castle_flags, False, False):
+            castling += 'q'
+        if castling == '':
+            castling = '-'
+
+        if self.ep:
+            ep_str = sq_to_str(self.ep)
+            assert(ep_str[1] in ['3', '6'])
+        else:
+            ep_str = '-'
+
+        full_moves = self.half_moves // 2 + 1
+        return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
 
 class Normal(Variant):
     """normal chess"""
@@ -961,7 +1095,7 @@ class Normal(Variant):
             flip = 1
         else:
             raise RuntimeError('unknown relation')
-        full_moves = self.pos.half_moves / 2 + 1
+        full_moves = self.pos.half_moves // 2 + 1
         last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
             self.game.last_move_secs)
         if user.ivars['ms']:

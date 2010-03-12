@@ -1,5 +1,4 @@
 import re
-import string
 import copy
 
 tag_re = re.compile(r'''\[(\w+)\s+"([^\n]*?)"\]\s*$''')
@@ -12,6 +11,8 @@ nag_re = re.compile(r'''\$(\d+)''')
 result_re = re.compile(r'''(1-0|0-1|1/2-1/2|\*)''')
 checkmate_re = re.compile(r'''\s+checkmated\s*$''')
 stalemate_re = re.compile(r'''\s+drawn\s+by\s+stalemate\s*$''')
+repetition_re = re.compile(r'''\s+drawn\s+by\s+repetition\s*$''')
+fifty_re = re.compile(r'''\s+drawn\s+by\s+the\s+50\s+move\s+rule\s*$''')
 nomaterial_re = re.compile(r'''[nN]either\s+player\s+has\s+mating\s+material\s*$''')
 
 class PgnError(Exception):
@@ -64,7 +65,7 @@ class Pgn(object):
                     # Search for the result to try to handle blank lines
                     # within the movetext.  This doesn't account for
                     # results within user comments, but works for now.
-                    movetext_str = string.joinfields(movetext, '\n')
+                    movetext_str = '\n'.join(movetext)
                     if not result_re.search(movetext_str):
                         movetext.append(line)
                         line_num += 1
@@ -84,6 +85,8 @@ class PgnGame(object):
         self.movetext = movetext
         self.is_checkmate = False
         self.is_stalemate = False
+        self.is_repetition = False
+        self.is_fifty = False
         self.is_draw_nomaterial = False
         self.initial_comments = []
         self.parse(movetext)
@@ -133,8 +136,13 @@ class PgnGame(object):
                     self.is_checkmate = True
                 elif stalemate_re.search(m.group(1)):
                     self.is_stalemate = True
+                elif repetition_re.search(m.group(1)):
+                    self.is_repetition = True
+                elif fifty_re.search(m.group(1)):
+                    self.is_fifty = True
                 elif nomaterial_re.search(m.group(1)):
                     self.is_draw_nomaterial = True
+
                 if len(self.moves) > 0:
                     self.moves[-1].add_comment(m.group(1))
                 else:

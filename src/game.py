@@ -1,6 +1,6 @@
 import random
 
-import globals
+games = {}
 
 from variant.variant_factory import variant_factory
 
@@ -19,14 +19,14 @@ def find_free_slot():
     # be more than efficient enough.
     i = 1
     while True:
-        if not i in globals.games:
+        if not i in games:
             return i
         i += 1
 
 class Game(object):
     def __init__(self, chal):
         self.number = find_free_slot()
-        globals.games[self.number] = self
+        games[self.number] = self
         side = chal.side
         if side == None:
             side = self._pick_color(chal.a, chal.b)
@@ -149,7 +149,7 @@ class Game(object):
         self.free()
 
     def free(self):
-        del globals.games[self.number]
+        del games[self.number]
         del self.white.session.games[self.black.name]
         del self.black.session.games[self.white.name]
 
