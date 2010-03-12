@@ -188,7 +188,10 @@ class TestAbort(Test):
         t2.write('e5\n')
         t.write('abort\n')
 
-        self.expect('GuestABCD requests to abort the game', t2)
+        self.expect('GuestABCD requests to abort game 1', t2)
+
+        t.write('abort\n')
+        self.expect('You are already offering to abort game 1', t)
 
         t2.write('abort\n')
         self.expect('Game aborted by agreement', t)

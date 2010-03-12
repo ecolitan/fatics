@@ -57,10 +57,7 @@ class Game(object):
         self.flip = False
         self.clock_is_ticking = False
 
-        self.abort_offered = [False, False]
-        self.draw_offered = [False, False]
-        self.adjourn_offered = [False, False]
-        self.pause_offered = [False, False]
+        self.pending_offers = []
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.user.name, self.white.rating, self.black.user.name, self.black.rating, rated_str, chal.variant_and_speed, time_str)
@@ -116,6 +113,10 @@ class Game(object):
             return self.white.user
         else:
             return self.black.user
+
+    def get_opp(self, user):
+        side = self.get_user_side(user)
+        return self.get_side_user(opp(side))
     
     def abort(self, msg):
         self.result(msg, '*')

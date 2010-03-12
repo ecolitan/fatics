@@ -1,3 +1,10 @@
+Copyright (C) 2010 by Wil Mahan
+This is just a rough draft; please don't distribute it yet.
+
+= Changes from original FICS =
+
+== Differences for users ==
+
 * The server is stricter about the format of moves entered.  Moves should
 be in Standard Algebraic Notation or long algebraic notation.  In particular,
 moves are now case-sensitive, so that a move like bxb3 (pawn capture) is
@@ -8,9 +15,13 @@ case-insensitivity violates the standard.  This change will make the
 server more compatible with programs that produce SAN.
 
 * Vars intentionally not implemented: availinfo, availmin, availmax, rated,
-pgn (games are always mailed as pgn), tolerance, ropen.
+pgn, tolerance, ropen.
 Rationale: I hope they have few enough users that they can be marked
-obsolete and not implemented.
+obsolete and not implemented.  Games are always mailed as pgn.  The
+"tolerance" var is replaced by the new "seclude" var (see New features).
+In my opinion "tolerance" was not sufficient for its stated purpose of
+blocking offensive communications.  If there is still demand for a
+keyword filter, it is more logically implemented on the client side.
 
 * The error messages given when logging in (for names that are
 too short, too long, or contain disallowed characters) have been
@@ -23,13 +34,6 @@ Rationale: conciseness.
 * If an alias contains invalid syntax (such as a bare $), the server will
 print an error message rather than trying to execute the command anyway.
 Rationale: Avoid hiding user errors.
-
-* These commands are deprecated: "open", "bell", "flip", "simopen",
-"style", "promote".
-Rationale: for interface consistency, encourage always using the "set"
-command to change vars. (I'm not firm on this.  Removing these commands
-might cause too many problems for users and interfaces, but I thought
-I would suggest it for discussion.)
 
 * When attempting to send a tell to a name that does not exist or user who
 is not online, the error message is "No user named HANDLE is logged in",
@@ -69,15 +73,9 @@ Rationale: simplifies the server implementation slightly; hopefully
 won't cause any user confusion.
 
 * If you use the "." command to tell the last told player, and that player
-has logged off, you now get the error message "PLAYER is no longer online",
+has logged off, you now get the error message "HANDLE is no longer online",
 rather than "I don't know who to tell that to".
 Rationale: more informative.
-
-* Newlines are now sent after carriage returns ('\r\n'), rather than
-vice versa ('\n\r'). (This affects some bots and interfaces, but typical
-users should not have to worry about it.)
-Rationale: Dating back to the original teletype machines, the order is
-conventionally '\r\n'.
 
 * If a game is aborted on move 1, the printed result now includes the
 name of the player who requested the abort.
@@ -85,36 +83,103 @@ Rationale: more informative.
 
 * When setting a password, the server does not print the password back
 to you, but rather replaces it with asterisks.
-Rationale: make it harder from someone else to read thes password
-over your shoulder, although it is still visible when you type.
+Rationale: make it harder from someone else to read the password
+over your shoulder, although it is still visible when you type it.
 
-===
+== Differences for interface and bot authors ==
+* Newlines are now sent after carriage returns ('\r\n'), rather than
+vice versa ('\n\r'). (This affects some bots and interfaces, but typical
+users should not have to worry about it.)
+Rationale: Dating back to the original teletype machines, the order is
+conventionally '\r\n'.
 
-Admin differences:
+== Admin differences ==
 * The following commands now require an exact login and do not accept
 abbreviations of player names:  "asetadminlevel", "asetpasswd", "nuke".
 Rationale: These commands should be used with great care.
 
-New features
-============
+== New features ==
+* Full support for international characters
+* Dynamically switch the language of FICS messages
+* New timeseal with support for sending international characters.
+===Not done yet===
 * Time odds are supported again (it appears they were removed from the
 old FICS, but I could not find a posted explanation of why).
+* Timeseal has compression of data sent from server to client;
+timeseal supports pinging.
+* New "seclude" variable.  When it is set, all communications to the
+user are blocked for the entire session, including personal tells,
+channel tells, shouts, c-chouts, and messages, with the following
+exceptions: tells by admins, announcements, tells in channel 1.  The
+purpose is to allow playing without seeing potentially offensive
+communications.
+* New "country" variable.  The sole purpose of this var is to allow
+interfaces to display a country flag for users who choose to set it.
+This var is optional and should not be set by an interface without a
+user's explicit permission.
+* New channel features: anyone can create his or her own channel;
+channel topics; messages to channels.  Channels below 1024 are
+managed by admins; there should be plenty of channels above that
+unofficial categories (the current limit is about 2 billion).
+* Multi-command aliases: separate commands in aliases with a
+semicolon (;).
+* New "slow" time control, for games longer than an hour.
+* Support for correspondence games.
+* Rating pools.
+* Automatic lag-detection features.
+* Unlimited lists like censor and noplay.
+* New variants; existing variant ratings split into lightning, blitz,
+standard, slow, and correspondence.
+* Glicko 2 ratings, which are like the Glicko FICS currently uses but
+add a volatility measure.
 
+== Changes I would like to make, but which need discussion first ==
+* These commands are deprecated: "open", "bell", "flip", "simopen",
+"style", "promote".
+Rationale: for interface consistency, encourage always using the "set"
+command to change vars. 
+* A new rshout command for announcing relays, so users who do not
+care about relays can "set rshout 0".  Currently announcements are used,
+so it is not possible to unsubscribe.
 
-on second thought, I changed my mind about these:
-===
+== Changes I considered but rejected ==
+* Preventing a player from logging out when starting a game: if a
+player wants to log out, there's no way to stop him or her from
+closing the interface.  It's better that we know the user has
+intentionally logged out.
+* Numbers and punctuation in player names: possible, but perhaps too
+disruptive to the existing conventions and too ripe for abuse.
+* International (non-ASCII) characters in names: in my opinion
+this is bad because not all players can type non-ASCII characters,
+which could make it difficult to finger, tell, or match users with
+such names.
+* Named channels (such as #help as an alias for channel 1): probably
+too disruptive to established conventions.
+* Multi-line messages: maybe possible for the future, but we would need
+to be careful to prevent spam.
+* Extra censor features like automatically expiring censor lists or
+censoring but still playing users.  Basically, I think censoring should
+be a last resort and don't want to encourage indiscriminate use of
+censor lists, because in my opinion they are a suboptimal solution to 
+antisocial behavior (maybe I should write up a more detailed explanation).
+
+== I changed my mind about these so I need to undo them ==
 * Gods can now set their own adminlevel. Not sure if it's useful, but it
 follows the principle of "gods can do anything".
-
 * It's no longer possible go give a guest a title (athough it is still
 possible to set a guest's adminlevel).
 
-=== 
-Internal differences:
-
+== Internal differences ==
+* Server is written in Python 2.6 with twisted (the original FICS
+is in C).  I/O is asynchronous, and on Linux 2.6, epoll() is used for
+better scalability than the traditional select().
+* The server uses a relational database for better load balancing
+and exporting of data to external applications like ficsgames.com.
+* Game history is stored as PGN.
 * Rather using than a global array of all challenges, the server
 stores each player's lists of challenges sent and received separately.
-
-* Noplay and censor lists are stored as python sets, which allows tests
-for set membership in O(1) average time.
+* Lists like noplay and censor are stored as Python sets, which allows
+tests for set membership in O(1) average time and O(n) worst-case.
+* (Minor) Channel tells no longer iterate over all logged-in users, but
+only users subscribed to the channel.
 
