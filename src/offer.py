@@ -102,7 +102,7 @@ class Draw(Offer):
                 game.result('Game drawn by repetition', '1/2-1/2')
                 return
             elif game.variant.pos.is_draw_fifty():
-                game.result('Game drawn by 50-move rule', '1/2-1/2')
+                game.result('Game drawn by the 50 move rule', '1/2-1/2')
                 return
 
             game.pending_offers.append(self)

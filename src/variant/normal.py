@@ -956,8 +956,12 @@ class Position(object):
         return ret
 
     def is_draw_fifty(self):
-        return False
-    
+        # If we checkmate comes on the move that causes the fifty-move
+        # counter to reach 100, the game is not a draw.  That shouldn't
+        # be a problem because if a player is checkmated, he or she
+        # won't have a chance to offer a draw and trigger this check.
+        return self.fifty_count >= 100
+
     def is_draw_repetition(self):
         """check for draw by repetition"""
 

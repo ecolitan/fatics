@@ -12,7 +12,7 @@ class TestPgn(Test):
         f = open('../data/test1.pgn', 'r')
 
         pgn = Pgn(f)
-        for g in pgn.games:
+        for g in pgn:
             print 'game %s' % g
             t.write('match admin white 1 0\n')
             self.expect('Issuing:', t)
@@ -49,7 +49,10 @@ class TestPgn(Test):
                 random.choice([t, t2]).write('draw\n')
                 self.expect('drawn by repetition} 1/2-1/2', t)
                 self.expect('drawn by repetition} 1/2-1/2', t2)
-            #elif g.result == '1/2-1/2' and g.is_fifty:
+            elif g.result == '1/2-1/2' and g.is_fifty:
+                random.choice([t, t2]).write('draw\n')
+                self.expect('drawn by the 50 move rule} 1/2-1/2', t)
+                self.expect('drawn by the 50 move rule} 1/2-1/2', t2)
             else:
                 t.write('abort\n')
                 t2.write('abort\n')

@@ -31,14 +31,15 @@ class PgnMove(object):
 
 class Pgn(object):
     def __init__(self, f):
-        in_tag_section = True
-        tags = {}
-        self.games = []
-        line_num = 0
-        i = 0
+        self.f = f
+
+    def __iter__(self):
         skip_blank = True
-  
-        for line in f:
+        line_num = 0
+        tags = {}
+        in_tag_section = True
+
+        for line in self.f:
             line = line.rstrip('\r\n')
             if skip_blank:
                 if line == '':
@@ -70,7 +71,7 @@ class Pgn(object):
                         movetext.append(line)
                         line_num += 1
                         continue
-                    self.games.append(PgnGame(tags, movetext_str))
+                    yield PgnGame(tags, movetext_str)
                     tags.clear()
                     skip_blank = True
                     in_tag_section = True
@@ -78,6 +79,8 @@ class Pgn(object):
                     movetext.append(line)
 
             line_num += 1
+
+        self.f.close()
 
 class PgnGame(object):
     def __init__(self, tags, movetext):
