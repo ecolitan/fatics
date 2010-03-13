@@ -1,2 +1,2 @@
 #!/bin/sh
-pyflakes src/*.py src/*/*.py | grep -v "undefined name 'N_'" | grep -v "undefined name '_" | grep -v "undefined name 'ngettext"
+pyflakes src/*.py src/*/*.py | grep -v "undefined name 'N_'" | grep -v "undefined name '_" | grep -t "undefined name 'A_" | grep -v "undefined name 'ngettext"

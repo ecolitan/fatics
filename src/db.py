@@ -8,7 +8,8 @@ class DeleteError(Exception):
 
 class DB(object):
     def __init__(self):
-        self.db = connect(host=config.db_host, db=config.db_db, user=config.db_user, passwd=config.db_passwd)
+        self.db = connect(host=config.db_host, db=config.db_db,
+            read_default_file="~/.my.cnf")
 
     def user_get(self, name):
         cursor = self.db.cursor(cursors.DictCursor)

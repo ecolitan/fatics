@@ -2,6 +2,11 @@
 -- Table structure for table `user`
 --
 
+--CREATE DATABASE chess;
+--USE chess
+--CREATE USER 'chess'@'localhost' IDENTIFIED BY 'thepassword';
+--GRANT ALL ON chess.* TO 'chess'@'localhost';
+
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `user_id` int(8) NOT NULL AUTO_INCREMENT,

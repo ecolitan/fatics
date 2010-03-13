@@ -3,8 +3,6 @@ class Config(object):
 
     db_host = "localhost"
     db_db = "chess"
-    db_user = "chess"
-    db_passwd = "Luu9yae7"
 
     login_timeout = 30
     min_login_name_len = 3

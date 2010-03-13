@@ -1,1 +1,0 @@
-mysql --show-warnings -hlocalhost -uchess -pLuu9yae7 chess
