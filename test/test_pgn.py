@@ -36,7 +36,7 @@ class TestPgn(Test):
         
             if g.result == '1-0' and g.is_checkmate:
                 self.expect('GuestEFGH checkmated} 1-0', t)
-                self.expect('GUestEFGH checkmated} 1-0', t2)
+                self.expect('GuestEFGH checkmated} 1-0', t2)
             elif g.result == '0-1' and g.is_checkmate:
                 self.expect('GuestABCD checkmated} 0-1', t)
                 self.expect('GuestABCD checkmated} 0-1', t2)
