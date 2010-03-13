@@ -93,12 +93,12 @@ def piece_is_white(pc):
     return pc.isupper()
 
 class Zobrist(object):
+    """Zobrist keys for low-overhead repetition detection"""
     _piece_index = {
         'p': 0, 'n': 1, 'b': 2, 'r': 3, 'q': 4, 'k': 5,
         'P': 6, 'N': 7, 'B': 8, 'R': 9, 'Q': 10, 'K': 11
     }
 
-    """Zobrist keys for low-overhead repetition detection"""
     # Note: using 64-bit keys, the expected number of positions
     # before a collision is 2^32.  Given that a collision has to
     # occur within one game to be meaningful, and games are no
@@ -431,7 +431,7 @@ class Position(object):
             self.fifty_count = int(fifty_count, 10)
             self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
             self.start_half_moves = self.half_moves
-            assert(self.hash == self._compute_hash())
+            #assert(self.hash == self._compute_hash())
             self.history.set_hash(self.half_moves, self.hash)
 
             self.detect_check()
@@ -605,7 +605,7 @@ class Position(object):
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
         #self._check_material()
-        assert(self.hash == self._compute_hash())
+        #assert(self.hash == self._compute_hash())
 
     def _check_material(self):
         bmat = sum([piece_material[pc.lower()]
@@ -962,7 +962,7 @@ class Position(object):
         # won't have a chance to offer a draw and trigger this check.
         return self.fifty_count >= 100
 
-    def is_draw_repetition(self):
+    def is_draw_repetition(self, side):
         """check for draw by repetition"""
 
         # Note that the most recent possible identical position is
@@ -970,16 +970,51 @@ class Position(object):
         # This is a well-known chess engine optimization.
         if self.half_moves < 8:
             return False
-        count = 0
         stop = max(self.half_moves - self.fifty_count, self.start_half_moves)
-        i = self.half_moves - 4
+
+        count = 0
         hash = self.history.get_hash(self.half_moves)
+        i = self.half_moves - 4
         while i >= stop:
             if self.history.get_hash(i) == hash:
                 count += 1
                 if count == 2:
                     return True
-            i -= 4
+            i -= 2
+
+        # Also check the previous position, because unlike OTB chess,
+        # we do not provide a way to write down a move and offer a draw
+        # without actually executing the move.  (Well, we do: an argument to
+        # the "draw" command, but few people know about it.)
+        #
+        # Previously, FICS allowed either player to claim a draw if the
+        # current or previous position represented a threefold repetition,
+        # regardless of which player's move it was.  (Note that this is
+        # different from FIDE rules, which only consider the current
+        # position and only allow a player to claim a draw on his or her
+        # own turn.)  My idea is to only check the previous position
+        # when the player making the draw offer has the move, to avoid
+        # a situation like the following:
+        # 
+        # Player A has the move.  The current position represents a 
+        # threefold repetition, so player A is entitled to claim a draw.
+        # Instead, Player A decides to press on, and plays a blunder
+        # that loses his queen.  Player A realizes the mistake before
+        # the opponent has a chance to move, and claims a draw.
+        #
+        # The old fics grants the draw request, unreasonably in my 
+        # opinion.  My change should close the loophole.
+        if self.half_moves > 8 and (side == game.WHITE) == self.wtm:
+            count = 0
+            hash = self.history.get_hash(self.half_moves - 1)
+            i = self.half_moves - 5
+            while i >= stop:
+                if self.history.get_hash(i) == hash:
+                    count += 1
+                    if count == 2:
+                        return True
+                i -= 2
+
         return False
     
     def to_fen(self):

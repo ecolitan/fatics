@@ -7,14 +7,15 @@ from pgn import Pgn
 class TestPgn(Test):
     def test_pgn(self):
         t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_admin()
+        t2 = self.connect_as_user('GuestEFGH', '')
         
         f = open('../data/test1.pgn', 'r')
+        #f = open('/home/wmahan/chess/2007-03.pgn', 'r')
 
         pgn = Pgn(f)
         for g in pgn:
             print 'game %s' % g
-            t.write('match admin white 1 0\n')
+            t.write('match GuestEFGH white 1 0\n')
             self.expect('Issuing:', t)
             self.expect('Challenge:', t2)
             t2.write('accept\n')
@@ -34,8 +35,8 @@ class TestPgn(Test):
                 wtm = not wtm 
         
             if g.result == '1-0' and g.is_checkmate:
-                self.expect('admin checkmated} 1-0', t)
-                self.expect('admin checkmated} 1-0', t2)
+                self.expect('GuestEFGH checkmated} 1-0', t)
+                self.expect('GUestEFGH checkmated} 1-0', t2)
             elif g.result == '0-1' and g.is_checkmate:
                 self.expect('GuestABCD checkmated} 0-1', t)
                 self.expect('GuestABCD checkmated} 0-1', t2)
@@ -46,9 +47,16 @@ class TestPgn(Test):
                 self.expect('neither player has mating material} 1/2-1/2', t)
                 self.expect('neither player has mating material} 1/2-1/2', t2)
             elif g.result == '1/2-1/2' and g.is_repetition:
-                random.choice([t, t2]).write('draw\n')
+                if wtm:
+                    t.write('draw\n')
+                else:
+                    t2.write('draw\n')
                 self.expect('drawn by repetition} 1/2-1/2', t)
                 self.expect('drawn by repetition} 1/2-1/2', t2)
+                #t.write('abort\n')
+                #t2.write('abort\n')
+                #self.expect('Game aborted', t)
+                #self.expect('Game aborted', t2)
             elif g.result == '1/2-1/2' and g.is_fifty:
                 random.choice([t, t2]).write('draw\n')
                 self.expect('drawn by the 50 move rule} 1/2-1/2', t)

@@ -42,7 +42,7 @@ class Pgn(object):
         for line in self.f:
             line = line.rstrip('\r\n')
             if skip_blank:
-                if line == '':
+                if line == '' or line[0:6] == '{ FEN ':
                     line_num += 1
                     continue
                 else:

@@ -97,12 +97,15 @@ class Draw(Offer):
             else:
                 o.accept()
         else:
-            # check for draw by repetition, 50-move rule
-            if game.variant.pos.is_draw_repetition():
-                game.result('Game drawn by repetition', '1/2-1/2')
-                return
-            elif game.variant.pos.is_draw_fifty():
+            # check for draw by 50-move rule, repetition
+            # The old fics checked for 50-move draw before repetition,
+            # and we do the same so the adjudications are identical.
+            if game.variant.pos.is_draw_fifty():
                 game.result('Game drawn by the 50 move rule', '1/2-1/2')
+                return
+            elif game.variant.pos.is_draw_repetition(game.get_user_side(
+                    self.a)):
+                game.result('Game drawn by repetition', '1/2-1/2')
                 return
 
             game.pending_offers.append(self)

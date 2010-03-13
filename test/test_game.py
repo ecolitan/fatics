@@ -118,6 +118,72 @@ class TestGame(Test):
 
         self.close(t)
         self.close(t2)
+    
+    def test_draw_repetition_claim_later(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        moves = ['Nf3', 'Nf6', 'd3', 'Nc6', 'Nc3', 'Nb8', 'Nb1', 'Nc6',
+            'Nc3', 'Nb8', 'Nb1', 'Ne4']
+    
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm 
+
+        # Old fics allows either white or black to claim a draw here.
+        # We only allow white to claim a draw; black should have
+        # claimed it before he or she moved.
+        t.write('draw\n')
+        self.expect('{Game 1 (GuestABCD vs. admin) Game drawn by repetition} 1/2-1/2', t)
+        self.expect('{Game 1 (GuestABCD vs. admin) Game drawn by repetition} 1/2-1/2', t2)
+
+        self.close(t)
+        self.close(t2)
+    
+    def test_draw_repetition_claim_too_late(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        moves = ['Nf3', 'Nf6', 'd3', 'Nc6', 'Nc3', 'Nb8', 'Nb1', 'Nc6',
+            'Nc3', 'Nb8', 'Nb1', 'Ne4']
+    
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm 
+
+        t2.write('draw\n')
+        # see note in test_draw_repetition_claim_later()
+        self.expect('Offering a draw', t2)
+        self.expect_not('drawn by repetition', t)
+
+        self.close(t)
+        self.close(t2)
 
 class TestResign(Test):
     def test_resign_white(self):
