@@ -108,6 +108,7 @@ class CommandList(object):
         self._add(Command('accept', 'n', self.accept, admin.Level.user))
         self._add(Command('addlist', 'ww', self.addlist, admin.Level.user))
         self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
+        self._add(Command('alias', 'oT', self.alias, admin.Level.user))
         self._add(Command('announce', 'S', self.announce, admin.Level.admin))
         self._add(Command('areload', '', self.areload, admin.Level.god))
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
@@ -135,6 +136,7 @@ class CommandList(object):
         self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
         self._add(Command('style', 'd', self.style, admin.Level.user))
         self._add(Command('tell', 'nS', self.tell, admin.Level.user))
+        self._add(Command('unalias', 'w', self.unalias, admin.Level.user))
         self._add(Command('uptime', '', self.uptime, admin.Level.user))
         self._add(Command('variables', 'o', self.variables, admin.Level.user))
         self._add(Command('who', 'T', self.who, admin.Level.user))
@@ -193,7 +195,44 @@ class CommandList(object):
             else:
                 passwd = user.create.passwd()
                 user.create.new(name, email, passwd, real_name)
-                conn.write(_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
+                conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
+    
+    def alias(self, args, conn):
+        if args[0] == None:
+            # show list of aliases
+            if len(conn.user.aliases) == 0:
+                conn.write(_('You have no aliases.\n'))
+            else:
+                conn.write(_('Aliases:\n'))
+                for (k, v) in conn.user.aliases.iteritems():
+                    conn.write(_("%s -> %s\n") % (k, v))
+            return
+
+        aname = args[0]
+        assert(aname == aname.lower())
+        if not 1 <= len(aname) < 16:
+            conn.write(_("Alias names may not be more than 15 characters long.\n"))
+            return
+
+        if aname in ['quit', 'unalias']:
+            conn.write(_('You cannot use "%s" as an alias.\n') % aname)
+            
+        if args[1] == None:
+            # show alias value
+            if aname not in conn.user.aliases:
+                conn.write(_('You have no alias named "%s".\n') % aname)
+            else:
+                conn.write(_("%s -> %s\n") % (aname,
+                    conn.user.aliases[aname]))
+            return
+
+        # set alias value
+        was_set = aname in conn.user.aliases
+        conn.user.set_alias(aname, args[1])
+        if was_set:
+            conn.write(_('Alias "%s" changed.\n') % aname)
+        else:
+            conn.write(_('Alias "%s" set.\n') % aname)
 
     def announce(self, args, conn):
         count = 0
@@ -546,6 +585,18 @@ class CommandList(object):
             conn.session.last_tell_user = u
         else:
             conn.session.last_tell_ch = ch
+    
+    def unalias(self, args, conn):
+        aname = args[0]
+        if not 1 <= len(aname) < 16:
+            conn.write(_("Alias names may not be more than 15 characters long.\n"))
+            return
+
+        if not aname in conn.user.aliases:
+            conn.write(_('You have no alias "%s".\n') % aname)
+        else:
+            conn.user.set_alias(aname, None)
+            conn.write(_('Alias "%s" unset.\n') % aname)
 
     def uptime(self, args, conn):
         conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
@@ -590,7 +641,7 @@ class CommandList(object):
                 except KeyError:
                     conn.write(_('Invalid channel number.\n'))
                 else:
-                    if not conn.user in ch.online:
+                    if conn.user not in ch.online:
                         conn.user.write(_('''(Not sent; you are not in channel %s.)\n''') % ch.id)
                         ch = None
             else:

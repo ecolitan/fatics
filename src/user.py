@@ -19,6 +19,8 @@ class BaseUser(object):
     def __init__(self):
         self.is_online = False
         self.ivars = var.varlist.get_default_ivars()
+        self.notes = {}
+        self.aliases = {}
 
     def __eq__(self, other):
         return self.name == other.name
@@ -33,6 +35,7 @@ class BaseUser(object):
                 u.session.conn.loseConnection('logged in again')
         self.vars.update(var.varlist.get_transient_vars())
         self.aliases = {}
+        self.formula = {}
         self.session = conn.session
         self.session.set_user(self)
         for ch in self.channels:
@@ -84,6 +87,12 @@ class BaseUser(object):
             if num in self.notes:
                 del self.notes[num]
     
+    def set_alias(self, name, val):
+        if val != None:
+            self.aliases[name] = val
+        else:
+            del self.aliases[name]
+    
     def add_channel(self, id):
         assert(type(id) == type(1) or type(id) == type(1l))
         self.channels.append(id)
@@ -119,10 +128,8 @@ class User(BaseUser):
         self.is_guest = False
         self.channels = db.user_get_channels(self.id)
         self.vars = db.user_get_vars(self.id)
-        self.formula = {}
         for f in db.user_get_formula(self.id):
             self.formula[f['num']] = f['f']
-        self.notes = {}
         for note in db.user_get_notes(self.id):
             self.notes[note['num']] = note['txt']
         self._make_title_str()
@@ -141,6 +148,8 @@ class User(BaseUser):
         notifiers = [dbu['user_name'] for dbu in notifiers if online.is_online(dbu['user_name'])]
         if len(notifiers) > 0:
             self.write(_('Present company includes: %s\n') % ' '.join(notifiers))
+        for a in db.user_get_aliases(self.id):
+            self.aliases[a['name']] = a['val']
 
     def log_off(self):
         BaseUser.log_off(self)
@@ -181,9 +190,9 @@ class User(BaseUser):
         BaseUser.set_note(self, v, val)
         db.user_set_note(self.id, v.name, val)
     
-    """def unset_var(self, v):
-        BaseUser.unset_var(self, v)
-        v.db_clear(self.id, v.name)"""
+    def set_alias(self, name, val):
+        BaseUser.set_alias(self, name, val)
+        db.user_set_alias(self.id, name, val)
 
     def add_channel(self, id):
         BaseUser.add_channel(self, id)
@@ -231,8 +240,6 @@ class GuestUser(BaseUser):
         self.channels = channel.chlist.get_default_guest_channels()
         self.vars = var.varlist.get_default_vars()
         self.title_str = '(U)'
-        self.notes = {}
-        self.formula = {}
 
     def log_on(self, conn):
         BaseUser.log_on(self, conn)

@@ -19,7 +19,7 @@ def find_free_slot():
     # be more than efficient enough.
     i = 1
     while True:
-        if not i in games:
+        if i not in games:
             return i
         i += 1
 

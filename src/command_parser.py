@@ -38,7 +38,8 @@ class CommandParser(object):
             s = s[1:].lstrip()
         else:
             try:
-                s = alias.alias.expand(s, alias.alias.system, conn.user.aliases, conn.user)
+                s = alias.alias.expand(s, alias.alias.system,
+                    conn.user.aliases, conn.user)
             except alias.AliasError:
                 conn.write(_("Command failed: There was an error expanding aliases.\n"))
                 return

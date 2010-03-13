@@ -40,7 +40,7 @@ class Channel(object):
         user.write(_('[%s] added to your channel list.\n') % self.id)
 
     def remove(self, user):
-        if not user in self.online:
+        if  user not in self.online:
             user.write(_('[%s] is not on your channel list.\n') % self.id)
             return
         if user.is_online:

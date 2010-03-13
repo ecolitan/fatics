@@ -33,13 +33,13 @@ class Session(object):
         
     def close(self):
         for v in self.offers_sent[:]:
-            if not v.name in ['match offer', 'pause request']:
+            if v.name not in ['match offer', 'pause request']:
                 continue
             v.withdraw(notify=False)
             v.a.write(_('Withdrawing your match offer to %s.\n') % v.b.name)
             v.b.write(_('%s, who was challenging you, has departed.\n') % self.user.name)
         for v in self.offers_received[:]:
-            if not v.name in ['match offer', 'pause request']:
+            if v.name not in ['match offer', 'pause request']:
                 continue
             v.decline(notify=False)
             v.b.write(_('Declining the match offer from %s.\n') % v.a.name)

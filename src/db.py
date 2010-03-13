@@ -72,6 +72,24 @@ class DB(object):
                 cursor.close()
                 raise DeleteError()
         cursor.close()
+    
+    def user_set_alias(self, user_id, name, val):
+        cursor = self.db.cursor()
+        if val != None:
+            cursor.execute("""INSERT INTO user_alias SET user_id=%s,name=%s,val=%s ON DUPLICATE KEY UPDATE val=%s""" , (user_id,name,val,val))
+        else:
+            cursor.execute("""DELETE FROM user_alias WHERE user_id=%s AND name=%s""", (user_id,name))
+            if cursor.rowcount != 1:
+                cursor.close()
+                raise DeleteError()
+        cursor.close()
+    
+    def user_get_aliases(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT name,val FROM user_alias WHERE user_id=%s ORDER BY name ASC""", (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
 
     def user_get_matching(self, prefix):
         cursor = self.db.cursor(cursors.DictCursor)

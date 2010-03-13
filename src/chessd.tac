@@ -13,7 +13,10 @@ sys.path.insert(0, 'src/')
 # add a builtin to mark strings for translation that should not
 # automatically be translated dynamically.
 import __builtin__
+# dynamically translated messagse
 __builtin__.__dict__['N_'] = lambda s: s
+# admin messages
+__builtin__.__dict__['A_'] = lambda s: s
 
 from config import config
 import telnet

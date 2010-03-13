@@ -60,7 +60,7 @@ class StringVar(Var):
 
 class LangVar(Var):
     def set(self, user, val):
-        if not val in lang.langs:
+        if val not in lang.langs:
             raise BadVarError()
         user.set_var(self, val)
         user.write(_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val})
@@ -131,7 +131,7 @@ class BoolVar(Var):
             else:
                 val = not user.vars[self.name]
         else:
-            if not val in ['0', '1']:
+            if val not in ['0', '1']:
                 raise BadVarError()
             val = int(val, 10)
         user.set_var(self, val)

@@ -133,8 +133,17 @@ CREATE TABLE `user_notify` (
   `notifier` int(8) NOT NULL COMMENT 'id of the user causing the notification',
   UNIQUE INDEX(`notified`, `notifier`)
 );
-  
 
+-- user aliases  
+DROP TABLE IF EXISTS `user_alias`;
+CREATE TABLE user_alias (
+  `alias_id` int(8) NOT NULL AUTO_INCREMENT,
+  `user_id` int(8) NOT NULL,
+  `name` VARCHAR(16) NOT NULL COMMENT 'alias word',
+  `val` VARCHAR(1024) NOT NULL COMMENT 'alias value',
+  UNIQUE KEY (`user_id`, `name`),
+  PRIMARY KEY (`alias_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 -- data
 LOCK TABLES `user` WRITE;
