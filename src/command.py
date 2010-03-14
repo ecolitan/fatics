@@ -12,6 +12,7 @@ from timer import timer
 from online import online
 from reload import reload
 from server import server
+from db import DuplicateKeyError
 
 class InternalException(Exception):
     pass
@@ -194,8 +195,12 @@ class CommandList(object):
                 conn.write('A player named %s is already registered.\n' % name)
             else:
                 passwd = user.create.passwd()
-                user.create.new(name, email, passwd, real_name)
-                conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
+                try:
+                    user.create.new(name, email, passwd, real_name)
+                except DuplicateKeyError as e:
+                    conn.write('Not added: %s\n' % e.reason)
+                else:
+                    conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
     
     def alias(self, args, conn):
         if args[0] == None:
