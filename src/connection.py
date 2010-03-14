@@ -1,4 +1,5 @@
 import time
+import re
 from twisted.protocols import basic
 import twisted.internet.interfaces
 from twisted.internet import reactor
@@ -22,6 +23,7 @@ class Connection(basic.LineReceiver):
     state = 'login'
     user = None
     logged_in_again = False
+    ivar_pat = re.compile(r'%b([01]{32})')
 
     def connectionMade(self):
         lang.langs['en'].install(names=['ngettext'])
@@ -75,6 +77,11 @@ class Connection(basic.LineReceiver):
                     self.session.use_zipseal = True
                     return
             # no timeseal; continue
+
+        m = self.ivar_pat.match(line)
+        if m:
+            self.session.set_ivars_from_str(m.group(1))
+            return
         name = line.strip()
         self.user = login.get_user(name, self)
         if self.user:

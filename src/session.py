@@ -17,6 +17,7 @@ class Session(object):
         self.offers_sent = []
         self.offers_received = []
         self.games = {}
+        self.lag = 50
 
     def set_user(self, user):
         self.user = user
@@ -53,5 +54,9 @@ class Session(object):
         del self.offers_sent[:]
         if len(self.games) > 0:
             self.conn.write('Your game will be lost because adjourning is not implemented.\n')
+
+    def set_ivars_from_str(self, s):
+        """Parse a %b string sent by Jin to set ivars before logging in."""
+        print 'got %s' % s
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

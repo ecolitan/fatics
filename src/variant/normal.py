@@ -1152,7 +1152,7 @@ class Normal(Variant):
             self.game.white_inc, self.pos.material[1], self.pos.material[0],
             white_clock, black_clock, full_moves, self.game.last_move_verbose,
             last_move_time_str, self.game.last_move_san, flip,
-            int(self.game.clock_is_ticking), int(1000 * user.lag))
+            int(self.game.clock_is_ticking), int(user.session.lag))
         return s
 
 def init_direction_table():
