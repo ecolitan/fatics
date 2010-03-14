@@ -75,8 +75,7 @@ CREATE TABLE `user` (
   `is_banned` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'banned from logging in?',
   -- `is_online` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'logged in?',
   PRIMARY KEY (`user_id`),
-  UNIQUE KEY `user_name` (`user_name`),
-  UNIQUE KEY `user_email` (`user_email`)
+  UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `formula`;

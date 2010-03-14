@@ -101,17 +101,8 @@ class DB(object):
 
     def user_add(self, name, email, passwd, real_name, admin_level):
         cursor = self.db.cursor()
-        try:
-            cursor.execute("""INSERT INTO user SET user_name=%s,user_email=%s,user_passwd=%s,user_real_name=%s,user_admin_level=%s""", (name,email,passwd,real_name,admin_level))
-        except IntegrityError:
-            cursor.execute("""SELECT user_name FROM user WHERE user_email=%s""", (emaili,))
-            row = curser.fetchone()
-            if row:
-                raise DuplicateKeyError('The player "%s" is already registered with that email.')
-            else:
-                raise DuplicateKeyError('unknown reason')
-        finally:
-            cursor.close()
+        cursor.execute("""INSERT INTO user SET user_name=%s,user_email=%s,user_passwd=%s,user_real_name=%s,user_admin_level=%s""", (name,email,passwd,real_name,admin_level))
+        cursor.close()
 
     def user_set_passwd(self, id, passwd):
         cursor = self.db.cursor()
@@ -179,10 +170,10 @@ class DB(object):
         cursor = self.db.cursor()
         try:
             cursor.execute("""INSERT INTO user_title SET user_id=%s,title_id=%s""", (user_id,title_id))
-        except IntegrityError:
-            raise DuplicateKeyError()
-        finally:
             cursor.close()
+        except IntegrityError:
+            cursor.close()
+            raise DuplicateKeyError()
 
     def user_del_title(self, user_id, title_id):
         cursor = self.db.cursor()
