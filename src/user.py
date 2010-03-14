@@ -18,7 +18,6 @@ class UsernameException(Exception):
 class BaseUser(object):
     def __init__(self):
         self.is_online = False
-        self.ivars = var.varlist.get_default_ivars()
         self.notes = {}
         self.aliases = {}
 
@@ -64,12 +63,11 @@ class BaseUser(object):
         return self.name + self.title_str
 
     def set_var(self, v, val):
-        var_dict = self.ivars if v.is_ivar else self.vars
         if val != None:
-            var_dict[v.name] = val
+            self.vars[v.name] = val
         else:
-            if v.name in var_dict:
-                del var_dict[v.name]
+            if v.name in self.vars:
+                del self.vars[v.name]
     
     def set_formula(self, v, val):
         if val != None:

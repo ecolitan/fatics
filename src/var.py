@@ -49,7 +49,10 @@ class StringVar(Var):
     max_len = 1023
     def set(self, user, val):
         assert(val == None or len(val) <= self.max_len)
-        user.set_var(self, val)
+        if self.is_ivar:
+            user.session.set_ivar(self, val)
+        else:
+            user.set_var(self, val)
         if val == None:
             user.write(_('''%s unset.\n''') % self.name)
         else:
@@ -62,7 +65,10 @@ class LangVar(Var):
     def set(self, user, val):
         if val not in lang.langs:
             raise BadVarError()
-        user.set_var(self, val)
+        if self.is_ivar:
+            user.session.set_ivar(self, val)
+        else:
+            user.set_var(self, val)
         user.write(_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val})
 
     def get_display_str(self, val):
@@ -110,7 +116,10 @@ class IntVar(Var):
             raise BadVarError()
         if val < self.min or val > self.max:
             raise BadVarError()
-        user.set_var(self, val)
+        if self.is_ivar:
+            user.session.set_ivar(self, val)
+        else:
+            user.set_var(self, val)
         user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
     
     def get_display_str(self, val):
@@ -127,14 +136,17 @@ class BoolVar(Var):
         if val == None:
             # toggle
             if self.is_ivar:
-                val = not user.ivars[self.name]
+                val = not user.session.ivars[self.name]
             else:
                 val = not user.vars[self.name]
         else:
             if val not in ['0', '1']:
                 raise BadVarError()
             val = int(val, 10)
-        user.set_var(self, val)
+        if self.is_ivar:
+            user.session.set_ivar(self, val)
+        else:
+            user.set_var(self, val)
         if val:
             user.write(_(self.on_msg) + '\n')
         else:

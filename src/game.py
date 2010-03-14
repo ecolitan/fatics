@@ -92,6 +92,12 @@ class Game(object):
         return random.choice([WHITE, BLACK])
 
     def next_move(self):
+        # decline all offers to the player who just moved
+        u = self.get_user_to_move()
+        offers = [o for o in self.pending_offers if o.a == u]
+        for o in offers:
+            o.decline()
+
         #print(self.variant.to_style12(self.white))
         if self.variant.pos.is_checkmate or self.variant.pos.is_stalemate or \
                 self.variant.pos.is_draw_nomaterial:
@@ -130,6 +136,12 @@ class Game(object):
         side = self.get_user_side(user)
         return self.get_side_user(opp(side))
     
+    def get_user_to_move(self):
+        if self.variant.get_turn == WHITE:
+            return self.white
+        else:
+            return self.black
+    
     def abort(self, msg):
         self.result(msg, '*')
     
@@ -146,6 +158,8 @@ class Game(object):
             self.white.name, self.black.name, msg, code)
         self.white.write(line)
         self.black.write(line)
+        
+        self.clock_is_ticking = False
         self.free()
 
     def free(self):

@@ -419,11 +419,12 @@ class CommandList(object):
         if args[0] == None:
             u = conn.user
         else:
-            u = user.find.by_name_or_prefix_for_user(args[0], conn)
+            u = user.find.by_name_or_prefix_for_user(args[0], conn,
+                online_only=True)
 
         if u:
             conn.write(_("Interface variable settings of %s:\n\n") % u.name)
-            for (vname, val) in u.ivars.iteritems():
+            for (vname, val) in u.session.ivars.iteritems():
                 v = var.ivars[vname]
                 if val != None and v.display_in_vars:
                     conn.write("%s\n" % v.get_display_str(val))

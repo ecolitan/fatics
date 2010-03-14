@@ -85,6 +85,29 @@ class TestAbort(Test):
 
         self.close(t)
         self.close(t2)
+    
+    def test_abort_autodecline(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('e4\n')
+        t2.write('e5\n')
+        t2.write('abort\n')
+
+        self.expect('admin requests to abort game 1', t)
+
+        t.write('f4\n')
+        self.expect('Declining the abort offer from admin', t)
+        self.expect('GuestABCD declines your abort offer', t2)
+
+        self.close(t)
+        self.close(t2)
         
     def test_abort_accept(self):
         t = self.connect_as_user('GuestABCD', '')

@@ -1,6 +1,7 @@
 import time
 import copy
 
+import var
 from timer import timer
 
 # user state that is per-session and not saved to persistent storage
@@ -17,7 +18,8 @@ class Session(object):
         self.offers_sent = []
         self.offers_received = []
         self.games = {}
-        self.lag = 50
+        self.ivars = var.varlist.get_default_ivars()
+        self.lag = 0
 
     def set_user(self, user):
         self.user = user
@@ -57,6 +59,13 @@ class Session(object):
 
     def set_ivars_from_str(self, s):
         """Parse a %b string sent by Jin to set ivars before logging in."""
-        print 'got %s' % s
+        self.conn.write(_("Ivars set.\n"))
+    
+    def set_ivar(self, v, val):
+        if val != None:
+            self.ivars[v.name] = val
+        else:
+            if v.name in self.ivars:
+                del self.ivars[v.name]
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

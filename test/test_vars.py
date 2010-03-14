@@ -31,9 +31,17 @@ class TestVarsCommand(Test):
 
     def test_other_ivars(self):
         t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
         t.write('ivars admin\n')
         self.expect('Interface variable settings of admin:', t)
         self.expect('smartmove=0', t)
+        self.close(t)
+        self.close(t2)
+    
+    def test_ivars_offline(self):
+        t = self.connect_as_guest()
+        t.write('ivars admin\n')
+        self.expect('No user named "admin" is logged in', t)
         self.close(t)
 
 class TestVars(Test):
@@ -84,5 +92,11 @@ class TestIvars(Test):
         self.expect("smartmove unset", t)
 
         self.close(t)
+
+    def test_login_ivars(self):
+        t = self.connect()
+        t.write('%b000000000000000000000000000000000\n')
+        self.expect("Ivars set.", t)
+        t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

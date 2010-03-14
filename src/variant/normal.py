@@ -1137,7 +1137,7 @@ class Normal(Variant):
         full_moves = self.pos.half_moves // 2 + 1
         last_move_time_str = '(%d:%06.3f)' % (self.game.last_move_mins,
             self.game.last_move_secs)
-        if user.ivars['ms']:
+        if user.session.ivars['ms']:
             white_clock = int(1000 * self.game.white_clock)
             black_clock = int(1000 * self.game.black_clock)
         else:
