@@ -1,0 +1,1 @@
+(cd /usr/local/chessd; bin/chessd -p 5002)
