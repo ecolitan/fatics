@@ -163,6 +163,8 @@ class Game(object):
         self.free()
 
     def free(self):
+        for o in self.pending_offers:
+            o.decline(notify=False)
         del games[self.number]
         del self.white.session.games[self.black.name]
         del self.black.session.games[self.white.name]

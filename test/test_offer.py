@@ -222,6 +222,28 @@ class TestDraw(Test):
         self.close(t)
         self.close(t2)
     
+    def test_draw_autodecline(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('e4\n')
+        t2.write('e5\n')
+        t2.write('draw\n')
+        self.expect('admin offers a draw', t)
+
+        t.write('f4\n')
+        self.expect('Declining the draw offer from admin', t)
+        self.expect('GuestABCD declines your draw offer', t2)
+
+        self.close(t)
+        self.close(t2)
+    
     def test_withdraw_draw(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
@@ -240,5 +262,27 @@ class TestDraw(Test):
 
         self.close(t)
         self.close(t2)
+    
+    def test_cancel_draw(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('draw\n')
+        self.expect('GuestABCD offers a draw', t2)
+
+        t2.write('resign\n')
+        t2.write('accept\n')
+        
+        self.expect('no pending offers', t2)
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
+
