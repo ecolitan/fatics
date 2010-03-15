@@ -22,7 +22,11 @@ class Var(object):
         self.is_persistent = False
         # display in vars output
         self.display_in_vars = True
-        
+
+    def hide_in_vars(self):
+        self.display_in_vars = False
+        return self
+
     def add_as_var(self): 
         vars[self.name] = self
         self.is_ivar = False
@@ -46,9 +50,13 @@ class Var(object):
         pass
 
 class StringVar(Var):
-    max_len = 1023
+    def __init__(self, name, default, max_len=1023):
+        Var.__init__(self, name, default)
+        self.max_len = max_len
+
     def set(self, user, val):
-        assert(val == None or len(val) <= self.max_len)
+        if val != None and len(val) > self.max_len:
+            raise BadVarError()
         if self.is_ivar:
             user.session.set_ivar(self, val)
         else:
@@ -61,7 +69,20 @@ class StringVar(Var):
     def get_display_str(self, val):
         return '''%s="%s"''' % (self.name, val)
 
-class LangVar(Var):
+class PromptVar(StringVar):
+    def set(self, user, val):
+        if val != None and len(val) > self.max_len - 1:
+            raise BadVarError()
+        assert(not self.is_ivar)
+        if val == None:
+            user.set_var(self, val)
+            user.write(_('''%s unset.\n''') % self.name)
+        else:
+            val += ' '
+            user.set_var(self, val)
+            user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
+
+class LangVar(StringVar):
     def set(self, user, val):
         if val not in lang.langs:
             raise BadVarError()
@@ -71,13 +92,11 @@ class LangVar(Var):
             user.set_var(self, val)
         user.write(_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val})
 
-    def get_display_str(self, val):
-        return '''%s="%s"''' % (self.name, val)
-
 class FormulaVar(Var):
     max_len = 1023
     def set(self, user, val):
-        assert(val == None or len(val) <= self.max_len)
+        if val != None and len(val) > self.max_len:
+            raise BadVarError()
         user.set_formula(self, val)
         if val == None:
             user.write(_('''%s unset.\n''') % self.name)
@@ -95,7 +114,8 @@ class NoteVar(Var):
         self.display_in_vars = False # don't display in "vars" output
 
     def set(self, user, val):
-        assert(val == None or len(val) <= self.max_len)
+        if val != None and len(val) > self.max_len:
+            raise BadVarError()
         user.set_note(self, val)
         if val == None:
             user.write(_('''Note %s unset.\n''') % self.name)
@@ -174,6 +194,7 @@ class VarList(object):
         IntVar("style", 12, min=0, max=12).add_as_var()
 
         StringVar("interface", None).add_as_var()
+        PromptVar("prompt", "fics% ").add_as_var()
 
         LangVar("lang", "en").persist().add_as_var()
 

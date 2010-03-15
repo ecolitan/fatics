@@ -70,7 +70,7 @@ CREATE TABLE `user` (
   -- `admin_light` BOOLEAN DEFAULT NULL COMMENT 'whether to show the (*) tag',
   `simopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for simul',
   `lang` VARCHAR(6) NOT NULL DEFAULT 'en' COMMENT 'user language',
-  `prompt` varchar(16) NOT NULL DEFAULT 'fics% ' COMMENT 'command prompt',
+  -- not persistent `prompt` varchar(16) NOT NULL DEFAULT 'fics% ' COMMENT 'command prompt',
   `is_abuser` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'is an abuser?',
   `is_banned` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'banned from logging in?',
   -- `is_online` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'logged in?',

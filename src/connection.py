@@ -114,14 +114,14 @@ class Connection(basic.LineReceiver):
         self.timeout_check.cancel()
         self.user.log_on(self)
         assert(self.user.is_online)
-        self.write('fics% ')
+        self.user.write_prompt(None)
         self.state = 'online'
 
     def lineReceived_online(self, line):
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])
         try:
             command_parser.parser.run(line, self)
-            self.write('fics% ')
+            self.user.write_prompt(None)
         except command.QuitException:
             self.loseConnection('quit')
 

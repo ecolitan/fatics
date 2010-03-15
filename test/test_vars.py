@@ -75,6 +75,16 @@ class TestVars(Test):
 
         self.close(t)
     
+    def test_prompt(self):
+        t = self.connect_as_guest()
+        t.write('set prompt foobar%\n')
+        self.expect('prompt set to "foobar% ".', t)
+        
+        t.write('fi\n')
+        self.expect('Finger of Guest', t)
+        self.expect('foobar% ', t)
+        self.close(t)
+    
     def test_transient_var_user(self):
         t = self.connect_as_admin()
         t.write('set interface Thief 1.23 Midget edition\n')

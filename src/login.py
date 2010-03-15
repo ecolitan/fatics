@@ -7,7 +7,7 @@ class Login(object):
         u = None
         if name.lower() == 'g' or name.lower() == 'guest':
             u = user.GuestUser(None)
-            conn.write(_('\nLogging you in as "%s"; you may use this name to play unrated games.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter the server as "%s":') % (u.name, u.name))
+            conn.write(_('\nLogging you in as "%s"; you may use this name to play unrated games.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter the server as "%s":\n') % (u.name, u.name))
         elif name != '':
             try:
                 u = user.find.by_name_exact(name)

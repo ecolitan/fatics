@@ -56,8 +56,9 @@ class BaseUser(object):
 
     def write_prompt(self, s):
         assert(self.is_online)
-        self.session.conn.write(s)
-        self.session.conn.write('fics% ')
+        if s != None:
+            self.session.conn.write(s)
+        self.session.conn.write(self.vars['prompt'])
 
     def get_display_name(self):
         return self.name + self.title_str
@@ -109,7 +110,7 @@ class BaseUser(object):
             return '----'
     
     def send_board(self, vari):
-        self.write(vari.to_style12(self))
+        self.write_prompt(vari.to_style12(self))
 
 # a registered user
 class User(BaseUser):

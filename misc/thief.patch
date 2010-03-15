@@ -12,7 +12,7 @@ diff -ur ../Thief-pristine/GLOBAL.H ./GLOBAL.H
  #ifdef KICS
 diff -ur ../Thief-pristine/NONFICS.C ./NONFICS.C
 --- ../Thief-pristine/NONFICS.C	2008-09-05 10:56:48.000000000 -0400
-+++ ./NONFICS.C	2010-03-15 03:22:53.000000000 -0400
++++ ./NONFICS.C	2010-03-15 13:10:21.000000000 -0400
 @@ -51,6 +51,17 @@
  //        return ;
  //        }
@@ -31,6 +31,15 @@ diff -ur ../Thief-pristine/NONFICS.C ./NONFICS.C
      if (! strncmp (cS, Login.cLoginPrompt, Login.nLoginPrompt))
          {
          cS += Login.nLoginPrompt ;
+@@ -259,7 +270,7 @@
+ 
+     //if (TELNET_MatchExp (cS, NONFICS_STYLE_12_SET))
+ 
+-    if (strstr (cS, NONFICS_STYLE_12_SET))
++    if (strstr (cS, NONFICS_STYLE_12_SET) || strstr (cS, NONFICS_STYLE_12_SET1))
+         {        
+         nC = Telnet.clrCurrent ;
+         Telnet.clrCurrent = clrColor [CLR_TELNET_NORMAL] ;
 @@ -326,6 +337,15 @@
          {        
          cS++ ;
@@ -49,14 +58,12 @@ diff -ur ../Thief-pristine/NONFICS.C ./NONFICS.C
          {
 diff -ur ../Thief-pristine/NONFICS.H ./NONFICS.H
 --- ../Thief-pristine/NONFICS.H	2008-09-02 16:46:34.000000000 -0400
-+++ ./NONFICS.H	2010-03-15 03:01:08.000000000 -0400
-@@ -6,7 +6,8 @@
- #define NONFICS_LOGIN_GUEST             "Press return to enter the FICS as"
++++ ./NONFICS.H	2010-03-15 13:09:25.000000000 -0400
+@@ -7,6 +7,7 @@
  #define NONFICS_LOGIN_GUEST1            "Press return to enter the SICS as"
  #define NONFICS_LOGIN_GUEST2            "Press return to enter the DNCS as"
--#define NONFICS_STYLE_12_SET            "Style 12 set."
-+//#define NONFICS_STYLE_12_SET            "Style 12 set."
-+#define NONFICS_STYLE_12_SET            "style set to 12."
+ #define NONFICS_STYLE_12_SET            "Style 12 set."
++#define NONFICS_STYLE_12_SET1           "style set to 12."
  #define NONFICS_12_INIT                 "<12> "
  #define NONFICS_B1_INIT                 "<b1> "
  #define NONFICS_ILLEGAL_MOVE_1          "Illegal move."
