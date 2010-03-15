@@ -5,7 +5,7 @@ import os
 from twisted.trial import unittest
 
 host = '127.0.0.1'
-port = '5003'
+port = '5000'
 admin_passwd = 'admin'
 
 sys.path.append('src/')

@@ -1,5 +1,5 @@
 class Config(object):
-    port = 5003
+    port = 5000
 
     db_host = "localhost"
     db_db = "chess"
