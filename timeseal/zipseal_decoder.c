@@ -46,7 +46,7 @@ void decrypt(char *s)
 	tmp_end = tmp_time + strlen(tmp_time) - 1;
 	*tmp_end=0;
 	// check that the timestamp actually is a number
-	strtol(tmp_time,&num_end,10);
+	strtol(tmp_time,&num_end,16);
 	if(num_end!=tmp_end) goto malformed_message;
 	// assume we have got a valid message, and print it out
 	printf("%s: %s\n",tmp_time,tmp);
