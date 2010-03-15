@@ -15,4 +15,5 @@ tests
 =====
 update existing match offer
 
+prevent one admin from nuking another
 
