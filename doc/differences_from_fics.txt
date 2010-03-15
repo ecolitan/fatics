@@ -95,6 +95,27 @@ conventionally '\r\n'.
 * In style 12, an en passant square is only set when there is a legal
 en passant capture.
 
+* Draws by repetition are handled differently:
+** Currently it is possible to move out of a position that was
+a third repetition and claim a draw before your opponent moves,
+regardless of what your move is.  Thus it is possible to, say,
+throw away your queen and still claim a draw.  This loophole
+has been fixed; you must claim the draw on your own turn if the
+claim is based not on the current position but on the previous
+position.  Note that neither the old nor the new behavior adheres
+to the FIDE laws of chess; I chose to make my implementation
+similar to the existing system rather than correct by the rules,
+which were designed for OTB play.  (This is a complex issue, so
+maybe I should write up a more detailed explanation.)
+** At present FICS fails to consider en passant capturing rights (and
+possibly castling rights; I haven't checked) when checking a draw
+by repetition claim.  This is incorrect according to rule 9.2 of
+the FIDE laws of chess.  For discussion see
+http://en.wikipedia.org/wiki/Threefold_repetition#Incorrect_claims .
+For just one example of where FICS gets this wrong, see
+http://ficsgames.com/cgi-bin/show.cgi?ID=182672306;action=show .
+The new server fixes this bug.
+
 == Admin differences ==
 * The following commands now require an exact login and do not accept
 abbreviations of player names:  "asetadminlevel", "asetpasswd", "nuke".
@@ -164,6 +185,10 @@ censoring but still playing users.  Basically, I think censoring should
 be a last resort and don't want to encourage indiscriminate use of
 censor lists, because in my opinion they are a suboptimal solution to 
 antisocial behavior (maybe I should write up a more detailed explanation).
+* The ability to play games using the FIDE rules for draws, i.e.
+you can only claim a draw on your own turn and claims may only be based
+on the current position.  This could be added as an option if there is
+interest.
 
 == I changed my mind about these so I need to undo them ==
 * Gods can now set their own adminlevel. Not sure if it's useful, but it
