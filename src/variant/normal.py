@@ -253,7 +253,7 @@ class Move(object):
         elif self.pc in ['P', 'p']:
             san = ''
             if self.is_capture or self.is_ep:
-                san += '12345678'[file(self.fr)] + 'x'
+                san += 'abcdefgh'[file(self.fr)] + 'x'
             san += sq_to_str(self.to)
             if self.prom:
                 san += '=' + self.prom.upper()
@@ -267,9 +267,9 @@ class Move(object):
                 f = file(self.fr)
                 # try disambiguating with file
                 if len(filter(lambda sq: file(sq) == f, ambigs)) == 1:
-                    san += '12345678'[f]
+                    san += 'abcdefgh'[f]
                 elif len(filter(lambda sq: rank(sq) == r, ambigs)) == 1:
-                    san += 'abcdefgh'[r]
+                    san += '12345678'[r]
                 else:
                     san += sq_to_str(self.fr)
             if self.is_capture:
@@ -424,14 +424,18 @@ class Position(object):
             if ep == '-':
                 self.ep = None
             else:
+                # only set ep if there is a legal capture
                 self.ep = ep[0].index('abcdefgh') + \
                     0x10 * ep[1].index('012345678')
-                self.hash ^= zobrist.ep_hash(self.ep)
+                if self._is_legal_ep(self.ep):
+                    self.hash ^= zobrist.ep_hash(self.ep)
+                else:
+                    self.ep = None
 
             self.fifty_count = int(fifty_count, 10)
             self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
             self.start_half_moves = self.half_moves
-            #assert(self.hash == self._compute_hash())
+            assert(self.hash == self._compute_hash())
             self.history.set_hash(self.half_moves, self.hash)
 
             self.detect_check()
@@ -485,10 +489,6 @@ class Position(object):
             self.king_pos[0] = mv.to
         elif mv.pc == 'K':
             self.king_pos[1] = mv.to
-
-        self.ep = mv.new_ep
-        if self.ep:
-            self.hash ^= zobrist.ep_hash(self.ep)
 
         if mv.pc in ['p', 'P'] or mv.is_capture:
             self.fifty_count = 0
@@ -546,8 +546,40 @@ class Position(object):
         self.wtm = not self.wtm
         self.hash ^= zobrist.side_hash
         #self._check_material()
+
+        if mv.new_ep and self._is_legal_ep(mv.new_ep):
+            self.ep = mv.new_ep
+            self.hash ^= zobrist.ep_hash(self.ep)
+        else:
+            self.ep = None
+
         assert(self.hash == self._compute_hash())
         self.history.set_hash(self.half_moves, self.hash)
+
+
+    def _is_legal_ep(self, ep):
+        # According to Geurt Gijssen's "An Arbiter's Notebook" #110,
+        # if an en passant capture that is otherwise legal is not
+        # permitted because it would leave the king in check,
+        # then for the puposes of claiming a draw by repetition, the
+        # position is identical to one where there is no such en
+        # passant capture.  So we have to test the legality of
+        # en passant captures.
+        if self.wtm:
+            if (valid_sq(ep - 0x11) and self.board[ep - 0x11] == 'P' and
+                    Move(self, ep - 0x11, ep, is_ep=True).is_legal()):
+                return True
+            elif (valid_sq(ep - 0xf) and self.board[ep - 0xf] == 'P' and
+                    Move(self, ep - 0xf, ep, is_ep=True).is_legal()):
+                return True
+        else:
+            if (valid_sq(ep + 0xf) and self.board[ep + 0xf] == 'p' and
+                    Move(self, ep + 0xf, ep, is_ep=True).is_legal()):
+                return True
+            elif (valid_sq(ep + 0x11) and self.board[ep + 0x11] == 'p' and
+                    Move(self, ep + 0x11, ep, is_ep=True).is_legal()):
+                return True
+        return False
 
     def _compute_hash(self):
         hash = 0
@@ -605,7 +637,7 @@ class Position(object):
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
         #self._check_material()
-        #assert(self.hash == self._compute_hash())
+        assert(self.hash == self._compute_hash())
 
     def _check_material(self):
         bmat = sum([piece_material[pc.lower()]
@@ -646,12 +678,13 @@ class Position(object):
                     return True
         return False
 
-    def _pawn_cap_at(self, sq, wtm):
+    def _pawn_cap_at(self, sq):
         if not valid_sq(sq):
             return False
         pc = self.board[sq]
-        return (pc != '-' and piece_is_white(pc) != wtm) or self.ep == sq
-
+        return (pc != '-' and piece_is_white(pc) != self.wtm) or \
+            self.ep == sq
+    
     def _any_pc_moves(self, sq, pc):
         if pc == 'P':
             if self.board[sq + 0x10] == '-':
@@ -660,11 +693,11 @@ class Position(object):
                 if rank(sq) == 1 and self.board[sq + 0x20] == '-' and Move(
                         self, sq, sq + 0x20).is_legal():
                     return True
-            if self._pawn_cap_at(sq + 0xf, self.wtm) and Move(
+            if self._pawn_cap_at(sq + 0xf) and Move(
                     self, sq, sq + 0xf,
                     is_ep=sq + 0xf == self.ep).is_legal():
                 return True
-            if self._pawn_cap_at(sq + 0x11, self.wtm) and Move(
+            if self._pawn_cap_at(sq + 0x11) and Move(
                     self, sq, sq + 0x11,
                     is_ep=sq + 0x11 == self.ep).is_legal():
                 return True
@@ -675,11 +708,11 @@ class Position(object):
                 if rank(sq) == 6 and self.board[sq + -0x20] == '-' and Move(
                         self, sq, sq + -0x20).is_legal():
                     return True
-            if self._pawn_cap_at(sq + -0xf, self.wtm) and Move(
+            if self._pawn_cap_at(sq + -0xf) and Move(
                     self, sq, sq + -0xf,
                     is_ep=sq + -0xf == self.ep).is_legal():
                 return True
-            if self._pawn_cap_at(sq + -0x11, self.wtm) and Move(
+            if self._pawn_cap_at(sq + -0x11) and Move(
                     self, sq, sq + -0x11,
                     is_ep=sq + -0x11 == self.ep).is_legal():
                 return True
@@ -872,7 +905,7 @@ class Position(object):
                         raise IllegalMoveError('bad pawn capture')
             else:
                 raise IllegalMoveError('bad pawn capture file')
-                
+
             mv = Move(self, fr, to, prom=prom, is_ep=is_ep)
    
         # examples: Nf3 Nxf3 Ng1xf3 
@@ -963,6 +996,7 @@ class Position(object):
         return self.fifty_count >= 100
 
     def is_draw_repetition(self, side):
+        assert(self.hash == self._compute_hash())
         """check for draw by repetition"""
 
         # Note that the most recent possible identical position is
@@ -1017,7 +1051,7 @@ class Position(object):
 
         return False
     
-    def to_fen(self):
+    def to_xfen(self):
         p = []
         for r in range(7, -1, -1):
             num_empty = 0
@@ -1052,6 +1086,8 @@ class Position(object):
         if castling == '':
             castling = '-'
 
+        # we follow X-FEN rather than FEN: only print an en passant
+        # square if there is a legal en passant capture
         if self.ep:
             ep_str = sq_to_str(self.ep)
             assert(ep_str[1] in ['3', '6'])
@@ -1101,6 +1137,9 @@ class Normal(Variant):
                 conn.write('Illegal move (%s)\n' % s)
             else:
                 mv.san = mv.to_san()
+                #if mv.san != s:
+                #    print 'hmm %s; %s' % (mv.san, s)
+                #assert(mv.san == s)
                 self.pos.make_move(mv)
                 self.pos.detect_check()
                 self.game.last_move_san = mv.san

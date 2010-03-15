@@ -79,6 +79,10 @@ class Pgn(object):
                     movetext.append(line)
 
             line_num += 1
+       
+        if len(tags) > 0:
+            movetext_str = '\n'.join(movetext)
+            yield PgnGame(tags, movetext_str)
 
         self.f.close()
 

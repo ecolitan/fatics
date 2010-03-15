@@ -92,6 +92,8 @@ vice versa ('\n\r'). (This affects some bots and interfaces, but typical
 users should not have to worry about it.)
 Rationale: Dating back to the original teletype machines, the order is
 conventionally '\r\n'.
+* In style 12, an en passant square is only set when there is a legal
+en passant capture.
 
 == Admin differences ==
 * The following commands now require an exact login and do not accept
