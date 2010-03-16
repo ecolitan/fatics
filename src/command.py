@@ -379,7 +379,7 @@ class CommandList(object):
             cmds = [c.name for c in command_list.admin_cmds.itervalues()]
         else:
             cmds = [c.name for c in command_list.cmds.itervalues()]
-        conn.write('This server is under development.  Recognized commands: %s\n' % ' '.join(cmds))
+        conn.write('This server is under development.\n\nRecognized commands: %s\n' % ' '.join(cmds))
 
     def inchannel(self, args, conn):
         if args[0] != None:
