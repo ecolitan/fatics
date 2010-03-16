@@ -472,7 +472,7 @@ class Position(object):
         if self.ep:
             # clear old en passant hash
             self.hash ^= zobrist.ep_hash(self.ep)
-
+            self.ep = None
         self.board[mv.fr] = '-'
         if not mv.prom:
             self.board[mv.to] = mv.pc
@@ -550,8 +550,6 @@ class Position(object):
         if mv.new_ep and self._is_legal_ep(mv.new_ep):
             self.ep = mv.new_ep
             self.hash ^= zobrist.ep_hash(self.ep)
-        else:
-            self.ep = None
 
         assert(self.hash == self._compute_hash())
         self.history.set_hash(self.half_moves, self.hash)

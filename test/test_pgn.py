@@ -12,7 +12,8 @@ class TestPgn(Test):
         t.write('set style 12\n')
         t2.write('set style 12\n')
         
-        f = open('../data/draw.pgn', 'r')
+        f = open('../data/out.pgn', 'r')
+        #f = open('../data/draw.pgn', 'r')
         #f = open('/home/wmahan/chess/2007-03.pgn', 'r')
 
         pgn = Pgn(f)
