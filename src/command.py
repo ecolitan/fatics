@@ -602,7 +602,8 @@ class CommandList(object):
     def uptime(self, args, conn):
         conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
         conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
-        conn.write(_("Up for: %s\n") % timer.hms(time.time() - server.start_time))
+        conn.write(_("Up for: %s\n") % timer.hms_words(time.time() -
+            server.start_time))
 
     def variables(self, args, conn):
         if args[0] == None:

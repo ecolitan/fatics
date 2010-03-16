@@ -6,7 +6,7 @@ import os
 import sys
 from twisted.application import service, internet
 from twisted.internet.protocol import ServerFactory
-from twisted.internet import epollreactor
+from twisted.internet import epollreactor, task
 
 sys.path.insert(0, 'src/')
 
@@ -22,11 +22,17 @@ from config import config
 import telnet
 import connection
 import var
+import clock
 
 if os.geteuid() == 0:
     sys.path.append('.')
 
 class IcsFactory(ServerFactory):
+    def __init__(self):
+        #ServerFactory.__init__(self)
+        self.lc = task.LoopingCall(clock.heartbeat)
+        self.lc.start(10)
+
     connections = []
     def buildProtocol(self, addr):
         conn = telnet.TelnetTransport(connection.Connection)

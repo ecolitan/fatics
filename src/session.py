@@ -27,12 +27,12 @@ class Session(object):
     """returns a human-readable string"""
     def get_idle_time(self):
         assert(self.last_command_time != None)
-        return timer.hms(time.time() - self.last_command_time)
+        return timer.hms_words(time.time() - self.last_command_time)
 
     """returns a human-readable string"""
     def get_online_time(self):
         assert(self.login_time != None)
-        return timer.hms(time.time() - self.login_time)
+        return timer.hms_words(time.time() - self.login_time)
         
     def close(self):
         for v in self.offers_sent[:]:

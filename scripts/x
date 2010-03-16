@@ -1,7 +1,7 @@
 #!/bin/sh
 if [ -z "$1" ]; then
 	echo timeseal off
-	/usr/games/xboard -queen -ics -icshost 127.0.0.1 -icsport 5000 -xpre 
+	/usr/games/xboard -queen -ics -icshost 127.0.0.1 -size petite -icsport 5000 -xpre 
 else
 	echo timeseal on
 	/usr/games/xboard -queen -ics -icshost 127.0.0.1 -icsport 5000 -telnet -telnetProgram /home/wmahan/bin/timeseal -xpre 

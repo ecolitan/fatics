@@ -1,5 +1,7 @@
 import random
 
+import clock
+
 games = {}
 
 from variant.variant_factory import variant_factory
@@ -59,17 +61,16 @@ class Game(object):
             time_str = '%d %d' % (self.white_time,self.white_inc)
         else:
             time_str = '%d %d %d %d' % (self.white_time,self.white_inc,self.blacck.time,self.black.inc)
-        self.white_clock = self.white_time*60.0
-        self.black_clock = self.black_time*60.0
 
         self.last_move_verbose = 'none'
         self.last_move_san = 'none'
         self.last_move_mins = 0
         self.last_move_secs = 0.0
         self.flip = False
-        self.clock_is_ticking = False
 
         self.pending_offers = []
+        self.clock = clock.FischerClock(self.white_time * 60.0,
+            self.black_time * 60.0, self.white_inc, self.black_inc)
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, rated_str, chal.variant_and_speed, time_str)
@@ -101,9 +102,11 @@ class Game(object):
         #print(self.variant.to_style12(self.white))
         if self.variant.pos.is_checkmate or self.variant.pos.is_stalemate or \
                 self.variant.pos.is_draw_nomaterial:
-            self.clock_is_ticking = False
-        if self.variant.pos.half_moves > 1:
-            self.clock_is_ticking = True
+            self.clock.stop()
+        elif self.variant.pos.half_moves > 1:
+            if self.clock.is_ticking:
+                self.clock.update(opp(self.variant.get_turn()))
+            self.clock.start(self.variant.get_turn())
 
         self.white.send_board(self.variant)
         self.black.send_board(self.variant)
@@ -137,7 +140,7 @@ class Game(object):
         return self.get_side_user(opp(side))
     
     def get_user_to_move(self):
-        if self.variant.get_turn == WHITE:
+        if self.variant.get_turn() == WHITE:
             return self.white
         else:
             return self.black
@@ -159,7 +162,7 @@ class Game(object):
         self.white.write(line)
         self.black.write(line)
         
-        self.clock_is_ticking = False
+        self.clock.stop()
         self.free()
 
     def free(self):
