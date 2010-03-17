@@ -51,6 +51,7 @@ class TestAbort(Test):
         t2.write('e5\n')
         t.write('abort\n')
 
+        self.expect('Requesting to abort game 1', t)
         self.expect('GuestABCD requests to abort game 1', t2)
 
         t.write('abort\n')
@@ -240,6 +241,12 @@ class TestDraw(Test):
         t.write('f4\n')
         self.expect('Declining the draw offer from admin', t)
         self.expect('GuestABCD declines your draw offer', t2)
+
+        t.write('draw\n')
+        self.expect('GuestABCD offers a draw', t2)
+        t2.write('exf4\n')
+        self.expect('Declining the draw offer from GuestABCD', t2)
+        self.expect('admin declines your draw offer', t)
 
         self.close(t)
         self.close(t2)

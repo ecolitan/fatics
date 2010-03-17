@@ -1,3 +1,4 @@
 #!/bin/sh
-twistd --pidfile chessd.pid -r epoll -noy src/chessd.tac
+twistd --pidfile chessd.pid -r epoll -oy src/chessd.tac
+tail -f twistd.log
 #twistd --profile profile-chessd.data --savestats --profiler cProfile -r epoll -noy src/chessd.tac

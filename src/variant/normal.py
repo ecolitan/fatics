@@ -808,6 +808,16 @@ class Position(object):
         prom = m.group(3)
         if prom == None:
             mv = Move(self, fr, to)
+            if mv.pc == 'K' and fr == E1:
+                if to == G1:
+                    mv.is_oo = True
+                elif to == C1:
+                    mv.is_ooo = True
+            elif mv.pc == 'k' and fr == E8:
+                if to == G8:
+                    mv.is_oo = True
+                elif to == C8:
+                    mv.is_ooo = True
         else:
             if self.wtm:
                 assert(prom == prom.upper())

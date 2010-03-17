@@ -66,6 +66,34 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
     
+    def test_lalg(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        moves = ['g2g3', 'b7b6', 'f1g2', 'b8c6', 'g1f3', 'c8b7', 'e1g1',
+            'e7e6', 'd2d4', 'd8e7', 'c1f4', 'e8c8']
+    
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm
+        t.write('abort\n')
+        t2.write('abort\n')
+
+        self.close(t)
+        self.close(t2)
 
     def test_san(self):
         t = self.connect_as_guest()

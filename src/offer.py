@@ -60,6 +60,7 @@ class Abort(Offer):
         else:
             # XXX should not substitute name till translation
             game.pending_offers.append(self)
+            user.write(N_('Requesting to abort game %d.\n') % game.number)
             self.b.write(N_('%s requests to abort game %d.\n') % (user.name, game.number))
             a_sent = user.session.offers_sent
             b_received = self.b.session.offers_received
@@ -111,7 +112,7 @@ class Draw(Offer):
             game.pending_offers.append(self)
             user.write(N_('Offering a draw.\n'))
             self.b.write(N_('%s offers a draw.\n') % user.name)
-            
+
             a_sent = user.session.offers_sent
             b_received = self.b.session.offers_received
             a_sent.append(self)
