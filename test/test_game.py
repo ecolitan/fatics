@@ -66,7 +66,7 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
     
-    def test_lalg(self):
+    def _assert_game_is_legal(self, moves):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
 
@@ -77,9 +77,6 @@ class TestGame(Test):
         self.expect('<12> ', t)
         self.expect('<12> ', t2)
 
-        moves = ['g2g3', 'b7b6', 'f1g2', 'b8c6', 'g1f3', 'c8b7', 'e1g1',
-            'e7e6', 'd2d4', 'd8e7', 'c1f4', 'e8c8']
-    
         wtm = True
         for mv in moves:
             if wtm:
@@ -94,6 +91,22 @@ class TestGame(Test):
 
         self.close(t)
         self.close(t2)
+   
+    def test_lalg(self):
+        moves = ['g2g3', 'b7b6', 'f1g2', 'b8c6', 'g1f3', 'c8b7', 'e1g1',
+            'e7e6', 'd2d4', 'd8e7', 'c1f4', 'e8c8']
+        self._assert_game_is_legal(moves)
+    
+    def test_promotion(self):
+        moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
+            'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',
+            'Rxa7','c7', 'Nc6', 'c8=Q+']
+        self._assert_game_is_legal(moves)
+    
+    def test_promotion_assumes_queen(self):
+        moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
+            'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',
+            'Rxa7','c7', 'Nc6', 'c8', 'Nd8', 'Qxd8']
 
     def test_san(self):
         t = self.connect_as_guest()

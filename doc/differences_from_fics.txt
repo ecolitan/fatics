@@ -116,6 +116,12 @@ For just one example of where FICS gets this wrong, see
 http://ficsgames.com/cgi-bin/show.cgi?ID=182672306;action=show .
 The new server fixes this bug.
 
+* The "promote" command and "promove" variable have been removed.
+Instead of using it, users and clients should specify the
+promotion piece with the move; for example, e8=N (SAN) or
+e7e8=N (long algebraic notation).  If no promotion piece is
+specified, queen is always assumed.
+
 == Admin differences ==
 * The following commands now require an exact login and do not accept
 abbreviations of player names:  "asetadminlevel", "asetpasswd", "nuke".
@@ -158,12 +164,14 @@ add a volatility measure.
 
 == Changes I would like to make, but which need discussion first ==
 * These commands are deprecated: "open", "bell", "flip", "simopen",
-"style", "promote".
+"style". (A similar command was "promote" but I removed it
+entirely.)
 Rationale: for interface consistency, encourage always using the "set"
 command to change vars. 
 * A new rshout command for announcing relays, so users who do not
-care about relays can "set rshout 0".  Currently announcements are used,
-so it is not possible to unsubscribe.
+care about relays can "set rshout 0".
+Rationale: Currently announcements are used, so it is not possible to
+unsubscribe.
 
 == Changes I considered but rejected ==
 * Preventing a player from logging out when starting a game: if a

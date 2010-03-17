@@ -144,6 +144,13 @@ class Move(object):
         self.is_ep = is_ep
         self.new_ep = new_ep
 
+        # if a promotion piece is not given, assume queen
+        if not self.prom:
+            if self.pc == 'p' and rank(to) == 0:
+                self.prom = 'q'
+            elif self.pc == 'P' and rank(to) == 7:
+                self.prom = 'Q'
+
     def __str__(self):
         s = '%s%s' % (sq_to_str(self.fr), sq_to_str(self.to))
         if self.prom:
@@ -331,13 +338,14 @@ class Position(object):
         self.history = MoveHistory()
         self.set_pos(fen)
 
+    set_pos_re = re.compile(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''')
     def set_pos(self, fen):
         """Set the position from Forsyth-Fdwards notation.  The format
         is intentionally interpreted strictly; better to give the user an
         error than take in bad data."""
         try:
             # rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1
-            m = re.match(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''', fen)
+            m = self.set_pos_re.match(fen)
             if not m:
                 raise BadFenError('does not look like FEN')
             (pos, side, castle_flags, ep, fifty_count, full_moves) = [
@@ -798,8 +806,9 @@ class Position(object):
 
         return False
 
+    lalg_re = re.compile(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?$')
     def move_from_lalg(self, s):
-        m = re.match(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?', s)
+        m = self.lalg_re.match(s)
         if not m:
             return None
 
@@ -831,13 +840,17 @@ class Position(object):
 
         return mv
 
+    san_pawn_push_re = re.compile(r'^([a-h][1-8])(?:=([NBRQ]))?$')
+    san_pawn_capture_re = re.compile(r'^([a-h])x([a-h][1-8])(?:=([NBRQ]))?$')
+    san_piece_re = re.compile(r'([NBRQK])([a-h])?([1-8])?(x)?([a-h][1-8])$')
+    decorator_re = re.compile(r'[\+#\?\!]+$')
     def move_from_san(self, s):
-        s = re.sub(r'/[\+#\?\!]+$/', '', s)
+        s = self.decorator_re.sub('', s)
         matched = False
         mv = None
     
         # examples: e4 e8=Q
-        m = re.match(r'^([a-h][1-8])(?:=([NBRQ]))?', s)
+        m = self.san_pawn_push_re.match(s)
         if m:
             to = str_to_sq(m.group(1))
             if self.board[to] != '-':
@@ -882,7 +895,7 @@ class Position(object):
         # examples: dxe4 dxe8=Q
         m = None
         if not mv:
-            m = re.match(r'^([a-h])x([a-h][1-8])(?:=([NBRQ]))?$', s)
+            m = self.san_pawn_capture_re.match(s)
         if m:
             to = str_to_sq(m.group(2))
             prom = m.group(3)
@@ -927,7 +940,7 @@ class Position(object):
         # examples: Nf3 Nxf3 Ng1xf3 
         m = None
         if not mv:
-            m = re.match(r'([NBRQK])([a-h])?([1-8])?(x)?([a-h][1-8])', s)
+            m = self.san_piece_re.match(s)
         if m:
             to = str_to_sq(m.group(5))
             if m.group(4):

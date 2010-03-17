@@ -110,7 +110,7 @@ class Draw(Offer):
                 return
 
             game.pending_offers.append(self)
-            user.write(N_('Offering a draw.\n'))
+            user.write(N_('Offering a draw to %s.\n') % self.b.name)
             self.b.write(N_('%s offers a draw.\n') % user.name)
 
             a_sent = user.session.offers_sent
