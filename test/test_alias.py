@@ -40,8 +40,9 @@ class TestUserAlias(Test):
         
         t.write('alias foo finger\n')
         self.expect('Alias "foo" set.', t)
-        
         t.write('foo\n')
+        self.expect('Finger of Guest', t)
+        t.write('foo ignore this\n')
         self.expect('Finger of Guest', t)
 
         t.write('alias foo\n')
@@ -49,9 +50,14 @@ class TestUserAlias(Test):
 
         t.write('alias foo finger $@\n')
         self.expect('Alias "foo" changed.', t)
-
         t.write('foo admin\n')
         self.expect('Finger of admin', t)
+       
+        # numeric parameters
+        t.write('alias foo tell $m $2 $1 jkl\n')
+        self.expect('Alias "foo" changed.', t)
+        t.write('foo abcd efgh 1234\n')
+        self.expect(' tells you: efgh abcd jkl\r\n', t)
 
         t.write('unalias foo\n')
         self.expect('Alias "foo" unset.', t)

@@ -1,17 +1,15 @@
 import re
 
 class Checker(object):
+    legal_chars_re = re.compile('''^[\t\x20-\xfd]*$''')
     def check_user_utf8(self, s):
-        ret =  re.match('''^[\t\x20-\xfd]*$''', s)
+        ret =  self.legal_chars_re.match(s)
         if ret:
             try:
                 s.decode('utf8')
             except UnicodeDecodeError:
                 ret = False
         return ret
-
-    #def check_utf8(self, s):
-    #        return re.match('''^[\a\r\n\t\x20-\xfd]*$''', s)
 
 checker = Checker()
 

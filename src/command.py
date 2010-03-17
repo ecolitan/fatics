@@ -1,4 +1,3 @@
-import re
 import time
 
 import user
@@ -13,11 +12,7 @@ from online import online
 from reload import reload
 from server import server
 
-class InternalException(Exception):
-    pass
 class QuitException(Exception):
-    pass
-class BadCommandError(Exception):
     pass
 
 class Command(object):
@@ -26,74 +21,6 @@ class Command(object):
         self.param_str = param_str
         self.run = run
         self.admin_level = admin_level
-
-    def parse_args(self, s):
-        args = []
-        for c in self.param_str:
-            if c in ['d', 'i', 'w', 'W']:
-                # required argument
-                if s == None:
-                    raise BadCommandError()
-                else:
-                    s = s.lstrip()
-                    m = re.split(r'\s', s, 1)
-                    assert(len(m) > 0)
-                    param = m[0]
-                    if len(param) == 0:
-                        raise BadCommandError()
-                    if c == c.lower():
-                        param = param.lower()
-                    if c in ['i', 'd']:
-                        # integer or word
-                        try:
-                            param = int(param, 10)
-                        except ValueError:
-                            if c == 'd':
-                                raise BadCommandError()
-                    s = m[1] if len(m) > 1 else None
-            elif c in ['o', 'n', 'p']:
-                # optional argument
-                if s == None:
-                    param = None
-                else:
-                    s = s.lstrip()
-                    m = re.split(r'\s', s, 1)
-                    assert(len(m) > 0)
-                    param = m[0].lower()
-                    if len(param) == 0:
-                        param = None
-                        assert(len(m) == 1)
-                    elif c in ['n', 'p']:
-                        try:
-                            param = int(param, 10)
-                        except ValueError:
-                            if c == 'p':
-                                raise BadCommandError()
-                    s = m[1] if len(m) > 1 else None
-            elif c == 'S':
-                # string to end
-                if s == None or len(s) == 0:
-                    raise BadCommandError()
-                param = s
-                s = None
-            elif c == 'T' or c == 't':
-                # optional string to end
-                if s == None or len(s) == 0:
-                    param = None
-                else:
-                    param = s
-                    if c == 't':
-                        param = param.lower()
-                s = None
-            else:
-                raise InternalException()
-            args.append(param)
-
-        if not (s == None or re.match(r'^\s*$', s)):
-            # extraneous data at the end
-            raise BadCommandError()
-
-        return args
 
     def help(self, conn):
         conn.write("help for %s\n" % self.name)

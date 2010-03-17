@@ -252,12 +252,13 @@ class AmbiguousException(Exception):
 """Various ways to look up a user."""
 class Find(object):
     """Find a user, accepting only exact matches."""
+    username_re = re.compile('^[a-zA-Z_]+$')
     def by_name_exact(self, name, min_len=config.min_login_name_len,online_only=False):
         if len(name) < min_len:
             raise UsernameException(_('Names should be at least %d characters long.  Try again.\n') % min_len)
         elif len(name) > 18:
             raise UsernameException(_('Names should be at most %d characters long.  Try again.\n') % 18)
-        elif not re.match('^[a-zA-Z_]+$', name):
+        elif not self.username_re.match(name):
             raise UsernameException(_('Names should only consist of lower and upper case letters.  Try again.\n'))
 
         u = online.find_exact(name)

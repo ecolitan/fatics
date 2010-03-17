@@ -154,13 +154,16 @@ class Alias(object):
     }
 
     """Expand system and user aliases in a given command."""
+    punct_re = re.compile(r'''^([@!#$%^&*\-+'"\/.,=]+)\s*(.*)''')
+    alias_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
+    space_re = re.compile(r'\s+')
     def expand(self, s, syslist, userlist, user):
-        m = re.match(r'''^([@!#$%^&*\-+'"\/.,=]+)\s*(.*)''', s)
+        m = self.punct_re.match(s)
         if m:
             word = m.group(1)
             rest = m.group(2)
         else:
-            m = re.match(r'^(\S+)(?:\s+(.*))?$', s)
+            m = self.alias_re.match(s)
             if m:
                 word = m.group(1)
                 rest = m.group(2)
@@ -190,18 +193,18 @@ class Alias(object):
                 if char == '@':
                     ret += rest if rest != None else ''
                 elif char == '-':
-                    if i < aliaslen - 1 and re.match('[0-9]', alias_str[i + 1]):
+                    if i < aliaslen - 1 and alias_str[i + 1].isdigit():
                         # $-n
                         i += 1
                         if rest_split == None:
-                            rest_split = re.split('\s+', rest)
+                            rest_split = self.space_re.split(rest)
                         d = int(char, 10) - 1
                         ret += ' '.join(rest_split[:d])
                     else:
                         ret += '-'
-                elif re.match('[0-9]', char):
+                elif char.isdigit():
                     if rest_split == None:
-                        rest_split = re.split('\s+', rest)
+                        rest_split = self.space_re.split(rest)
                     d = int(char, 10) - 1
                     if i < aliaslen - 1 and alias_str[i + 1] == '-':
                         # $n-
