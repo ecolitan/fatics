@@ -11,7 +11,7 @@ class Notify(object):
         for dbu in db.user_get_notified(user_id):
             u = online.find_exact(dbu['user_name'])
             if u:
-                u.write(msg)
+                u.write_prompt(msg)
 notify = Notify()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
