@@ -5,6 +5,7 @@ import lang
 
 vars = trie.Trie()
 ivars = trie.Trie()
+ivar_number = {}
 
 class BadVarError(Exception):
     pass
@@ -32,8 +33,9 @@ class Var(object):
         self.is_ivar = False
         return self
     
-    def add_as_ivar(self): 
+    def add_as_ivar(self, number): 
         ivars[self.name] = self
+        ivar_number[number] = self
         self.is_ivar = True
         return self
 
@@ -147,10 +149,17 @@ class IntVar(Var):
 
 """A boolean variable."""
 class BoolVar(Var):
-    def __init__(self, name, default, on_msg, off_msg):
+    def __init__(self, name, default, on_msg=None, off_msg=None):
         Var.__init__(self, name, default)
-        self.on_msg = on_msg
-        self.off_msg = off_msg
+
+        if on_msg != None:
+            self.on_msg = on_msg
+        else:
+            self.on_msg = N_("%s set.") % name
+        if off_msg != None:
+            self.off_msg = off_msg
+        else:
+            self.off_msg = N_("%s unset.") % name
 
     def set(self, user, val):
         if val == None:
@@ -215,8 +224,42 @@ class VarList(object):
                 self.transient_vars[var.name] = var.default
 
     def init_ivars(self):
-        BoolVar("smartmove", False, N_("smartmove set."), N_("smartmove unset.")).add_as_ivar()
-        BoolVar("ms", False, N_("ms set."), N_("ms unset.")).add_as_ivar()
+        BoolVar("compressmove", False).add_as_ivar(0)
+        BoolVar("audiochat", False).add_as_ivar(1)
+        BoolVar("seekremove", False).add_as_ivar(2)
+        BoolVar("defprompt", False).add_as_ivar(3)
+        BoolVar("lock", False).add_as_ivar(4)
+        BoolVar("startpos", False).add_as_ivar(5)
+        BoolVar("block", False).add_as_ivar(6)
+        BoolVar("gameinfo", False).add_as_ivar(7)
+        BoolVar("xdr", False).add_as_ivar(8)
+        BoolVar("pendinfo", False).add_as_ivar(9)
+        BoolVar("graph", False).add_as_ivar(10)
+        BoolVar("seekinfo", False).add_as_ivar(11)
+        BoolVar("extascii", False).add_as_ivar(12)
+        BoolVar("nohighlight", False).add_as_ivar(13)
+        BoolVar("highlight", False).add_as_ivar(14)
+        BoolVar("showserver", False).add_as_ivar(15)
+        BoolVar("pin", False).add_as_ivar(16)
+        BoolVar("ms", False).add_as_ivar(17)
+        BoolVar("pinginfo", False).add_as_ivar(18)
+        BoolVar("boardinfo", False).add_as_ivar(19)
+        BoolVar("extuserinfo", False).add_as_ivar(20)
+        BoolVar("seekca", False).add_as_ivar(21)
+        BoolVar("showownseek", False).add_as_ivar(22)
+        BoolVar("premove", False).add_as_ivar(23)
+        BoolVar("smartmove", False).add_as_ivar(24)
+        BoolVar("movecase", False).add_as_ivar(25)
+        BoolVar("suicide", False).add_as_ivar(26)
+        BoolVar("crazyhouse", False).add_as_ivar(27)
+        BoolVar("losers", False).add_as_ivar(28)
+        BoolVar("wildcastle", False).add_as_ivar(29)
+        BoolVar("fr", False).add_as_ivar(30)
+        BoolVar("nowrap", False).add_as_ivar(31)
+        BoolVar("allresults", False).add_as_ivar(32)
+        BoolVar("obsping", False).add_as_ivar(33)
+        BoolVar("singleboard", False).add_as_ivar(34)
+
         self.default_ivars = {}
         for ivar in ivars.itervalues():
             self.default_ivars[ivar.name] = ivar.default

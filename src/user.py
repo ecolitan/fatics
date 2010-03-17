@@ -58,7 +58,10 @@ class BaseUser(object):
         assert(self.is_online)
         if s != None:
             self.session.conn.write(s)
-        self.session.conn.write(self.vars['prompt'])
+        if self.session.ivars['defprompt']:
+            self.session.conn.write('fics% ')
+        else:
+            self.session.conn.write(self.vars['prompt'])
 
     def get_display_name(self):
         return self.name + self.title_str
