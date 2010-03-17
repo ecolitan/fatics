@@ -118,6 +118,7 @@ class CommandList(object):
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
         self._add(Command('draw', 'o', self.draw, admin.Level.user))
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
+        self._add(Command('flag', '', self.flag, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
         self._add(Command('help', 'o', self.help, admin.Level.user))
         self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
@@ -369,7 +370,14 @@ class CommandList(object):
                     conn.write(_("%2d: %s\n") % (num, txt))
                     prev_max = num
                 conn.write('\n')
-
+    
+    def flag(self, args, conn):
+        if len(conn.user.session.games) == 0:
+            conn.write(_("You are not playing a game.\n"))
+            return
+        g = conn.user.session.games.values()[0]
+        if not g.clock.check_flag(g, g.get_user_opp_side(conn.user)):
+            conn.write(_('Your opponent is not out of time.\n'))
 
     def follow(self, args, conn):
         conn.write('TODO: FOLLOW\n')

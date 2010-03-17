@@ -1,7 +1,7 @@
 """This implements routines for normal chess.  (I avoid the term
 standard since that is used to describe the game speed on FICS.)
 Maybe normal chess technically not a variant, but organizationally
-I didn't want to privilege it over variants, so it is here. """
+I didn't want to privilege it over variants, so it is here."""
 
 import re
 import copy
@@ -171,7 +171,7 @@ class Move(object):
                 if diff == -0x10:
                     pass
                 elif diff == -0x20 and rank(self.fr) == 6:
-                    self.new_ep = self.fr + -0x10
+                    self.new_ep = self.fr - 0x10
                     if self.pos.board[self.new_ep] != '-':
                         raise IllegalMoveError('bad en passant')
                 elif diff in [-0x11, -0xf] and self.to == self.pos.ep:
@@ -325,9 +325,9 @@ class Position(object):
         self.board = array('c', 0x80 * ['-'])
         self.castle_flags = 0
         self.king_pos = [None, None]
-        self.is_stalemate = False
-        self.is_checkmate = False
-        self.is_draw_nomaterial = False
+        #self.is_stalemate = False
+        #self.is_checkmate = False
+        #self.is_draw_nomaterial = False
         self.history = MoveHistory()
         self.set_pos(fen)
 
@@ -503,9 +503,9 @@ class Position(object):
             self.material[not self.wtm] -= piece_material['p']
             # remove the captured pawn
             if self.wtm:
-                assert(self.board[mv.to + -0x10] == 'p')
-                self.hash ^= zobrist.piece_hash(mv.to + -0x10, 'p')
-                self.board[mv.to + -0x10] = '-'
+                assert(self.board[mv.to - 0x10] == 'p')
+                self.hash ^= zobrist.piece_hash(mv.to - 0x10, 'p')
+                self.board[mv.to - 0x10] = '-'
             else:
                 assert(self.board[mv.to + 0x10] == 'P')
                 self.hash ^= zobrist.piece_hash(mv.to + 0x10, 'P')
@@ -611,8 +611,8 @@ class Position(object):
         
         if mv.is_ep:
             if self.wtm:
-                assert(self.board[mv.to + -0x10] == '-')
-                self.board[mv.to + -0x10] = 'p'
+                assert(self.board[mv.to - 0x10] == '-')
+                self.board[mv.to - 0x10] = 'p'
             else:
                 assert(self.board[mv.to + 0x10] == '-')
                 self.board[mv.to + 0x10] = 'P'
@@ -650,18 +650,26 @@ class Position(object):
         self.in_check = self.under_attack(self.king_pos[self.wtm],
             not self.wtm)
 
-        if self.in_check:
-            self.is_checkmate = not self._any_legal_moves()
-        else:
-            self.is_stalemate = not self._any_legal_moves()
+        self.is_checkmate = self.in_check and not self._any_legal_moves()
+        self.is_stalemate = not self.in_check and not self._any_legal_moves()
 
-        self.is_draw_nomaterial = self.material[0] <= 3 and \
-            self.material[1] <= 3 and self.no_pawns()
+        self._check_mating_material()
+        self.is_draw_nomaterial = (not self.white_has_mating_material and
+            not self.black_has_mating_material)
+
+    def _check_mating_material(self):
+        self.white_has_mating_material = self.material[1] > 3
+        self.black_has_mating_material = self.material[0] > 3
+        if (not self.white_has_mating_material or
+                not self.black_has_mating_material):
+            for (sq, pc) in self:
+                if pc == 'P':
+                    self.white_has_mating_material = True
+                elif pc == 'p':
+                    self.black_has_mating_material = True
+
 
     def no_pawns(self):
-        for (sq, pc) in self:
-            if pc in ['P', 'p']:
-                return False
         return True
 
     def _any_legal_moves(self):
@@ -700,19 +708,19 @@ class Position(object):
                     is_ep=sq + 0x11 == self.ep).is_legal():
                 return True
         elif pc == 'p':
-            if self.board[sq + -0x10] == '-':
-                if Move(self, sq, sq + -0x10).is_legal():
+            if self.board[sq - 0x10] == '-':
+                if Move(self, sq, sq - 0x10).is_legal():
                     return True
-                if rank(sq) == 6 and self.board[sq + -0x20] == '-' and Move(
-                        self, sq, sq + -0x20).is_legal():
+                if rank(sq) == 6 and self.board[sq - 0x20] == '-' and Move(
+                        self, sq, sq - 0x20).is_legal():
                     return True
-            if self._pawn_cap_at(sq + -0xf) and Move(
-                    self, sq, sq + -0xf,
-                    is_ep=sq + -0xf == self.ep).is_legal():
+            if self._pawn_cap_at(sq - 0xf) and Move(
+                    self, sq, sq - 0xf,
+                    is_ep=sq - 0xf == self.ep).is_legal():
                 return True
-            if self._pawn_cap_at(sq + -0x11) and Move(
-                    self, sq, sq + -0x11,
-                    is_ep=sq + -0x11 == self.ep).is_legal():
+            if self._pawn_cap_at(sq - 0x11) and Move(
+                    self, sq, sq - 0x11,
+                    is_ep=sq - 0x11 == self.ep).is_legal():
                 return True
         else:
             for d in piece_moves[pc.lower()]:
@@ -737,8 +745,8 @@ class Position(object):
         """determine whether a square is attacked by the given side"""
         # pawn attacks
         if wtm:
-            if (self._is_pc_at('P', sq + -0x11)
-                    or self._is_pc_at('P', sq + -0xf)):
+            if (self._is_pc_at('P', sq - 0x11)
+                    or self._is_pc_at('P', sq - 0xf)):
                 return True
         else:
             if (self._is_pc_at('p', sq + 0x11)
@@ -885,7 +893,7 @@ class Position(object):
             f = 'abcdefgh'.index(m.group(1))
             if f == file(to) - 1:
                 if self.wtm:
-                    fr = to + -0x11
+                    fr = to - 0x11
                     if self.board[fr] != 'P':
                         raise IllegalMoveError('bad pawn capture')
                 else:
@@ -894,7 +902,7 @@ class Position(object):
                         raise IllegalMoveError('bad pawn capture')
             elif f == file(to) + 1:
                 if self.wtm:
-                    fr = to + -0xf
+                    fr = to - 0xf
                     if self.board[fr] != 'P':
                         raise IllegalMoveError('bad pawn capture')
                 else:

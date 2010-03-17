@@ -41,7 +41,7 @@ class BaseUser(object):
             channel.chlist[ch].log_on(self)
         online.add(self)
         self.is_online = True
-        conn.write(_('**** Starting OICS session as %s ****\n\n') % self.name)
+        conn.write(_('**** Starting session as %s ****\n\n') % self.name)
 
     def log_off(self):
         for ch in self.channels:

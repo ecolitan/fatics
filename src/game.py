@@ -1,12 +1,13 @@
 import random
 
+(WHITE, BLACK) = range(2)
+
 import clock
 
 games = {}
 
 from variant.variant_factory import variant_factory
 
-(WHITE, BLACK) = range(2)
 def opp(side):
     assert side in [WHITE, BLACK]
     return BLACK if side==WHITE else WHITE
@@ -67,6 +68,7 @@ class Game(object):
         self.last_move_mins = 0
         self.last_move_secs = 0.0
         self.flip = False
+        self.is_active = True
 
         self.pending_offers = []
         self.clock = clock.FischerClock(self.white_time * 60.0,
@@ -100,13 +102,15 @@ class Game(object):
             o.decline()
 
         #print(self.variant.to_style12(self.white))
-        if self.variant.pos.is_checkmate or self.variant.pos.is_stalemate or \
-                self.variant.pos.is_draw_nomaterial:
-            self.clock.stop()
-        elif self.variant.pos.half_moves > 1:
+        if self.is_active and self.variant.pos.half_moves > 1:
+            moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
-                self.clock.update(opp(self.variant.get_turn()))
-            self.clock.start(self.variant.get_turn())
+                self.clock.update(moved_side)
+            if self.get_user_to_move().vars['autoflag']:
+                self.clock.check_flag(self, moved_side)
+            if self.is_active:
+                self.clock.add_increment(moved_side)
+                self.clock.start(self.variant.get_turn())
 
         self.white.send_board(self.variant)
         self.black.send_board(self.variant)
@@ -128,6 +132,14 @@ class Game(object):
             return BLACK
         else:
             raise RuntimeError('Game.get_side(): got a non-player')
+    
+    def get_user_opp_side(self, user):
+        if user == self.white:
+            return BLACK
+        elif user == self.black:
+            return WHITE
+        else:
+            raise RuntimeError('Game.get_opp_side(): got a non-player')
 
     def get_side_user(self, side):
         if side == WHITE:
@@ -163,6 +175,7 @@ class Game(object):
         self.black.write(line)
         
         self.clock.stop()
+        self.is_active = False
         self.free()
 
     def free(self):

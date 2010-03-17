@@ -1,7 +1,7 @@
 # coding=utf-8
 
 class Config(object):
-    port = 5000
+    port = 5001
 
     db_host = "localhost"
     db_db = "chess"
@@ -11,9 +11,9 @@ class Config(object):
 
     # Silly Babas requires freechess.org to be in the welcome message,
     # so work it into a disclaimer.
-    welcome_msg = '''♙♘♗♖♕♔ Welcome to the Open Internet Chess Server! ♚♛♜♝♞♟\n\nThis server is not affiliated with or endorsed by freechess.org.\n\n'''
+    welcome_msg = '''♙♘♗♖♕♔ Welcome to the fatICS! ♚♛♜♝♞♟\n\nThis server is not affiliated with or endorsed by freechess.org.\n\n'''
     login_msg = '''If you are not a registered player, enter the login name "guest".\n\n''' 
-    logout_msg = '''♙♙♙ Thank you for using the Open Internet Chess Server! ♟♟♟\n'''
+    logout_msg = '''♙♙♙ Thank you for using fatICS.  ♟♟♟\n'''
 
 config = Config()
 
