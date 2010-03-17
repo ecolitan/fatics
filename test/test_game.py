@@ -258,5 +258,41 @@ class TestResign(Test):
         self.expect('{Game 1 (GuestABCD vs. admin) admin resigns} 1-0', t2)
         self.close(t)
         self.close(t2)
-   
+
+class TestRefresh(Test):
+    def test_refresh(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t.write('refresh\n')
+        self.expect('<12> ', t)
+        self.expect_not('<12> ', t2)
+
+        t3 = self.connect_as_user('GuestDEFG', '')
+        t3.write('re\n')
+        self.expect('You are not playing', t3)
+        t3.write('re 999\n')
+        self.expect('no such game', t3)
+        t3.write('re 1\n')
+        self.expect('<12> ', t3)
+        t3.write('re nosuchuser\n')
+        self.expect('No user named "nosuchuser"', t3)
+        t3.write('REF GUESTDEF\n')
+        self.expect('GuestDEFG is not playing or examining', t3)
+        t3.write('re admi\n')
+        self.expect('<12> ', t3)
+        self.close(t3)
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -72,10 +72,12 @@ you'll now receive the generic "Command not found" message, rather than
 Rationale: simplifies the server implementation slightly; hopefully
 won't cause any user confusion.
 
-* If you use the "." command to tell the last told player, and that player
+* If you use the "." alias to tell the last told player, and that player
 has logged off, you now get the error message "HANDLE is no longer online",
-rather than "I don't know who to tell that to".
-Rationale: more informative.
+rather than "I don't know who to tell that to".  Also, if the player
+logs back on, you can immediately use "." again, so a temporary
+disconnection should not interrupt the flow of a conversation.
+Rationale: more informative and user-friendly.
 
 * If a game is aborted on move 1, the printed result now includes the
 name of the player who requested the abort.

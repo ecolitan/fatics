@@ -1201,14 +1201,16 @@ class Normal(Variant):
             relation = 1 if not self.pos.wtm else -1
             flip = 1
         else:
-            raise RuntimeError('unknown relation')
+            relation = -3
+            flip = 0
         full_moves = self.pos.half_moves // 2 + 1
         if user.session.ivars['ms']:
-            white_clock = int(1000 * self.game.clock.white_time)
-            black_clock = int(1000 * self.game.clock.black_time)
+            white_clock = int(round(1000 * self.game.clock.get_white_time()))
+            black_clock = int(round(1000 * self.game.clock.get_black_time()))
         else:
-            white_clock = int(self.game.clock.white_time)
-            black_clock = int(self.game.clock.black_time)
+            print('rounding %f' % self.game.clock.get_white_time())
+            white_clock = int(round(self.game.clock.get_white_time()))
+            black_clock = int(round(self.game.clock.get_black_time()))
 
         # board_str begins with a space
         s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (

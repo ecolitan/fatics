@@ -14,8 +14,8 @@ def heartbeat():
 class FischerClock(Clock):
     def __init__(self, white_start, black_start, white_inc, black_inc):
         self.is_ticking = False
-        self.white_time = white_start
-        self.black_time = black_start
+        self._white_time = white_start
+        self._black_time = black_start
         self.white_inc = white_inc
         self.black_inc = black_inc
         running_clocks.append(self)
@@ -24,33 +24,53 @@ class FischerClock(Clock):
     
     def start(self, side):
         self.is_ticking = True
+        self._side_ticking = side
         self.started_time = time.time()
 
     def update(self, side):
+        """Record the time remaining for the player whose clock was
+        ticking, and stop the clock."""
+        assert(self.is_ticking)
+        assert(self._side_ticking == side)
+
+        self.stop()
         elapsed = time.time() - self.started_time
         self.last_move_time_str = '%s' % timer.timer.hms(elapsed)
         if side == WHITE:
-            self.white_time -= elapsed
+            self._white_time -= elapsed
         else:
-            self.black_time -= elapsed
+            self._black_time -= elapsed
+
+    def get_white_time(self):
+        ret = self._white_time
+        if self.is_ticking and self._side_ticking == WHITE:
+            ret -= time.time() - self.started_time
+        return ret
+    
+    def get_black_time(self):
+        ret = self._black_time
+        if self.is_ticking and self._side_ticking == BLACK:
+            ret -= time.time() - self.started_time
+        return ret
 
     def check_flag(self, game, side):
         """Check the flag of the given side.  Return True if the flag
         call was sucessful."""
         assert(game.is_active)
         if side == WHITE:
-            if self.white_time <= 0:
-                if self.black_time <= 0:
-                    game.result('Both players ran out of time' % game.white.name, '1/2-1/2')
+            if self.get_white_time() <= 0:
+                if self.get_black_time() <= 0:
+                    game.result('Both players ran out of time', '1/2-1/2')
                 elif not game.variant.pos.black_has_mating_material:
                     game.result('%s ran out of time and %s lacks mating material' % (game.white.name, game.black.name), '1/2-1/2')
                 else:
                     game.result('%s forfeits on time' % game.white.name, '0-1')
         else:
             # check black's flag
-            if self.black_time <= 0:
-                assert(self.white_time > 0)
-                if not game.variant.pos.white_has_mating_material:
+            if self.get_black_time() <= 0:
+                if self.get_white_time() <= 0:
+                    game.result('Both players ran out of time', '1/2-1/2')
+                elif not game.variant.pos.white_has_mating_material:
                     game.result('%s ran out of time and %s lacks mating material' % (game.black.name, game.white.name), '1/2-1/2')
                 else:
                     game.result('%s forfeits on time' % game.black.name, '1-0')
@@ -58,9 +78,9 @@ class FischerClock(Clock):
 
     def add_increment(self, side):
         if side == WHITE:
-            self.white_time += self.white_inc
+            self._white_time += self.white_inc
         else:
-            self.white_time += self.black_inc
+            self._black_time += self.black_inc
 
     def stop(self):
         self.is_ticking = False

@@ -23,7 +23,7 @@ class Test(unittest.TestCase):
     def expect(self, str, t, msg=None, timeout=2):
         ret = t.read_until(str, timeout)
         if not str in ret:
-            print "got {{%s}}" % ret
+            print "got {{%s}}" % repr(ret)
         self.assert_(str in ret)
 
     def expect_not(self, str, t):

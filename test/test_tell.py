@@ -52,6 +52,24 @@ class TellTest(Test):
 
         self.close(t2)
         self.deluser('aduser')
+    
+    def test_tell_disconnected(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+
+        t2.write('t admin hello there\n')
+        self.expect('hello there', t)
+        self.close(t)
+
+        t2.write('. where are you?\n')
+        self.expect('admin is no longer online', t2)
+
+        t = self.connect_as_admin()
+        t2.write('. why hello again\n')
+        self.expect('tells you: why hello again', t)
+
+        self.close(t)
+        self.close(t2)
 
 class QtellTest(Test):
     def test_qtell(self):

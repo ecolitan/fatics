@@ -81,8 +81,8 @@ class Game(object):
         self.black.write(create_str)
         
         create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, rated_str, chal.variant_and_speed)
-        self.white.write(create_str_2)
-        self.black.write(create_str_2)
+        self.white.write_prompt(create_str_2)
+        self.black.write_prompt(create_str_2)
 
         self.variant = variant_factory.get(chal.variant_name, self)
 
@@ -109,12 +109,13 @@ class Game(object):
             if self.get_user_to_move().vars['autoflag']:
                 self.clock.check_flag(self, moved_side)
             if self.is_active:
-                self.clock.add_increment(moved_side)
+                if self.variant.pos.half_moves > 2:
+                    self.clock.add_increment(moved_side)
                 self.clock.start(self.variant.get_turn())
 
         self.white.send_board(self.variant)
         self.black.send_board(self.variant)
-
+               
         if self.variant.pos.is_checkmate:
             if self.variant.get_turn() == WHITE:
                 self.result('%s checkmated' % self.white.name, '0-1')
@@ -171,8 +172,8 @@ class Game(object):
     def result(self, msg, code):
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
             self.white.name, self.black.name, msg, code)
-        self.white.write(line)
-        self.black.write(line)
+        self.white.write_prompt(line)
+        self.black.write_prompt(line)
         
         self.clock.stop()
         self.is_active = False

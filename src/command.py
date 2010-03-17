@@ -7,6 +7,7 @@ import var
 import list
 import channel
 import offer
+import game
 from timer import timer
 from online import online
 from reload import reload
@@ -56,6 +57,7 @@ class CommandList(object):
         self._add(Command('password', 'WW', self.password, admin.Level.user))
         self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
         self._add(Command('quit', '', self.quit, admin.Level.user))
+        self._add(Command('refresh', 'n', self.refresh, admin.Level.user))
         self._add(Command('remplayer', 'w', self.remplayer, admin.Level.admin))
         self._add(Command('resign', 'o', self.resign, admin.Level.user))
         self._add(Command('set', 'wT', self.set, admin.Level.user))
@@ -448,6 +450,32 @@ class CommandList(object):
                 u.remove()
                 conn.write("Player %s removed.\n" % name)
     
+    def refresh(self, args, conn):
+        if args[0] != None:
+            try:
+                num = int(args[0])
+                if not num in game.games:
+                    conn.write(_("There is no such game.\n"))
+                    return
+                g = game.games[num]
+            except ValueError:
+                # user name
+                u = user.find.by_name_or_prefix_for_user(args[0], conn,
+                    online_only=True)
+                if not u:
+                    return
+                if len(u.session.games) == 0:
+                    conn.write(_("%s is not playing or examining a game.\n") % u.name)
+                    return
+                g = u.session.games.values()[0]
+        else:
+            if len(conn.user.session.games) > 0:
+                g = conn.user.session.games.values()[0]
+            else:
+                conn.write(_("You are not playing, examining, or observing a game.\n"))
+                return
+        conn.user.send_board(g.variant)
+    
     def resign(self, args, conn):
         if args[0] != None:
             conn.write('TODO: RESIGN PLAYER\n')
@@ -565,8 +593,12 @@ class CommandList(object):
             if not u:
                 conn.write(_("No previous tell.\n"))
             elif not u.is_online:
-                conn.write(_('%s is no longer online.\n') % u.name)
-                u = None
+                # try to find the user if he or she has logged off
+                # and since reconnected
+                name = u.name
+                u = online.find_exact(name)
+                if not u:
+                    conn.write(_('%s is no longer online.\n') % name)
         elif args[0] == ',':
             ch = conn.session.last_tell_ch
             if not ch:
