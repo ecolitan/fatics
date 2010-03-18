@@ -313,8 +313,18 @@ class Undo(object):
     pass
 
 class MoveHistory(object):
-    """keeps past of previous moves and positions for repetition
-    detection and undoing"""
+    """keeps a list of past moves"""
+    def __init__(self, start_ply):
+        self.start_ply = start_ply
+        self.moves = []
+
+    def add(
+
+
+
+
+class PositionHistory(object):
+    """keeps past of past positions for repetition detection"""
     def __init__(self):
         self.h = [None] * 2
 
@@ -335,7 +345,7 @@ class Position(object):
         #self.is_stalemate = False
         #self.is_checkmate = False
         #self.is_draw_nomaterial = False
-        self.history = MoveHistory()
+        self.history = PositionHistory()
         self.set_pos(fen)
 
     set_pos_re = re.compile(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''')
