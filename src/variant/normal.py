@@ -8,8 +8,9 @@ import copy
 import random
 from array import array
 
-from variant import Variant
 import game
+from variant import Variant
+from timer import timer
 
 """
 0x88 board representation; pieces are represented as ASCII,
@@ -143,6 +144,9 @@ class Move(object):
         self.is_capture = self.capture != '-'
         self.is_ep = is_ep
         self.new_ep = new_ep
+        self.time_str = None
+        self._san = None
+        self._verbose_alg = None
 
         # if a promotion piece is not given, assume queen
         if not self.prom:
@@ -253,6 +257,11 @@ class Move(object):
             self.pos.undo_move(self)
 
     def to_san(self):
+        if self._san is None:
+            self._san = self._to_san()
+        return self._san
+
+    def _to_san(self):
         if self.is_oo:
             san = 'O-O'
         elif self.is_ooo:
@@ -268,6 +277,8 @@ class Move(object):
             assert(not self.is_ep)
             san = self.pc.upper()
             ambigs = self.pos.get_from_sqs(self.pc, self.to)
+            if len(ambigs) == 0:
+                print 'mv not abmig with itself: %s' % self.to_verbose_alg()
             assert(len(ambigs) >= 1)
             if len(ambigs) > 1:
                 r = rank(self.fr)
@@ -285,6 +296,11 @@ class Move(object):
         return san
     
     def to_verbose_alg(self):
+        if self._verbose_alg is None:
+            self._verbose_alg = self._to_verbose_alg()
+        return self._verbose_alg
+
+    def _to_verbose_alg(self):
         """convert to the verbose notation used in style12"""
         if self.is_oo:
             # why fics, why?
@@ -312,29 +328,27 @@ class Undo(object):
     """information needed to undo a move"""
     pass
 
-class MoveHistory(object):
-    """keeps a list of past moves"""
-    def __init__(self, start_ply):
-        self.start_ply = start_ply
-        self.moves = []
-
-    def add(
-
-
-
-
 class PositionHistory(object):
     """keeps past of past positions for repetition detection"""
     def __init__(self):
-        self.h = [None] * 2
+        self.hashes = [None] * 40
+        self.moves = [None] * 40
 
     def set_hash(self, ply, hash):
-        if ply >= len(self.h):
-            self.h.extend([None] * (ply - len(self.h) + 1))
-        self.h[ply] = hash
+        if ply >= len(self.hashes):
+            self.hashes.extend([None] * (ply - len(self.hashes) + 1))
+        self.hashes[ply] = hash
+
+    def set_move(self, ply, mv):
+        if ply >= len(self.moves):
+            self.moves.extend([None] * (ply - len(self.moves) + 1))
+        self.moves[ply] = mv
 
     def get_hash(self, ply):
-        return self.h[ply]
+        return self.hashes[ply]
+    
+    def get_move(self, ply):
+        return self.moves[ply]
 
 class Position(object):
     def __init__(self, fen):
@@ -571,7 +585,7 @@ class Position(object):
 
         assert(self.hash == self._compute_hash())
         self.history.set_hash(self.half_moves, self.hash)
-
+        self.history.set_move(self.half_moves, mv)
 
     def _is_legal_ep(self, ep):
         # According to Geurt Gijssen's "An Arbiter's Notebook" #110,
@@ -687,8 +701,8 @@ class Position(object):
                     self.black_has_mating_material = True
 
 
-    def no_pawns(self):
-        return True
+    def get_last_move(self):
+        return self.history.get_move(self.half_moves)
 
     def _any_legal_moves(self):
         ksq = self.king_pos[self.wtm]
@@ -1175,18 +1189,16 @@ class Normal(Variant):
             elif illegal:
                 conn.write('Illegal move (%s)\n' % s)
             else:
-                mv.san = mv.to_san()
-                #if mv.san != s:
+                #if mv.to_san() != s:
                 #    print 'hmm %s; %s' % (mv.san, s)
-                #assert(mv.san == s)
+                #assert(mv.to_san() == s)
+                mv.to_san()
                 self.pos.make_move(mv)
                 self.pos.detect_check()
-                self.game.last_move_san = mv.san
-                self.game.last_move_verbose = mv.to_verbose_alg()
                 self.game.next_move()
 
         return mv or illegal
-
+    
     def get_turn(self):
         return game.WHITE if self.pos.wtm else game.BLACK
 
@@ -1220,6 +1232,18 @@ class Normal(Variant):
         else:
             white_clock = int(round(self.game.clock.get_white_time()))
             black_clock = int(round(self.game.clock.get_black_time()))
+        last_mv = self.pos.get_last_move()
+        if last_mv is None:
+            last_move_time_str = timer.hms(0.0)
+            last_move_san = 'none'
+            last_move_verbose = 'none'
+        else:
+            if last_mv.time_str is None:
+                last_move_time_str = timer.hms(0.0)
+            else:
+                last_move_time_str = last_mv.time_str
+            last_move_san = last_mv.to_san()
+            last_move_verbose = last_mv.to_verbose_alg()
 
         # board_str begins with a space
         s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
@@ -1227,8 +1251,8 @@ class Normal(Variant):
             self.pos.fifty_count, self.game.number, self.game.white.name,
             self.game.black.name, relation, self.game.white_time,
             self.game.white_inc, self.pos.material[1], self.pos.material[0],
-            white_clock, black_clock, full_moves, self.game.last_move_verbose,
-            self.game.clock.last_move_time_str, self.game.last_move_san, flip,
+            white_clock, black_clock, full_moves, last_move_verbose,
+            last_move_time_str, last_move_san, flip,
             int(self.game.clock.is_ticking), int(user.session.lag))
         return s
 

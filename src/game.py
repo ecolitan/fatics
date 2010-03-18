@@ -65,8 +65,6 @@ class Game(object):
         else:
             time_str = '%d %d %d %d' % (self.white_time,self.white_inc,self.blacck.time,self.black.inc)
 
-        self.last_move_verbose = 'none'
-        self.last_move_san = 'none'
         self.flip = False
         self.start_time = time.time()
         self.is_active = True
@@ -106,7 +104,9 @@ class Game(object):
         if self.is_active and self.variant.pos.half_moves > 1:
             moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
-                self.clock.update(moved_side)
+                time_str = self.clock.update(moved_side)
+                self.variant.pos.get_last_move().time_str = \
+                    time_str
             if self.get_user_to_move().vars['autoflag']:
                 self.clock.check_flag(self, moved_side)
             if self.is_active:
