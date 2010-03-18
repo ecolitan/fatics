@@ -1,4 +1,5 @@
 import random
+import time
 
 (WHITE, BLACK) = range(2)
 
@@ -56,8 +57,9 @@ class Game(object):
         self.white.session.is_white = True
         self.black.session.is_white = False
 
-        self.speed = chal.speed
-        rated_str = 'rated' if chal.rated else 'unrated'
+        #self.speed = chal.speed
+        self.variant_and_speed = chal.variant_and_speed
+        self.rated_str = 'rated' if chal.rated else 'unrated'
         if not chal.is_time_odds:
             time_str = '%d %d' % (self.white_time,self.white_inc)
         else:
@@ -65,9 +67,8 @@ class Game(object):
 
         self.last_move_verbose = 'none'
         self.last_move_san = 'none'
-        self.last_move_mins = 0
-        self.last_move_secs = 0.0
         self.flip = False
+        self.start_time = time.time()
         self.is_active = True
 
         self.pending_offers = []
@@ -75,12 +76,12 @@ class Game(object):
             self.black_time * 60.0, self.white_inc, self.black_inc)
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
-        create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, rated_str, chal.variant_and_speed, time_str)
+        create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.variant_and_speed, time_str)
     
         self.white.write(create_str)
         self.black.write(create_str)
         
-        create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, rated_str, chal.variant_and_speed)
+        create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.variant_and_speed)
         self.white.write_prompt(create_str_2)
         self.black.write_prompt(create_str_2)
 
@@ -185,5 +186,19 @@ class Game(object):
         del games[self.number]
         del self.white.session.games[self.black.name]
         del self.black.session.games[self.white.name]
+
+    def write_moves(self, conn):
+        # don't translate for now since clients parse these messages
+        conn.write("Movelist for game %d:\n\n" % self.number)
+   
+        conn.write("%s (%s) vs. %s (%s) --- %s\n" % (self.white.name,
+            self.white_rating, self.black.name, self.black_rating,
+            time.strftime("%a %b %e, %H:%M %Z %Y",
+                time.localtime(self.start_time))))
+        conn.write("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
+            (self.rated_str.capitalize(), self.variant_and_speed,
+                self.white_time, self.white_inc))
+        conn.write('Move  %-18s %-18s\n----  ----------------   ----------------\n' % (self.white.name, self.black.name))
+        
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

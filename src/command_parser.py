@@ -74,8 +74,9 @@ class CommandParser(object):
                 try:
                     args = self.parse_args(m.group(2), cmd.param_str)
                 except BadCommandError:
-                    cmd.help(conn)
-                cmd.run(args, conn)
+                    cmd.usage(conn)
+                else:
+                    cmd.run(args, conn)
         else:
             #conn.write(_("Command not found.\n"))
             assert(False)

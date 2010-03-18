@@ -24,7 +24,11 @@ class TestCommand(Test):
 
         t.write('   \t \n')
         self.expect_not('Bad command', t)
+        
+        t.write('tell\n')
+        self.expect('USAGE', t)
 
         t.close()
+    
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -25,6 +25,9 @@ class Command(object):
 
     def help(self, conn):
         conn.write("help for %s\n" % self.name)
+    
+    def usage(self, conn):
+        conn.write("USAGE for %s\n" % self.name)
 
 class CommandList(object):
     def __init__(self):
@@ -53,6 +56,7 @@ class CommandList(object):
         self._add(Command('iset', 'wS', self.iset, admin.Level.user))
         self._add(Command('ivariables', 'o', self.ivariables, admin.Level.user))
         self._add(Command('match', 'wt', self.match, admin.Level.user))
+        self._add(Command('moves', 'n', self.moves, admin.Level.user))
         self._add(Command('nuke', 'w', self.nuke, admin.Level.admin))
         self._add(Command('password', 'WW', self.password, admin.Level.user))
         self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
@@ -389,6 +393,33 @@ class CommandList(object):
         # adjourned games
 
         offer.Challenge(conn.user, u, args[1])
+   
+    def moves(self, args, conn):
+        # similar to "refresh"
+        if args[0] != None:
+            try:
+                num = int(args[0])
+                if not num in game.games:
+                    conn.write(_("There is no such game.\n"))
+                    return
+                g = game.games[num]
+            except ValueError:
+                # user name
+                u = user.find.by_name_or_prefix_for_user(args[0], conn,
+                    online_only=True)
+                if not u:
+                    return
+                if len(u.session.games) == 0:
+                    conn.write(_("%s is not playing or examining a game.\n") % u.name)
+                    return
+                g = u.session.games.values()[0]
+        else:
+            if len(conn.user.session.games) > 0:
+                g = conn.user.session.games.values()[0]
+            else:
+                conn.write(_("You are not playing, examining, or observing a game.\n"))
+                return
+        g.write_moves(conn)
 
     def nuke(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)

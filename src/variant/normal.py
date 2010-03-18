@@ -1208,7 +1208,6 @@ class Normal(Variant):
             white_clock = int(round(1000 * self.game.clock.get_white_time()))
             black_clock = int(round(1000 * self.game.clock.get_black_time()))
         else:
-            print('rounding %f' % self.game.clock.get_white_time())
             white_clock = int(round(self.game.clock.get_white_time()))
             black_clock = int(round(self.game.clock.get_black_time()))
 
