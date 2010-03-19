@@ -39,6 +39,9 @@ class Online(object):
             ulist = []
         return ulist
 
+    def __iter__(self):
+        return self.online.itervalues()
+
     def itervalues(self):
         return self.online.itervalues()
 

@@ -35,6 +35,7 @@ class BaseUser(object):
         self.vars.update(var.varlist.get_transient_vars())
         self.aliases = {}
         self.formula = {}
+        self.notifiers = set()
         self.session = conn.session
         self.session.set_user(self)
         for ch in self.channels:
@@ -105,6 +106,12 @@ class BaseUser(object):
 
     def set_admin_level(self, level):
         self.admin_level = level
+    
+    def add_notification(self, user):
+        self.notifiers.add(user.name)
+
+    def remove_notification(self, user):
+        self.notifiers.remove(user.name)
 
     def get_rating(self, variant):
         if self.is_guest:
@@ -144,17 +151,23 @@ class User(BaseUser):
 
     def log_on(self, conn):
         BaseUser.log_on(self, conn)
-        notify.notify.users(self.id, _("Notification: %s has arrived.\n") % self.name)
-        notifiers = db.user_get_notifiers(self.id)
-        notifiers = [dbu['user_name'] for dbu in notifiers if online.is_online(dbu['user_name'])]
-        if len(notifiers) > 0:
-            self.write(_('Present company includes: %s\n') % ' '.join(notifiers))
+        notify.notify.users(self, _("Notification: %s has arrived.\n") % self.name)
+        nlist = []
+        for dbu in db.user_get_notifiers(self.id):
+            name = dbu['user_name']
+            if online.is_online(name):
+                nlist.append(name)
+
+            self.notifiers.add(dbu['user_name'])
+        if len(nlist) > 0:
+            self.write(_('Present company includes: %s\n') % ' '.join(nlist))
+
         for a in db.user_get_aliases(self.id):
             self.aliases[a['name']] = a['val']
 
     def log_off(self):
         BaseUser.log_off(self)
-        notify.notify.users(self.id, _("Notification: %s has departed.\n") % self.name)
+        notify.notify.users(self, _("Notification: %s has departed.\n") % self.name)
         db.user_set_last_logout(self.id)
    
     def set_passwd(self, passwd):
@@ -212,9 +225,11 @@ class User(BaseUser):
         self._make_title_str()
 
     def add_notification(self, user):
+        BaseUser.add_notification(self, user)
         db.user_add_notification(self.id, user.id)
 
     def remove_notification(self, user):
+        BaseUser.remove_notification(self, user)
         db.user_del_notification(self.id, user.id)
 
 class GuestUser(BaseUser):

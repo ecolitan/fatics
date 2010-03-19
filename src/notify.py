@@ -1,16 +1,11 @@
-from db import db
 from online import online
 
-#"""A giant dict whose keys consist of every user who might potentially
-#cause a notification by logging in or out."""
-#notify = {}
-
 class Notify(object):
-    """Send a message to all users notified about the given user_id."""
-    def users(self, user_id, msg):
-        for dbu in db.user_get_notified(user_id):
-            u = online.find_exact(dbu['user_name'])
-            if u:
+    """Send a message to all users notified about the given user."""
+    def users(self, user, msg):
+        name = user.name
+        for u in online:
+            if name in u.notifiers:
                 u.write_prompt(msg)
 notify = Notify()
 
