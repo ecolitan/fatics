@@ -26,6 +26,20 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
     
+    def test_bad_match(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin b c d e\n')
+        self.expect('Usage: ', t)
+        
+        t.write('match admin 1 2 3 4 5\n')
+        self.expect('Usage: ', t)
+
+        self.close(t)
+        self.close(t2)
+
+    
     def test_withdraw_logout(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()

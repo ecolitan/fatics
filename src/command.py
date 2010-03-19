@@ -27,7 +27,7 @@ class Command(object):
         conn.write("help for %s\n" % self.name)
     
     def usage(self, conn):
-        conn.write("USAGE for %s\n" % self.name)
+        conn.write("Usage: TODO for %s\n" % self.name)
 
 class CommandList(object):
     def __init__(self):

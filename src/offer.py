@@ -1,7 +1,7 @@
 import re
 
 import speed
-import command
+import command_parser
 import game
 from game import WHITE, BLACK
 
@@ -279,13 +279,13 @@ class Challenge(Offer):
     def _set_rated(self, val):
         assert(val in [True, False])
         if self.rated != None:
-            raise command.BadCommandError()
+            raise command_parser.BadCommandError()
         self.rated = val
     
     def _set_side(self, val):
         assert(val in [WHITE, BLACK])
         if self.side != None:
-            raise command.BadCommandError()
+            raise command_parser.BadCommandError()
         self.side = val
     
     def _set_wild(self, val):
@@ -306,7 +306,7 @@ class Challenge(Offer):
                     self._set_wild(w)
                 if len(times) > 3:
                     # no more than 4 time values should be given
-                    raise command.BadCommandError()
+                    raise command_parser.BadCommandError()
                 times.append(num)
                 continue
 
@@ -328,6 +328,8 @@ class Challenge(Offer):
                     self._set_wild(m.group(1))
                 elif w == 'wild':
                     do_wild = True
+                else:
+                    raise command_parser.BadCommandError()
 
         if len(times) == 0:
             pass

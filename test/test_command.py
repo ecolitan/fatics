@@ -26,7 +26,7 @@ class TestCommand(Test):
         self.expect_not('Bad command', t)
         
         t.write('tell\n')
-        self.expect('USAGE', t)
+        self.expect('Usage: ', t)
 
         t.close()
     
