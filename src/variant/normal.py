@@ -465,10 +465,10 @@ class Position(object):
                     self.ep = None
 
             self.fifty_count = int(fifty_count, 10)
-            self.half_moves = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
-            self.start_half_moves = self.half_moves
+            self.ply = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
+            self.start_ply = self.ply
             assert(self.hash == self._compute_hash())
-            self.history.set_hash(self.half_moves, self.hash)
+            self.history.set_hash(self.ply, self.hash)
 
             self.detect_check()
             if self.is_checkmate or self.is_stalemate \
@@ -491,7 +491,7 @@ class Position(object):
 
     def make_move(self, mv):
         """make the move"""
-        self.half_moves += 1
+        self.ply += 1
 
         mv.undo = Undo()
         mv.undo.ep = self.ep
@@ -584,8 +584,8 @@ class Position(object):
             self.hash ^= zobrist.ep_hash(self.ep)
 
         assert(self.hash == self._compute_hash())
-        self.history.set_hash(self.half_moves, self.hash)
-        self.history.set_move(self.half_moves, mv)
+        self.history.set_hash(self.ply, self.hash)
+        self.history.set_move(self.ply - 1 , mv)
 
     def _is_legal_ep(self, ep):
         # According to Geurt Gijssen's "An Arbiter's Notebook" #110,
@@ -626,7 +626,7 @@ class Position(object):
     def undo_move(self, mv):
         """undo the move"""
         self.wtm = not self.wtm
-        self.half_moves -= 1
+        self.ply -= 1
         self.ep = mv.undo.ep
         self.board[mv.to] = mv.capture
         self.board[mv.fr] = mv.pc
@@ -702,7 +702,7 @@ class Position(object):
 
 
     def get_last_move(self):
-        return self.history.get_move(self.half_moves)
+        return self.history.get_move(self.ply - 1)
 
     def _any_legal_moves(self):
         ksq = self.king_pos[self.wtm]
@@ -1055,13 +1055,13 @@ class Position(object):
         # Note that the most recent possible identical position is
         # 4 ply ago, and we only have to check every other move.
         # This is a well-known chess engine optimization.
-        if self.half_moves < 8:
+        if self.ply < 8:
             return False
-        stop = max(self.half_moves - self.fifty_count, self.start_half_moves)
+        stop = max(self.ply - self.fifty_count, self.start_ply)
 
         count = 0
-        hash = self.history.get_hash(self.half_moves)
-        i = self.half_moves - 4
+        hash = self.history.get_hash(self.ply)
+        i = self.ply - 4
         while i >= stop:
             if self.history.get_hash(i) == hash:
                 count += 1
@@ -1091,10 +1091,10 @@ class Position(object):
         #
         # The old fics grants the draw request, unreasonably in my 
         # opinion.  My change should close the loophole.
-        if self.half_moves > 8 and (side == game.WHITE) == self.wtm:
+        if self.ply > 8 and (side == game.WHITE) == self.wtm:
             count = 0
-            hash = self.history.get_hash(self.half_moves - 1)
-            i = self.half_moves - 5
+            hash = self.history.get_hash(self.ply - 1)
+            i = self.ply - 5
             while i >= stop:
                 if self.history.get_hash(i) == hash:
                     count += 1
@@ -1147,7 +1147,7 @@ class Position(object):
         else:
             ep_str = '-'
 
-        full_moves = self.half_moves // 2 + 1
+        full_moves = self.ply // 2 + 1
         return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
 
 class Normal(Variant):
@@ -1225,7 +1225,7 @@ class Normal(Variant):
         else:
             relation = -3
             flip = 0
-        full_moves = self.pos.half_moves // 2 + 1
+        full_moves = self.pos.ply // 2 + 1
         if user.session.ivars['ms']:
             white_clock = int(round(1000 * self.game.clock.get_white_time()))
             black_clock = int(round(1000 * self.game.clock.get_black_time()))
@@ -1238,10 +1238,8 @@ class Normal(Variant):
             last_move_san = 'none'
             last_move_verbose = 'none'
         else:
-            if last_mv.time_str is None:
-                last_move_time_str = timer.hms(0.0)
-            else:
-                last_move_time_str = last_mv.time_str
+            assert(last_mv.time_str != None)
+            last_move_time_str = last_mv.time_str
             last_move_san = last_mv.to_san()
             last_move_verbose = last_mv.to_verbose_alg()
 

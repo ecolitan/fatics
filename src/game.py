@@ -4,6 +4,7 @@ import time
 (WHITE, BLACK) = range(2)
 
 import clock
+from timer import timer
 
 games = {}
 
@@ -101,18 +102,21 @@ class Game(object):
             o.decline()
 
         #print(self.variant.to_style12(self.white))
-        if self.is_active and self.variant.pos.half_moves > 1:
+        time_str = None
+        if self.is_active and self.variant.pos.ply > 1:
             moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
                 time_str = self.clock.update(moved_side)
-                self.variant.pos.get_last_move().time_str = \
-                    time_str
             if self.get_user_to_move().vars['autoflag']:
                 self.clock.check_flag(self, moved_side)
             if self.is_active:
-                if self.variant.pos.half_moves > 2:
+                if self.variant.pos.ply > 2:
                     self.clock.add_increment(moved_side)
                 self.clock.start(self.variant.get_turn())
+
+        if time_str is None:
+            time_str = timer.hms(0.0)
+        self.variant.pos.get_last_move().time_str = time_str
 
         self.white.send_board(self.variant)
         self.black.send_board(self.variant)
@@ -189,7 +193,7 @@ class Game(object):
 
     def write_moves(self, conn):
         # don't translate for now since clients parse these messages
-        conn.write("Movelist for game %d:\n\n" % self.number)
+        conn.write("\nMovelist for game %d:\n\n" % self.number)
    
         conn.write("%s (%s) vs. %s (%s) --- %s\n" % (self.white.name,
             self.white_rating, self.black.name, self.black_rating,
@@ -198,7 +202,25 @@ class Game(object):
         conn.write("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
             (self.rated_str.capitalize(), self.variant_and_speed,
                 self.white_time, self.white_inc))
-        conn.write('Move  %-18s %-18s\n----  ----------------   ----------------\n' % (self.white.name, self.black.name))
-        
+        assert(len(self.black.name) <= 23)
+        conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (self.white.name, self.black.name))
+        i = self.variant.pos.start_ply & ~1
+        while i < self.variant.pos.ply:
+            if i < self.variant.pos.start_ply:
+                move_str = '...'
+            else:
+                mv = self.variant.pos.history.get_move(i)
+                move_str = '%-7s (%s)' % (mv.to_san(), mv.time_str)
+            if i % 2 == 0:
+                conn.write('%3d.  %-23s ' % (int((i + 3) / 2),move_str))
+            else:
+                assert(len(move_str) <= 23)
+                conn.write('%s\n' % move_str)
+            i += 1
+
+        if i & 1 != 0:
+            conn.write('\n')
+
+        conn.write('      {Still in progress} *\n\n')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

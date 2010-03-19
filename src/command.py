@@ -90,7 +90,7 @@ class CommandList(object):
             conn.write(_('Please use "simabort" for simuls.\n'))
             return
         g = conn.user.session.games.values()[0]
-        if g.variant.pos.half_moves < 2:
+        if g.variant.pos.ply < 2:
             g.abort('Game aborted on move 1 by %s' % conn.user.name)
         else:
             offer.Abort(g, conn.user)

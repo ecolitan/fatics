@@ -295,4 +295,31 @@ class TestRefresh(Test):
         self.close(t)
         self.close(t2)
 
+class TestMoves(Test):
+    def test_moves(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t.write('e4\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t.write('moves\n')
+        self.expect('Movelist for game 1:\r\n\r\nGuestABCD (++++) vs. admin (----) --- ', t)
+        self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      \r\n      {Still in progress} *''', t)
+
+        t2.write('c5\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t2.write('moves\n')
+        self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
