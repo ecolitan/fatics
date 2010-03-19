@@ -12,6 +12,7 @@ from timer import timer
 from online import online
 from reload import reload
 from server import server
+from command_parser import BadCommandError
 
 class QuitException(Exception):
     pass
@@ -76,6 +77,7 @@ class CommandList(object):
         self._add(Command('who', 'T', self.who, admin.Level.user))
         self._add(Command('withdraw', 'n', self.withdraw, admin.Level.user))
         self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
+        self._add(Command('znotify', 'o', self.znotify, admin.Level.user))
 
     def _add(self, cmd):
         self.admin_cmds[cmd.name] = cmd
@@ -675,6 +677,21 @@ class CommandList(object):
             conn.user.session.offers_sent[0].withdraw()
         else:
             conn.write('TODO: WITHDRAW PARAM\n')
+    
+    def znotify(self, args, conn):
+        if args[0] != None:
+            if args[0] != 'n':
+                raise BadCommandError()
+            show_idle = True
+        else:
+            show_idle = False
+        conn.write(_('Present company on your notify list:\n'))
+
+        conn.write(_('The following players have you on their notify list:\n'))
+
+
+
+            
 
 command_list = CommandList()
 

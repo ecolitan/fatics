@@ -13,6 +13,11 @@ class TestSet(Test):
 
         t.write("set formula\n")
         self.expect("formula unset", t)
+        
+        t.write("set shout off\n")
+        self.expect("You will not hear shouts", t)
+        t.write("set shout ON\n")
+        self.expect("You will now hear shouts", t)
 
         self.close(t)
 

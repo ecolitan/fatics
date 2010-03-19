@@ -6,7 +6,7 @@ from online import online
 #notify = {}
 
 class Notify(object):
-    """Send a message to all users notivied about the given user_id."""
+    """Send a message to all users notified about the given user_id."""
     def users(self, user_id, msg):
         for dbu in db.user_get_notified(user_id):
             u = online.find_exact(dbu['user_name'])

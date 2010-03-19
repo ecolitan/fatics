@@ -20,7 +20,7 @@ class DB(object):
 
     def user_get_vars(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT tell,shout,cshout,open,silence,bell,time,inc,lang,autoflag FROM user WHERE user_id=%s""", (user_id,))
+        cursor.execute("""SELECT tell,shout,cshout,open,silence,bell,time,inc,lang,autoflag,ptime FROM user WHERE user_id=%s""", (user_id,))
         row = cursor.fetchone()
         cursor.close()
         return row

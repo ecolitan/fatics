@@ -169,7 +169,12 @@ class BoolVar(Var):
             else:
                 val = not user.vars[self.name]
         else:
-            if val not in ['0', '1']:
+            val = val.lower()
+            if val == 'on':
+                val = '1'
+            elif val == 'off':
+                val = '0'
+            elif val not in ['0', '1']:
                 raise BadVarError()
             val = int(val, 10)
         if self.is_ivar:
@@ -197,6 +202,7 @@ class VarList(object):
         BoolVar("silence", False, N_("You will now play games in silence."), N_("You will not play games in silence.")).persist().add_as_var()
         BoolVar("bell", True, N_("You will now hear beeps."), N_("You will not hear beeps.")).persist().add_as_var()
         BoolVar("autoflag", True, N_("Auto-flagging enabled."), N_("Auto-flagging disabled.")).persist().add_as_var()
+        BoolVar("ptime", False, N_("Your prompt will now show the time."), N_("Your prompt will now not show the time.")).persist().add_as_var()
 
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
