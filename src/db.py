@@ -185,7 +185,7 @@ class DB(object):
 
     def user_get_titles(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT title_flag,display FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s""", (user_id,))
+        cursor.execute("""SELECT title_flag,display FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s ORDER BY title_id DESC""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows

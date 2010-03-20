@@ -146,7 +146,7 @@ class User(BaseUser):
 
     def _make_title_str(self):
         self.title_str = ''
-        titles =  db.user_get_titles(self.id)
+        titles = db.user_get_titles(self.id)
         for title in titles:
             if title['display']:
                 self.title_str += '(%s)' % title['title_flag']

@@ -13,6 +13,7 @@ class Timeseal(object):
         dec = self.timeseal.stdout.readline()
         m = self._timeseal_pat.match(dec)
         if not m:
+            print 'failed to match: {{%s}}' % dec
             return (0, None)
         return (int(m.group(1), 10), m.group(2))
 

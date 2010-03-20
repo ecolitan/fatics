@@ -21,7 +21,7 @@ class TestTitle(Test):
         self.expect("admin added to the GM list", t)
 
         t.write('t admin a b c\n')
-        self.expect("admin(*)(GM) tells you: a b c", t)
+        self.expect("admin(GM)(*) tells you: a b c", t)
 
         t.write('+gm admin\n')
         self.expect("admin is already in the GM list", t)

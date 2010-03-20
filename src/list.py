@@ -122,6 +122,12 @@ class ListList(object):
         for title in db.title_get_all():
             TitleList(title['title_id'], title['title_name'], title['title_descr'])
 
+
+"""class CensorList(MyList):
+    def add(self, args, conn):
+
+    def sub(self, args, conn):"""
+
 ListList()
 
 #  removedcom filter muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle, c50muzzle, c51muzzle,
