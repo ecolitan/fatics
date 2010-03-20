@@ -277,10 +277,13 @@ class CommandList(object):
             if u.is_guest:
                 conn.write(_('%s is NOT a registered player.\n') % u.name)
             if u.admin_level > admin.Level.user:
-                conn.write(_('Admin level: %s\n') % admin.level.to_str(u.admin_level))
-            if not u.is_guest and conn.user.admin_level > admin.Level.user:
-                conn.write(_('Email:       %s\n') % u.email)
-                conn.write(_('Real name:   %s\n') % u.real_name)
+                conn.write(A_('Admin level: %s\n') % admin.level.to_str(u.admin_level))
+            if conn.user.admin_level > admin.Level.user:
+                if not u.is_guest:
+                    conn.write(A_('Email:       %s\n') % u.email)
+                    conn.write(A_('Real name:   %s\n') % u.real_name)
+                if u.is_online:
+                    conn.write(A_('Host:        %s\n') % u.session.conn.ip)
                
             if u.is_online:
                 if u.session.use_timeseal:
