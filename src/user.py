@@ -40,6 +40,7 @@ class BaseUser(object):
         self.session.set_user(self)
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
+        notify.notify.users(self, _("Notification: %s has arrived.\n") % self.name)
         online.add(self)
         self.is_online = True
         conn.write(_('**** Starting session as %s ****\n\n') % self.name)
@@ -47,6 +48,7 @@ class BaseUser(object):
     def log_off(self):
         for ch in self.channels:
             channel.chlist[ch].log_off(self)
+        notify.notify.users(self, _("Notification: %s has departed.\n") % self.name)
         self.session.close()
         self.is_online = False
         online.remove(self)
@@ -151,7 +153,6 @@ class User(BaseUser):
 
     def log_on(self, conn):
         BaseUser.log_on(self, conn)
-        notify.notify.users(self, _("Notification: %s has arrived.\n") % self.name)
         nlist = []
         for dbu in db.user_get_notifiers(self.id):
             name = dbu['user_name']
@@ -167,7 +168,6 @@ class User(BaseUser):
 
     def log_off(self):
         BaseUser.log_off(self)
-        notify.notify.users(self, _("Notification: %s has departed.\n") % self.name)
         db.user_set_last_logout(self.id)
    
     def set_passwd(self, passwd):
@@ -226,11 +226,13 @@ class User(BaseUser):
 
     def add_notification(self, user):
         BaseUser.add_notification(self, user)
-        db.user_add_notification(self.id, user.id)
+        if not user.is_guest:
+            db.user_add_notification(self.id, user.id)
 
     def remove_notification(self, user):
         BaseUser.remove_notification(self, user)
-        db.user_del_notification(self.id, user.id)
+        if not user.is_guest:
+            db.user_del_notification(self.id, user.id)
 
 class GuestUser(BaseUser):
     def __init__(self, name):

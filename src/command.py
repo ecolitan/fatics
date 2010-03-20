@@ -688,13 +688,21 @@ class CommandList(object):
             show_idle = True
         else:
             show_idle = False
-        conn.write(_('Present company on your notify list:\n'))
+        notifiers = [name for name in conn.user.notifiers
+            if online.is_online(name)]
+        if len(notifiers) == 0:
+            conn.write(_('No one from your notify list is logged on.\n'))
+        else:
+            conn.write(_('Present company on your notify list:\n   %s\n') %
+                ' '.join(notifiers))
 
-        conn.write(_('The following players have you on their notify list:\n'))
-
-
-
-            
+        name = conn.user.name
+        notified = [u.name for u in online if name in u.notifiers]
+        if len(notified) == 0:
+            conn.write(_('No one logged in has you on their notify list.\n'))
+        else:
+            conn.write(_('The following players have you on their notify list:\n   %s\n') %
+                ' '.join(notified))
 
 command_list = CommandList()
 

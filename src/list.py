@@ -59,12 +59,8 @@ class TitleList(MyList):
 
 class NotifyList(MyList):
     def add(self, args, conn):
-        if conn.user.is_guest:
-            raise ListError(_('Sorry, only registered users can use notification lists.'))
         u = user.find.by_name_or_prefix_for_user(args[1], conn)
         if u:
-            if u.is_guest:
-                raise ListError(_('Sorry, you can only add registered users to your notify list.'))
             try:
                 conn.user.add_notification(u)
             except DuplicateKeyError:
@@ -74,12 +70,9 @@ class NotifyList(MyList):
 
 
     def sub(self, args, conn):
-        if conn.user.is_guest:
-            raise ListError(_('Sorry, only registered users can use notification lists.'))
+        # would it be better to only search the notify list?
         u = user.find.by_name_or_prefix_for_user(args[1], conn)
         if u:
-            if u.is_guest:
-                raise ListError(_('Sorry, you can only remove registered users from your notify list.'))
             try:
                 conn.user.remove_notification(u)
             except DeleteError:

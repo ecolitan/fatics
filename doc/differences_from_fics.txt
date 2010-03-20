@@ -44,11 +44,6 @@ a registered user.
 * The "teams" list has been removed.
 Rationale: It's obsolete.
 
-* Unregistered users can no longer have notification lists, nor can they be
-added to notification lists.
-Rationale: I didn't think such a feature would be useful enough to warrant
-the extra complexity that would be required to implement it.
-
 * The behavior of empty finger note lines is different. For example,
 if you have only note 1 set, and you set note 5, notes 2-4 will
 automatically be filled with blank lines.  Subsequently deleting
