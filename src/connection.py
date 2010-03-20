@@ -33,7 +33,7 @@ class Connection(basic.LineReceiver):
         self.login()
         self.session = Session(self)
         self.session.login_last_command = time.time()
-        self.ip = self.transport.getPeer()[1]
+        self.ip = self.transport.getPeer().host
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
 
     def login_timeout(self):

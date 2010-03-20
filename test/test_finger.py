@@ -7,6 +7,7 @@ class FingerTest(Test):
         self.expect('Finger of admin(*):', t)
         self.expect('On for:', t)
         self.expect('Email:', t)
+        self.expect('Host:', t)
 
         # finger with trailing space
         t.write('finger \r\n')

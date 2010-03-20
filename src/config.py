@@ -13,7 +13,7 @@ class Config(object):
     # so work it into a disclaimer.
     welcome_msg = '''♙♘♗♖♕♔ Welcome to the fatICS! ♚♛♜♝♞♟\n\nThis server is not affiliated with or endorsed by freechess.org.\n\n'''
     login_msg = '''If you are not a registered player, enter the login name "guest".\n\n''' 
-    logout_msg = '''♙♙♙ THANKS ♟♟♟\n'''
+    logout_msg = '''♙♙♙ Thank you for using FatICS. ♟♟♟\n'''
 
 config = Config()
 
