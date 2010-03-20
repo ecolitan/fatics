@@ -111,13 +111,16 @@ class CommandList(object):
 
     def addlist(self, args, conn):
         try:
-            list.lists.get(args[0]).add(args, conn)
+            ls = list.lists.get(args[0])
         except KeyError:
             conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
         except trie.NeedMore as e:
             conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
-        except list.ListError as e:
-            conn.write('%s\n' % e.reason)
+        else:
+            try:
+                ls.add(args[1], conn)
+            except list.ListError as e:
+                conn.write(e.reason)
 
     def addplayer(self, args, conn):
         [name, email, real_name] = args
@@ -557,23 +560,29 @@ class CommandList(object):
             return
 
         try:
-            list.lists.get(args[0]).show(args, conn)
+            ls = list.lists.get(args[0])
         except KeyError:
             conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
         except trie.NeedMore as e:
             conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
-        except list.ListError as e:
-            conn.write('%s\n' % e.reason)
+        else:
+            try:
+                ls.show(conn)
+            except list.ListError as e:
+                conn.write(e.reason)
 
     def sublist(self, args, conn):
         try:
-            list.lists.get(args[0]).sub(args, conn)
+            ls = list.lists.get(args[0])
         except KeyError:
             conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
         except trie.NeedMore as e:
             conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
-        except list.ListError as e:
-            conn.write('%s\n' % e.reason)
+        else:
+            try:
+                ls.sub(args[1], conn)
+            except list.ListError as e:
+                conn.write(e.reason)
     
     def style(self, args, conn):
         #conn.write('Warning: the "style" command is deprecated.  Please use "set style" instead.\n')

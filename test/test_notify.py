@@ -23,7 +23,7 @@ class TestNotify(Test):
     def test_bad_notify(self):
         t = self.connect_as_admin()
         t.write('+not testplayer\n')
-        self.expect("no player matching", t)
+        self.expect('There is no player matching the name "testplayer"', t)
         self.close(t)
 
     def test_notify_user(self):

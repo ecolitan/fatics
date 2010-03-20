@@ -20,6 +20,9 @@ class TestChannel(Test):
 
         t.write('-ch 1\n')
         self.expect("[1] removed from your channel list", t)
+        
+        t.write('-ch 1\n')
+        self.expect("[1] is not on your channel list", t)
 
         t.write('t 1 foo bar baz\n')
         self.expect("not in channel", t)

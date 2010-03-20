@@ -2,7 +2,7 @@ import sys
 import copy
 
 from db import db
-#from online import online
+import list
 
 class ChannelError(Exception):
     pass
@@ -33,20 +33,18 @@ class Channel(object):
 
     def add(self, user):
         if user in self.online:
-            user.write(_('[%s] is already on your channel list.\n') % self.id)
-            return
+            raise list.ListError(_('[%s] is already on your channel list.\n') %
+                self.id)
         self.online.append(user)
         user.add_channel(self.id)
-        user.write(_('[%s] added to your channel list.\n') % self.id)
 
     def remove(self, user):
         if  user not in self.online:
-            user.write(_('[%s] is not on your channel list.\n') % self.id)
-            return
+            raise list.ListError(_('[%s] is not on your channel list.\n') %
+                self.id)
         if user.is_online:
             self.online.remove(user)
         user.remove_channel(self.id)
-        user.write(_('[%s] removed from your channel list.\n') % self.id)
 
     def get_display_name(self):
         if self.name != None:

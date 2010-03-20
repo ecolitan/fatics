@@ -24,13 +24,13 @@ class TestTitle(Test):
         self.expect("admin(GM)(*) tells you: a b c", t)
 
         t.write('+gm admin\n')
-        self.expect("admin is already in the GM list", t)
+        self.expect("admin is already on the GM list", t)
 
         t.write('-gm admin\n')
         self.expect("admin removed from the GM list", t)
 
         t.write('-gm admin\n')
-        self.expect("admin is not in the GM list", t)
+        self.expect("admin is not on the GM list", t)
 
         t.write('t admin d e f\n')
         self.expect("admin(*) tells you: d e f", t)
