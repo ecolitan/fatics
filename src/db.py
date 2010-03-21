@@ -196,9 +196,9 @@ class DB(object):
         try:
             cursor.execute("""INSERT INTO user_notify SET notified=%s,notifier=%s""", (notified,notifier))
         except IntegrityError:
-            cursor.close()
             raise DuplicateKeyError()
-        cursor.close()
+        finally:
+            cursor.close()
 
     def user_del_notification(self, notified, notifier):
         cursor = self.db.cursor()
@@ -219,6 +219,56 @@ class DB(object):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notifier) WHERE notified=%s""", (user_id,))
         rows = cursor.fetchall()
+        return rows
+    
+    # censor
+    def user_add_censor(self, censored, censorer):
+        cursor = self.db.cursor()
+        try:
+            cursor.execute("""INSERT INTO censor SET censored=%s,censorer=%s""", (censored,censorer))
+        except IntegrityError:
+            raise DuplicateKeyError()
+        finally:
+            cursor.close()
+    
+    def user_del_censor(self, censored, censorer):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM censor WHERE censored=%s AND censorer=%s""", (censored,censorer))
+        if cursor.rowcount != 1:
+            cursor.close()
+            raise DeleteError()
+        cursor.close()
+    
+    def user_get_censored(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT user_name FROM user LEFT JOIN censor ON (user.user_id=censor.censored) WHERE censorer=%s""", (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    # noplay
+    def user_add_noplay(self, noplayed, noplayer):
+        cursor = self.db.cursor()
+        try:
+            cursor.execute("""INSERT INTO noplay SET noplayed=%s,noplayer=%s""", (noplayed,noplayer))
+        except IntegrityError:
+            raise DuplicateKeyError()
+        finally:
+            cursor.close()
+    
+    def user_del_noplay(self, noplayed, noplayer):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM noplay WHERE noplayed=%s AND noplayer=%s""", (noplayed,noplayer))
+        if cursor.rowcount != 1:
+            cursor.close()
+            raise DeleteError()
+        cursor.close()
+    
+    def user_get_noplayed(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT user_name FROM user LEFT JOIN noplay ON (user.user_id=noplay.noplayed) WHERE noplayer=%s""", (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
         return rows
 
     def title_get_all(self):

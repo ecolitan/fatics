@@ -389,17 +389,21 @@ class CommandList(object):
         if u == conn.user:
             conn.write(_("You can't match yourself.\n"))
             return
+        
+        if conn.user.name in u.censor:
+            conn.write(_("%s is censoring you.\n") % u.name)
+            return
+        if conn.user.name in u.noplay:
+            conn.write(_("You are on %s's noplay list.\n") % u.name)
+            return
         if not u.vars['open']:
             conn.write(_("%s is not open to match requests.\n") % u.name)
             return
         if len(u.session.games) != 0:
             conn.write(_("%s is playing a game.\n") % u.name)
+
         if not conn.user.vars['open']:
             var.vars['open'].set(conn.user, '1')
-
-        # noplay, censor
-        # adjourned games
-
         offer.Challenge(conn.user, u, args[1])
    
     def moves(self, args, conn):
@@ -665,8 +669,12 @@ class CommandList(object):
             count = ch.tell(args[1], conn.user)
             conn.write(ngettext('(told %d player in channel %d)\n', '(told %d players in channel %d)\n', count) % (count, ch.id))
         elif u:
-            u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
-            conn.write(_("(told %s)") % u.name + '\n')
+            if conn.user.name in u.censor and conn.user.admin_level <= \
+                    admin.level.user:
+                conn.write(_("%s is censoring you.\n") % u.name)
+            else:
+                u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
+                conn.write(_("(told %s)") % u.name + '\n')
 
         return (u, ch)
 

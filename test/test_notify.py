@@ -6,6 +6,10 @@ class TestNotify(Test):
         t.write('+not admin\n')
         self.expect("admin added to your notify list", t)
 
+        t.write('=not\n')
+        self.expect('notify list: 1 name', t)
+        self.expect('admin', t)
+
         t2 = self.connect_as_admin()
         self.expect('Notification: admin has arrived', t)
 
@@ -51,6 +55,9 @@ class TestNotify(Test):
 
             t.write('-NOTIFY testplayer\n')
             self.expect('TestPlayer removed from your notify list', t)
+            
+            t.write('-not testplayer\n')
+            self.expect('TestPlayer is not on your notify list', t)
 
             t2 = self.connect_as_user('testplayer', 'test')
             self.expect_not("TestPlayer", t)
@@ -78,7 +85,6 @@ class TestZnotify(Test):
             self.expect('Present company on your notify list:\r\n   TestPlayer\r\nThe following players have you on their notify list:\r\n   GuestABCD', t)
 
             t.write('-notify testplayer\n')
-            self.close(t)
             self.close(t2)
             self.close(t3)
         finally:

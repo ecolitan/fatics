@@ -3,12 +3,14 @@ from test import *
 class CommandTest(Test):
     def test_addplayer(self):
         t = self.connect_as_admin()
-        t.write('addplayer testplayer nobody@example.com Foo Bar\n')
-        self.expect('Added:', t)
-        t.write('addplayer testplayer nobody@example.com Foo Bar\n')
-        self.expect('already registered', t)
-        t.write('remplayer testplayer\n')
-        t.close()
+        try:
+            t.write('addplayer testplayer nobody@example.com Foo Bar\n')
+            self.expect('Added:', t)
+            t.write('addplayer testplayer nobody@example.com Foo Bar\n')
+            self.expect('already registered', t)
+        finally:
+            t.write('remplayer testplayer\n')
+        self.close(t)
 
     def test_announce(self):
         t = self.connect_as_admin()

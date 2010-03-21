@@ -2,6 +2,7 @@ import trie
 import channel
 import admin
 import user
+
 from db import db, DuplicateKeyError, DeleteError
 
 lists = trie.Trie()
@@ -30,18 +31,14 @@ class TitleList(MyList):
         if u:
             if u.is_guest:
                 raise ListError(_("Only registered users may have titles.\n"))
+
             try:
                 u.add_title(self.id)
             except DuplicateKeyError:
-                raise ListError(_('%s is already on the %s list.\n') % (u.name, self.name))
+                raise ListError(_('%(uname)s is already on the %(lname)s list.\n') %
+                    {'uname': u.name, 'lname': self.name })
             else:
                 conn.write(_('%s added to the %s list.\n') % (u.name, self.name))
-
-    def show(self, conn):
-        conn.write('%s: ' % self.name)
-        for user_name in db.title_get_users(self.id):
-            conn.write('%s ' % user_name)
-        conn.write('\n')
 
     def sub(self, item, conn):
         if conn.user.admin_level < admin.level.admin:
@@ -53,39 +50,39 @@ class TitleList(MyList):
             try:
                 u.remove_title(self.id)
             except DeleteError:
-                raise ListError(_("%s is not on the %s list.\n") % (u.name, self.name))
-            else:
-                conn.write(_('%s removed from the %s list.\n') % (u.name, self.name))
+                raise ListError(_('%(uname)s is not on the %(lname)s list.\n') %
+                    {'uname': u.name, 'lname': self.name })
+            conn.write(_('%s removed from the %s list.\n') % (u.name, self.name))
+    
+    def show(self, conn):
+        conn.write('%s: ' % self.name)
+        for user_name in db.title_get_users(self.id):
+            conn.write('%s ' % user_name)
+        conn.write('\n')
 
 class NotifyList(MyList):
     def add(self, item, conn):
         u = user.find.by_name_or_prefix_for_user(item, conn)
         if u:
-            try:
-                conn.user.add_notification(u)
-            except DuplicateKeyError:
-                raise ListError(_('%s is already on your notify list.\n') % u.name)
-            else:
-                conn.write(_('%s added to your notify list.\n') % (u.name))
-
+            if u.name in conn.user.notifiers:
+                raise ListError(_('%s is already on your notify list.\n')
+                    % u.name)
+            conn.user.add_notification(u)
+            conn.write(_('%s added to your notify list.\n') % (u.name))
 
     def sub(self, item, conn):
         # would it be better to only search the notify list?
         u = user.find.by_name_or_prefix_for_user(item, conn)
         if u:
-            try:
-                conn.user.remove_notification(u)
-            except DeleteError:
+            if u.name not in conn.user.notifiers:
                 raise ListError(_('%s is not on your notify list.\n') % u.name)
-            else:
-                conn.write(_('%s removed from your notify list.\n') % (u.name))
+            conn.user.remove_notification(u)
+            conn.write(_('%s removed from your notify list.\n') % (u.name))
 
     def show(self, conn):
-        notlist = db.user_get_notifiers(conn.user.id)
+        notlist = conn.user.notifiers
         conn.write(ngettext('-- notify list: %d name --\n', '-- notify list: %d names --\n', len(notlist)) % len(notlist))
-        for dbu in notlist:
-            conn.write('%s ' % dbu['user_name'])
-        conn.write('\n')
+        conn.write('%s\n' % ' '.join(notlist))
 
 class ChannelList(MyList):
     def add(self, item, conn):
@@ -123,21 +120,40 @@ class ChannelList(MyList):
             conn.write('%s ' % ch)
         conn.write('\n')
 
+class CensorList(MyList):
+    def add(self, item, conn):
+        u = user.find.by_name_or_prefix_for_user(item, conn)
+        if u:
+            if u.name in conn.user.censor:
+                raise ListError(_('%s is already on your censor list.\n') % u.name)
+            conn.user.add_censor(u)
+            conn.write(_('%s added to your censor list.\n') % (u.name))
+
+    def sub(self, item, conn):
+        u = user.find.by_name_or_prefix_for_user(item, conn)
+        if u:
+            if u.name not in conn.user.censor:
+                raise ListError(_('%s is not on your censor list.\n') % u.name)
+            conn.user.remove_censor(u)
+            conn.write(_('%s removed from your censor list.\n') % (u.name))
+
+    def show(self, conn):
+        cenlist = conn.user.censor
+        conn.write(ngettext('-- censor list: %d name --\n', '-- censor list: %d names --\n', len(cenlist)) % len(cenlist))
+        for dbu in cenlist:
+            conn.write('%s ' % dbu['user_name'])
+        conn.write('\n')
+
 """a list of lists"""
 class ListList(object):
     def __init__(self):
         ChannelList("channel")
         NotifyList("notify")
+        CensorList("censor")
+        #NoplayList("noplay")
 
         for title in db.title_get_all():
             TitleList(title['title_id'], title['title_name'], title['title_descr'])
-
-
-"""class CensorList(MyList):
-    def add(self, item, conn):
-
-    def sub(self, item, conn):"""
-
 ListList()
 
 #  removedcom filter muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle, c50muzzle, c51muzzle,

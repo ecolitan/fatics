@@ -36,6 +36,8 @@ class BaseUser(object):
         self.aliases = {}
         self.formula = {}
         self.notifiers = set()
+        self.censor = set()
+        self.noplay = set()
         self.session = conn.session
         self.session.set_user(self)
         for ch in self.channels:
@@ -108,12 +110,24 @@ class BaseUser(object):
 
     def set_admin_level(self, level):
         self.admin_level = level
-    
+
     def add_notification(self, user):
         self.notifiers.add(user.name)
 
     def remove_notification(self, user):
         self.notifiers.remove(user.name)
+    
+    def add_censor(self, user):
+        self.censor.add(user.name)
+
+    def remove_censor(self, user):
+        self.censor.remove(user.name)
+    
+    def add_noplay(self, user):
+        self.noplay.add(user.name)
+
+    def remove_noplay(self, user):
+        self.noplay.remove(user.name)
 
     def get_rating(self, variant):
         if self.is_guest:
@@ -165,6 +179,11 @@ class User(BaseUser):
 
         for a in db.user_get_aliases(self.id):
             self.aliases[a['name']] = a['val']
+        
+        for dbu in db.user_get_censored(self.id):
+            self.censor.add(dbu['user_name'])
+        for dbu in db.user_get_noplayed(self.id):
+            self.noplay.add(dbu['user_name'])
 
     def log_off(self):
         BaseUser.log_off(self)
@@ -233,6 +252,26 @@ class User(BaseUser):
         BaseUser.remove_notification(self, user)
         if not user.is_guest:
             db.user_del_notification(self.id, user.id)
+    
+    def add_censor(self, user):
+        BaseUser.add_censor(self, user)
+        if not user.is_guest:
+            db.user_add_censor(self.id, user.id)
+
+    def remove_censor(self, user):
+        BaseUser.remove_censor(self, user)
+        if not user.is_guest:
+            db.user_del_censor(self.id, user.id)
+    
+    def add_noplay(self, user):
+        BaseUser.add_noplay(self, user)
+        if not user.is_guest:
+            db.user_add_noplay(self.id, user.id)
+
+    def remove_noplay(self, user):
+        BaseUser.remove_censor(self, user)
+        if not user.is_guest:
+            db.user_del_noplay(self.id, user.id)
 
 class GuestUser(BaseUser):
     def __init__(self, name):
@@ -341,7 +380,7 @@ class Find(object):
         try:
             u = self.by_name_exact(name)
         except UsernameException:
-            conn.write(_('"%s" is not a valid handle\n.') % name)
+            conn.write(_('"%s" is not a valid handle.\n') % name)
         else:
             if not u:
                 conn.write(_('There is no player matching the name "%s".\n') % name)
