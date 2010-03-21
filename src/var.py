@@ -57,13 +57,13 @@ class StringVar(Var):
         self.max_len = max_len
 
     def set(self, user, val):
-        if val != None and len(val) > self.max_len:
+        if val is not None and len(val) > self.max_len:
             raise BadVarError()
         if self.is_ivar:
             user.session.set_ivar(self, val)
         else:
             user.set_var(self, val)
-        if val == None:
+        if val is None:
             user.write(_('''%s unset.\n''') % self.name)
         else:
             user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
@@ -73,10 +73,10 @@ class StringVar(Var):
 
 class PromptVar(StringVar):
     def set(self, user, val):
-        if val != None and len(val) > self.max_len - 1:
+        if val is not None and len(val) > self.max_len - 1:
             raise BadVarError()
         assert(not self.is_ivar)
-        if val == None:
+        if val is None:
             user.set_var(self, val)
             user.write(_('''%s unset.\n''') % self.name)
         else:
@@ -97,10 +97,10 @@ class LangVar(StringVar):
 class FormulaVar(Var):
     max_len = 1023
     def set(self, user, val):
-        if val != None and len(val) > self.max_len:
+        if val is not None and len(val) > self.max_len:
             raise BadVarError()
         user.set_formula(self, val)
-        if val == None:
+        if val is None:
             user.write(_('''%s unset.\n''') % self.name)
         else:
             user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
@@ -116,10 +116,10 @@ class NoteVar(Var):
         self.display_in_vars = False # don't display in "vars" output
 
     def set(self, user, val):
-        if val != None and len(val) > self.max_len:
+        if val is not None and len(val) > self.max_len:
             raise BadVarError()
         user.set_note(self, val)
-        if val == None:
+        if val is None:
             user.write(_('''Note %s unset.\n''') % self.name)
         else:
             user.write((_('''Note %(name)s set: %(val)s\n''') % {'name': self.name, 'val': val}))
@@ -152,17 +152,17 @@ class BoolVar(Var):
     def __init__(self, name, default, on_msg=None, off_msg=None):
         Var.__init__(self, name, default)
 
-        if on_msg != None:
+        if on_msg is not None:
             self.on_msg = on_msg
         else:
             self.on_msg = N_("%s set.") % name
-        if off_msg != None:
+        if off_msg is not None:
             self.off_msg = off_msg
         else:
             self.off_msg = N_("%s unset.") % name
 
     def set(self, user, val):
-        if val == None:
+        if val is None:
             # toggle
             if self.is_ivar:
                 val = not user.session.ivars[self.name]

@@ -150,10 +150,10 @@ class Challenge(Offer):
         # the side requested by a, if any
         self.side = None
 
-        if opts != None:
+        if opts is not None:
             self._parse_opts(opts)
      
-        if self.rated == None:
+        if self.rated is None:
             if a.is_guest or b.is_guest:
                 a.write(N_('Setting match offer to unrated.\n'))
                 self.rated = False
@@ -162,7 +162,7 @@ class Challenge(Offer):
                 self.rated = True
 
         #a.write('%(aname) (%(arat))%(acol) %(bname) %(brat) %(rat) %(variant)')
-        if self.side != None:
+        if self.side is not None:
             side_str = " [%s]" % game.side_to_str(self.side)
         else:
             side_str = ''
@@ -199,7 +199,7 @@ class Challenge(Offer):
         challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.variant_and_speed, time_str)
 
 
-        #if self.board != None:
+        #if self.board is not None:
         #    challenge_str = 'Loaded from a board'
 
         o = next((o for o in a.session.offers_received if
@@ -261,7 +261,7 @@ class Challenge(Offer):
                 self.b_time == other.a_time and
                 self.a_inc == other.b_inc and
                 self.b_inc == other.a_inc and (
-                (self.side == None and other.side == None) or
+                (self.side is None and other.side is None) or
                 (self.side in [WHITE, BLACK] and
                     other.side in [WHITE, BLACK] and
                     self.side != other.side))):
@@ -278,13 +278,13 @@ class Challenge(Offer):
 
     def _set_rated(self, val):
         assert(val in [True, False])
-        if self.rated != None:
+        if self.rated is not None:
             raise command_parser.BadCommandError()
         self.rated = val
     
     def _set_side(self, val):
         assert(val in [WHITE, BLACK])
-        if self.side != None:
+        if self.side is not None:
             raise command_parser.BadCommandError()
         self.side = val
     

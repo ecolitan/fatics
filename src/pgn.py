@@ -23,7 +23,7 @@ class PgnError(Exception):
 class PgnMove(object):
     def __init__(self, text, decorator):
         self.text = text
-        self.decorator = decorator if decorator != None else ''
+        self.decorator = decorator if decorator is not None else ''
         self.comments = []
 
     def add_comment(self, com):
@@ -129,7 +129,7 @@ class PgnGame(object):
 
             m = move_re.match(s, i)
             if m:
-                if m.group(2) != None:
+                if m.group(2) is not None:
                     if '#' in m.group(2):
                         self.is_checkmate = True
                 self.moves.append(PgnMove(m.group(1), m.group(2)))

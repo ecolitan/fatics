@@ -85,7 +85,7 @@ class CommandParser(object):
         for c in param_str:
             if c in ['d', 'i', 'w', 'W']:
                 # required argument
-                if s == None:
+                if s is None:
                     raise BadCommandError()
                 else:
                     s = s.lstrip()
@@ -106,7 +106,7 @@ class CommandParser(object):
                     s = m[1] if len(m) > 1 else None
             elif c in ['o', 'n', 'p']:
                 # optional argument
-                if s == None:
+                if s is None:
                     param = None
                 else:
                     s = s.lstrip()
@@ -125,13 +125,13 @@ class CommandParser(object):
                     s = m[1] if len(m) > 1 else None
             elif c == 'S':
                 # string to end
-                if s == None or len(s) == 0:
+                if s is None or len(s) == 0:
                     raise BadCommandError()
                 param = s
                 s = None
             elif c == 'T' or c == 't':
                 # optional string to end
-                if s == None or len(s) == 0:
+                if s is None or len(s) == 0:
                     param = None
                 else:
                     param = s
@@ -142,7 +142,7 @@ class CommandParser(object):
                 raise InternalException()
             args.append(param)
 
-        if not (s == None or re.match(r'^\s*$', s)):
+        if not (s is None or re.match(r'^\s*$', s)):
             # extraneous data at the end
             raise BadCommandError()
 

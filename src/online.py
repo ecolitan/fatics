@@ -18,7 +18,7 @@ class Online(object):
 
     def is_online(self, name):
         # there's probably a more efficient way
-        return self.find_exact(name) != None
+        return self.find_exact(name) is not None
 
     def find_exact(self, name):
         name = name.lower()

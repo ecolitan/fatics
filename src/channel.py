@@ -51,7 +51,7 @@ class Channel(object):
         user.remove_channel(self.id)
 
     def get_display_name(self):
-        if self.name != None:
+        if self.name is not None:
             return '''%d "%s"''' % (self.id, self.name)
         else:
             return "%d" % self.id

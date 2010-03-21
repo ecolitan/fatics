@@ -101,7 +101,7 @@ class CommandList(object):
         if len(conn.user.session.offers_received) == 0:
             conn.write(_('You have no pending offers from other players.\n'))
             return
-        if args[0] == None:
+        if args[0] is None:
             if len(conn.user.session.offers_received) > 1:
                 conn.write(_('You have more than one pending offer. Use "pending" to see them and "accept n" to choose one.\n'))
                 return
@@ -137,7 +137,7 @@ class CommandList(object):
                 conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
     
     def alias(self, args, conn):
-        if args[0] == None:
+        if args[0] is None:
             # show list of aliases
             if len(conn.user.aliases) == 0:
                 conn.write(_('You have no aliases.\n'))
@@ -156,7 +156,7 @@ class CommandList(object):
         if aname in ['quit', 'unalias']:
             conn.write(_('You cannot use "%s" as an alias.\n') % aname)
             
-        if args[1] == None:
+        if args[1] is None:
             # show alias value
             if aname not in conn.user.aliases:
                 conn.write(_('You have no alias named "%s".\n') % aname)
@@ -245,8 +245,8 @@ class CommandList(object):
         if len(conn.user.session.offers_received) == 0:
             conn.write(_('You have no pending offers from other players.\n'))
             return
-        if args[0] == None:
-            if len(conn.user.session.offers_received) > 1 and args[0] == None:
+        if args[0] is None:
+            if len(conn.user.session.offers_received) > 1 and args[0] is None:
                 conn.write(_('You have more than one pending offer. Use "pending" to see them and "decline n" to choose one.\n'))
                 return
             conn.user.session.offers_received[0].decline()
@@ -254,7 +254,7 @@ class CommandList(object):
             conn.write('TODO: DECLINE PARAM\n')
     
     def draw(self, args, conn):
-        if args[0] == None:
+        if args[0] is None:
             if len(conn.user.session.games) == 0:
                 conn.write(_("You are not playing a game.\n"))
                 return
@@ -265,7 +265,7 @@ class CommandList(object):
 
     def finger(self, args, conn):
         u = None
-        if args[0] != None:
+        if args[0] is not None:
             u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
         else:
             u = conn.user
@@ -276,7 +276,7 @@ class CommandList(object):
                 conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 
             else:
-                if u.last_logout == None:
+                if u.last_logout is None:
                     conn.write(_('%s has never connected.\n\n') % u.name)
                 else:
                     conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
@@ -334,7 +334,7 @@ class CommandList(object):
         conn.write('This server is under development.\n\nRecognized commands: %s\n' % ' '.join(cmds))
 
     def inchannel(self, args, conn):
-        if args[0] != None:
+        if args[0] is not None:
             if type(args[0]) != str:
                 try:
                     ch = channel.chlist.all[args[0]]
@@ -368,7 +368,7 @@ class CommandList(object):
             conn.write(_('Bad value given for ivariable "%s".\n') % v.name)
     
     def ivariables(self, args, conn):
-        if args[0] == None:
+        if args[0] is None:
             u = conn.user
         else:
             u = user.find.by_prefix_for_user(args[0], conn,
@@ -378,7 +378,7 @@ class CommandList(object):
             conn.write(_("Interface variable settings of %s:\n\n") % u.name)
             for (vname, val) in u.session.ivars.iteritems():
                 v = var.ivars[vname]
-                if val != None and v.display_in_vars:
+                if val is not None and v.display_in_vars:
                     conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
 
@@ -411,7 +411,7 @@ class CommandList(object):
    
     def moves(self, args, conn):
         # similar to "refresh"
-        if args[0] != None:
+        if args[0] is not None:
             try:
                 num = int(args[0])
                 if not num in game.games:
@@ -497,7 +497,7 @@ class CommandList(object):
                 conn.write("Player %s removed.\n" % name)
     
     def refresh(self, args, conn):
-        if args[0] != None:
+        if args[0] is not None:
             try:
                 num = int(args[0])
                 if not num in game.games:
@@ -523,7 +523,7 @@ class CommandList(object):
         conn.user.send_board(g.variant)
     
     def resign(self, args, conn):
-        if args[0] != None:
+        if args[0] is not None:
             conn.write('TODO: RESIGN PLAYER\n')
             return
         if len(conn.user.session.games) == 0:
@@ -563,7 +563,7 @@ class CommandList(object):
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
 
     def showlist(self, args, conn):
-        if args[0] == None:
+        if args[0] is None:
             for c in list.lists.itervalues():
                 conn.write('%s\n' % c.name)
             return
@@ -599,7 +599,7 @@ class CommandList(object):
 
     def tell(self, args, conn):
         (u, ch) = self._do_tell(args, conn)
-        if u != None:
+        if u is not None:
             conn.session.last_tell_user = u
         else:
             conn.session.last_tell_ch = ch
@@ -623,7 +623,7 @@ class CommandList(object):
             server.start_time))
 
     def variables(self, args, conn):
-        if args[0] == None:
+        if args[0] is None:
             u = conn.user
         else:
             u = user.find.by_prefix_for_user(args[0], conn)
@@ -632,7 +632,7 @@ class CommandList(object):
             conn.write(_("Variable settings of %s:\n\n") % u.name)
             for (vname, val) in u.vars.iteritems():
                 v = var.vars[vname]
-                if val != None and v.display_in_vars:
+                if val is not None and v.display_in_vars:
                     conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
 
@@ -695,7 +695,7 @@ class CommandList(object):
         if len(conn.user.session.offers_sent) == 0:
             conn.write(_('You have no pending offers to other players.\n'))
             return
-        if args[0] == None:
+        if args[0] is None:
             if len(conn.user.session.offers_sent) > 1:
                 conn.write(_('You have more than one pending offer. Use "pending" to see them and "withdraw n" to choose one.\n'))
                 return
@@ -704,7 +704,7 @@ class CommandList(object):
             conn.write('TODO: WITHDRAW PARAM\n')
     
     def znotify(self, args, conn):
-        if args[0] != None:
+        if args[0] is not None:
             if args[0] != 'n':
                 raise BadCommandError()
             show_idle = True

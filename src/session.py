@@ -26,12 +26,12 @@ class Session(object):
 
     """returns a human-readable string"""
     def get_idle_time(self):
-        assert(self.last_command_time != None)
+        assert(self.last_command_time is not None)
         return timer.hms_words(time.time() - self.last_command_time)
 
     """returns a human-readable string"""
     def get_online_time(self):
-        assert(self.login_time != None)
+        assert(self.login_time is not None)
         return timer.hms_words(time.time() - self.login_time)
         
     def close(self):
@@ -64,7 +64,7 @@ class Session(object):
         self.conn.write(_("Ivars set.\n"))
     
     def set_ivar(self, v, val):
-        if val != None:
+        if val is not None:
             self.ivars[v.name] = val
         else:
             if v.name in self.ivars:

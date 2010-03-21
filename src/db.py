@@ -45,7 +45,7 @@ class DB(object):
         assert(name in dbkeys.keys())
         num = dbkeys[name]
         cursor = self.db.cursor()
-        if val != None:
+        if val is not None:
             cursor.execute("""INSERT INTO formula SET user_id=%s,num=%d,f=%s ON DUPLICATE KEY UPDATE""", (user_id,num,val))
         else:
             cursor.execute("""DELETE FROM formula WHERE user_id=%s AND num=%d""", (user_id,num,val))
@@ -65,7 +65,7 @@ class DB(object):
         num = int(name, 10)
         assert(num >= 1 and num <= 10)
         cursor = self.db.cursor()
-        if val != None:
+        if val is not None:
             cursor.execute("""INSERT INTO note SET user_id=%s,num=%s,txt=%s ON DUPLICATE KEY UPDATE txt=%s""" , (user_id,num,val,val))
         else:
             cursor.execute("""DELETE FROM note WHERE user_id=%s AND num=%s""", (user_id,num))
@@ -76,7 +76,7 @@ class DB(object):
     
     def user_set_alias(self, user_id, name, val):
         cursor = self.db.cursor()
-        if val != None:
+        if val is not None:
             cursor.execute("""INSERT INTO user_alias SET user_id=%s,name=%s,val=%s ON DUPLICATE KEY UPDATE val=%s""" , (user_id,name,val,val))
         else:
             cursor.execute("""DELETE FROM user_alias WHERE user_id=%s AND name=%s""", (user_id,name))

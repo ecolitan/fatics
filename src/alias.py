@@ -178,8 +178,8 @@ class Alias(object):
     def _expand_params(self, alias_str, rest, user):
         # unlike lasker, but like FICS, there is no implicit
         # $@ after simple aliases
-        assert(alias_str != None)
-        if rest == None:
+        assert(alias_str is not None)
+        if rest is None:
             rest = ''
         rest_split = None
         ret = ''
@@ -191,19 +191,19 @@ class Alias(object):
                 # raises an error if beyond the end
                 char = alias_str[i]
                 if char == '@':
-                    ret += rest if rest != None else ''
+                    ret += rest if rest is not None else ''
                 elif char == '-':
                     if i < aliaslen - 1 and alias_str[i + 1].isdigit():
                         # $-n
                         i += 1
-                        if rest_split == None:
+                        if rest_split is None:
                             rest_split = self.space_re.split(rest)
                         d = int(char, 10) - 1
                         ret += ' '.join(rest_split[:d])
                     else:
                         ret += '-'
                 elif char.isdigit():
-                    if rest_split == None:
+                    if rest_split is None:
                         rest_split = self.space_re.split(rest)
                     d = int(char, 10) - 1
                     if i < aliaslen - 1 and alias_str[i + 1] == '-':
@@ -226,11 +226,11 @@ class Alias(object):
                     # XXX
                     pass
                 elif char == '.':
-                    if user.last_tell_user == None:
+                    if user.last_tell_user is None:
                         raise AliasError()
                     ret += user.last_tell_user.name
                 elif char == ',':
-                    if user.last_tell_ch == None:
+                    if user.last_tell_ch is None:
                         raise AliasError()
                     ret += '%s' % user.last_tell_ch
                 elif char == '_':

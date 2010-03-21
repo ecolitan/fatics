@@ -12,11 +12,11 @@ from variant.variant_factory import variant_factory
 
 def opp(side):
     assert side in [WHITE, BLACK]
-    return BLACK if side==WHITE else WHITE
+    return BLACK if side == WHITE else WHITE
 
 def side_to_str(side):
     assert side in [WHITE, BLACK]
-    return "white" if side==WHITE else "black"
+    return "white" if side == WHITE else "black"
 
 def find_free_slot():
     """Find the first available game number."""
@@ -33,8 +33,9 @@ class Game(object):
         self.number = find_free_slot()
         games[self.number] = self
         side = chal.side
-        if side == None:
+        if side is None:
             side = self._pick_color(chal.a, chal.b)
+
         if side == WHITE:
             self.white = chal.a
             self.black = chal.b

@@ -40,6 +40,7 @@ class BaseUser(object):
         self.noplay = set()
         self.session = conn.session
         self.session.set_user(self)
+        self.history = None
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
         notify.notify.users(self, _("Notification: %s has arrived.\n") % self.name)
@@ -61,7 +62,7 @@ class BaseUser(object):
 
     def write_prompt(self, s):
         assert(self.is_online)
-        if s != None:
+        if s is not None:
             self.session.conn.write(s)
         if self.session.ivars['defprompt']:
             self.session.conn.write('fics% ')
@@ -72,14 +73,14 @@ class BaseUser(object):
         return self.name + self.title_str
 
     def set_var(self, v, val):
-        if val != None:
+        if val is not None:
             self.vars[v.name] = val
         else:
             if v.name in self.vars:
                 del self.vars[v.name]
     
     def set_formula(self, v, val):
-        if val != None:
+        if val is not None:
             self.formula[v.name] = val
         else:
             if v.name in self.formula:
@@ -87,14 +88,14 @@ class BaseUser(object):
     
     def set_note(self, v, val):
         num = int(v.name, 10)
-        if val != None:
+        if val is not None:
             self.notes[num] = val
         else:
             if num in self.notes:
                 del self.notes[num]
     
     def set_alias(self, name, val):
-        if val != None:
+        if val is not None:
             self.aliases[name] = val
         else:
             del self.aliases[name]
@@ -277,7 +278,7 @@ class GuestUser(BaseUser):
     def __init__(self, name):
         BaseUser.__init__(self)
         self.is_guest = True
-        if name == None:
+        if name is None:
             count = 0
             while True:
                 self.name = 'Guest'
@@ -300,6 +301,7 @@ class GuestUser(BaseUser):
 
     def log_on(self, conn):
         BaseUser.log_on(self, conn)
+        self.history = []
     
 class AmbiguousException(Exception):
     def __init__(self, names):
