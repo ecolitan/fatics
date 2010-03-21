@@ -269,7 +269,7 @@ class User(BaseUser):
             db.user_add_noplay(self.id, user.id)
 
     def remove_noplay(self, user):
-        BaseUser.remove_censor(self, user)
+        BaseUser.remove_noplay(self, user)
         if not user.is_guest:
             db.user_del_noplay(self.id, user.id)
 

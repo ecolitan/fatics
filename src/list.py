@@ -55,10 +55,9 @@ class TitleList(MyList):
             conn.write(_('%s removed from the %s list.\n') % (u.name, self.name))
     
     def show(self, conn):
-        conn.write('%s: ' % self.name)
-        for user_name in db.title_get_users(self.id):
-            conn.write('%s ' % user_name)
-        conn.write('\n')
+        tlist = db.title_get_users(self.id)
+        conn.write(ngettext('-- %s list: %d name --\n', '-- %s list: %d names --\n', len(tlist)) % (self.name,len(tlist)))
+        conn.write('%s\n' % ' '.join(tlist))
 
 class NotifyList(MyList):
     def add(self, item, conn):
@@ -140,9 +139,29 @@ class CensorList(MyList):
     def show(self, conn):
         cenlist = conn.user.censor
         conn.write(ngettext('-- censor list: %d name --\n', '-- censor list: %d names --\n', len(cenlist)) % len(cenlist))
-        for dbu in cenlist:
-            conn.write('%s ' % dbu['user_name'])
-        conn.write('\n')
+        conn.write('%s\n' % ' '.join(cenlist))
+
+class NoplayList(MyList):
+    def add(self, item, conn):
+        u = user.find.by_name_or_prefix_for_user(item, conn)
+        if u:
+            if u.name in conn.user.noplay:
+                raise ListError(_('%s is already on your noplay list.\n') % u.name)
+            conn.user.add_noplay(u)
+            conn.write(_('%s added to your noplay list.\n') % (u.name))
+
+    def sub(self, item, conn):
+        u = user.find.by_name_or_prefix_for_user(item, conn)
+        if u:
+            if u.name not in conn.user.noplay:
+                raise ListError(_('%s is not on your noplay list.\n') % u.name)
+            conn.user.remove_noplay(u)
+            conn.write(_('%s removed from your noplay list.\n') % (u.name))
+
+    def show(self, conn):
+        noplist = conn.user.noplay
+        conn.write(ngettext('-- noplay list: %d name --\n', '-- noplay list: %d names --\n', len(noplist)) % len(noplist))
+        conn.write('%s\n' % ' '.join(noplist))
 
 """a list of lists"""
 class ListList(object):
@@ -150,7 +169,7 @@ class ListList(object):
         ChannelList("channel")
         NotifyList("notify")
         CensorList("censor")
-        #NoplayList("noplay")
+        NoplayList("noplay")
 
         for title in db.title_get_all():
             TitleList(title['title_id'], title['title_name'], title['title_descr'])

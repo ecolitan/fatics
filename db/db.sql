@@ -142,17 +142,17 @@ CREATE TABLE `user_notify` (
 -- censor lists
 DROP TABLE IF EXISTS `censor`;
 CREATE TABLE censor (
-  `censored` int(8) NOT NULL COMMENT 'id of the user being censored',
   `censorer` int(8) NOT NULL COMMENT 'id of the censoring user',
-  UNIQUE INDEX(`censored`, `censorer`)
+  `censored` int(8) NOT NULL COMMENT 'id of the user being censored',
+  UNIQUE INDEX(`censorer`, `censored`)
 );
 
 -- noplay lists
 DROP TABLE IF EXISTS `noplay`;
 CREATE TABLE noplay (
-  `noplayed` int(8) NOT NULL COMMENT 'id of the user being noplayed',
   `noplayer` int(8) NOT NULL COMMENT 'id of the noplaying user',
-  UNIQUE INDEX(`noplayed`, `noplayer`)
+  `noplayed` int(8) NOT NULL COMMENT 'id of the user being noplayed',
+  UNIQUE INDEX(`noplayer`, `noplayed`)
 );
 
 -- user aliases  

@@ -222,7 +222,7 @@ class DB(object):
         return rows
     
     # censor
-    def user_add_censor(self, censored, censorer):
+    def user_add_censor(self, censorer, censored):
         cursor = self.db.cursor()
         try:
             cursor.execute("""INSERT INTO censor SET censored=%s,censorer=%s""", (censored,censorer))
@@ -231,7 +231,7 @@ class DB(object):
         finally:
             cursor.close()
     
-    def user_del_censor(self, censored, censorer):
+    def user_del_censor(self, censorer, censored):
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM censor WHERE censored=%s AND censorer=%s""", (censored,censorer))
         if cursor.rowcount != 1:
@@ -247,7 +247,7 @@ class DB(object):
         return rows
 
     # noplay
-    def user_add_noplay(self, noplayed, noplayer):
+    def user_add_noplay(self, noplayer, noplayed):
         cursor = self.db.cursor()
         try:
             cursor.execute("""INSERT INTO noplay SET noplayed=%s,noplayer=%s""", (noplayed,noplayer))
@@ -256,7 +256,7 @@ class DB(object):
         finally:
             cursor.close()
     
-    def user_del_noplay(self, noplayed, noplayer):
+    def user_del_noplay(self, noplayer, noplayed):
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM noplay WHERE noplayed=%s AND noplayer=%s""", (noplayed,noplayer))
         if cursor.rowcount != 1:
