@@ -21,9 +21,13 @@ class Channel(object):
 
     def tell(self, msg, user):
         msg = '%s(%s): %s\n' % (user.get_display_name(), self.id, msg)
+        count = 0
+        name = user.name
         for u in self.online:
-            u.write(msg)
-        return len(self.online)
+            if not name in u.censor:
+                u.write(msg)
+                count += 1
+        return count
 
     def log_on(self, user):
         self.online.append(user)

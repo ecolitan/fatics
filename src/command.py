@@ -220,16 +220,19 @@ class CommandList(object):
     def cshout(self, args, conn):
         if conn.user.is_guest:
             conn.write(_("Only registered players can use the cshout command.\n"))
+        elif not conn.user.vars['cshout']:
+            conn.write(_("(Did not c-shout because you are not listening to c-shouts)\n"))
         else:
             count = 0
-            name = conn.user.get_display_name()
+            name = conn.user.name
+            dname = conn.user.get_display_name()
             for u in online.itervalues():
                 if u.vars['cshout']:
-                    u.write_prompt(_("%s c-shouts: %s\n") % (name, args[0]))
-                    count += 1
+                    if not name in u.censor:
+                        u.write_prompt(_("%s c-shouts: %s\n") %
+                            (dname, args[0]))
+                        count += 1
             conn.write(ngettext("(c-shouted to %d player)\n", "(c-shouted to %d players)\n", count) % count)
-            if not conn.user.vars['cshout']:
-                conn.write(_("(did not cshout because you are not listening to cshouts)\n"))
 
     def date(self, args, conn):
         t = time.time()
@@ -546,16 +549,18 @@ class CommandList(object):
     def shout(self, args, conn):
         if conn.user.is_guest:
             conn.write(_("Only registered players can use the shout command.\n"))
+        elif not conn.user.vars['shout']:
+            conn.write(_("(Did not shout because you are not listening to shouts)\n"))
         else:
             count = 0
-            name = conn.user.get_display_name()
+            name = conn.user.name
+            dname = conn.user.get_display_name()
             for u in online.itervalues():
                 if u.vars['shout']:
-                    u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
-                    count += 1
+                    if not name in u.censor:
+                        u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
+                        count += 1
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
-            if not conn.user.vars['shout']:
-                conn.write(_("(did not shout because you are not listening to shouts)\n"))
 
     def showlist(self, args, conn):
         if args[0] == None:
@@ -660,7 +665,7 @@ class CommandList(object):
                     conn.write(_('Invalid channel number.\n'))
                 else:
                     if conn.user not in ch.online:
-                        conn.user.write(_('''(Not sent; you are not in channel %s.)\n''') % ch.id)
+                        conn.user.write(_('''(Not sent because you are not in channel %s.)\n''') % ch.id)
                         ch = None
             else:
                 u = user.find.by_name_or_prefix_for_user(args[0], conn, online_only=True)

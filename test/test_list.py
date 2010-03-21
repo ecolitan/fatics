@@ -145,9 +145,20 @@ class TestCensor(Test):
 
             t = self.connect_as_admin()
             t2 = self.connect_as_user('TestPlayer', 'test')
+            t.write('+ch 1\n')
+            t2.write('+ch 1\n')
 
             t2.write('t Admin hey there!\n')
             self.expect("admin is censoring you.", t2)
+
+            t2.write('shout anybody there?\n')
+            self.expect("shouted to 1 player", t2)
+
+            t2.write('cshout or there?\n')
+            self.expect("c-shouted to 1 player", t2)
+            
+            t2.write('tell 1 or in ch 1\n')
+            self.expect("(told 1 player in channel 1)", t2)
 
             t.write('-cen testplayer\n')
             self.expect('TestPlayer removed from your censor list.', t)
@@ -155,8 +166,13 @@ class TestCensor(Test):
             t.write('-cen testplayer\n')
             self.expect('TestPlayer is not on your censor list.', t)
             
-            t2.write('t admin test 123\n')
+            t2.write('shout test 123\n')
+            self.expect("(shouted to 2 players)", t2)
             self.expect('test 123', t)
+            
+            t2.write('tell 1 456 789\n')
+            self.expect("(told 2 players in channel 1)", t2)
+            self.expect('TestPlayer(1): 456 789', t)
 
             self.close(t)
 
@@ -164,6 +180,8 @@ class TestCensor(Test):
             t2.write('t admin test 123\n')
             self.expect('test 123', t)
         
+            t.write('-ch 1\n')
+            t2.write('-ch 1\n')
             self.close(t)
             self.close(t2)
 
