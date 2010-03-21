@@ -27,7 +27,7 @@ class TitleList(MyList):
     def add(self, item, conn):
         if conn.user.admin_level < admin.level.admin:
             raise ListError(_("You don't have permission to do that.\n"))
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(_("Only registered users may have titles.\n"))
@@ -43,7 +43,7 @@ class TitleList(MyList):
     def sub(self, item, conn):
         if conn.user.admin_level < admin.level.admin:
             raise ListError(_("You don't have permission to do that.\n"))
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(_("Only registered users may have titles.\n"))
@@ -61,7 +61,7 @@ class TitleList(MyList):
 
 class NotifyList(MyList):
     def add(self, item, conn):
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.name in conn.user.notifiers:
                 raise ListError(_('%s is already on your notify list.\n')
@@ -71,7 +71,7 @@ class NotifyList(MyList):
 
     def sub(self, item, conn):
         # would it be better to only search the notify list?
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.notifiers:
                 raise ListError(_('%s is not on your notify list.\n') % u.name)
@@ -121,7 +121,7 @@ class ChannelList(MyList):
 
 class CensorList(MyList):
     def add(self, item, conn):
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.name in conn.user.censor:
                 raise ListError(_('%s is already on your censor list.\n') % u.name)
@@ -129,7 +129,7 @@ class CensorList(MyList):
             conn.write(_('%s added to your censor list.\n') % (u.name))
 
     def sub(self, item, conn):
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.censor:
                 raise ListError(_('%s is not on your censor list.\n') % u.name)
@@ -143,7 +143,7 @@ class CensorList(MyList):
 
 class NoplayList(MyList):
     def add(self, item, conn):
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.name in conn.user.noplay:
                 raise ListError(_('%s is already on your noplay list.\n') % u.name)
@@ -151,7 +151,7 @@ class NoplayList(MyList):
             conn.write(_('%s added to your noplay list.\n') % (u.name))
 
     def sub(self, item, conn):
-        u = user.find.by_name_or_prefix_for_user(item, conn)
+        u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.noplay:
                 raise ListError(_('%s is not on your noplay list.\n') % u.name)

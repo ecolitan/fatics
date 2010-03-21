@@ -327,7 +327,7 @@ class Find(object):
     """Find a user but allow the name to abbreviated if
     it is unambiguous; if the name is not an exact match, prefer
     online users to offline"""
-    def by_name_or_prefix(self, name, online_only=False):
+    def by_prefix(self, name, online_only=False):
         u = None
         if len(name) >= config.min_login_name_len:
             u = self.by_name_exact(name, 2, online_only=online_only)
@@ -350,15 +350,15 @@ class Find(object):
                 raise AmbiguousException([u['user_name'] for u in ulist])
         return u
 
-    """Like by_name_or_prefix(), but writes an error message
+    """Like by_prefix(), but writes an error message
     on failure."""
-    def by_name_or_prefix_for_user(self, name, conn, min_len=0, online_only=False):
+    def by_prefix_for_user(self, name, conn, min_len=0, online_only=False):
         u = None
         try:
             if len(name) < min_len:
                 conn.write(_('You need to specify at least %d characters of the name.\n') % min_len)
             else:
-                u = self.by_name_or_prefix(name, online_only=online_only)
+                u = self.by_prefix(name, online_only=online_only)
                 if online_only:
                     if not u:
                         conn.write(_('No user named "%s" is logged in.\n') % name)

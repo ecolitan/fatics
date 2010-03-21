@@ -27,7 +27,7 @@ class TestZipseal(Test):
         [out, err] = process.communicate()
         self.assert_('fics%' in out)
         self.assert_('Finger of admin' in out)
-        self.assert_('Zipseal: On' in out)
+        self.assert_('Zipseal:     On' in out)
         self.assert_('''tells you: Les naïfs ægithales hâtifs pondant à Noël où il gèle sont sûrs d'être déçus et de voir leurs drôles d'œufs abîmés''' in out)
         self.assert_('Thank you for using' in out)
 

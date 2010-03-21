@@ -39,7 +39,7 @@ void decrypt(char *s)
 	// first a consistency check
 	// decode the string
 	strcpy(tmp,s);
-	tmp_time=strrchr(tmp,'\xfe');
+	tmp_time=strrchr(tmp,'\x18');
 	if (!tmp_time) goto malformed_message;
 	*tmp_time++ = 0;
 	// find the timestamp end

@@ -35,7 +35,7 @@ int crypt(char *s,int l)
 {
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
-	s[l++]='\xfe';
+	s[l++]='\x18';
 	l+=sprintf(&s[l],"%lx",(tv.tv_sec%10000)*1000+tv.tv_usec/1000);
 	s[l++]='\x0a';
 	return l;

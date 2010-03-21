@@ -266,7 +266,7 @@ class CommandList(object):
     def finger(self, args, conn):
         u = None
         if args[0] != None:
-            u = user.find.by_name_or_prefix_for_user(args[0], conn, min_len=2)
+            u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
         else:
             u = conn.user
         if u:
@@ -293,11 +293,11 @@ class CommandList(object):
                
             if u.is_online:
                 if u.session.use_timeseal:
-                    conn.write(_('Timeseal: On\n'))
+                    conn.write(_('Timeseal:    On\n'))
                 elif u.session.use_zipseal:
-                    conn.write(_('Zipseal: On\n'))
+                    conn.write(_('Zipseal:     On\n'))
                 else:
-                    conn.write(_('Zipseal: Off\n'))
+                    conn.write(_('Zipseal:     Off\n'))
 
             notes = u.notes
             if len(notes) > 0:
@@ -371,7 +371,7 @@ class CommandList(object):
         if args[0] == None:
             u = conn.user
         else:
-            u = user.find.by_name_or_prefix_for_user(args[0], conn,
+            u = user.find.by_prefix_for_user(args[0], conn,
                 online_only=True)
 
         if u:
@@ -386,7 +386,7 @@ class CommandList(object):
         if len(conn.user.session.games) != 0:
             conn.write(_("You can't challenge while you are playing a game.\n"))
             return
-        u = user.find.by_name_or_prefix_for_user(args[0], conn, online_only=True)
+        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
         if not u:
             return
         if u == conn.user:
@@ -420,7 +420,7 @@ class CommandList(object):
                 g = game.games[num]
             except ValueError:
                 # user name
-                u = user.find.by_name_or_prefix_for_user(args[0], conn,
+                u = user.find.by_prefix_for_user(args[0], conn,
                     online_only=True)
                 if not u:
                     return
@@ -506,7 +506,7 @@ class CommandList(object):
                 g = game.games[num]
             except ValueError:
                 # user name
-                u = user.find.by_name_or_prefix_for_user(args[0], conn,
+                u = user.find.by_prefix_for_user(args[0], conn,
                     online_only=True)
                 if not u:
                     return
@@ -626,7 +626,7 @@ class CommandList(object):
         if args[0] == None:
             u = conn.user
         else:
-            u = user.find.by_name_or_prefix_for_user(args[0], conn)
+            u = user.find.by_prefix_for_user(args[0], conn)
 
         if u:
             conn.write(_("Variable settings of %s:\n\n") % u.name)
@@ -668,7 +668,7 @@ class CommandList(object):
                         conn.user.write(_('''(Not sent because you are not in channel %s.)\n''') % ch.id)
                         ch = None
             else:
-                u = user.find.by_name_or_prefix_for_user(args[0], conn, online_only=True)
+                u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
 
         if ch:
             count = ch.tell(args[1], conn.user)

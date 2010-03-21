@@ -25,7 +25,7 @@ class TestTimeseal(Test):
         [out, err] = process.communicate()
         self.assert_('fics%' in out)
         self.assert_('Finger of admin' in out)
-        self.assert_('Timeseal: On\r\n' in out)
+        self.assert_('Timeseal:    On\r\n' in out)
         self.assert_('Thank you for using' in out)
 
 class TestTimesealWindows(Test):
@@ -43,7 +43,7 @@ class TestTimesealWindows(Test):
         [out, err] = process.communicate()
         self.assert_('fics%' in out)
         self.assert_('Finger of admin' in out)
-        self.assert_('Timeseal: On\r\n' in out)
+        self.assert_('Timeseal:    On\r\n' in out)
         self.assert_('Thank you for using' in out)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
