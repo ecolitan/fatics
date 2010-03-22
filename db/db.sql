@@ -129,7 +129,44 @@ CREATE TABLE `user_title` (
   `title_id` int(8) NOT NULL,
   `display` BOOLEAN DEFAULT 1 COMMENT 'admin light, tm light, etc.',
   UNIQUE INDEX(`user_id`,`title_id`)
-);
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- game
+DROP TABLE IF EXISTS `game`;
+CREATE TABLE `game` (
+  `game_id` int(8) NOT NULL AUTO_INCREMENT,
+  `white_id` int(8) NOT NULL,
+  `white_rating` smallint(4),
+  `black_id` int(8) NOT NULL,
+  `black_rating` smallint(4),
+  `eco` char(5) NOT NULL,
+  `variant` ENUM('normal', 'crazyhouse') NOT NULL,
+  `speed` ENUM ('lightning', 'blitz', 'standard', 'slow', 'correspondence')
+    NOT NULL,
+  `private` BOOLEAN NOT NULL DEFAULT 0,
+  `initial_time` int(3),
+  `inc` int(3) COMMENT 'increment',
+  `result` ENUM('1-0', '0-1', '1/2-1/2', '*') NOT NULL, 
+  `rated` BOOLEAN NOT NULL,
+  `result_code` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Rep', 'Res',
+    'TM', 'WLM', 'WNM', '50') NOT NULL,
+  `when_ended` datetime NOT NULL,
+  INDEX(`white_id`),
+  INDEX(`black_id`),
+  INDEX(`when_ended`),
+  PRIMARY KEY (`game_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- ECO codes
+-- use import-eco.py to populate 
+DROP TABLE IF EXISTS `eco`;
+CREATE TABLE `eco` (
+  `eco_id` int(4) NOT NULL AUTO_INCREMENT,
+  `eco` char(5) NOT NULL,
+  `long_` varchar(128) NOT NULL,
+  `moves` varchar(255) NOT NULL UNIQUE,
+  PRIMARY KEY (`eco_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
 -- notifications
 DROP TABLE IF EXISTS `user_notify`;
