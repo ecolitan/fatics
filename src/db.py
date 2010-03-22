@@ -285,6 +285,16 @@ class DB(object):
         cursor.close()
         return [r[0] for r in rows]
 
+    # eco
+    def get_eco(self, moves):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT eco,long_,moves FROM eco WHERE LOCATE(moves, %s)=1 ORDER BY LENGTH(moves) DESC LIMIT 1""", moves)
+        row = cursor.fetchone()
+        cursor.close()
+        assert(row is not None)
+        return row
+
+
 db = DB()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -19,6 +19,7 @@ def main():
     count = 0
     txt = None
     for line in f:
+        line = line.decode('iso-8859-1').encode('utf-8')
         line = line.rstrip()
         if not line or line.startswith('#'):
             continue
@@ -30,11 +31,14 @@ def main():
             txt += ' ' + line.lstrip()
         if '*' in txt:
             txt = txt.rstrip()
-            m = re.match('([A-Z]\d\d.*) +"(.*)" +(.*)\s+\*', txt)
+            m = re.match(r'([A-Z]\d\d.*) +"(.*)" +(.*)\s+\*', txt)
             if not m:
                 print 'failed to match: %s' % txt
             assert(m)
-            cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, moves=%s""", (m.group(1), m.group(2), m.group(3)))
+            (eco, long, moves) = (m.group(1), m.group(2), m.group(3))
+            moves = re.sub(r'\d+\. *', '', moves)
+            cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, moves=%s""",
+                (eco,long,moves))
             count += 1
             txt = None
     cursor.close()

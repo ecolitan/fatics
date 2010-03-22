@@ -4,7 +4,9 @@ import time
 (WHITE, BLACK) = range(2)
 
 import clock
+import history
 from timer import timer
+from db import db
 
 games = {}
 
@@ -175,14 +177,16 @@ class Game(object):
             assert(side == BLACK)
             self.result('%s resigns' % user.name, '1-0')
 
-    def result(self, msg, code):
+    def result(self, msg, result):
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
-            self.white.name, self.black.name, msg, code)
+            self.white.name, self.black.name, msg, result)
         self.white.write_prompt(line)
         self.black.write_prompt(line)
         
         self.clock.stop()
         self.is_active = False
+        if result != '*':
+            history.history.save(self, msg, result)
         self.free()
 
     def free(self):
@@ -191,6 +195,21 @@ class Game(object):
         del games[self.number]
         del self.white.session.games[self.black.name]
         del self.black.session.games[self.white.name]
+
+    def get_moves(self, limit=None):
+        ret = []
+        i = self.variant.pos.start_ply
+        while i < self.variant.pos.ply:
+            ret.append(self.variant.pos.history.get_move(i).to_san())
+            i += 1
+            if limit is not None and i > limit:
+                break
+        return ret
+
+    def get_eco(self):
+        moves = self.get_moves(limit=36)
+        row = db.get_eco(' '.join(moves))
+        return (row['eco'], row['long_'])
 
     def write_moves(self, conn):
         # don't translate for now since clients parse these messages

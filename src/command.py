@@ -49,6 +49,7 @@ class CommandList(object):
         self._add(Command('date', '', self.date, admin.Level.user))
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
         self._add(Command('draw', 'o', self.draw, admin.Level.user))
+        self._add(Command('eco', 't', self.eco, admin.Level.user))
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
         self._add(Command('flag', '', self.flag, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
@@ -262,6 +263,19 @@ class CommandList(object):
             offer.Draw(g, conn.user)
         else:
             conn.write('TODO: DRAW PARAM\n')
+    
+    def eco(self, args, conn):
+        if args[0] is None:
+            if len(conn.user.session.games) == 0:
+                conn.write(_("You are not playing, examining, or observing a game.\n"))
+                return
+            g = conn.user.session.games.values()[0]
+            (eco, long) = g.get_eco()
+            conn.write(_('Eco for game %d (%s vs. %s):\n') % (g.number, g.white.name, g.black.name))
+            conn.write(_(' ECO[   ]: %s\n') % eco)
+            conn.write(_('LONG[   ]: %s\n') % long)
+        else:
+            conn.write('TODO: ECO PARAM\n')
 
     def finger(self, args, conn):
         u = None
