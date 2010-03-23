@@ -261,6 +261,13 @@ class Move(object):
             self._san = self._to_san()
         return self._san
 
+    def add_san_decorator(self):
+        assert(self._san is not None)
+        if self.pos.is_checkmate:
+            self._san += '#'
+        elif self.pos.in_check:
+            self._san += '+'
+
     def _to_san(self):
         if self.is_oo:
             san = 'O-O'
@@ -1195,6 +1202,7 @@ class Normal(Variant):
                 mv.to_san()
                 self.pos.make_move(mv)
                 self.pos.detect_check()
+                mv.add_san_decorator()
                 self.game.next_move()
 
         return mv or illegal

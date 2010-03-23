@@ -1,4 +1,4 @@
-all: openseal openseal_decoder zipseal zipseal_decoder
+all: openseal openseal_decoder zipseal zipseal_decoder compress
 
 openseal: openseal.c
 	$(CC) -o openseal openseal.c
@@ -11,6 +11,9 @@ zipseal: zipseal.c
 
 zipseal_decoder: zipseal_decoder.c
 	$(CC) -Wall -g -o zipseal_decoder zipseal_decoder.c
+
+compress: compress.c
+	$(CC) -lz -g -Wall -o compress compress.c
 
 clean:
 	rm -f openseal openseal_decoder zipseal zipseal_decoder

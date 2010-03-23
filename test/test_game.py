@@ -107,8 +107,9 @@ class TestGame(Test):
         moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
             'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',
             'Rxa7','c7', 'Nc6', 'c8', 'Nd8', 'Qxd8']
+        self._assert_game_is_legal(moves)
 
-    def test_san(self):
+    def test_san_basic(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
         
@@ -127,6 +128,66 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
     
+    def test_san_check(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('e4\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        
+        t2.write('e5\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        
+        t.write('f3\n')
+        self.expect('<12> ', t)
+        self.expect('f3', t)
+        self.expect('<12> ', t2)
+        self.expect('f3', t2)
+        
+        t2.write('Qh4\n')
+        self.expect('Qh4+', t)
+        self.expect('Qh4+', t2)
+
+        self.close(t)
+        self.close(t2)
+    
+    def test_san_checkmate(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('f3\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        
+        t2.write('e5\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        
+        t.write('g4\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        
+        t2.write('Qh4\n')
+        self.expect('Qh4#', t)
+        self.expect('Qh4#', t2)
+
+        self.close(t)
+        self.close(t2)
+
     def test_draw_repetition(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()

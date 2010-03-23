@@ -1,36 +1,29 @@
 #!/usr/bin/env python
 
-"""This is a script to read a database of ECO openings in the
-format used by scid and insert into the database in the
-format the server expects."""
+"""This is a script to read a database of ECO openings in EPD format
+and insert into the database in the format the server expects.  The
+EPD file I use comes from scid by way of its eco2epd tool. """
 
 import MySQLdb
 import re
+import variant.normal
 
-eco_file = 'data/scid.eco'
+epd_file = 'data/scid.epd'
 
 def main():
     db = MySQLdb.connect(host='localhost', db='chess',
         read_default_file="~/.my.cnf")
     cursor = db.cursor()
 
-    f = open(eco_file, 'r')
+    f = open(epd_file, 'r')
 
     count = 0
     txt = None
     for line in f:
         line = line.decode('iso-8859-1').encode('utf-8')
-        line = line.rstrip()
+        line = line.strip()
         if not line or line.startswith('#'):
             continue
-        if txt is None:
-            assert(not line.startswith(' '))
-            txt = line
-        else:
-            assert(line.startswith(' '))
-            txt += ' ' + line.lstrip()
-        if '*' in txt:
-            txt = txt.rstrip()
             m = re.match(r'([A-Z]\d\d.*) +"(.*)" +(.*)\s+\*', txt)
             if not m:
                 print 'failed to match: %s' % txt
