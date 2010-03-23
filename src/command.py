@@ -270,7 +270,7 @@ class CommandList(object):
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
                 return
             g = conn.user.session.games.values()[0]
-            (eco, long) = g.get_eco()
+            (ply, eco, long) = g.get_eco()
             conn.write(_('Eco for game %d (%s vs. %s):\n') % (g.number, g.white.name, g.black.name))
             conn.write(_(' ECO[   ]: %s\n') % eco)
             conn.write(_('LONG[   ]: %s\n') % long)

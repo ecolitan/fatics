@@ -17,6 +17,7 @@ def main():
 
     f = open(epd_file, 'r')
 
+    cursor.execute("""DELETE FROM eco""")
     count = 0
     txt = None
     for line in f:
@@ -24,16 +25,15 @@ def main():
         line = line.strip()
         if not line or line.startswith('#'):
             continue
-            m = re.match(r'([A-Z]\d\d.*) +"(.*)" +(.*)\s+\*', txt)
-            if not m:
-                print 'failed to match: %s' % txt
-            assert(m)
-            (eco, long, moves) = (m.group(1), m.group(2), m.group(3))
-            moves = re.sub(r'\d+\. *', '', moves)
-            cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, moves=%s""",
-                (eco,long,moves))
-            count += 1
-            txt = None
+        m = re.match(r'(.+) +eco +([A-Z]\d\d\S*) +(.+);', line)
+        if not m:
+            print 'failed to match: %s' % line
+        assert(m)
+        (fen, eco, long) = (m.group(1), m.group(2), m.group(3))
+        pos = variant.normal.Position(fen + ' 0 1')
+        cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, hash=%s""",
+            (eco,long,pos.hash))
+        count += 1
     cursor.close()
     print 'imported %d codes' % count
     

@@ -8,7 +8,8 @@ import copy
 import random
 from array import array
 
-import game
+#from game import WHITE, BLACK
+(WHITE, BLACK) = range(2)
 from variant import Variant
 from timer import timer
 
@@ -116,6 +117,7 @@ class Zobrist(object):
     def piece_hash(self, sq, pc):
         assert((0xf << 7) & sq == 0)
         assert(valid_sq(sq))
+        #print 'hashing %s at %s' % (pc, sq_to_str(sq))
         return self._piece[(self._piece_index[pc] << 7) | sq]
 
     def ep_hash(self, ep):
@@ -370,7 +372,7 @@ class Position(object):
         self.set_pos(fen)
 
     set_pos_re = re.compile(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''')
-    def set_pos(self, fen):
+    def set_pos(self, fen, detect_check=True):
         """Set the position from Forsyth-Fdwards notation.  The format
         is intentionally interpreted strictly; better to give the user an
         error than take in bad data."""
@@ -390,7 +392,7 @@ class Position(object):
                 sq = 0x10 * r
                 for c in rank_str:
                     d = '12345678'.find(c)
-                    if d > 0:
+                    if d >= 0:
                         sq += d + 1
                     else:
                         assert(valid_sq(sq))
@@ -454,33 +456,39 @@ class Position(object):
                         if b_ooo:
                             raise BadFenError()
                         b_ooo = True
-
                 self.castle_flags = to_castle_flags(w_oo, w_ooo,
                     b_oo, b_ooo)
-
             self.hash ^= zobrist.castle_hash(self.castle_flags)
-
+           
+            self.fifty_count = int(fifty_count, 10)
+            self.ply = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
+            self.start_ply = self.ply
+            
             if ep == '-':
                 self.ep = None
             else:
                 # only set ep if there is a legal capture
-                self.ep = ep[0].index('abcdefgh') + \
-                    0x10 * ep[1].index('012345678')
-                if self._is_legal_ep(self.ep):
-                    self.hash ^= zobrist.ep_hash(self.ep)
-                else:
+                self.ep = 'abcdefgh'.index(ep[0]) + \
+                    0x10 * '1234567'.index(ep[1])
+                if rank(self.ep) not in (2, 5):
+                    raise BadFenError('bad en passant square')
+                self.hash ^= zobrist.ep_hash(self.ep)
+                # legality checking needs a value for in_check
+                self.in_check = None
+                if not self._is_legal_ep(self.ep):
+                    # undo the en passant square
                     self.ep = None
+                    self.hash ^= zobrist.ep_hash(self.ep)
 
-            self.fifty_count = int(fifty_count, 10)
-            self.ply = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
-            self.start_ply = self.ply
             assert(self.hash == self._compute_hash())
             self.history.set_hash(self.ply, self.hash)
 
-            self.detect_check()
-            if self.is_checkmate or self.is_stalemate \
-                    or self.is_draw_nomaterial:
-                raise BadFenError('got a terminal position')
+            if detect_check:
+                self.detect_check()
+                if self.is_checkmate or self.is_stalemate \
+                        or self.is_draw_nomaterial:
+                    raise BadFenError('got a terminal position')
+
 
         except AssertionError:
             raise
@@ -712,6 +720,8 @@ class Position(object):
         return self.history.get_move(self.ply - 1)
 
     def _any_legal_moves(self):
+        if self.ep:
+            return True
         ksq = self.king_pos[self.wtm]
         if self._any_pc_moves(ksq, self.board[ksq]):
             return True
@@ -727,8 +737,7 @@ class Position(object):
         if not valid_sq(sq):
             return False
         pc = self.board[sq]
-        return (pc != '-' and piece_is_white(pc) != self.wtm) or \
-            self.ep == sq
+        return pc != '-' and piece_is_white(pc) != self.wtm
     
     def _any_pc_moves(self, sq, pc):
         if pc == 'P':
@@ -1098,7 +1107,7 @@ class Position(object):
         #
         # The old fics grants the draw request, unreasonably in my 
         # opinion.  My change should close the loophole.
-        if self.ply > 8 and (side == game.WHITE) == self.wtm:
+        if self.ply > 8 and (side == WHITE) == self.wtm:
             count = 0
             hash = self.history.get_hash(self.ply - 1)
             i = self.ply - 5
@@ -1189,7 +1198,7 @@ class Normal(Variant):
             illegal = True
             
         if mv or illegal:
-            if (self.game.get_user_side(conn.user) == game.WHITE) != \
+            if (self.game.get_user_side(conn.user) == WHITE) != \
                     self.pos.wtm:
                 #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.pos.wtm)
                 conn.write(_('It is not your move.\n'))
@@ -1208,7 +1217,7 @@ class Normal(Variant):
         return mv or illegal
     
     def get_turn(self):
-        return game.WHITE if self.pos.wtm else game.BLACK
+        return WHITE if self.pos.wtm else BLACK
 
     def to_style12(self, user):
         """returns a style12 string for a given user"""

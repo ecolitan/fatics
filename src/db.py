@@ -286,9 +286,9 @@ class DB(object):
         return [r[0] for r in rows]
 
     # eco
-    def get_eco(self, moves):
+    def get_eco(self, hash):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT eco,long_,moves FROM eco WHERE LOCATE(moves, %s)=1 ORDER BY LENGTH(moves) DESC LIMIT 1""", moves)
+        cursor.execute("""SELECT eco,long_ FROM eco WHERE hash=%s""", hash)
         row = cursor.fetchone()
         cursor.close()
         assert(row is not None)

@@ -196,20 +196,20 @@ class Game(object):
         del self.white.session.games[self.black.name]
         del self.black.session.games[self.white.name]
 
-    def get_moves(self, limit=None):
-        ret = []
-        i = self.variant.pos.start_ply
-        while i < self.variant.pos.ply:
-            ret.append(self.variant.pos.history.get_move(i).to_san())
-            i += 1
-            if limit is not None and i > limit:
-                break
-        return ret
-
     def get_eco(self):
-        moves = self.get_moves(limit=36)
-        row = db.get_eco(' '.join(moves))
-        return (row['eco'], row['long_'])
+        i = min(self.variant.pos.ply, 36)
+        row = None
+        while i >= self.variant.pos.start_ply:
+            hash = self.variant.pos.history.get_hash(i)
+            row = db.get_eco(hash)
+            if row:
+                break
+            i -= 1
+        if row:
+            ret = (i, row['eco'], row['long_'])
+        else:
+            ret = (0, 'A00', 'Unknown')
+        return ret
 
     def write_moves(self, conn):
         # don't translate for now since clients parse these messages

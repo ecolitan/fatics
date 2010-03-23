@@ -164,7 +164,7 @@ CREATE TABLE `eco` (
   `eco_id` int(4) NOT NULL AUTO_INCREMENT,
   `eco` char(5) NOT NULL,
   `long_` varchar(128) NOT NULL,
-  `moves` varchar(255) NOT NULL UNIQUE,
+  `hash` bigint(12) UNSIGNED NOT NULL UNIQUE,
   PRIMARY KEY (`eco_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
