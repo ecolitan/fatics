@@ -291,7 +291,6 @@ class DB(object):
         cursor.execute("""SELECT eco,long_ FROM eco WHERE hash=%s""", hash)
         row = cursor.fetchone()
         cursor.close()
-        assert(row is not None)
         return row
 
 
