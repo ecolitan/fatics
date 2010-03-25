@@ -73,8 +73,9 @@ const char *filename = "fromfics2.txt";
 int main(int argc, char *argv[])
 {
     FILE *fpIn;
-    bit_file_t *bfpOut;
+    bit_file_t bfpOut;
     huffman_node_t *huffmanTree;        /* root of huffman tree */
+    char outBuf[1024];
 
     /* open binary input file and bitfile output file */
     if ((fpIn = fopen(filename, "rb")) == NULL)
@@ -83,13 +84,16 @@ int main(int argc, char *argv[])
         return FALSE;
     }
 
-    bfpOut = MakeBitFile(stdout, BF_WRITE);
+    bfpOut.mode = BF_WRITE;
+    bfpOut.buf = outBuf;
+    bfpOut.bufLen = sizeof(outBuf);
+    BitFileInit(&bfpOut);
 
     /* build tree */
     if ((huffmanTree = GenerateTreeFromFile(fpIn)) == NULL)
     {
         fclose(fpIn);
-        BitFileClose(bfpOut);
+        BitFileClose(&bfpOut);
         return FALSE;
     }
 
@@ -97,12 +101,12 @@ int main(int argc, char *argv[])
     if (!BuildCanonicalCode(huffmanTree, canonicalList))
     {
         fclose(fpIn);
-        BitFileClose(bfpOut);
+        BitFileClose(&bfpOut);
         FreeHuffmanTree(huffmanTree);     /* free allocated memory */
         return FALSE;
     }
 
-    WriteHeader(canonicalList, bfpOut);
+    WriteHeader(canonicalList, &bfpOut);
 
     return TRUE;
 }

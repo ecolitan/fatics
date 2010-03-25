@@ -115,36 +115,50 @@ int CHuffmanInit(int for_encode)
     return TRUE;
 }
 
-int CHuffmanEncode(char *inBuf, unsigned int inBytes, FILE *fpOut)
+int CHuffmanEncode(char *inBuf, unsigned int inBytes, char *outBuf,
+	int outSize)
 {
-    bit_file_t *bfpOut;
+    bit_file_t bfpOut;
     int c, i;
 
-    bfpOut = MakeBitFile(fpOut, BF_WRITE);
+
+    bfpOut.buf = outBuf;
+    bfpOut.bufLen = outSize;
+    bfpOut.mode = BF_WRITE;
+    BitFileInit(&bfpOut);
 
     /* read characters from file and write them to encoded file */
     for (i = 0; i < inBytes; i++) {
 	c = inBuf[i];
         /* write encoded symbols */
-        BitFilePutBits(bfpOut,
+        if (BitFilePutBits(&bfpOut,
             BitArrayGetBits(canonicalList[c].code),
-            canonicalList[c].codeLen);
+            canonicalList[c].codeLen) == EOF)
+        {
+            fprintf(stderr, "buffer full writing\n");
+            exit(1);
+        }
     }
 
     /* now write EOF */
-    BitFilePutBits(bfpOut,
+    if (BitFilePutBits(&bfpOut,
         BitArrayGetBits(canonicalList[EOF_CHAR].code),
-        canonicalList[EOF_CHAR].codeLen);
+        canonicalList[EOF_CHAR].codeLen) == EOF)
+    {
+            fprintf(stderr, "buffer full writing\n");
+            exit(1);
+    }
 
     /* clean up */
-    BitFileClose(bfpOut);
+    BitFileClose(&bfpOut);
 
-    return TRUE;
+    return bfpOut.bufPos;
 }
 
-int CHuffmanDecode(FILE *fpIn, char *outBuf, unsigned int outSize)
+int CHuffmanDecode(char *inBuf, signed int inBytes,
+	char *outBuf, unsigned int outSize)
 {
-    bit_file_t *bfpIn;
+    bit_file_t bfpIn;
     bit_array_t *code;
     byte_t length;
     char decodedEOF;
@@ -152,14 +166,17 @@ int CHuffmanDecode(FILE *fpIn, char *outBuf, unsigned int outSize)
     unsigned int outIndex = 0;
 
     /* open binary output file and bitfile input file */
-    bfpIn = MakeBitFile(fpIn, BF_READ);
+    bfpIn.mode = BF_READ;
+    bfpIn.buf = inBuf;
+    bfpIn.bufLen = inBytes;
+    BitFileInit(&bfpIn);
 
     /* allocate canonical code list */
     code = BitArrayCreate(256);
     if (code == NULL)
     {
         perror("Bit array allocation");
-        BitFileClose(bfpIn);
+        BitFileClose(&bfpIn);
         return FALSE;
     }
 
@@ -170,8 +187,10 @@ int CHuffmanDecode(FILE *fpIn, char *outBuf, unsigned int outSize)
     BitArrayClearAll(code);
     decodedEOF = FALSE;
 
-    while(((newBit = BitFileGetBit(bfpIn)) != EOF) && (!decodedEOF))
-    {
+    while (((newBit = BitFileGetBit(&bfpIn)) != EOF) && (!decodedEOF)) {
+        if (newBit == BUFFER_EMPTY) {
+            return BUFFER_EMPTY;
+        }
         if (newBit != 0)
         {
             BitArraySetBit(code, length);
@@ -193,7 +212,7 @@ int CHuffmanDecode(FILE *fpIn, char *outBuf, unsigned int outSize)
                     {
 			if (outIndex >= outSize) {
 				/* buffer limit reached */
-        			BitFileClose(bfpIn);
+        			BitFileClose(&bfpIn);
 				return FALSE;
 			}
 			outBuf[outIndex++] = canonicalList[i].value;
@@ -213,7 +232,7 @@ int CHuffmanDecode(FILE *fpIn, char *outBuf, unsigned int outSize)
     }
 
     /* close all files */
-    BitFileClose(bfpIn);
+    BitFileClose(&bfpIn);
 
     return outIndex;
 }
@@ -365,19 +384,17 @@ static int ReadHeader(canonical_list_t *cl)
 
 int encode(char *inBuf, int inBytes)
 {
-	char *outBuf;
-	unsigned int outBytes;
-	FILE *out;
+	char outBuf[1024];
 	int i;
+        unsigned int outBytes;
 
-	out = open_memstream(&outBuf, &outBytes);
-	CHuffmanEncode(inBuf, inBytes, out);
+	outBytes = CHuffmanEncode(inBuf, inBytes, outBuf, sizeof(outBuf));
 
 	printf("bytes[%d] = \"", outBytes);
 	for (i = 0; i < outBytes; i++) {
 		printf("\\x%02x", (unsigned char)outBuf[i]);
 	}
-	printf("\"\n");
+	printf("\";\n");
 	return 0;
 }
 
@@ -385,11 +402,9 @@ int decode(char *inBuf, int inSize)
 {
 	char outBuf[1024];
 	unsigned int outSize;
-	FILE *in;
 	int i;
 
-	in = fmemopen(inBuf, inSize, "r");
-	outSize = CHuffmanDecode(in, outBuf, sizeof(outBuf));
+	outSize = CHuffmanDecode(inBuf, inSize, outBuf, sizeof(outBuf));
 	for (i = 0; i < outSize; i++)  {
 		printf("%c", outBuf[i]);
 	}
@@ -423,8 +438,8 @@ int main(int argc, char *argv[])
 
 		char *inBuf;
 		int inBytes;
-	
-	        inBuf = "\x52\x49\xa7\x0c\x2e\x08\x26\xb3\x60\x22\x20\x66\xa4\x02\xf9\xa1\x2c\x64\x0f\x01\x4d\x80\x09\x93\x80";
+
+		inBuf = "\x52\x49\xa7\x0c\x2e\x08\x26\xb3\x60\x22\x20\x66\xa4\x02\xf9\xa1\x2c\x64\x0f\x01\x4d\x80\x09\x93\x80";
 	        inBytes = 25;
 		decode(inBuf, inBytes);
 	        

@@ -19,7 +19,7 @@ maketable: maketable.c bitarray.c bitfile.c huflocal.c
 	$(CC) -O3 -Wall -o maketable maketable.c bitarray.c bitfile.c \
 		huflocal.c
 
-chuffman: chuffman.o
+chuffman: chuffman.o huflocal.o bitarray.o bitfile.o
 	$(CC) -g -Wall -o chuffman chuffman.o huflocal.o bitarray.o \
 		bitfile.o
 
