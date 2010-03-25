@@ -271,9 +271,12 @@ class CommandList(object):
                 return
             g = conn.user.session.games.values()[0]
             (ply, eco, long) = g.get_eco()
+            (nicply, nic) = g.get_nic()
             conn.write(_('Eco for game %d (%s vs. %s):\n') % (g.number, g.white.name, g.black.name))
-            conn.write(_(' ECO[   ]: %s\n') % eco)
-            conn.write(_('LONG[   ]: %s\n') % long)
+            conn.write(_(' ECO[%3d]: %s\n') % (ply, eco))
+            conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
+            conn.write(_('LONG[%3d]: %s\n') % (ply, long))
+
         else:
             conn.write('TODO: ECO PARAM\n')
 

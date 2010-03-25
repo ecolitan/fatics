@@ -9,13 +9,14 @@ import re
 import variant.normal
 
 epd_file = 'data/scid.epd'
+nic_file = 'data/nic999.idx'
 
 def main():
     db = MySQLdb.connect(host='localhost', db='chess',
         read_default_file="~/.my.cnf")
     cursor = db.cursor()
 
-    f = open(epd_file, 'r')
+    '''f = open(epd_file, 'r')
 
     cursor.execute("""DELETE FROM eco""")
     count = 0
@@ -35,7 +36,33 @@ def main():
             (eco,long,pos.hash))
         count += 1
     cursor.close()
-    print 'imported %d codes' % count
+    print 'imported %d eco codes' % count'''
+   
+    cursor.execute("""DELETE FROM nic""")
+    count = 0
+    f = open(nic_file, 'r')
+    fen = None
+    for line in f:
+        line = line.strip()
+        if fen is None:
+            assert(re.match(r'\S+ \S+ \S+ \S+', line))
+            fen = line
+        else:
+            nic = line
+            m = re.match(r'([A-Z][A-Z]\.\d\d)\*?', line) 
+            if not m:
+                raise RuntimeError('failed to match %s', line)
+            nic = m.group(1)
+            pos = variant.normal.Position(fen + ' 0 1')
+            try:
+                cursor.execute("""INSERT INTO nic SET nic=%s, hash=%s""",
+                    (nic,pos.hash))
+            except:
+                print 'dupe for %s' % nic
+                raise
+            count += 1
+            fen = None
+    print 'imported %d nic codes' % count
     
 if __name__ == "__main__":
     main()

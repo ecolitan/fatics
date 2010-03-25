@@ -120,7 +120,7 @@ huffman_node_t *GenerateTreeFromFile(FILE *inFile)
     }
     
     /* estimate the freqency of the end of a string -- Wil Mahan */
-    huffmanArray[EOF_CHAR]->count = huffmanArray['\n']->count * 2 / 3;
+    huffmanArray[EOF_CHAR]->count = 1;
     huffmanArray[EOF_CHAR]->ignore = FALSE;
 
     /* put array of leaves into a huffman tree */

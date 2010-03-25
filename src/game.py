@@ -210,6 +210,21 @@ class Game(object):
         else:
             ret = (0, 'A00', 'Unknown')
         return ret
+    
+    def get_nic(self):
+        i = min(self.variant.pos.ply, 36)
+        row = None
+        while i >= self.variant.pos.start_ply:
+            hash = self.variant.pos.history.get_hash(i)
+            row = db.get_nic(hash)
+            if row:
+                break
+            i -= 1
+        if row:
+            ret = (i, row['nic'])
+        else:
+            ret = (0, '--.--', 'Unknown')
+        return ret
 
     def write_moves(self, conn):
         # don't translate for now since clients parse these messages

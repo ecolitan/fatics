@@ -292,7 +292,13 @@ class DB(object):
         row = cursor.fetchone()
         cursor.close()
         return row
-
+    
+    def get_nic(self, hash):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT nic FROM nic WHERE hash=%s""", hash)
+        row = cursor.fetchone()
+        cursor.close()
+        return row
 
 db = DB()
 

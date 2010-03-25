@@ -168,6 +168,14 @@ CREATE TABLE `eco` (
   PRIMARY KEY (`eco_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_bin;
 
+DROP TABLE IF EXISTS `nic`;
+CREATE TABLE `nic` (
+  `nic_id` int(4) NOT NULL AUTO_INCREMENT,
+  `nic` char(5) NOT NULL,
+  `hash` bigint(12) UNSIGNED NOT NULL UNIQUE,
+  PRIMARY KEY (`nic_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_bin;
+
 -- notifications
 DROP TABLE IF EXISTS `user_notify`;
 CREATE TABLE `user_notify` (
