@@ -1,4 +1,5 @@
-all: openseal openseal_decoder zipseal zipseal_decoder maketable chuffman
+all: openseal openseal_decoder zipseal zipseal_decoder maketable \
+	zipseal_encoder
 
 openseal: openseal.c
 	$(CC) -o openseal openseal.c
@@ -9,8 +10,11 @@ openseal_decoder: openseal_decoder.c
 zipseal: zipseal.c libhuffman.a
 	$(CC) -Wall -g -o zipseal zipseal.c libhuffman.a
 
-zipseal_decoder: zipseal_decoder.c libhuffman.a
-	$(CC) -Wall -g -o zipseal_decoder zipseal_decoder.c libhuffman.a
+zipseal_decoder: zipseal_decoder.c
+	$(CC) -Wall -g -o zipseal_decoder zipseal_decoder.c
+
+zipseal_encoder: zipseal_encoder.c libhuffman.a
+	$(CC) -Wall -g -o zipseal_encoder zipseal_encoder.c libhuffman.a
 
 compress: compress.c
 	$(CC) -lz -g -Wall -o compress compress.c

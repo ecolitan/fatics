@@ -34,28 +34,10 @@
 #include "huflocal.h"
 #include "bitarray.h"
 #include "bitfile.h"
+#include "chuffman.h"
 
 /* automatically-generated code table */
 #include "codes.c"
-
-typedef struct canonical_list_t
-{
-    short value;        /* characacter represented */
-    byte_t codeLen;     /* number of bits used in code (1 - 255) */
-    bit_array_t *code;  /* code used for symbol (left justified) */
-} canonical_list_t;
-
-struct CHuffman {
-	char *inBuf;
-	unsigned int inLen;
-	char *outBuf;
-	unsigned int outLen;
-        unsigned int outIndex;
-	int for_encode;
-	canonical_list_t canonicalList[NUM_CHARS];      /* list of canonical codes */
-};
-
-int lenIndex[NUM_CHARS]; /* for decoding */
 
 /* creating canonical codes */
 static int AssignCanonicalCodes(canonical_list_t *cl);
@@ -103,19 +85,26 @@ int CHuffmanInit(struct CHuffman *ch)
     }
     else {
 		/* decoding */
-            	ch->outIndex = 0;
+		    /* allocate canonical code list */
+		    ch->code = BitArrayCreate(256);
+		    if (ch->code == NULL) {
+			perror("Bit array allocation");
+			return FALSE;
+		    }
+       		ch->resume = 0;
+
 	    /* create an index of first code at each possible length */
 	    for (i = 0; i < NUM_CHARS; i++)
 	    {
-		lenIndex[i] = NUM_CHARS;
+		ch->lenIndex[i] = NUM_CHARS;
 	    }
 
 	    for (i = 0; i < NUM_CHARS; i++)
 	    {
-		if (lenIndex[ch->canonicalList[i].codeLen] > i)
+		if (ch->lenIndex[ch->canonicalList[i].codeLen] > i)
 		{
 		    /* first occurance of this code length */
-		    lenIndex[ch->canonicalList[i].codeLen] = i;
+		    ch->lenIndex[ch->canonicalList[i].codeLen] = i;
 		}
 	    }
     }
@@ -166,60 +155,51 @@ int CHuffmanEncode(struct CHuffman *ch)
 int CHuffmanDecode(struct CHuffman *ch)
 {
     bit_file_t bfpIn;
-    bit_array_t *code;
-    byte_t length;
-    char decodedEOF;
+    char decodedEOF = 0;
     int i, newBit;
+    
+	bfpIn.mode = BF_READ;
+    	bfpIn.buf = ch->inBuf;
+    	bfpIn.bufLen = ch->inLen;
+    	BitFileInit(&bfpIn);
 
     /* open binary output file and bitfile input file */
-    bfpIn.mode = BF_READ;
-    bfpIn.buf = ch->inBuf;
-    bfpIn.bufLen = ch->inLen;
-    BitFileInit(&bfpIn);
-
-    /* allocate canonical code list */
-    code = BitArrayCreate(256);
-    if (code == NULL)
-    {
-        perror("Bit array allocation");
-        BitFileClose(&bfpIn);
-        return FALSE;
-    }
-
-    /* now we have a huffman code that matches the code used on the encode */
-
     /* decode input file */
-    length = 0;
-    BitArrayClearAll(code);
-    decodedEOF = FALSE;
+
+    if (!ch->resume) {
+    	BitArrayClearAll(ch->code);
+	ch->outIndex = 0;
+	ch->decode_length = 0;
+    }
 
     while (((newBit = BitFileGetBit(&bfpIn)) != EOF) && (!decodedEOF)) {
         if (newBit == BUFFER_EMPTY) {
+	    ch->resume = 1;
             return BUFFER_EMPTY;
         }
         if (newBit != 0)
         {
-            BitArraySetBit(code, length);
+            BitArraySetBit(ch->code, ch->decode_length);
         }
 
-        length++;
+        ch->decode_length++;
 
-        if (lenIndex[length] != NUM_CHARS)
+        if (ch->lenIndex[ch->decode_length] != NUM_CHARS)
         {
             /* there are code of this length */
-            for(i = lenIndex[length];
-                (i < NUM_CHARS) && (ch->canonicalList[i].codeLen == length);
+            for(i = ch->lenIndex[ch->decode_length];
+                (i < NUM_CHARS) && (ch->canonicalList[i].codeLen == ch->decode_length);
                 i++)
             {
-                if (BitArrayCompare(ch->canonicalList[i].code, code) == 0)
+                if (BitArrayCompare(ch->canonicalList[i].code, ch->code) == 0)
                 {
                     /* we just read a symbol output decoded value */
                     if (ch->canonicalList[i].value != EOF_CHAR)
                     {
 			if (ch->outIndex >= ch->outLen) {
 				/* buffer limit reached */
-        			BitFileClose(&bfpIn);
-				return FALSE;
+				fprintf(stderr, "buffer full\n");
+				exit(1);
 			}
 			ch->outBuf[ch->outIndex++] = ch->canonicalList[i].value;
                     }
@@ -228,14 +208,15 @@ int CHuffmanDecode(struct CHuffman *ch)
                         decodedEOF = TRUE;
                     }
 
-                    BitArrayClearAll(code);
-                    length = 0;
+                    BitArrayClearAll(ch->code);
+                    ch->decode_length = 0;
 
                     break;
                 }
             }
         }
     }
+    ch->resume = 0;
 
     /* close all files */
     BitFileClose(&bfpIn);
@@ -388,7 +369,7 @@ static int ReadHeader(canonical_list_t *cl)
     return TRUE;
 }
 
-int encode(struct CHuffman *ch, char *inBuf, int inBytes)
+static int encode(struct CHuffman *ch, char *inBuf, int inBytes)
 {
 	char outBuf[1024];
 	int i;
@@ -407,7 +388,7 @@ int encode(struct CHuffman *ch, char *inBuf, int inBytes)
 	return 0;
 }
 
-int decode(struct CHuffman *ch, char *inBuf, int inSize)
+static int decode(struct CHuffman *ch, char *inBuf, int inSize)
 {
 	char outBuf[1024];
 	unsigned int outSize;
@@ -424,6 +405,7 @@ int decode(struct CHuffman *ch, char *inBuf, int inSize)
 	return 0;
 }
 
+#if 1
 int main(int argc, char *argv[])
 {
 	if (argc == 2 && !strcmp(argv[1], "encode")) {
@@ -437,13 +419,13 @@ int main(int argc, char *argv[])
 		char *inBuf;
 		int inBytes;
 
-		inBuf = "hello world\nHi, how are you?\n";
-        	inBytes = strlen(inBuf) + 1;
+		inBuf = "hello world\n";
+        	inBytes = strlen(inBuf);
 		encode(&ch, inBuf, inBytes);
 		
-		inBuf = "this is yet another test!!!\nbye\n";
-        	inBytes = strlen(inBuf) + 1;
-		encode(&ch, inBuf, inBytes);
+		/*inBuf = "this is yet another test!!!\nbye\n";
+        	inBytes = strlen(inBuf);
+		encode(&ch, inBuf, inBytes);*/
 	}
 	else if (argc == 2 && !strcmp(argv[1], "decode")) {
                 struct CHuffman ch;
@@ -456,12 +438,8 @@ int main(int argc, char *argv[])
 		char *inBuf;
 		int inBytes;
 
-		inBuf = "\x52\x49\xa7\x0c\x2e\x08\x26\xb3\x60\x22\x20\x66\xa4\x02\xf9\xa1\x2c\x64\x0f\x01\x4d\x80\x09\x93\x80";
-	        inBytes = 25;
-		decode(&ch, inBuf, inBytes);
-	        
-		inBuf = "\x72\x91\x7f\x17\xe3\x24\xee\x69\x41\xca\x49\x0d\xd2\x7b\x80\x58\x0b\x01\x6d\x8f\x19\x26\xc0\x04\xc9\xc0";
-	        inBytes = 26;
+		inBuf = "\x6c\x09\x80\xe1\xd1\x48\x76\x32\x07\xf1\x4b\x9b\xf0\xa8\x81\xf2\x7b\x82\x60\x0a\x00\x61\xe1\x50\x01\xf1\x90\x3f\x1b\x31\x99\xef\x96\xe5\x22\xfd\x29\x8d\x96\xe8\x68\xa7\x31\x99\xe9\x21\x37\x49\x6c\x74\xc6\xc9\xe2\xed\x9a\x01\x2a\xba\x48\x69\xc0\x70\xe8\xa4\x3b\x8a\x40\x66\xb4\x30\xaa\x92\x4d\x1d\x09\x0e\x8b\xdd\x24\x02\xba\xb0\x43\x1b\x04\x25\xc5\x25\x61\xc1\x2d\x48\x05\xee\x86\x84\x87\x45\xee\x92\x02\xe6\x5b\x6d\x84\x24\xf7\xe8\x49\xc7\xa0\x96\xe8\x72\x49\xd2\x43\x72\x92\xdf\x24\x03\x24\x87\x37\xe1\x51\x03\xe4\xf7\x04\xc0\x14\x00\xc3\xc2\xa4\x5b\x38";
+	        inBytes = 138;
 		decode(&ch, inBuf, inBytes);
 	}
 	else {
@@ -470,4 +448,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
-
+#endif

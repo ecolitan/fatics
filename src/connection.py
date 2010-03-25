@@ -20,7 +20,7 @@ class Connection(basic.LineReceiver):
     # so we can just use '\n' here
     delimiter = '\n'
     MAX_LENGTH = 1024
-    state = 'login'
+    state = 'prelogin'
     user = None
     logged_in_again = False
     ivar_pat = re.compile(r'%b([01]{32})')
@@ -30,8 +30,8 @@ class Connection(basic.LineReceiver):
 
         self.factory.connections.append(self)
         self.write(config.welcome_msg)
-        self.login()
         self.session = Session(self)
+        self.login()
         self.session.login_last_command = time.time()
         self.ip = self.transport.getPeer().host
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
@@ -75,6 +75,7 @@ class Connection(basic.LineReceiver):
             (t, dec) = timeseal.decode_zipseal(line)
             if t != 0:
                 if dec[0:8] == 'zipseal|':
+                    self.write('ZIPSEAL\n')
                     self.session.use_zipseal = True
                     return
             # no timeseal; continue
@@ -150,6 +151,9 @@ class Connection(basic.LineReceiver):
 
 
     def write(self, s):
-        self.transport.write(s)
+        if self.state != 'prelogin' and self.session.use_zipseal:
+            self.transport.write(timeseal.compress_zipseal(s))
+        else:
+            self.transport.write(s)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
