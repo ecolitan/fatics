@@ -45,7 +45,16 @@ typedef struct canonical_list_t
     bit_array_t *code;  /* code used for symbol (left justified) */
 } canonical_list_t;
 
-canonical_list_t canonicalList[NUM_CHARS];      /* list of canonical codes */
+struct CHuffman {
+	char *inBuf;
+	unsigned int inLen;
+	char *outBuf;
+	unsigned int outLen;
+        unsigned int outIndex;
+	int for_encode;
+	canonical_list_t canonicalList[NUM_CHARS];      /* list of canonical codes */
+};
+
 int lenIndex[NUM_CHARS]; /* for decoding */
 
 /* creating canonical codes */
@@ -56,46 +65,45 @@ static int CompareBySymbolValue(const void *item1, const void *item2);
 /* reading/writing code to file */
 static int ReadHeader(canonical_list_t *cl);
 
-int CHuffmanInit(int for_encode)
+int CHuffmanInit(struct CHuffman *ch)
 {
     int i;
     /* initialize canonical list */
-    for (i = 0; i < NUM_CHARS; i++)
-    {
-        canonicalList[i].codeLen = 0;
-        canonicalList[i].code = NULL;
+    for (i = 0; i < NUM_CHARS; i++) {
+        ch->canonicalList[i].codeLen = 0;
+        ch->canonicalList[i].code = NULL;
     }
     
-    if (!ReadHeader(canonicalList))
-    {
+    if (!ReadHeader(ch->canonicalList)) {
         return FALSE;
     }
 
     /* sort the header by code length */
-    qsort(canonicalList, NUM_CHARS, sizeof(canonical_list_t),
+    qsort(ch->canonicalList, NUM_CHARS, sizeof(canonical_list_t),
         CompareByCodeLen);
     
-    if (AssignCanonicalCodes(canonicalList) == 0)
+    if (AssignCanonicalCodes(ch->canonicalList) == 0)
     {
         /* failed to assign codes */
         for (i = 0; i < NUM_CHARS; i++)
         {
-            if(canonicalList[i].code != NULL)
+            if(ch->canonicalList[i].code != NULL)
             {
-                BitArrayDestroy(canonicalList[i].code);
+                BitArrayDestroy(ch->canonicalList[i].code);
             }
         }
 
         return FALSE;
     }
 
-    if (for_encode) {
+    if (ch->for_encode) {
 	    /* re-sort list in lexical order for use by encode algorithm */
-	    qsort(canonicalList, NUM_CHARS, sizeof(canonical_list_t),
+	    qsort(ch->canonicalList, NUM_CHARS, sizeof(canonical_list_t),
 		CompareBySymbolValue);
     }
     else {
 		/* decoding */
+            	ch->outIndex = 0;
 	    /* create an index of first code at each possible length */
 	    for (i = 0; i < NUM_CHARS; i++)
 	    {
@@ -104,10 +112,10 @@ int CHuffmanInit(int for_encode)
 
 	    for (i = 0; i < NUM_CHARS; i++)
 	    {
-		if (lenIndex[canonicalList[i].codeLen] > i)
+		if (lenIndex[ch->canonicalList[i].codeLen] > i)
 		{
 		    /* first occurance of this code length */
-		    lenIndex[canonicalList[i].codeLen] = i;
+		    lenIndex[ch->canonicalList[i].codeLen] = i;
 		}
 	    }
     }
@@ -115,25 +123,24 @@ int CHuffmanInit(int for_encode)
     return TRUE;
 }
 
-int CHuffmanEncode(char *inBuf, unsigned int inBytes, char *outBuf,
-	int outSize)
+int CHuffmanEncode(struct CHuffman *ch)
 {
     bit_file_t bfpOut;
     int c, i;
 
 
-    bfpOut.buf = outBuf;
-    bfpOut.bufLen = outSize;
+    bfpOut.buf = ch->outBuf;
+    bfpOut.bufLen = ch->outLen;
     bfpOut.mode = BF_WRITE;
     BitFileInit(&bfpOut);
 
     /* read characters from file and write them to encoded file */
-    for (i = 0; i < inBytes; i++) {
-	c = inBuf[i];
+    for (i = 0; i < ch->inLen; i++) {
+	c = ch->inBuf[i];
         /* write encoded symbols */
         if (BitFilePutBits(&bfpOut,
-            BitArrayGetBits(canonicalList[c].code),
-            canonicalList[c].codeLen) == EOF)
+            BitArrayGetBits(ch->canonicalList[c].code),
+            ch->canonicalList[c].codeLen) == EOF)
         {
             fprintf(stderr, "buffer full writing\n");
             exit(1);
@@ -142,8 +149,8 @@ int CHuffmanEncode(char *inBuf, unsigned int inBytes, char *outBuf,
 
     /* now write EOF */
     if (BitFilePutBits(&bfpOut,
-        BitArrayGetBits(canonicalList[EOF_CHAR].code),
-        canonicalList[EOF_CHAR].codeLen) == EOF)
+        BitArrayGetBits(ch->canonicalList[EOF_CHAR].code),
+        ch->canonicalList[EOF_CHAR].codeLen) == EOF)
     {
             fprintf(stderr, "buffer full writing\n");
             exit(1);
@@ -152,23 +159,22 @@ int CHuffmanEncode(char *inBuf, unsigned int inBytes, char *outBuf,
     /* clean up */
     BitFileClose(&bfpOut);
 
-    return bfpOut.bufPos;
+    ch->outIndex = bfpOut.bufPos;
+    return 0;
 }
 
-int CHuffmanDecode(char *inBuf, signed int inBytes,
-	char *outBuf, unsigned int outSize)
+int CHuffmanDecode(struct CHuffman *ch)
 {
     bit_file_t bfpIn;
     bit_array_t *code;
     byte_t length;
     char decodedEOF;
     int i, newBit;
-    unsigned int outIndex = 0;
 
     /* open binary output file and bitfile input file */
     bfpIn.mode = BF_READ;
-    bfpIn.buf = inBuf;
-    bfpIn.bufLen = inBytes;
+    bfpIn.buf = ch->inBuf;
+    bfpIn.bufLen = ch->inLen;
     BitFileInit(&bfpIn);
 
     /* allocate canonical code list */
@@ -202,20 +208,20 @@ int CHuffmanDecode(char *inBuf, signed int inBytes,
         {
             /* there are code of this length */
             for(i = lenIndex[length];
-                (i < NUM_CHARS) && (canonicalList[i].codeLen == length);
+                (i < NUM_CHARS) && (ch->canonicalList[i].codeLen == length);
                 i++)
             {
-                if (BitArrayCompare(canonicalList[i].code, code) == 0)
+                if (BitArrayCompare(ch->canonicalList[i].code, code) == 0)
                 {
                     /* we just read a symbol output decoded value */
-                    if (canonicalList[i].value != EOF_CHAR)
+                    if (ch->canonicalList[i].value != EOF_CHAR)
                     {
-			if (outIndex >= outSize) {
+			if (ch->outIndex >= ch->outLen) {
 				/* buffer limit reached */
         			BitFileClose(&bfpIn);
 				return FALSE;
 			}
-			outBuf[outIndex++] = canonicalList[i].value;
+			ch->outBuf[ch->outIndex++] = ch->canonicalList[i].value;
                     }
                     else
                     {
@@ -234,7 +240,7 @@ int CHuffmanDecode(char *inBuf, signed int inBytes,
     /* close all files */
     BitFileClose(&bfpIn);
 
-    return outIndex;
+    return 0;
 }
 
 /****************************************************************************
@@ -382,30 +388,37 @@ static int ReadHeader(canonical_list_t *cl)
     return TRUE;
 }
 
-int encode(char *inBuf, int inBytes)
+int encode(struct CHuffman *ch, char *inBuf, int inBytes)
 {
 	char outBuf[1024];
 	int i;
-        unsigned int outBytes;
 
-	outBytes = CHuffmanEncode(inBuf, inBytes, outBuf, sizeof(outBuf));
+	ch->inBuf = inBuf;
+	ch->inLen = inBytes;
+	ch->outBuf = outBuf;
+	ch->outLen = sizeof(outBuf);
+	CHuffmanEncode(ch);
 
-	printf("bytes[%d] = \"", outBytes);
-	for (i = 0; i < outBytes; i++) {
+	printf("bytes[%d] = \"", ch->outIndex);
+	for (i = 0; i < ch->outIndex; i++) {
 		printf("\\x%02x", (unsigned char)outBuf[i]);
 	}
 	printf("\";\n");
 	return 0;
 }
 
-int decode(char *inBuf, int inSize)
+int decode(struct CHuffman *ch, char *inBuf, int inSize)
 {
 	char outBuf[1024];
 	unsigned int outSize;
 	int i;
 
-	outSize = CHuffmanDecode(inBuf, inSize, outBuf, sizeof(outBuf));
-	for (i = 0; i < outSize; i++)  {
+	ch->inBuf = inBuf;
+	ch->inLen = inSize;
+	ch->outBuf = outBuf;
+	ch->outLen = sizeof(outBuf);
+	outSize = CHuffmanDecode(ch);
+	for (i = 0; i < ch->outIndex; i++)  {
 		printf("%c", outBuf[i]);
 	}
 	return 0;
@@ -414,7 +427,9 @@ int decode(char *inBuf, int inSize)
 int main(int argc, char *argv[])
 {
 	if (argc == 2 && !strcmp(argv[1], "encode")) {
-		if (!CHuffmanInit(1)) {
+                struct CHuffman ch;
+                ch.for_encode = 1;
+		if (!CHuffmanInit(&ch)) {
 			fprintf(stderr, "initialization error\n");
 			exit(1);
 		}
@@ -424,14 +439,16 @@ int main(int argc, char *argv[])
 
 		inBuf = "hello world\nHi, how are you?\n";
         	inBytes = strlen(inBuf) + 1;
-		encode(inBuf, inBytes);
+		encode(&ch, inBuf, inBytes);
 		
 		inBuf = "this is yet another test!!!\nbye\n";
         	inBytes = strlen(inBuf) + 1;
-		encode(inBuf, inBytes);
+		encode(&ch, inBuf, inBytes);
 	}
 	else if (argc == 2 && !strcmp(argv[1], "decode")) {
-		if (!CHuffmanInit(0)) {
+                struct CHuffman ch;
+                ch.for_encode = 0;
+		if (!CHuffmanInit(&ch)) {
 			fprintf(stderr, "initialization error\n");
 			exit(1);
 		}
@@ -441,11 +458,11 @@ int main(int argc, char *argv[])
 
 		inBuf = "\x52\x49\xa7\x0c\x2e\x08\x26\xb3\x60\x22\x20\x66\xa4\x02\xf9\xa1\x2c\x64\x0f\x01\x4d\x80\x09\x93\x80";
 	        inBytes = 25;
-		decode(inBuf, inBytes);
+		decode(&ch, inBuf, inBytes);
 	        
 		inBuf = "\x72\x91\x7f\x17\xe3\x24\xee\x69\x41\xca\x49\x0d\xd2\x7b\x80\x58\x0b\x01\x6d\x8f\x19\x26\xc0\x04\xc9\xc0";
 	        inBytes = 26;
-		decode(inBuf, inBytes);
+		decode(&ch, inBuf, inBytes);
 	}
 	else {
 		printf("Usage: %s [encode|decode]\n", argv[0]);
