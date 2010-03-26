@@ -30,12 +30,42 @@ class TestEco(Test):
 
         t.write('eco\n')
         self.expect('Eco for game 1 (GuestABCD vs. admin):', t)
-        self.expect(' ECO[   ]: D00l', t)
-        self.expect('LONG[   ]: Blackmar-Diemer: Grosshans Defence', t)
+        self.expect(' ECO[  6]: D00l', t)
+        self.expect(' NIC[  2]: QP.08', t)
+        self.expect('LONG[  6]: Blackmar-Diemer: Grosshans Defence', t)
 
         self.close(t)
         self.close(t2)
+
+    def test_eco_out_of_book(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        
+        t.write('match admin white 1 0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        moves = ['e4', 'd5', 'Qg4']
     
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm 
+
+        t.write('eco\n')
+        self.expect('Eco for game 1 (GuestABCD vs. admin):', t)
+        self.expect(' ECO[  2]: B01a', t)
+        self.expect(' NIC[  1]: VO.17', t)
+        self.expect('LONG[  2]: Scandinavian (Centre Counter)', t)
+
     def test_eco_utf8(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
@@ -52,10 +82,8 @@ class TestEco(Test):
         wtm = True
         for mv in moves:
             if wtm:
-                #print 'sending %s to white' % mv.text
                 t.write('%s\n' % mv)
             else:
-                #print 'sending %s to black' % mv.text
                 t2.write('%s\n' % mv)
             self.expect('<12> ', t)
             self.expect('<12> ', t2)
@@ -63,8 +91,9 @@ class TestEco(Test):
 
         t.write('eco\n')
         self.expect('Eco for game 1 (GuestABCD vs. admin):', t)
-        self.expect(' ECO[   ]: C15h', t)
-        self.expect('LONG[   ]: French: Winawer, Müller-Zhuravlev Gambit', t)
+        self.expect(' ECO[  7]: C15h', t)
+        self.expect(' NIC[  6]: FR.08', t)
+        self.expect('LONG[  7]: French: Winawer, Müller-Zhuravlev Gambit', t)
         self.close(t)
         self.close(t2)
 

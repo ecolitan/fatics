@@ -30,6 +30,7 @@ class Connection(basic.LineReceiver):
         self.session = Session(self)
         if self.transport.getHost().port == config.zipseal_port:
             self.session.use_zipseal = True
+            self.transport.encoder = timeseal.compress_zipseal
             self.session.check_for_timeseal = False
         self.factory.connections.append(self)
         self.write(config.welcome_msg)
@@ -136,6 +137,7 @@ class Connection(basic.LineReceiver):
             self.user.log_off()
         self.transport.loseConnection()
         if reason == 'quit':
+            timeseal.print_stats()
             self.write(config.logout_msg)
 
     def connectionLost(self, reason):
@@ -153,10 +155,6 @@ class Connection(basic.LineReceiver):
 
 
     def write(self, s):
-        if self.session.use_zipseal:
-            s = self.transport.escape(s)
-            self.transport.write(timeseal.compress_zipseal(s), raw=True)
-        else:
-            self.transport.write(s)
+        self.transport.write(s)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

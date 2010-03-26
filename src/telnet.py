@@ -1,7 +1,7 @@
 # Copyright (C) 2010 Wil Mahan <wmahan at gmail.com>
 
-# Very loosely based on conch.telnet from twisted.  To be safe, here
-# is the copyright header for that code:
+# Loosely based on conch.telnet from twisted.  Here is the
+# copyright header for that code:
 #       Copyright (c) 2001-2007 Twisted Matrix Laboratories.
 #       See LICENSE for details.
 #       @author: Jp Calderone
@@ -40,6 +40,7 @@ class TelnetTransport(protocol.Protocol):
     protocolFactory = None
     protocol = None
     disconnecting = False
+    encoder = None
 
     def __init__(self, protocolFactory=None, *a, **kw):
         self.commandMap = {
@@ -56,6 +57,8 @@ class TelnetTransport(protocol.Protocol):
             self.protocolKwArgs = kw
 
     def _write(self, bytes):
+        if self.encoder is not None:
+            bytes = self.encoder(bytes)
         self.transport.write(bytes)
 
     def do(self, option):
@@ -179,16 +182,15 @@ class TelnetTransport(protocol.Protocol):
     def applicationDataReceived(self, bytes):
         self.protocol.dataReceived(bytes)
 
-    def escape(self, data):
+    def _escape(self, data):
         data = data.replace('''\xff''', '''\xff\xff''')
         data = data.replace('\n', '\r\n')
         #data = data.replace('\n', '\n\r')
         return data
 
-    def write(self, data, raw=False):
-        if not raw:
-            data = self.escape(data)
-        self.transport.write(data)
+    def write(self, data):
+        data = self._escape(data)
+        self._write(data)
 
     def writeSequence(self, seq):
         self.transport.writeSequence(seq)

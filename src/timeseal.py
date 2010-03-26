@@ -4,6 +4,8 @@ import subprocess
 class Timeseal(object):
     _timeseal_pat = re.compile(r'''^(\d+): (.*)\n$''')
     _zipseal_pat = re.compile(r'''^([0-9a-f]+): (.*)\n$''')
+    zipseal_in = 0
+    zipseal_out = 0
     def __init__(self):
         self.timeseal = subprocess.Popen(['timeseal/openseal_decoder'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
         self.zipseal_decoder = subprocess.Popen(['timeseal/zipseal_decoder'], stdout=subprocess.PIPE, stdin=subprocess.PIPE)
@@ -14,7 +16,7 @@ class Timeseal(object):
         dec = self.timeseal.stdout.readline()
         m = self._timeseal_pat.match(dec)
         if not m:
-            print 'failed to match: {{%s}}' % dec
+            print('failed to match: {{%s}}' % dec)
             return (0, None)
         return (int(m.group(1), 10), m.group(2))
 
@@ -30,8 +32,15 @@ class Timeseal(object):
         self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
         count = int(self.zipseal_encoder.stdout.read(4), 16)
         ret = self.zipseal_encoder.stdout.read(count)
-        print('%04x%s -> %d' % (len(line),repr(line),len(ret)))
+        self.zipseal_in += len(line)
+        self.zipseal_out += len(ret)
         return ret
+
+    def print_stats(self):
+        if self.zipseal_in > 0:
+            print("compression statistics: %d in, %d out, ratio = %.3f" %
+                (self.zipseal_in, self.zipseal_out,
+                    float(self.zipseal_out) / self.zipseal_in))
 
 timeseal = Timeseal()
 

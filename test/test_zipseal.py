@@ -17,7 +17,7 @@ class TestZipseal(Test):
             # python 2.7
             #self.skip()
             return
-        process = subprocess.Popen([seal_prog, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        process = subprocess.Popen([seal_prog, host, '5001'], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         process.stdin.write('admin\n')
         process.stdin.write('%s\n' % admin_passwd)
         process.stdin.write('fi admin\n')
