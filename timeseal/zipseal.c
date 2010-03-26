@@ -27,16 +27,19 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <zlib.h>
+
+#include "chuffman.h"
+
 #define BSIZE 1024
 
-char hello[]="zipseal|zipseal|Running on an operating system|";
+//char hello[]="zipseal|zipseal|Running on an operating system|";
 
-int crypt(char *s,int l)
+static int crypt(char *s,int l)
 {
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
 	s[l++]='\x18';
-	l+=sprintf(&s[l],"%lx",(tv.tv_sec%10000)*1000+tv.tv_usec/1000);
+	l += sprintf(&s[l],"%lx",(tv.tv_sec%10000)*1000+tv.tv_usec/1000);
 	s[l++]='\x0a';
 	return l;
 }
@@ -92,8 +95,8 @@ void sendtofics(int fd, char *buff, int *rd)
 
 void getfromfics(int fd, char *buff, int *rd)
 {
-	int n,m;
-	while(*rd>0) {
+	int n, m;
+	while (*rd > 0) {
 		if(!memcmp(buff,"[G]",*rd<4?*rd:4)) {
 			if(*rd<4) {
 				break;
@@ -123,19 +126,26 @@ int main(int argc, char **argv)
 {
 	char *hostname;
 	int port,fd,n;
+	struct CHuffman ch;
+
 	if(argc==3) {
 		hostname=argv[1];
 		port=atoi(argv[2]);
 	} else if(argc==2) {
 		hostname=argv[1];
-		port=5000;
+		port=5001;
 	} else {
-		fprintf(stderr,"Usage:\n    %s ICS-host [ICS-port]\n",argv[0]);
+		fprintf(stderr, "Usage: %s ICS-host [ICS-port]\n", argv[0]);
 		return 1;
 	}
+
+                ch.for_encode = 0;
+		if (!CHuffmanInit(&ch)) {
+			fprintf(stderr, "initialization error\n");
+			exit(1);
+		}
+
 	fd=makeconn(hostname,port);
-	n=crypt(hello,strlen(hello));
-	mywrite(fd,hello,n);
 	for(;;) {
 		fd_set fds;
 		FD_ZERO(&fds);
@@ -145,7 +155,8 @@ int main(int argc, char **argv)
 		if(FD_ISSET(0,&fds)) {
 			static int rd=0;
 			static char buff[BSIZE];
-			rd+=n=read(0,buff+rd,BSIZE-rd);
+			n=read(0,buff+rd,BSIZE-rd);
+			rd += n;
 			if(!n) {
 				fprintf(stderr,"Gasp!\n");
 				exit(0);
@@ -155,27 +166,52 @@ int main(int argc, char **argv)
 				exit(1);
 			}
 			sendtofics(fd,buff,&rd);
-			if(rd==BSIZE) {
+			if (rd==BSIZE) {
 				fprintf(stderr,"Line tooooo long! I die!\n");
 				exit(1);
 			}
 		}
-		if(FD_ISSET(fd,&fds)) {
-			static int rd=0;
-			static char buff[BSIZE];
-			rd+=(n=read(fd,buff+rd,BSIZE-rd));
-			//rd+=n=read(fd,buff,BSIZE-rd);
-			if(!n) {
-				fprintf(stderr,"Connection closed by ICS\n");
+		if (FD_ISSET(fd, &fds)) {
+			static int rd = 0;
+			static char buf[BSIZE];
+			static int dec_rd = 0;
+			static char dec_buf[BSIZE];
+			int ret;
+			int q;
+
+			n = read(fd, buf + rd, sizeof(buf) - rd);
+			rd += n;
+			printf("read %d, total %d\n", n, rd);
+			for (q = 0; q <rd; q++) {
+				printf("%c", buf[q]);
+			}
+			if (!n) {
+				fprintf(stderr, "Connection closed by ICS\n");
 				exit(0);
 			}
-			if(n==-1) {
+			if (n == -1) {
 				perror(NULL);
 				exit(1);
 			}
-			getfromfics(fd,buff,&rd);
-			if(rd==BSIZE) {
-				fprintf(stderr,"Receive buffer full! Your ICS killed me!\n");
+
+			ch.inBuf = buf;
+			ch.inLen = rd;
+			ch.outBuf = dec_buf + dec_rd;
+			ch.outLen = sizeof(dec_buf) - dec_rd;
+			ret = CHuffmanDecode(&ch);
+			dec_rd += ch.outIndex;
+			printf("decoded to %d, ret %d\n", ch.outIndex, ret);
+			if (ret == BUFFER_EMPTY) {
+			}
+			else if (ret == 0) {
+			}
+			else {
+				fprintf(stderr, "decode error\n");
+				exit(1);
+			}
+			getfromfics(fd, dec_buf, &dec_rd);
+			if (dec_rd >= sizeof(dec_buf)) {
+				fprintf(stderr, "Buffer full reading from ICS\n");
 				exit(1);
 			}
 		}

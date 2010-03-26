@@ -166,9 +166,9 @@ int CHuffmanDecode(struct CHuffman *ch)
     /* open binary output file and bitfile input file */
     /* decode input file */
 
+    ch->outIndex = 0;
     if (!ch->resume) {
     	BitArrayClearAll(ch->code);
-	ch->outIndex = 0;
 	ch->decode_length = 0;
     }
 
@@ -391,21 +391,20 @@ static int encode(struct CHuffman *ch, char *inBuf, int inBytes)
 static int decode(struct CHuffman *ch, char *inBuf, int inSize)
 {
 	char outBuf[1024];
-	unsigned int outSize;
 	int i;
 
 	ch->inBuf = inBuf;
 	ch->inLen = inSize;
 	ch->outBuf = outBuf;
 	ch->outLen = sizeof(outBuf);
-	outSize = CHuffmanDecode(ch);
+	CHuffmanDecode(ch);
 	for (i = 0; i < ch->outIndex; i++)  {
 		printf("%c", outBuf[i]);
 	}
 	return 0;
 }
 
-#if 1
+#if 0
 int main(int argc, char *argv[])
 {
 	if (argc == 2 && !strcmp(argv[1], "encode")) {

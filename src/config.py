@@ -2,6 +2,7 @@
 
 class Config(object):
     port = 5000
+    zipseal_port = 5001
 
     db_host = "localhost"
     db_db = "chess"

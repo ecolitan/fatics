@@ -30,9 +30,7 @@ class Timeseal(object):
         print('%04x%s' % (len(line),repr(line)))
         self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
         count = int(self.zipseal_encoder.stdout.read(4), 16)
-        print 'count %d -> %d' % (len(line), count)
         ret = self.zipseal_encoder.stdout.read(count)
-        print '1got "%s"\n' % ''.join(['\\x%02x' % ord(c) for c in ret])
         return ret
 
 timeseal = Timeseal()

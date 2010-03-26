@@ -27,10 +27,14 @@ class Connection(basic.LineReceiver):
 
     def connectionMade(self):
         lang.langs['en'].install(names=['ngettext'])
-
+        self.session = Session(self)
+        if self.transport.getHost().port == config.zipseal_port:
+            print  'zipseal on'
+            self.session.use_zipseal = True
+            self.session.check_for_timeseal = False
+        print  'zipseal on?'
         self.factory.connections.append(self)
         self.write(config.welcome_msg)
-        self.session = Session(self)
         self.login()
         self.session.login_last_command = time.time()
         self.ip = self.transport.getPeer().host
@@ -72,12 +76,12 @@ class Connection(basic.LineReceiver):
                 elif dec[0:10] == 'TIMESEAL2|':
                     self.session.use_timeseal = True
                     return
-            (t, dec) = timeseal.decode_zipseal(line)
+            '''(t, dec) = timeseal.decode_zipseal(line)
             if t != 0:
                 if dec[0:8] == 'zipseal|':
                     self.write('ZIPSEAL\n')
                     self.session.use_zipseal = True
-                    return
+                    return'''
             # no timeseal; continue
 
         m = self.ivar_pat.match(line)
@@ -151,7 +155,7 @@ class Connection(basic.LineReceiver):
 
 
     def write(self, s):
-        if self.state != 'prelogin' and self.session.use_zipseal:
+        if self.session.use_zipseal:
             self.transport.write(timeseal.compress_zipseal(s))
         else:
             self.transport.write(s)

@@ -49,6 +49,8 @@ application = service.Application("chessd")
 
 service = getService(config.port)
 service.setServiceParent(application)
+service = getService(config.zipseal_port)
+service.setServiceParent(application)
 if os.geteuid() == 0:
     service = getService(23)
     service.setServiceParent(application)
