@@ -23,13 +23,13 @@ maketable: maketable.c bitarray.c bitfile.c huflocal.c
 	$(CC) -O3 -Wall -o maketable maketable.c bitarray.c bitfile.c \
 		huflocal.c
 
-chuffman: chuffman.o huflocal.o bitarray.o bitfile.o
-	$(CC) -g -Wall -o chuffman chuffman.o huflocal.o bitarray.o \
-		bitfile.o
+#chuffman: chuffman.o huflocal.o bitarray.o bitfile.o
+#	$(CC) -g -Wall -o chuffman chuffman.o huflocal.o bitarray.o \
+#		bitfile.o
 
 huflocal.o: huflocal.c
 	$(CC) -g -Wall -c huflocal.c
-chuffman.o: chuffman.c
+chuffman.o: chuffman.c codes.c
 	$(CC) -g -Wall -c chuffman.c
 bitarray.o: bitarray.c
 	$(CC) -g -Wall -c bitarray.c
