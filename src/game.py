@@ -61,9 +61,10 @@ class Game(object):
         self.white.session.is_white = True
         self.black.session.is_white = False
 
-        #self.speed = chal.speed
+        self.speed = chal.speed
         self.variant_and_speed = chal.variant_and_speed
-        self.rated_str = 'rated' if chal.rated else 'unrated'
+        self.rated = chal.rated
+        self.rated_str = 'rated' if self.rated else 'unrated'
         if not chal.is_time_odds:
             time_str = '%d %d' % (self.white_time,self.white_inc)
         else:
@@ -177,16 +178,16 @@ class Game(object):
             assert(side == BLACK)
             self.result('%s resigns' % user.name, '1-0')
 
-    def result(self, msg, result):
+    def result(self, msg, result_code):
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
-            self.white.name, self.black.name, msg, result)
+            self.white.name, self.black.name, msg, result_code)
         self.white.write_prompt(line)
         self.black.write_prompt(line)
         
         self.clock.stop()
         self.is_active = False
-        if result != '*':
-            history.history.save(self, msg, result)
+        if result_code != '*':
+            history.history.save(self, msg, result_code)
         self.free()
 
     def free(self):

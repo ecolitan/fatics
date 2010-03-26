@@ -1,28 +1,28 @@
-#from db import db
+from db import db
 
 class History(object):
-    def save(self, game, msg, result):
+    def save(self, game, msg, result_code):
         if 'by adjudication' in msg:
-            res = 'Adj'
+            result_reason = 'Adj'
         elif 'by agreement' in msg:
-            res = 'Agr'
+            result_reason = 'Agr'
         elif 'by disonnection' in msg:
-            res = 'Dis'
+            result_reason = 'Dis'
         elif 'forfeits on time' in msg:
-            res = 'Fla'
+            result_reason = 'Fla'
         elif 'checkmated' in msg:
-            res = 'Mat'
+            result_reason = 'Mat'
         elif 'neither player has mating material' in msg:
-            res = 'NM'
+            result_reason = 'NM'
         elif 'by repetition' in msg:
-            res = 'Rep'
+            result_reason = 'Rep'
         elif 'resigns' in msg:
-            res = 'Res'
+            result_reason = 'Res'
         elif 'ran out of time' in msg:
-            res = 'TM'
+            result_reason = 'TM'
         # TODO add suicide PLM and WNM
         elif '50 move rule' in msg:
-            res = '50'
+            result_reason = '50'
         else:
             raise RuntimeError('could not abbreviate result message: %s' % msg)
 
@@ -36,8 +36,11 @@ class History(object):
         except ValueError:
             black_rating = None
 
-        #db.game_add(game.white.id, white_rating, game.black.id,
-        #    black_rating, game.get_eco(), 
+        (i, eco, long) = game.get_eco()
+        db.game_add(game.white.name, white_rating, game.black.name,
+            black_rating, eco, game.variant.name, game.speed,
+            game.white_time, game.white_inc, result_code, game.rated,
+            result_reason)
 
 history = History()
 

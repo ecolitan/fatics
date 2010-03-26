@@ -16,7 +16,7 @@ CREATE TABLE `user` (
   `user_email` varchar(32) NOT NULL,
   `user_admin_level` smallint(4) unsigned NOT NULL,
   `user_fics_name` varchar(18) DEFAULT NULL,
-  `user_last_logout` datetime DEFAULT NULL,
+  `user_last_logout` timestamp NULL DEFAULT NULL,
 
   -- vars
   `time` SMALLINT(4) NOT NULL DEFAULT 2 COMMENT 'default seek time',
@@ -135,24 +135,24 @@ CREATE TABLE `user_title` (
 DROP TABLE IF EXISTS `game`;
 CREATE TABLE `game` (
   `game_id` int(8) NOT NULL AUTO_INCREMENT,
-  `white_id` int(8) NOT NULL,
+  `white_name` varchar(32) NOT NULL,
   `white_rating` smallint(4),
-  `black_id` int(8) NOT NULL,
+  `black_name` varchar(32) NOT NULL,
   `black_rating` smallint(4),
   `eco` char(5) NOT NULL,
   `variant` ENUM('normal', 'crazyhouse') NOT NULL,
   `speed` ENUM ('lightning', 'blitz', 'standard', 'slow', 'correspondence')
     NOT NULL,
-  `private` BOOLEAN NOT NULL DEFAULT 0,
-  `initial_time` int(3),
+  -- `private` BOOLEAN NOT NULL DEFAULT 0,
+  `time` int(3) COMMENT 'initial time',
   `inc` int(3) COMMENT 'increment',
   `result` ENUM('1-0', '0-1', '1/2-1/2', '*') NOT NULL, 
   `rated` BOOLEAN NOT NULL,
-  `result_code` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Rep', 'Res',
+  `result_reason` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Rep', 'Res',
     'TM', 'WLM', 'WNM', '50') NOT NULL,
-  `when_ended` datetime NOT NULL,
-  INDEX(`white_id`),
-  INDEX(`black_id`),
+  `when_ended` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX(`white_name`),
+  INDEX(`black_name`),
   INDEX(`when_ended`),
   PRIMARY KEY (`game_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

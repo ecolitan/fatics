@@ -1171,6 +1171,7 @@ class Normal(Variant):
     def __init__(self, game):
         self.game = game
         self.pos = copy.deepcopy(initial_pos)
+        self.name = 'normal'
 
     def do_move(self, s, conn):
         """Try to parse a move and execute it.  If it looks like a move but

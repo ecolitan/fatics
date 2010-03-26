@@ -300,6 +300,16 @@ class DB(object):
         cursor.close()
         return row
 
+    # game
+    def game_add(self, white_name, white_rating, black_name, black_rating,
+            eco, variant_name, speed, time, inc, result, rated, result_reason):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant=%s,speed=%s,time=%s,inc=%s,result=%s,rated=%s,result_reason=%s""", (white_name, white_rating, black_name,
+            black_rating, eco, variant_name, speed, time, inc, result,
+            rated, result_reason))
+        cursor.close()
+
+
 db = DB()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
