@@ -29,10 +29,8 @@ class Connection(basic.LineReceiver):
         lang.langs['en'].install(names=['ngettext'])
         self.session = Session(self)
         if self.transport.getHost().port == config.zipseal_port:
-            print  'zipseal on'
             self.session.use_zipseal = True
             self.session.check_for_timeseal = False
-        print  'zipseal on?'
         self.factory.connections.append(self)
         self.write(config.welcome_msg)
         self.login()
@@ -156,7 +154,8 @@ class Connection(basic.LineReceiver):
 
     def write(self, s):
         if self.session.use_zipseal:
-            self.transport.write(timeseal.compress_zipseal(s))
+            s = self.transport.escape(s)
+            self.transport.write(timeseal.compress_zipseal(s), raw=True)
         else:
             self.transport.write(s)
 

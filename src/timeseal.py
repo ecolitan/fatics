@@ -27,10 +27,10 @@ class Timeseal(object):
         return (int(m.group(1), 16), m.group(2))
     
     def compress_zipseal(self, line):
-        print('%04x%s' % (len(line),repr(line)))
         self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
         count = int(self.zipseal_encoder.stdout.read(4), 16)
         ret = self.zipseal_encoder.stdout.read(count)
+        print('%04x%s -> %d' % (len(line),repr(line),len(ret)))
         return ret
 
 timeseal = Timeseal()

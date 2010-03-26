@@ -115,7 +115,8 @@ int CHuffmanInit(struct CHuffman *ch)
 int CHuffmanEncode(struct CHuffman *ch)
 {
     bit_file_t bfpOut;
-    int c, i;
+    int i;
+    unsigned char c;
 
 
     bfpOut.buf = ch->outBuf;
@@ -154,25 +155,29 @@ int CHuffmanEncode(struct CHuffman *ch)
 
 int CHuffmanDecode(struct CHuffman *ch)
 {
-    bit_file_t bfpIn;
-    char decodedEOF = 0;
-    int i, newBit;
+	bit_file_t bfpIn;
+	int i, newBit;
     
 	bfpIn.mode = BF_READ;
     	bfpIn.buf = ch->inBuf;
     	bfpIn.bufLen = ch->inLen;
     	BitFileInit(&bfpIn);
 
-    /* open binary output file and bitfile input file */
-    /* decode input file */
+	/* open binary output file and bitfile input file */
+	/* decode input file */
 
-    ch->outIndex = 0;
-    if (!ch->resume) {
-    	BitArrayClearAll(ch->code);
-	ch->decode_length = 0;
-    }
+	ch->outIndex = 0;
+	if (!ch->resume) {
+		BitArrayClearAll(ch->code);
+		ch->decode_length = 0;
+	}
 
-    while (((newBit = BitFileGetBit(&bfpIn)) != EOF) && (!decodedEOF)) {
+    while (1) {
+	newBit = BitFileGetBit(&bfpIn);
+	if (newBit == EOF) {
+		fprintf(stderr, "error reading bitfile\n");
+		exit(1);
+	}
         if (newBit == BUFFER_EMPTY) {
 	    ch->resume = 1;
             return BUFFER_EMPTY;
@@ -192,20 +197,21 @@ int CHuffmanDecode(struct CHuffman *ch)
                 i++)
             {
                 if (BitArrayCompare(ch->canonicalList[i].code, ch->code) == 0)
-                {
-                    /* we just read a symbol output decoded value */
-                    if (ch->canonicalList[i].value != EOF_CHAR)
-                    {
+		{
+			/* we just read a symbol output decoded value */
+                    	if (ch->canonicalList[i].value == EOF_CHAR) {
+				if (BitFileByteAlign(&bfpIn)) {
+					fprintf(stderr, "buffer full\n");
+					exit(1);
+				}
+			}
+                    else {
 			if (ch->outIndex >= ch->outLen) {
 				/* buffer limit reached */
 				fprintf(stderr, "buffer full\n");
 				exit(1);
 			}
 			ch->outBuf[ch->outIndex++] = ch->canonicalList[i].value;
-                    }
-                    else
-                    {
-                        decodedEOF = TRUE;
                     }
 
                     BitArrayClearAll(ch->code);

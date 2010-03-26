@@ -27,6 +27,7 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <zlib.h>
+#include <assert.h>
 
 #include "chuffman.h"
 
@@ -56,7 +57,7 @@ int makeconn(char *hostname,int port)
 		exit(1);
 	}
 	host_info=gethostbyname(hostname);
-	if(host_info==NULL) {
+	if (host_info==NULL) {
 		perror(NULL);
 		exit(1);
 	}
@@ -114,11 +115,11 @@ void getfromfics(int fd, char *buff, int *rd)
 		for(n=0;n<*rd && buff[n]!='\n';n++);
 		//for(n=0;n<*rd && buff[n]!='\r';n++);
 		if(n<*rd) n++;
-		mywrite(1,buff,n);
-		for(m=n;m<*rd;m++) {
-			buff[m-n]=buff[m];
+		mywrite(1, buff, n);
+		for(m = n; m < *rd; m++) {
+			buff[m - n] = buff[m];
 		}
-		*rd-=n;
+		*rd -= n;
 	}
 }
 
@@ -151,11 +152,12 @@ int main(int argc, char **argv)
 		FD_ZERO(&fds);
 		FD_SET(0,&fds);
 		FD_SET(fd,&fds);
-		select(fd+1,&fds,NULL,NULL,NULL);
-		if(FD_ISSET(0,&fds)) {
+		select(fd + 1, &fds, NULL, NULL, NULL);
+		if(FD_ISSET(0, &fds)) {
+			/* read from stdin */
 			static int rd=0;
 			static char buff[BSIZE];
-			n=read(0,buff+rd,BSIZE-rd);
+			n = read(0, buff + rd, BSIZE - rd);
 			rd += n;
 			if(!n) {
 				fprintf(stderr,"Gasp!\n");
@@ -172,19 +174,17 @@ int main(int argc, char **argv)
 			}
 		}
 		if (FD_ISSET(fd, &fds)) {
+			/* read from ICS */
 			static int rd = 0;
 			static char buf[BSIZE];
 			static int dec_rd = 0;
 			static char dec_buf[BSIZE];
 			int ret;
-			int q;
 
+			assert(rd == 0);
 			n = read(fd, buf + rd, sizeof(buf) - rd);
 			rd += n;
-			printf("read %d, total %d\n", n, rd);
-			for (q = 0; q <rd; q++) {
-				printf("%c", buf[q]);
-			}
+			//printf("read %d, total %d\n", n, rd);
 			if (!n) {
 				fprintf(stderr, "Connection closed by ICS\n");
 				exit(0);
@@ -200,7 +200,7 @@ int main(int argc, char **argv)
 			ch.outLen = sizeof(dec_buf) - dec_rd;
 			ret = CHuffmanDecode(&ch);
 			dec_rd += ch.outIndex;
-			printf("decoded to %d, ret %d\n", ch.outIndex, ret);
+			rd = 0;
 			if (ret == BUFFER_EMPTY) {
 			}
 			else if (ret == 0) {

@@ -124,7 +124,7 @@ int BitFileGetBit(bit_file_t *stream)
     stream->bitCount--;
     returnValue = (stream->bitBuffer) >> (stream->bitCount);
 
-    return (returnValue & 0x01);
+    return returnValue & 0x01;
 }
 
 /***************************************************************************
@@ -229,3 +229,24 @@ int BitFilePutChar(const int c, bit_file_t *stream)
 
     return 0;
 }
+
+int BitFileByteAlign(bit_file_t *stream)
+{
+    if ((stream->mode == BF_WRITE) || (stream->mode == BF_APPEND))
+    {
+        /* write out any unwritten bits */
+        if (stream->bitCount != 0) {
+            if (stream->bufPos >= stream->bufLen) {
+                return EOF;
+            }
+            stream->bitBuffer <<= 8 - (stream->bitCount);
+	    stream->buf[stream->bufPos++] = stream->bitBuffer;
+        }
+    }
+
+    stream->bitBuffer = 0;
+    stream->bitCount = 0;
+
+    return 0;
+}
+

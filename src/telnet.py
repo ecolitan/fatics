@@ -179,10 +179,15 @@ class TelnetTransport(protocol.Protocol):
     def applicationDataReceived(self, bytes):
         self.protocol.dataReceived(bytes)
 
-    def write(self, data):
+    def escape(self, data):
         data = data.replace('''\xff''', '''\xff\xff''')
         data = data.replace('\n', '\r\n')
         #data = data.replace('\n', '\n\r')
+        return data
+
+    def write(self, data, raw=False):
+        if not raw:
+            data = self.escape(data)
         self.transport.write(data)
 
     def writeSequence(self, seq):
