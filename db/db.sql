@@ -10,7 +10,7 @@
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
   `user_id` int(8) NOT NULL AUTO_INCREMENT,
-  `user_name` varchar(32) NOT NULL,
+  `user_name` varchar(17) NOT NULL,
   `user_passwd` char(64) DEFAULT NULL,
   `user_real_name` varchar(64) NOT NULL,
   `user_email` varchar(32) NOT NULL,
@@ -135,9 +135,9 @@ CREATE TABLE `user_title` (
 DROP TABLE IF EXISTS `game`;
 CREATE TABLE `game` (
   `game_id` int(8) NOT NULL AUTO_INCREMENT,
-  `white_name` varchar(32) NOT NULL,
+  `white_name` varchar(17) NOT NULL,
   `white_rating` smallint(4),
-  `black_name` varchar(32) NOT NULL,
+  `black_name` varchar(17) NOT NULL,
   `black_rating` smallint(4),
   `eco` char(5) NOT NULL,
   `variant` ENUM('normal', 'crazyhouse') NOT NULL,

@@ -314,8 +314,8 @@ class Find(object):
     def by_name_exact(self, name, min_len=config.min_login_name_len,online_only=False):
         if len(name) < min_len:
             raise UsernameException(_('Names should be at least %d characters long.  Try again.\n') % min_len)
-        elif len(name) > 18:
-            raise UsernameException(_('Names should be at most %d characters long.  Try again.\n') % 18)
+        elif len(name) > 17:
+            raise UsernameException(_('Names should be at most %d characters long.  Try again.\n') % 17)
         elif not self.username_re.match(name):
             raise UsernameException(_('Names should only consist of lower and upper case letters.  Try again.\n'))
 

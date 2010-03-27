@@ -308,7 +308,13 @@ class DB(object):
             black_rating, eco, variant_name, speed, time, inc, result,
             rated, result_reason))
         cursor.close()
-
+    
+    def history_get(self, user_name):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT result, white_name, black_name, white_rating, black_rating, speed, variant, time, inc, eco, result_reason, when_ended FROM game WHERE white_name = %s or black_name = %s ORDER BY when_ended DESC LIMIT 10""", (user_name, user_name))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
 
 db = DB()
 

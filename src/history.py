@@ -42,6 +42,45 @@ class History(object):
             game.white_time, game.white_inc, result_code, game.rated,
             result_reason)
 
+def show_for_user(user, conn):
+    hist = db.history_get(user.name)
+    if not hist:
+        conn.write(_('%s has no history games.\n') % user.name)
+        return
+
+    conn.write(_('History for %s:\n') % user.name)
+    conn.write(_('                  Opponent      Type         ECO End Date\n'))
+    i = 1
+    for row in db.history_get(user.name):
+        if row['white_name'] == user.name:
+            color_char = 'W'
+            user_rating = row['white_rating']
+            opp_rating = row['black_rating']
+            opp_name = row['black_name']
+            if row['result'] == '1-0':
+                result_char = '+'
+            elif row['result'] == '1/2-1/2':
+                result_char = '='
+            else:
+                assert(row['result'] == '0-1')
+                result_char = '-'
+        else:
+            assert(row['black_name'] == user.name)
+            color_char = 'B'
+            user_rating = row['black_rating']
+            opp_rating = row['white_rating']
+            opp_name = row['white_name']
+            if row['result'] == '1-0':
+                result_char = '-'
+            elif row['result'] == '1/2-1/2':
+                result_char = '='
+            else:
+                assert(row['result'] == '0-1')
+                result_char = '+'
+        conn.write('%2d %s %4s %s %4s %15s' % (i, result_char, user_rating,
+            color_char, opp_rating, opp_name))
+        i += 1
+
 history = History()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

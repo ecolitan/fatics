@@ -8,6 +8,7 @@ import list
 import channel
 import offer
 import game
+import history
 from timer import timer
 from online import online
 from reload import reload
@@ -54,6 +55,7 @@ class CommandList(object):
         self._add(Command('flag', '', self.flag, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
         self._add(Command('help', 'o', self.help, admin.Level.user))
+        self._add(Command('history', 'o', self.history, admin.Level.user))
         self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
         self._add(Command('iset', 'wS', self.iset, admin.Level.user))
         self._add(Command('ivariables', 'o', self.ivariables, admin.Level.user))
@@ -349,7 +351,16 @@ class CommandList(object):
         else:
             cmds = [c.name for c in command_list.cmds.itervalues()]
         conn.write('This server is under development.\n\nRecognized commands: %s\n' % ' '.join(cmds))
-
+    
+    def history(self, args, conn):
+        u = None
+        if args[0] is not None:
+            u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
+        else:
+            u = conn.user
+        if u:
+            history.show_for_user(u, conn)
+                
     def inchannel(self, args, conn):
         if args[0] is not None:
             if type(args[0]) != str:

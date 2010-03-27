@@ -19,7 +19,7 @@ class LoginTest(Test):
         self.expect(' should be at least ', t)
 
         # login username too long
-        t.write('adminabcdefghijklmno\n')
+        t.write('adminabcdefghijklmn\n')
         self.expect(' should be at most ', t)
 
         # login username contains numbers
