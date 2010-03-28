@@ -598,9 +598,9 @@ class Position(object):
             self.ep = mv.new_ep
             self.hash ^= zobrist.ep_hash(self.ep)
 
+        self.history.set_move(self.ply - 1 , mv)
         assert(self.hash == self._compute_hash())
         self.history.set_hash(self.ply, self.hash)
-        self.history.set_move(self.ply - 1 , mv)
 
     def _is_legal_ep(self, ep):
         # According to Geurt Gijssen's "An Arbiter's Notebook" #110,

@@ -16,7 +16,7 @@ def main():
         read_default_file="~/.my.cnf")
     cursor = db.cursor()
 
-    '''f = open(epd_file, 'r')
+    f = open(epd_file, 'r')
 
     cursor.execute("""DELETE FROM eco""")
     count = 0
@@ -35,8 +35,7 @@ def main():
         cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, hash=%s""",
             (eco,long,pos.hash))
         count += 1
-    cursor.close()
-    print 'imported %d eco codes' % count'''
+    print 'imported %d eco codes' % count
    
     cursor.execute("""DELETE FROM nic""")
     count = 0

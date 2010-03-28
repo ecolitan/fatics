@@ -90,8 +90,6 @@ class Game(object):
 
         self.variant = variant_factory.get(chal.variant_name, self)
 
-        #print('white: ' + self.variant.to_style12(self.white))
-        #print('black: ' + self.variant.to_style12(self.black))
         self.white.send_board(self.variant)
         self.black.send_board(self.variant)
 
@@ -225,7 +223,7 @@ class Game(object):
         if row:
             ret = (i, row['nic'])
         else:
-            ret = (0, '--.--', 'Unknown')
+            ret = (0, '--.--')
         return ret
 
     def get_moves(self):
@@ -236,7 +234,6 @@ class Game(object):
             moves.append(mv.to_san())
             i += 1
         ret = ' '.join(moves)
-        print 'ret %s' % ret
         return ret
 
     def write_moves(self, conn):
