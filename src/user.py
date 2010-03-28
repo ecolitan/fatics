@@ -2,6 +2,7 @@ import re
 import bcrypt
 import random
 import string
+import time
 
 import admin
 import var
@@ -138,6 +139,26 @@ class BaseUser(object):
     
     def send_board(self, vari):
         self.write_prompt(vari.to_style12(self))
+       
+    def save_history(self, game_id, result_char, user_rating, color_char,
+            opp_name, opp_rating, eco, flags, initial_time, inc,
+            result_reason, when_ended):
+        if len(self.history) == 0:
+            num = 1
+        else:
+            num = (self.history[-1]['num'] + 1) % 100
+            self.history = self.history[1:]
+        when_ended_str = time.strftime("%a %b %e, %H:%M %Z %Y",
+                time.localtime(when_ended))
+        entry = {'game_id': game_id, 'num': num, 'result_char': result_char,
+            'user_rating': user_rating, 'color_char': color_char,
+            'opp_name': opp_name, 'opp_rating': opp_rating, 'eco': eco,
+            'flags' : flags, 'time': initial_time, 'inc' : inc,
+            'result_reason': result_reason, 'when_ended': when_ended,
+            'when_ended_str': when_ended_str
+        }
+        self.history.append(entry)
+        return entry
 
 # a registered user
 class User(BaseUser):
@@ -185,6 +206,8 @@ class User(BaseUser):
             self.censor.add(dbu['user_name'])
         for dbu in db.user_get_noplayed(self.id):
             self.noplay.add(dbu['user_name'])
+        
+        self.history = []
 
     def log_off(self):
         BaseUser.log_off(self)

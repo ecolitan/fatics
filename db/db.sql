@@ -92,7 +92,7 @@ DROP TABLE IF EXISTS `note`;
 CREATE TABLE note (
   `note_id` int(8) NOT NULL AUTO_INCREMENT,
   `user_id` int(8) NOT NULL,
-  `num` tinyint(1) NOT NULL COMMENT 'the note number',
+  `num` tinyint(1) NOT NULL COMMENT 'note number',
   `txt` VARCHAR(1024) NOT NULL COMMENT 'note text',
   UNIQUE KEY (`user_id`, `num`),
   PRIMARY KEY (`note_id`)
@@ -131,6 +131,29 @@ CREATE TABLE `user_title` (
   UNIQUE INDEX(`user_id`,`title_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- history
+DROP TABLE IF EXISTS `history`;
+CREATE TABLE `history` (
+  `history_id` int(8) NOT NULL AUTO_INCREMENT,
+  `history_num` tinyint(2) NOT NULL,
+  `user_id` int(8) NOT NULL,
+  `user_rating` smallint(4),
+  `color_char` ENUM('W', 'B') NOT NULL,
+  `opp_name` varchar(17) NOT NULL,
+  `opp_rating` smallint(4),
+  `eco` char(5) NOT NULL,
+  `flags` COMMENT 'string describing variant, speed, ratedness, etc.',
+  `time` COMMENT 'initial time',
+  `inc` int(3) COMMENT 'increment',
+  `result_reason` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Rep', 'Res',
+    'TM', 'WLM', 'WNM', '50') NOT NULL,
+  `when_ended` TIMESTAMP NOT NULL,
+  `game_id` int(8) NOT NULL, 'correspinding game entry that has the moves',
+  INDEX(`user_id`),
+  UNIQUE INDEX(`user_id`, `history_num`),
+  PRIMARY KEY (`history_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 -- game
 DROP TABLE IF EXISTS `game`;
 CREATE TABLE `game` (
@@ -150,7 +173,8 @@ CREATE TABLE `game` (
   `rated` BOOLEAN NOT NULL,
   `result_reason` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Rep', 'Res',
     'TM', 'WLM', 'WNM', '50') NOT NULL,
-  `when_ended` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `moves` TEXT,
+  `when_ended` TIMESTAMP NOT NULL,
   INDEX(`white_name`),
   INDEX(`black_name`),
   INDEX(`when_ended`),

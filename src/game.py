@@ -179,6 +179,7 @@ class Game(object):
             self.result('%s resigns' % user.name, '1-0')
 
     def result(self, msg, result_code):
+        self.when_ended = time.time()
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
             self.white.name, self.black.name, msg, result_code)
         self.white.write_prompt(line)
@@ -187,7 +188,7 @@ class Game(object):
         self.clock.stop()
         self.is_active = False
         if result_code != '*':
-            history.history.save(self, msg, result_code)
+            history.history.save_game(self, msg, result_code)
         self.free()
 
     def free(self):
@@ -225,6 +226,17 @@ class Game(object):
             ret = (i, row['nic'])
         else:
             ret = (0, '--.--', 'Unknown')
+        return ret
+
+    def get_moves(self):
+        i = self.variant.pos.start_ply
+        moves = []
+        while i < self.variant.pos.ply:
+            mv = self.variant.pos.history.get_move(i)
+            moves.append(mv.to_san())
+            i += 1
+        ret = ' '.join(moves)
+        print 'ret %s' % ret
         return ret
 
     def write_moves(self, conn):

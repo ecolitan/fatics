@@ -1,4 +1,4 @@
-from MySQLdb import connect, cursors, IntegrityError
+from MySQLdb import connect, cursors, IntegrityError, TimestampFromTicks
 from config import config
 
 class DuplicateKeyError(Exception):
@@ -302,13 +302,17 @@ class DB(object):
 
     # game
     def game_add(self, white_name, white_rating, black_name, black_rating,
-            eco, variant_name, speed, time, inc, result, rated, result_reason):
+            eco, variant_name, speed, time, inc, result, rated, result_reason,
+            moves, when_ended):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant=%s,speed=%s,time=%s,inc=%s,result=%s,rated=%s,result_reason=%s""", (white_name, white_rating, black_name,
-            black_rating, eco, variant_name, speed, time, inc, result,
-            rated, result_reason))
+        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant=%s,speed=%s,time=%s,inc=%s,result=%s,rated=%s,result_reason=%s,moves=%s,when_ended=%s""", (white_name, white_rating,
+            black_name, black_rating, eco, variant_name, speed, time, inc,
+            result, rated, result_reason, moves,
+            TimestampFromTicks(when_ended)))
+        id = cursor.lastrowid
         cursor.close()
-    
+        return id
+
     def history_get(self, user_name):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT result, white_name, black_name, white_rating, black_rating, speed, variant, time, inc, eco, result_reason, when_ended FROM game WHERE white_name = %s or black_name = %s ORDER BY when_ended DESC LIMIT 10""", (user_name, user_name))

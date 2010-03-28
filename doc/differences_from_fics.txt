@@ -139,8 +139,6 @@ Rationale: These commands should be used with great care.
 * Dynamically switch the language of FICS messages
 * New timeseal with support for sending international characters.
 ===Not done yet===
-* Time odds are supported again (it appears they were removed from the
-old FICS, but I could not find a posted explanation of why).
 * Timeseal has compression of data sent from server to client;
 timeseal supports pinging.
 * New "seclude" variable.  When it is set, all communications to the
@@ -204,6 +202,12 @@ antisocial behavior (maybe I should write up a more detailed explanation).
 you can only claim a draw on your own turn and claims may only be based
 on the current position.  This could be added as an option if there is
 interest.
+* Time odds (It appears they were once possible with the old FICS but
+the feature was removed.)  A similar effect can be achieved if one
+player simply grants moretime at the beginning of a game.  It is not
+currently possible to give different increments to each player, but
+that seems like a very esoteric feature.
+* Increase history games to 100.  Just use hstat instead?
 
 == I changed my mind about these so I need to undo them ==
 * Gods can now set their own adminlevel. Not sure if it's useful, but it
