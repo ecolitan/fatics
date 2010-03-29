@@ -177,6 +177,8 @@ command to change vars.
 care about relays can "set rshout 0".
 Rationale: Currently announcements are used, so it is not possible to
 unsubscribe.
+* The concept of "server time" no longer exists.  All times are in local
+time or UTC.
 
 == Changes I considered but rejected ==
 * Preventing a player from logging out when starting a game: if a

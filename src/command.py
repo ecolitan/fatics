@@ -39,6 +39,7 @@ class CommandList(object):
         self.admin_cmds = trie.Trie()
         self._add(Command('abort', 'n', self.abort, admin.Level.user))
         self._add(Command('accept', 'n', self.accept, admin.Level.user))
+        self._add(Command('aclearhistory', 'w', self.aclearhistory, admin.Level.admin))
         self._add(Command('addlist', 'ww', self.addlist, admin.Level.user))
         self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
         self._add(Command('alias', 'oT', self.alias, admin.Level.user))
@@ -111,6 +112,14 @@ class CommandList(object):
             conn.user.session.offers_received[0].accept()
         else:
             conn.write('TODO: ACCEPT PARAM\n')
+    
+    def aclearhistory(self, args, conn):
+        name = args[0]
+        u = user.find.by_name_exact_for_user(name, conn)
+        if u:
+            # disallow clearing history for higher adminlevels?
+            u.clear_history()
+            u.write_prompt(A_('\nHistory of %s cleared.\n') % conn.user.name)
 
     def addlist(self, args, conn):
         try:

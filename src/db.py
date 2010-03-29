@@ -1,4 +1,4 @@
-from MySQLdb import connect, cursors, IntegrityError, TimestampFromTicks
+from MySQLdb import connect, cursors, IntegrityError
 from config import config
 
 class DuplicateKeyError(Exception):
@@ -308,17 +308,31 @@ class DB(object):
         cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant=%s,speed=%s,time=%s,inc=%s,result=%s,rated=%s,result_reason=%s,moves=%s,when_ended=%s""", (white_name, white_rating,
             black_name, black_rating, eco, variant_name, speed, time, inc,
             result, rated, result_reason, moves,
-            TimestampFromTicks(when_ended)))
+            when_ended))
         id = cursor.lastrowid
         cursor.close()
         return id
 
-    def history_get(self, user_name):
+    def user_get_history(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT result, white_name, black_name, white_rating, black_rating, speed, variant, time, inc, eco, result_reason, when_ended FROM game WHERE white_name = %s or black_name = %s ORDER BY when_ended DESC LIMIT 10""", (user_name, user_name))
+        cursor.execute("""SELECT game_id, num, result_char, user_rating, color_char, opp_name, opp_rating, eco, flags, time, inc, result_reason, when_ended FROM history WHERE user_id=%s""", user_id)
         rows = cursor.fetchall()
         cursor.close()
+        #for row in rows:
+        #    row['when_ended'] = row['when_ended'].timetuple()
         return rows
+    
+    def user_add_history(self, entry, user_id):
+        cursor = self.db.cursor()
+        entry.update({'user_id': user_id})
+        cursor.execute("""DELETE FROM history WHERE user_id=%s AND num=%s""" % (user_id, entry['num']))
+        cursor.execute("""INSERT INTO history SET user_id=%(user_id)s,game_id=%(game_id)s, num=%(num)s, result_char=%(result_char)s, user_rating=%(user_rating)s, color_char=%(color_char)s, opp_name=%(opp_name)s, opp_rating=%(opp_rating)s, eco=%(eco)s, flags=%(flags)s, time=%(time)s, inc=%(inc)s, result_reason=%(result_reason)s, when_ended=%(when_ended)s""", entry)
+        cursor.close()
+
+    def user_del_history(self, user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM history WHERE user_id=%s""", user_id)
+        cursor.close()
 
 db = DB()
 

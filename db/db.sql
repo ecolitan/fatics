@@ -135,22 +135,23 @@ CREATE TABLE `user_title` (
 DROP TABLE IF EXISTS `history`;
 CREATE TABLE `history` (
   `history_id` int(8) NOT NULL AUTO_INCREMENT,
-  `history_num` tinyint(2) NOT NULL,
+  `num` tinyint(2) NOT NULL,
+  `result_char` enum('+', '-', '=') NOT NULL,
   `user_id` int(8) NOT NULL,
-  `user_rating` smallint(4),
+  `user_rating` char(4) NOT NULL,
   `color_char` ENUM('W', 'B') NOT NULL,
   `opp_name` varchar(17) NOT NULL,
-  `opp_rating` smallint(4),
+  `opp_rating` char(4) NOT NULL,
   `eco` char(5) NOT NULL,
-  `flags` COMMENT 'string describing variant, speed, ratedness, etc.',
-  `time` COMMENT 'initial time',
-  `inc` int(3) COMMENT 'increment',
+  `flags` char(3) NOT NULL COMMENT 'string describing variant, speed, ratedness, etc.',
+  `time` smallint(4) COMMENT 'initial time',
+  `inc` smallint(4) COMMENT 'increment',
   `result_reason` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Rep', 'Res',
     'TM', 'WLM', 'WNM', '50') NOT NULL,
   `when_ended` TIMESTAMP NOT NULL,
-  `game_id` int(8) NOT NULL, 'correspinding game entry that has the moves',
+  `game_id` int(8) NOT NULL COMMENT 'corresponding game entry that has the moves',
   INDEX(`user_id`),
-  UNIQUE INDEX(`user_id`, `history_num`),
+  UNIQUE INDEX(`user_id`, `num`),
   PRIMARY KEY (`history_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -159,9 +160,9 @@ DROP TABLE IF EXISTS `game`;
 CREATE TABLE `game` (
   `game_id` int(8) NOT NULL AUTO_INCREMENT,
   `white_name` varchar(17) NOT NULL,
-  `white_rating` smallint(4),
+  `white_rating` char(4),
   `black_name` varchar(17) NOT NULL,
-  `black_rating` smallint(4),
+  `black_rating` char(4),
   `eco` char(5) NOT NULL,
   `variant` ENUM('normal', 'crazyhouse') NOT NULL,
   `speed` ENUM ('lightning', 'blitz', 'standard', 'slow', 'correspondence')

@@ -2,7 +2,6 @@ import re
 import bcrypt
 import random
 import string
-import time
 
 import admin
 import var
@@ -20,28 +19,21 @@ class BaseUser(object):
     def __init__(self):
         self.is_online = False
         self.notes = {}
-        self.aliases = {}
+        self._history = None
 
     def __eq__(self, other):
         return self.name == other.name
 
     def log_on(self, conn):
-        if not self.is_guest:
-            if online.is_online(self.name):
-                conn.write(_("**** %s is already logged in; closing the other connection. ****\n" % self.name))
-                u = online.find_exact(self.name)
-                u.session.conn.write(_("**** %s has arrived; you can't both be logged in. ****\n\n") % self.name)
-                #u.session.conn.write(_("**** %s has arrived - you can't both be logged in. ****\n\n") % self.name)
-                u.session.conn.loseConnection('logged in again')
         self.vars.update(var.varlist.get_transient_vars())
         self.aliases = {}
         self.formula = {}
+        self.aliases = {}
         self.notifiers = set()
         self.censor = set()
         self.noplay = set()
         self.session = conn.session
         self.session.set_user(self)
-        self.history = None
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
         notify.notify.users(self, _("Notification: %s has arrived.\n") % self.name)
@@ -143,22 +135,23 @@ class BaseUser(object):
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
             result_reason, when_ended):
-        if len(self.history) == 0:
+        assert(self._history is not None)
+        if len(self._history) == 0:
             num = 1
         else:
-            num = (self.history[-1]['num'] + 1) % 100
-            self.history = self.history[1:]
-        when_ended_str = time.strftime("%a %b %e, %H:%M %Z %Y",
-                time.localtime(when_ended))
+            num = (self._history[-1]['num'] + 1) % 100
+            self._history = self._history[1:]
         entry = {'game_id': game_id, 'num': num, 'result_char': result_char,
             'user_rating': user_rating, 'color_char': color_char,
             'opp_name': opp_name, 'opp_rating': opp_rating, 'eco': eco,
             'flags' : flags, 'time': initial_time, 'inc' : inc,
-            'result_reason': result_reason, 'when_ended': when_ended,
-            'when_ended_str': when_ended_str
+            'result_reason': result_reason, 'when_ended': when_ended
         }
-        self.history.append(entry)
+        self._history.append(entry)
         return entry
+
+    def clear_history(self):
+        self._history = []
 
 # a registered user
 class User(BaseUser):
@@ -188,6 +181,12 @@ class User(BaseUser):
                 self.title_str += '(%s)' % title['title_flag']
 
     def log_on(self, conn):
+        if online.is_online(self.name):
+            conn.write(_("**** %s is already logged in; closing the other connection. ****\n" % self.name))
+            u = online.find_exact(self.name)
+            u.session.conn.write(_("**** %s has arrived; you can't both be logged in. ****\n\n") % self.name)
+            #u.session.conn.write(_("**** %s has arrived - you can't both be logged in. ****\n\n") % self.name)
+            u.session.conn.loseConnection('logged in again')
         BaseUser.log_on(self, conn)
         nlist = []
         for dbu in db.user_get_notifiers(self.id):
@@ -206,9 +205,9 @@ class User(BaseUser):
             self.censor.add(dbu['user_name'])
         for dbu in db.user_get_noplayed(self.id):
             self.noplay.add(dbu['user_name'])
-        
-        self.history = []
 
+        self.get_history()
+        
     def log_off(self):
         BaseUser.log_off(self)
         db.user_set_last_logout(self.id)
@@ -296,6 +295,23 @@ class User(BaseUser):
         BaseUser.remove_noplay(self, user)
         if not user.is_guest:
             db.user_del_noplay(self.id, user.id)
+    
+    def get_history(self):
+        if self._history is None:
+            self._history = [e for e in db.user_get_history(self.id)]
+        return self._history
+    
+    def save_history(self, game_id, result_char, user_rating, color_char,
+            opp_name, opp_rating, eco, flags, initial_time, inc,
+            result_reason, when_ended):
+        entry = BaseUser.save_history(self, game_id, result_char, user_rating,
+            color_char, opp_name, opp_rating, eco, flags, initial_time, inc,
+            result_reason, when_ended)
+        db.user_add_history(entry, self.id)
+    
+    def clear_history(self):
+        BaseUser.clear_history(self)
+        db.user_del_history(self.id)
 
 class GuestUser(BaseUser):
     def __init__(self, name):
@@ -324,7 +340,11 @@ class GuestUser(BaseUser):
 
     def log_on(self, conn):
         BaseUser.log_on(self, conn)
-        self.history = []
+        self._history = []
+
+    def get_history(self):
+        assert(self._history is not None)
+        return self._history
     
 class AmbiguousException(Exception):
     def __init__(self, names):

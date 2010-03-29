@@ -1,5 +1,6 @@
 import random
 import time
+import datetime
 
 (WHITE, BLACK) = range(2)
 
@@ -177,7 +178,7 @@ class Game(object):
             self.result('%s resigns' % user.name, '1-0')
 
     def result(self, msg, result_code):
-        self.when_ended = time.time()
+        self.when_ended = datetime.datetime.utcnow()
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
             self.white.name, self.black.name, msg, result_code)
         self.white.write_prompt(line)
