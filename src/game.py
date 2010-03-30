@@ -1,6 +1,7 @@
 import random
 import time
 import datetime
+import user
 
 (WHITE, BLACK) = range(2)
 
@@ -30,34 +31,51 @@ def find_free_slot():
         if i not in games:
             return i
         i += 1
+        
+def from_name_or_number(arg, conn):
+    g = None
+    try:
+        num = int(arg)
+        if num in games:
+            g = games[num]
+        else:
+            conn.write(_("There is no such game.\n"))
+    except ValueError:
+        # user name
+        u = user.find.by_prefix_for_user(arg, conn,
+            online_only=True)
+        if u:
+            if len(u.session.games) == 0:
+                conn.write(_("%s is not playing or examining a game.\n")
+                    % u.name)
+            else:
+                g = u.session.games.values()[0]
+    return g
 
 class Game(object):
     def __init__(self, chal):
         self.number = find_free_slot()
         games[self.number] = self
+        self.observers = set()
+
         side = chal.side
         if side is None:
             side = self._pick_color(chal.a, chal.b)
-
         if side == WHITE:
             self.white = chal.a
             self.black = chal.b
-            self.white_time = chal.a_time
-            self.black_time = chal.b_time
-            self.white_inc = chal.a_inc
-            self.black_inc = chal.b_inc
             self.white_rating = chal.a_rating
             self.black_rating = chal.b_rating
         else:
             assert(side == BLACK)
             self.white = chal.b
             self.black = chal.a
-            self.white_time = chal.b_time
-            self.black_time = chal.a_time
-            self.white_inc = chal.b_inc
-            self.black_inc = chal.a_inc
             self.white_rating = chal.b_rating
             self.black_rating = chal.a_rating
+
+        self.white_time = chal.time
+        self.black_time = chal.time
+        self.inc = chal.inc
 
         self.white.session.is_white = True
         self.black.session.is_white = False
@@ -66,10 +84,7 @@ class Game(object):
         self.variant_and_speed = chal.variant_and_speed
         self.rated = chal.rated
         self.rated_str = 'rated' if self.rated else 'unrated'
-        if not chal.is_time_odds:
-            time_str = '%d %d' % (self.white_time,self.white_inc)
-        else:
-            time_str = '%d %d %d %d' % (self.white_time,self.white_inc,self.blacck.time,self.black.inc)
+        time_str = '%d %d' % (self.white_time,self.inc)
 
         self.flip = False
         self.start_time = time.time()
@@ -77,7 +92,7 @@ class Game(object):
 
         self.pending_offers = []
         self.clock = clock.FischerClock(self.white_time * 60.0,
-            self.black_time * 60.0, self.white_inc, self.black_inc)
+            self.black_time * 60.0, self.inc)
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.variant_and_speed, time_str)
@@ -93,6 +108,14 @@ class Game(object):
 
         self.white.send_board(self.variant)
         self.black.send_board(self.variant)
+        for u in self.observers:
+            u.send_board(self.variant)
+
+    def __eq__(self, other):
+        return self.number == other.number
+
+    def __hash__(self):
+        return self.number
 
     def _pick_color(self, a, b): 
         return random.choice([WHITE, BLACK])
@@ -123,6 +146,8 @@ class Game(object):
 
         self.white.send_board(self.variant)
         self.black.send_board(self.variant)
+        for u in self.observers:
+            u.send_board(self.variant)
                
         if self.variant.pos.is_checkmate:
             if self.variant.get_turn() == WHITE:
@@ -159,16 +184,16 @@ class Game(object):
     def get_opp(self, user):
         side = self.get_user_side(user)
         return self.get_side_user(opp(side))
-    
+
     def get_user_to_move(self):
         if self.variant.get_turn() == WHITE:
             return self.white
         else:
             return self.black
-    
+
     def abort(self, msg):
         self.result(msg, '*')
-    
+
     def resign(self, user):
         side = self.get_user_side(user)
         if side == WHITE:
@@ -183,17 +208,29 @@ class Game(object):
             self.white.name, self.black.name, msg, result_code)
         self.white.write_prompt(line)
         self.black.write_prompt(line)
-        
+        for u in self.observers:
+            u.write(line)
+
         self.clock.stop()
         self.is_active = False
         if result_code != '*':
             history.history.save_game(self, msg, result_code)
         self.free()
 
+    def unobserve(self, u):
+        """Remove the given user as an observer and notify the user."""
+        u.write_prompt(_('Removing game %d from observation list.\n')
+            % self.number)
+        u.session.observed.remove(self)
+        self.observers.remove(u)
+
     def free(self):
         for o in self.pending_offers:
             o.decline(notify=False)
         del games[self.number]
+        for u in self.observers.copy():
+            self.unobserve(u)
+        assert(not self.observers)
         del self.white.session.games[self.black.name]
         del self.black.session.games[self.white.name]
 
@@ -247,7 +284,7 @@ class Game(object):
                 time.localtime(self.start_time))))
         conn.write("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
             (self.rated_str.capitalize(), self.variant_and_speed,
-                self.white_time, self.white_inc))
+                self.white_time, self.inc))
         assert(len(self.black.name) <= 23)
         conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (self.white.name, self.black.name))
         i = self.variant.pos.start_ply & ~1

@@ -1266,7 +1266,7 @@ class Normal(Variant):
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, self.game.white.name,
             self.game.black.name, relation, self.game.white_time,
-            self.game.white_inc, self.pos.material[1], self.pos.material[0],
+            self.game.inc, self.pos.material[1], self.pos.material[0],
             white_clock, black_clock, full_moves, last_move_verbose,
             last_move_time_str, last_move_san, flip,
             int(self.game.clock.is_ticking), int(user.session.lag))

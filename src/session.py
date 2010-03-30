@@ -20,6 +20,7 @@ class Session(object):
         self.games = {}
         self.ivars = var.varlist.get_default_ivars()
         self.lag = 0
+        self.observed = set()
 
     def set_user(self, user):
         self.user = user
@@ -56,6 +57,11 @@ class Session(object):
         del self.offers_sent[:]
         if len(self.games) > 0:
             self.conn.write('Your game will be lost because adjourning is not implemented.\n')
+
+        # unobserve games
+        for g in self.observed:
+            g.unobserve(self.user)
+        assert(not self.observed)
 
     def set_ivars_from_str(self, s):
         """Parse a %b string sent by Jin to set ivars before logging in."""

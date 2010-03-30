@@ -5,6 +5,8 @@ class TestStyle12(Test):
         self.adduser('testplayer', 'testpass')
         t = self.connect_as_user('testplayer', 'testpass')
         t2 = self.connect_as_admin()
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
         
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)

@@ -24,6 +24,9 @@ class BaseUser(object):
     def __eq__(self, other):
         return self.name == other.name
 
+    def __hash__(self):
+        return hash(self.name)
+
     def log_on(self, conn):
         self.vars.update(var.varlist.get_transient_vars())
         self.aliases = {}

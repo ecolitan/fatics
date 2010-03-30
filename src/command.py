@@ -63,6 +63,7 @@ class CommandList(object):
         self._add(Command('match', 'wt', self.match, admin.Level.user))
         self._add(Command('moves', 'n', self.moves, admin.Level.user))
         self._add(Command('nuke', 'w', self.nuke, admin.Level.admin))
+        self._add(Command('observe', 'i', self.observe, admin.Level.user))
         self._add(Command('password', 'WW', self.password, admin.Level.user))
         self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
         self._add(Command('quit', '', self.quit, admin.Level.user))
@@ -76,6 +77,7 @@ class CommandList(object):
         self._add(Command('style', 'd', self.style, admin.Level.user))
         self._add(Command('tell', 'nS', self.tell, admin.Level.user))
         self._add(Command('unalias', 'w', self.unalias, admin.Level.user))
+        self._add(Command('unobserve', 'n', self.unobserve, admin.Level.user))
         self._add(Command('uptime', '', self.uptime, admin.Level.user))
         self._add(Command('variables', 'o', self.variables, admin.Level.user))
         self._add(Command('who', 'T', self.who, admin.Level.user))
@@ -87,9 +89,9 @@ class CommandList(object):
         self.admin_cmds[cmd.name] = cmd
         if cmd.admin_level <= admin.Level.user:
             self.cmds[cmd.name] = cmd
-    
+
     def abort(self, args, conn):
-        if len(conn.user.session.games) == 0:
+        if not conn.user.session.games:
             conn.write(_("You are not playing a game.\n"))
             return
         if len(conn.user.session.games) > 1:
@@ -100,9 +102,9 @@ class CommandList(object):
             g.abort('Game aborted on move 1 by %s' % conn.user.name)
         else:
             offer.Abort(g, conn.user)
-    
+
     def accept(self, args, conn):
-        if len(conn.user.session.offers_received) == 0:
+        if not conn.user.session.offers_received:
             conn.write(_('You have no pending offers from other players.\n'))
             return
         if args[0] is None:
@@ -240,7 +242,7 @@ class CommandList(object):
             dname = conn.user.get_display_name()
             for u in online.itervalues():
                 if u.vars['cshout']:
-                    if not name in u.censor:
+                    if name not in u.censor:
                         u.write_prompt(_("%s c-shouts: %s\n") %
                             (dname, args[0]))
                         count += 1
@@ -451,7 +453,7 @@ class CommandList(object):
         if args[0] is not None:
             try:
                 num = int(args[0])
-                if not num in game.games:
+                if num not in game.games:
                     conn.write(_("There is no such game.\n"))
                     return
                 g = game.games[num]
@@ -484,6 +486,22 @@ class CommandList(object):
                 u.write('\n\n**** You have been kicked out by %s! ****\n\n' % conn.user.name)
                 u.session.conn.loseConnection('nuked')
                 conn.write('Nuked: %s\n' % u.name)
+    
+    def observe(self, args, conn):
+        if args[0] in ['/l', '/b', '/s', '/S', '/w', '/z', '/B', '/L', '/x']:
+            conn.write('TODO: observe flag\n')
+            return
+        g = game.from_name_or_number(args[0], conn)
+        if g:
+            if g in conn.user.session.observed:
+                conn.write(_('You are already observing game %d\n' % g.number))
+            elif conn.user == g.white or conn.user == g.black:
+                conn.write(_('You cannot observe yourself.\n'))
+            else:
+                assert(conn.user not in g.observers)
+                conn.user.session.observed.add(g)
+                g.observers.add(conn.user)
+                conn.user.send_board(g.variant)
 
     def password(self, args, conn):
         if conn.user.is_guest:
@@ -537,7 +555,7 @@ class CommandList(object):
         if args[0] is not None:
             try:
                 num = int(args[0])
-                if not num in game.games:
+                if num not in game.games:
                     conn.write(_("There is no such game.\n"))
                     return
                 g = game.games[num]
@@ -594,7 +612,7 @@ class CommandList(object):
             dname = conn.user.get_display_name()
             for u in online.itervalues():
                 if u.vars['shout']:
-                    if not name in u.censor:
+                    if name not in u.censor:
                         u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
                         count += 1
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
@@ -640,18 +658,37 @@ class CommandList(object):
             conn.session.last_tell_user = u
         else:
             conn.session.last_tell_ch = ch
-    
+
     def unalias(self, args, conn):
         aname = args[0]
         if not 1 <= len(aname) < 16:
             conn.write(_("Alias names may not be more than 15 characters long.\n"))
             return
 
-        if not aname in conn.user.aliases:
+        if aname not in conn.user.aliases:
             conn.write(_('You have no alias "%s".\n') % aname)
         else:
             conn.user.set_alias(aname, None)
             conn.write(_('Alias "%s" unset.\n') % aname)
+
+    def unobserve(self, args, conn):
+        if args[0] is None:
+            if not conn.user.session.observed:
+                conn.write(_('You are not observing any games.\n'))
+            else:
+                for g in conn.user.session.observed.copy():
+                    g.unobserve(conn.user)
+                    #conn.write(_('Removing game %d from observation list.\n') % g.number)
+                    #g.observers.remove(conn.user)
+                assert(not conn.user.session.observed)
+        else:
+            g = game.from_name_or_number(args[0], conn)
+            if g:
+                if g in conn.user.session.observed:
+                    g.unobserve(conn.user)
+                else:
+                    conn.write(_('You are not observing game %d.\n')
+                        % g.number)
 
     def uptime(self, args, conn):
         conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))

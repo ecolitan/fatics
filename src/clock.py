@@ -12,12 +12,11 @@ def heartbeat():
     pass
 
 class FischerClock(Clock):
-    def __init__(self, white_start, black_start, white_inc, black_inc):
+    def __init__(self, white_start, black_start, inc):
         self.is_ticking = False
         self._white_time = white_start
         self._black_time = black_start
-        self.white_inc = white_inc
-        self.black_inc = black_inc
+        self.inc = inc
         running_clocks.append(self)
         self.started_time = None
     
@@ -78,9 +77,9 @@ class FischerClock(Clock):
 
     def add_increment(self, side):
         if side == WHITE:
-            self._white_time += self.white_inc
+            self._white_time += self.inc
         else:
-            self._black_time += self.black_inc
+            self._black_time += self.inc
 
     def stop(self):
         self.is_ticking = False

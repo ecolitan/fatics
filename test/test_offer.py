@@ -4,7 +4,7 @@ class TestAbort(Test):
     def test_abort_ply_0(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -17,11 +17,11 @@ class TestAbort(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_abort_ply_1(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -36,11 +36,11 @@ class TestAbort(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_abort_agreement(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -63,11 +63,11 @@ class TestAbort(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_abort_decline(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -86,11 +86,11 @@ class TestAbort(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_abort_autodecline(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -109,11 +109,11 @@ class TestAbort(Test):
 
         self.close(t)
         self.close(t2)
-        
+
     def test_abort_accept(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -134,11 +134,11 @@ class TestAbort(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_abort_withdraw(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -162,7 +162,7 @@ class TestDraw(Test):
     def test_agree_draw(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -172,7 +172,7 @@ class TestDraw(Test):
         t.write('draw\n')
         self.expect('Offering a draw', t)
         self.expect('GuestABCD offers a draw', t2)
-        
+
         t2.write('draw\n')
         self.expect('admin accepts your draw offer', t)
         self.expect('{Game 1 (GuestABCD vs. admin) Game drawn by agreement} 1/2-1/2', t)
@@ -180,11 +180,11 @@ class TestDraw(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_draw_accept(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -194,7 +194,7 @@ class TestDraw(Test):
         t.write('draw\n')
         self.expect('Offering a draw', t)
         self.expect('GuestABCD offers a draw', t2)
-        
+
         t2.write('accept\n')
         self.expect('admin accepts your draw offer', t)
         self.expect('{Game 1 (GuestABCD vs. admin) Game drawn by agreement} 1/2-1/2', t)
@@ -206,7 +206,7 @@ class TestDraw(Test):
     def test_draw_decline(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -216,17 +216,17 @@ class TestDraw(Test):
         t.write('draw\n')
         self.expect('GuestABCD offers a draw', t2)
         t2.write('decl\n')
-        
+
         self.expect('Declining the draw offer', t2)
         self.expect('admin declines your draw offer', t)
 
         self.close(t)
         self.close(t2)
-    
+
     def test_draw_autodecline(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -250,11 +250,11 @@ class TestDraw(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_withdraw_draw(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -269,11 +269,11 @@ class TestDraw(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_cancel_draw(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -285,8 +285,8 @@ class TestDraw(Test):
 
         t2.write('resign\n')
         t2.write('accept\n')
-        
-        self.expect('no pending offers', t2)
+
+        self.expect('You have no pending offers', t2)
 
         self.close(t)
         self.close(t2)

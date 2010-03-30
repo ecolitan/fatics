@@ -39,7 +39,7 @@ class History(object):
         (i, eco, long) = game.get_eco()
         game_id = db.game_add(game.white.name, white_rating, game.black.name,
             black_rating, eco, game.variant.name, game.speed,
-            game.white_time, game.white_inc, result_code, game.rated,
+            game.white_time, game.inc, result_code, game.rated,
             result_reason, game.get_moves(), game.when_ended)
 
         flags = ''
@@ -75,11 +75,11 @@ class History(object):
             black_result_char = '='
         game.white.save_history(game_id, white_result_char,
             game.white_rating, 'W', game.black.name, game.black_rating,
-            eco[0:3], flags, game.white_time, game.white_inc, result_reason,
+            eco[0:3], flags, game.white_time, game.inc, result_reason,
             game.when_ended)
         game.black.save_history(game_id, black_result_char,
             game.black_rating, 'B', game.white.name, game.white_rating,
-            eco[0:3], flags, game.white_time, game.white_inc, result_reason,
+            eco[0:3], flags, game.white_time, game.inc, result_reason,
             game.when_ended)
         return game_id
 

@@ -136,15 +136,14 @@ class Challenge(Offer):
     def __init__(self, a, b, opts):
         """a is the player issuing the offer; b receives the request"""
         Offer.__init__(self, "match offer")
-        self.is_time_odds = False
 
         self.a = a
         self.b = b
 
         self.variant_name = 'normal'
 
-        self.a_time = self.b_time = a.vars['time']
-        self.a_inc = self.b_inc = a.vars['inc']
+        self.time = a.vars['time']
+        self.inc = a.vars['inc']
 
         self.rated = None
         # the side requested by a, if any
@@ -172,15 +171,10 @@ class Challenge(Offer):
 
         rated_str = "rated" if self.rated else "unrated"
 
-        if not self.is_time_odds:
-            time_str = "%d %d" % (self.a_time, self.a_inc)
-        else:
-            time_str = "%d %d %d %d" % (self.a_time, self.a_inc, self.b_time, self.b_inc)
-        expected_duration = self.a_time + self.a_inc * float(2) / 3
+        time_str = "%d %d" % (self.time, self.inc)
+        expected_duration = self.time + self.inc * float(2) / 3
         assert(expected_duration > 0)
-        if self.is_time_odds:
-            self.speed = speed.nonstandard
-        elif expected_duration < 3.0:
+        if expected_duration < 3.0:
             self.speed = speed.lightning
         elif expected_duration < 15.0:
             self.speed = speed.blitz
@@ -242,13 +236,14 @@ class Challenge(Offer):
         if (self.name == other.name and
                 self.a == other.a and
                 self.b == other.b and
-                self.a_time == other.a_time and
-                self.b_time == other.b_time and
-                self.a_inc == other.a_inc and
-                self.b_inc == other.b_inc and
+                self.time == other.time and
+                self.inc == other.inc and
                 self.side == other.side):
             return True
         return False
+    
+    def __hash__(self, other):
+        return hash((self.a, self.b, self.time, self.inc, self.side))
 
     def equivalent_to(self, other):
         if self.variant_name != other.variant_name:
@@ -257,14 +252,12 @@ class Challenge(Offer):
         # opposite but equivalent?
         if (self.a == other.b and
                 self.b == other.a and
-                self.a_time == other.b_time and
-                self.b_time == other.a_time and
-                self.a_inc == other.b_inc and
-                self.b_inc == other.a_inc and (
+                self.time == other.time and
+                self.inc == other.inc and
                 (self.side is None and other.side is None) or
                 (self.side in [WHITE, BLACK] and
                     other.side in [WHITE, BLACK] and
-                    self.side != other.side))):
+                    self.side != other.side)):
             return True
 
         return False
@@ -334,21 +327,12 @@ class Challenge(Offer):
         if len(times) == 0:
             pass
         elif len(times) == 1:
-            self.a_time = self.b_time = times[0]
-            self.a_inc = self.b_inc = 0
+            self.time = times[0]
+            self.inc = 0
         elif len(times) == 2:
-            self.a_time = self.b_time = times[0]
-            self.a_inc = self.b_inc = times[1]
-        elif len(times) == 3:
-            self.is_time_odds = True
-            self.a_time = 60*times[0]
-            self.a_inc = self.b_inc = times[1]
-            self.b_time = 60*times[1]
-        elif len(times) == 4:
-            self.is_time_odds = True
-            (self.a_time, self.a_inc,
-                self.b_time, self.b_inc) = times
+            self.time = times[0]
+            self.inc = times[1]
         else:
-            assert(False)
+            raise RuntimeError('internal error parsing match times')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

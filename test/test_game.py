@@ -4,7 +4,7 @@ class TestGame(Test):
     def test_game_basics(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -20,17 +20,17 @@ class TestGame(Test):
         # plain illegal move
         t.write('e2e5\n')
         self.expect('Illegal move (e2e5)', t)
-        
+
         t.write('e7e5\n')
         self.expect('Illegal move (e7e5)', t)
-        
+
         t.write('e3e4\n')
         self.expect('Illegal move (e3e4)', t)
 
         # square occpied by own piece
         t.write('a1a2\n')
         self.expect('Illegal move (a1a2)', t)
-       
+
         # path blocked by own piece
         t.write('a1a3\n')
         self.expect('Illegal move (a1a3)', t)
@@ -38,37 +38,39 @@ class TestGame(Test):
         # legal move
         t.write('e2e4\n')
         self.expect_not('Illegal move', t)
-        
+
         t2.write('e7e5\n')
         self.expect_not('Illegal move', t2)
-        
+
         t.write('g1f3\n')
         self.expect_not('Illegal move', t)
-        
+
         t2.write('b8c6\n')
         self.expect_not('Illegal move', t2)
-       
+
         # castling blocked
         t.write('O-O\n')
         self.expect('Illegal move', t)
         t.write('O-O-O\n')
         self.expect('Illegal move', t)
-        
+
         t.write('f1c4\n')
         self.expect_not('Illegal move', t2)
-        
+
         t2.write('g8f6\n')
         self.expect_not('Illegal move', t2)
-        
+
         t.write('O-O\n')
         self.expect_not('Illegal move', t2)
 
         self.close(t)
         self.close(t2)
-    
+
     def _assert_game_is_legal(self, moves):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
 
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
@@ -91,18 +93,18 @@ class TestGame(Test):
 
         self.close(t)
         self.close(t2)
-   
+
     def test_lalg(self):
         moves = ['g2g3', 'b7b6', 'f1g2', 'b8c6', 'g1f3', 'c8b7', 'e1g1',
             'e7e6', 'd2d4', 'd8e7', 'c1f4', 'e8c8']
         self._assert_game_is_legal(moves)
-    
+
     def test_promotion(self):
         moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
             'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',
             'Rxa7','c7', 'Nc6', 'c8=Q+']
         self._assert_game_is_legal(moves)
-    
+
     def test_promotion_assumes_queen(self):
         moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
             'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',
@@ -112,13 +114,13 @@ class TestGame(Test):
     def test_san_basic(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
-        
+
         t.write('e5\n')
         self.expect('Illegal move', t)
 
@@ -127,11 +129,13 @@ class TestGame(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_san_check(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -141,28 +145,28 @@ class TestGame(Test):
         t.write('e4\n')
         self.expect('<12> ', t)
         self.expect('<12> ', t2)
-        
+
         t2.write('e5\n')
         self.expect('<12> ', t)
         self.expect('<12> ', t2)
-        
+
         t.write('f3\n')
         self.expect('<12> ', t)
         self.expect('f3', t)
         self.expect('<12> ', t2)
         self.expect('f3', t2)
-        
+
         t2.write('Qh4\n')
         self.expect('Qh4+', t)
         self.expect('Qh4+', t2)
 
         self.close(t)
         self.close(t2)
-    
+
     def test_san_checkmate(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -172,15 +176,15 @@ class TestGame(Test):
         t.write('f3\n')
         self.expect('<12> ', t)
         self.expect('<12> ', t2)
-        
+
         t2.write('e5\n')
         self.expect('<12> ', t)
         self.expect('<12> ', t2)
-        
+
         t.write('g4\n')
         self.expect('<12> ', t)
         self.expect('<12> ', t2)
-        
+
         t2.write('Qh4\n')
         self.expect('Qh4#', t)
         self.expect('Qh4#', t2)
@@ -191,7 +195,7 @@ class TestGame(Test):
     def test_draw_repetition(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
         self.expect('Challenge:', t2)
@@ -201,7 +205,7 @@ class TestGame(Test):
 
         moves = ['Nf3', 'Nf6', 'Ng1', 'Ng8', 'Nf3', 'Nf6',
             'Ng1', 'Ng8']
-    
+
         wtm = True
         for mv in moves:
             if wtm:
@@ -212,7 +216,7 @@ class TestGame(Test):
                 t2.write('%s\n' % mv)
             self.expect('<12> ', t)
             self.expect('<12> ', t2)
-            wtm = not wtm 
+            wtm = not wtm
 
         t.write('draw\n')
         self.expect('{Game 1 (GuestABCD vs. admin) Game drawn by repetition} 1/2-1/2', t)
@@ -220,11 +224,11 @@ class TestGame(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_draw_repetition_claim_later(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
         self.expect('Challenge:', t2)
@@ -234,7 +238,7 @@ class TestGame(Test):
 
         moves = ['Nf3', 'Nf6', 'd3', 'Nc6', 'Nc3', 'Nb8', 'Nb1', 'Nc6',
             'Nc3', 'Nb8', 'Nb1', 'Ne4']
-    
+
         wtm = True
         for mv in moves:
             if wtm:
@@ -243,7 +247,7 @@ class TestGame(Test):
                 t2.write('%s\n' % mv)
             self.expect('<12> ', t)
             self.expect('<12> ', t2)
-            wtm = not wtm 
+            wtm = not wtm
 
         # Old fics allows either white or black to claim a draw here.
         # We only allow white to claim a draw; black should have
@@ -254,11 +258,11 @@ class TestGame(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_draw_repetition_claim_too_late(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
         self.expect('Challenge:', t2)
@@ -268,7 +272,7 @@ class TestGame(Test):
 
         moves = ['Nf3', 'Nf6', 'd3', 'Nc6', 'Nc3', 'Nb8', 'Nb1', 'Nc6',
             'Nc3', 'Nb8', 'Nb1', 'Ne4']
-    
+
         wtm = True
         for mv in moves:
             if wtm:
@@ -277,7 +281,7 @@ class TestGame(Test):
                 t2.write('%s\n' % mv)
             self.expect('<12> ', t)
             self.expect('<12> ', t2)
-            wtm = not wtm 
+            wtm = not wtm
 
         t2.write('draw\n')
         # see note in test_draw_repetition_claim_later()
@@ -291,7 +295,7 @@ class TestResign(Test):
     def test_resign_white(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -303,11 +307,11 @@ class TestResign(Test):
         self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD resigns} 0-1', t2)
         self.close(t)
         self.close(t2)
-    
+
     def test_resign_black(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -324,7 +328,9 @@ class TestRefresh(Test):
     def test_refresh(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -360,7 +366,9 @@ class TestMoves(Test):
     def test_moves(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -382,5 +390,71 @@ class TestMoves(Test):
 
         t2.write('moves\n')
         self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t2)
+
+class TestObserve(Test):
+    def test_observe_unobserve(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_user('GuestEFGH', '')
+        t3 = self.connect_as_user('GuestIJKL', '')
+
+        t.write('set style 12\n')
+        t.write('observe\n')
+        self.expect('Usage:', t)
+        t.write('unobserve\n')
+        self.expect('You are not observing any games', t)
+
+        t.write('observe GuestABCD\n')
+        self.expect('GuestABCD is not playing or examining a game', t)
+
+        t.write('unobserve GuestABCD\n')
+        self.expect('GuestABCD is not playing or examining a game', t)
+
+        t.write('observe admin\n')
+        self.expect('No user named "admin" is logged in', t)
+
+        t2.write('match guestijkl 1 0 w\n')
+        self.expect('Challenge:', t3)
+        t3.write('a\n')
+        self.expect('Creating:', t2)
+        self.expect('Creating:', t3)
+
+        t2.write('o 1\n')
+        self.expect('You cannot observe yourself', t2)
+        t3.write('o 1\n')
+        self.expect('You cannot observe yourself', t3)
+
+        t.write('o Guestijkl\n')
+        self.expect('<12>', t)
+
+        t2.write('h4\n')
+        self.expect('<12>', t)
+        self.expect('P/h2-h4', t)
+
+        t.write('unobserve\n')
+        self.expect('Removing game 1 from observation list.', t)
+        t.write('unobserve guestefgh\n')
+        self.expect('You are not observing game 1', t)
+
+        t.write('o 1\n')
+        self.expect('<12> ', t)
+        t.write('o guestefgh\n')
+        self.expect('You are already observing game 1', t)
+
+        t.write('unob 1\n')
+        self.expect('Removing game 1 from observation list.', t)
+        t.write('ob 1\n')
+        self.expect('<12> ', t)
+        t.write('unob Guestefgh\n')
+        self.expect('Removing game 1 from observation list.', t)
+        t.write('ob guestijkl\n')
+        self.expect('<12> ', t)
+
+        t2.write('res\n')
+        self.expect('GuestEFGH resigns} 0-1', t)
+        self.expect('Removing game 1 from observation list.', t)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
