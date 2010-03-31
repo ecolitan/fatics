@@ -1211,9 +1211,10 @@ class Normal(Variant):
                 self.pos.make_move(mv)
                 self.pos.detect_check()
                 mv.add_san_decorator()
-                if mv.to_san() != s:
-                    print 'hmm %s; %s' % (mv.to_san(), s)
-                assert(mv.to_san() == s)
+                if False:
+                    if mv.to_san() != s:
+                        print 'hmm %s; %s' % (mv.to_san(), s)
+                    assert(mv.to_san() == s)
                 self.game.next_move()
 
         return mv or illegal

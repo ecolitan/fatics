@@ -74,22 +74,30 @@ class TellTest(Test):
 class QtellTest(Test):
     def test_qtell(self):
         self.adduser('tdplayer', 'tdplayer', ['td'])
-        t = self.connect_as_user('tdplayer', 'tdplayer')
-        t.write('qtell nonexistentname test\n')
-        self.expect('*qtell nonexistentname 1*', t)
+        try:
+            t = self.connect_as_user('tdplayer', 'tdplayer')
+            t.write('qtell nonexistentname test\n')
+            self.expect('*qtell nonexistentname 1*', t)
 
-        t2 = self.connect_as_admin()
-        t.write('qtell admin simple test\n')
-        self.expect(':simple test', t2)
-        self.expect('*qtell admin 0*', t)
+            t.write('qtell admin test\n')
+            self.expect('*qtell admin 1*', t)
 
-        t.write('qtell admin \\bthis\\nis a \\Hmore complicated\\h test\n')
-        self.expect(':\x07this', t2)
-        self.expect(':is a \x1b[7mmore complicated\x1b[0m test', t2)
-        self.expect('*qtell admin 0*', t)
+            t2 = self.connect_as_admin()
+            t.write('qtell admin simple test\n')
+            self.expect(':simple test', t2)
+            self.expect('*qtell admin 0*', t)
 
-        self.close(t2)
-        self.close(t)
-        self.deluser('tdplayer')
+            t.write('qtell admin \\bthis\\nis a \\Hmore complicated\\h test\n')
+            self.expect(':\x07this', t2)
+            self.expect(':is a \x1b[7mmore complicated\x1b[0m test', t2)
+            self.expect('*qtell admin 0*', t)
+
+            t2.write('qtell tdplayer test\n')
+            self.expect('Only TD programs are allowed to use this command', t2)
+
+            self.close(t2)
+            self.close(t)
+        finally:
+            self.deluser('tdplayer')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -27,7 +27,7 @@ class Command(object):
 
     def help(self, conn):
         conn.write("help for %s\n" % self.name)
-    
+
     def usage(self, conn):
         conn.write("Usage: TODO for %s\n" % self.name)
 
@@ -114,7 +114,7 @@ class CommandList(object):
             conn.user.session.offers_received[0].accept()
         else:
             conn.write('TODO: ACCEPT PARAM\n')
-    
+
     def aclearhistory(self, args, conn):
         name = args[0]
         u = user.find.by_name_exact_for_user(name, conn)
@@ -276,7 +276,7 @@ class CommandList(object):
             offer.Draw(g, conn.user)
         else:
             conn.write('TODO: DRAW PARAM\n')
-    
+
     def eco(self, args, conn):
         if args[0] is None:
             if len(conn.user.session.games) == 0:
@@ -344,7 +344,7 @@ class CommandList(object):
                     conn.write(_("%2d: %s\n") % (num, txt))
                     prev_max = num
                 conn.write('\n')
-    
+
     def flag(self, args, conn):
         if len(conn.user.session.games) == 0:
             conn.write(_("You are not playing a game.\n"))
@@ -447,33 +447,19 @@ class CommandList(object):
         if not conn.user.vars['open']:
             var.vars['open'].set(conn.user, '1')
         offer.Challenge(conn.user, u, args[1])
-   
+
     def moves(self, args, conn):
         # similar to "refresh"
+        g = None
         if args[0] is not None:
-            try:
-                num = int(args[0])
-                if num not in game.games:
-                    conn.write(_("There is no such game.\n"))
-                    return
-                g = game.games[num]
-            except ValueError:
-                # user name
-                u = user.find.by_prefix_for_user(args[0], conn,
-                    online_only=True)
-                if not u:
-                    return
-                if len(u.session.games) == 0:
-                    conn.write(_("%s is not playing or examining a game.\n") % u.name)
-                    return
-                g = u.session.games.values()[0]
+            g = game.from_name_or_number(args[0], conn)
         else:
             if len(conn.user.session.games) > 0:
                 g = conn.user.session.games.values()[0]
             else:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
-                return
-        g.write_moves(conn)
+        if g is not None:
+            g.write_moves(conn)
 
     def nuke(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)
@@ -486,7 +472,7 @@ class CommandList(object):
                 u.write('\n\n**** You have been kicked out by %s! ****\n\n' % conn.user.name)
                 u.session.conn.loseConnection('nuked')
                 conn.write('Nuked: %s\n' % u.name)
-    
+
     def observe(self, args, conn):
         if args[0] in ['/l', '/b', '/s', '/S', '/w', '/z', '/B', '/L', '/x']:
             conn.write('TODO: observe flag\n')
@@ -519,7 +505,9 @@ class CommandList(object):
 
     def qtell(self, args, conn):
         # 0 means success
-        # XXX check for td
+        if 'TD' not in conn.user.get_titles():
+            conn.write('Only TD programs are allowed to use this command\n')
+            return
         if type(args[0]) == type(1):
             # qtell channel
             conn.write('NOT IMPLEMENTED\n')
@@ -550,32 +538,18 @@ class CommandList(object):
             else:
                 u.remove()
                 conn.write("Player %s removed.\n" % name)
-    
+
     def refresh(self, args, conn):
+        g = None
         if args[0] is not None:
-            try:
-                num = int(args[0])
-                if num not in game.games:
-                    conn.write(_("There is no such game.\n"))
-                    return
-                g = game.games[num]
-            except ValueError:
-                # user name
-                u = user.find.by_prefix_for_user(args[0], conn,
-                    online_only=True)
-                if not u:
-                    return
-                if len(u.session.games) == 0:
-                    conn.write(_("%s is not playing or examining a game.\n") % u.name)
-                    return
-                g = u.session.games.values()[0]
+            g = game.from_name_or_number(args[0], conn)
         else:
             if len(conn.user.session.games) > 0:
                 g = conn.user.session.games.values()[0]
             else:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
-                return
-        conn.user.send_board(g)
+        if g is not None:
+            conn.user.send_board(g)
 
     def resign(self, args, conn):
         if args[0] is not None:
@@ -672,7 +646,15 @@ class CommandList(object):
             conn.write(_('Alias "%s" unset.\n') % aname)
 
     def unobserve(self, args, conn):
-        if args[0] is None:
+        if args[0] is not None:
+            g = game.from_name_or_number(args[0], conn)
+            if g:
+                if g in conn.user.session.observed:
+                    g.unobserve(conn.user)
+                else:
+                    conn.write(_('You are not observing game %d.\n')
+                        % g.number)
+        else:
             if not conn.user.session.observed:
                 conn.write(_('You are not observing any games.\n'))
             else:
@@ -681,14 +663,6 @@ class CommandList(object):
                     #conn.write(_('Removing game %d from observation list.\n') % g.number)
                     #g.observers.remove(conn.user)
                 assert(not conn.user.session.observed)
-        else:
-            g = game.from_name_or_number(args[0], conn)
-            if g:
-                if g in conn.user.session.observed:
-                    g.unobserve(conn.user)
-                else:
-                    conn.write(_('You are not observing game %d.\n')
-                        % g.number)
 
     def uptime(self, args, conn):
         conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))

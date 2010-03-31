@@ -346,7 +346,7 @@ class TestRefresh(Test):
 
         t3 = self.connect_as_user('GuestDEFG', '')
         t3.write('re\n')
-        self.expect('You are not playing', t3)
+        self.expect('You are not playing, examining, or observing', t3)
         t3.write('re 999\n')
         self.expect('no such game', t3)
         t3.write('re 1\n')
@@ -368,6 +368,9 @@ class TestMoves(Test):
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t2.write('set style 12\n')
+
+        t2.write('moves\n')
+        self.expect('You are not playing, examining, or observing a game', t2)
 
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)

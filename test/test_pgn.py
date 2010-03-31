@@ -14,7 +14,7 @@ class TestPgn(Test):
 
         f = open('../data/out.pgn', 'r')
         #f = open('../data/draw.pgn', 'r')
-        f = open('/home/wmahan/chess/fics-2009-12.pgn', 'r')
+        #f = open('/home/wmahan/chess/fics-2009-12.pgn', 'r')
 
         pgn = Pgn(f)
         for g in pgn:

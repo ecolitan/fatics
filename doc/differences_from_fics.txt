@@ -172,13 +172,18 @@ add a volatility measure.
 "style". (A similar command was "promote" but I removed it
 entirely.)
 Rationale: for interface consistency, encourage always using the "set"
-command to change vars. 
+command to change vars.
 * A new rshout command for announcing relays, so users who do not
 care about relays can "set rshout 0".
 Rationale: Currently announcements are used, so it is not possible to
 unsubscribe.
 * The concept of "server time" no longer exists.  All times are in local
 time or UTC.
+Rationale: UTC is the standard way of coordinating times from around
+the world.
+* Admins can no longer use the qtell command unless they are on the
+TD list.
+Rationale: simpler.
 
 == Changes I considered but rejected ==
 * Preventing a player from logging out when starting a game: if a

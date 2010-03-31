@@ -21,6 +21,8 @@ class BaseUser(object):
         self.is_online = False
         self.notes = {}
         self._history = None
+        self._titles = None
+        self._title_str = None
 
     def __eq__(self, other):
         return self.name == other.name
@@ -66,7 +68,12 @@ class BaseUser(object):
             self.session.conn.write(self.vars['prompt'])
 
     def get_display_name(self):
-        return self.name + self.title_str
+        assert(self._title_str is not None)
+        return '%s%s' % (self.name, self._title_str)
+
+    def get_titles(self):
+        assert(self._titles is not None)
+        return self._titles
 
     def set_var(self, v, val):
         if val is not None:
@@ -74,7 +81,7 @@ class BaseUser(object):
         else:
             if v.name in self.vars:
                 del self.vars[v.name]
-    
+
     def set_formula(self, v, val):
         if val is not None:
             self.formula[v.name] = val
@@ -113,7 +120,7 @@ class BaseUser(object):
 
     def remove_notification(self, user):
         self.notifiers.remove(user.name)
-    
+
     def add_censor(self, user):
         self.censor.add(user.name)
 
@@ -174,14 +181,21 @@ class User(BaseUser):
             self.formula[f['num']] = f['f']
         for note in db.user_get_notes(self.id):
             self.notes[note['num']] = note['txt']
-        self._make_title_str()
 
-    def _make_title_str(self):
-        self.title_str = ''
-        titles = db.user_get_titles(self.id)
-        for title in titles:
-            if title['display']:
-                self.title_str += '(%s)' % title['title_flag']
+    def get_display_name(self):
+        """Get the name displayed for other users, e.g. admin(*)(SR)"""
+        if self._title_str is None:
+            self._load_titles()
+        return BaseUser.get_display_name(self)
+
+    def _load_titles(self):
+        disp_list = []
+        self._titles = set()
+        for t in db.user_get_titles(self.id):
+            if t['display']:
+                disp_list.append('(%s)' % t['title_flag'])
+            self._titles.add(t['title_flag'])
+        self._title_str = ''.join(disp_list)
 
     def log_on(self, conn):
         if online.is_online(self.name):
@@ -203,18 +217,18 @@ class User(BaseUser):
 
         for a in db.user_get_aliases(self.id):
             self.aliases[a['name']] = a['val']
-        
+
         for dbu in db.user_get_censored(self.id):
             self.censor.add(dbu['user_name'])
         for dbu in db.user_get_noplayed(self.id):
             self.noplay.add(dbu['user_name'])
 
         self.get_history()
-        
+
     def log_off(self):
         BaseUser.log_off(self)
         db.user_set_last_logout(self.id)
-   
+
     def set_passwd(self, passwd):
         self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
         db.user_set_passwd(self.id, self.passwd_hash)
@@ -263,11 +277,11 @@ class User(BaseUser):
 
     def add_title(self, id):
         db.user_add_title(self.id, id)
-        self._make_title_str()
+        self._load_titles()
 
     def remove_title(self, id):
         db.user_del_title(self.id, id)
-        self._make_title_str()
+        self._load_titles()
 
     def add_notification(self, user):
         BaseUser.add_notification(self, user)
@@ -288,7 +302,7 @@ class User(BaseUser):
         BaseUser.remove_censor(self, user)
         if not user.is_guest:
             db.user_del_censor(self.id, user.id)
-    
+
     def add_noplay(self, user):
         BaseUser.add_noplay(self, user)
         if not user.is_guest:
@@ -298,12 +312,17 @@ class User(BaseUser):
         BaseUser.remove_noplay(self, user)
         if not user.is_guest:
             db.user_del_noplay(self.id, user.id)
-    
+
     def get_history(self):
         if self._history is None:
             self._history = [e for e in db.user_get_history(self.id)]
         return self._history
-    
+
+    def get_titles(self):
+        if self._titles is None:
+            self._load_titles()
+        return BaseUser.get_titles(self)
+
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
             result_reason, when_ended):
@@ -311,7 +330,7 @@ class User(BaseUser):
             color_char, opp_name, opp_rating, eco, flags, initial_time, inc,
             result_reason, when_ended)
         db.user_add_history(entry, self.id)
-    
+
     def clear_history(self):
         BaseUser.clear_history(self)
         db.user_del_history(self.id)
@@ -339,16 +358,17 @@ class GuestUser(BaseUser):
         self.admin_level = admin.Level.user
         self.channels = channel.chlist.get_default_guest_channels()
         self.vars = var.varlist.get_default_vars()
-        self.title_str = '(U)'
 
     def log_on(self, conn):
         BaseUser.log_on(self, conn)
         self._history = []
+        self._titles = set(['U'])
+        self._title_str = '(U)'
 
     def get_history(self):
         assert(self._history is not None)
         return self._history
-    
+
 class AmbiguousException(Exception):
     def __init__(self, names):
         self.names = names

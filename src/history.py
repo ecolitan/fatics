@@ -16,6 +16,8 @@ class History(object):
             result_reason = 'NM'
         elif 'by repetition' in msg:
             result_reason = 'Rep'
+        elif 'stalemate' in msg:
+            result_reason = 'Sta'
         elif 'resigns' in msg:
             result_reason = 'Res'
         elif 'ran out of time' in msg:
