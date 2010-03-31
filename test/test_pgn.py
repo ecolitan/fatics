@@ -11,10 +11,10 @@ class TestPgn(Test):
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
-        
+
         f = open('../data/out.pgn', 'r')
         #f = open('../data/draw.pgn', 'r')
-        #f = open('/home/wmahan/chess/2007-03.pgn', 'r')
+        f = open('/home/wmahan/chess/fics-2009-12.pgn', 'r')
 
         pgn = Pgn(f)
         for g in pgn:
@@ -25,19 +25,19 @@ class TestPgn(Test):
             t2.write('accept\n')
             self.expect('<12> ', t)
             self.expect('<12> ', t2)
-    
+
             wtm = True
             for mv in g.moves:
                 if wtm:
                     #print 'sending %s to white' % mv.text
-                    t.write('%s\n' % mv.text)
+                    t.write('%s%s\n' % (mv.text, mv.decorator))
                 else:
                     #print 'sending %s to black' % mv.text
-                    t2.write('%s\n' % mv.text)
+                    t2.write('%s%s\n' % (mv.text, mv.decorator))
                 self.expect('<12> ', t)
                 self.expect('<12> ', t2)
                 wtm = not wtm 
-        
+
             if g.result == '1-0' and g.is_checkmate:
                 self.expect('GuestEFGH checkmated} 1-0', t)
                 self.expect('GuestEFGH checkmated} 1-0', t2)

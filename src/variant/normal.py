@@ -873,7 +873,7 @@ class Position(object):
                 mv = Move(self, fr, to, prom=prom)
             else:
                 mv = Move(self, fr, to, prom=prom.lower())
-       
+
         if mv:
             mv.check_pseudo_legal()
             mv.check_legal()
@@ -888,7 +888,7 @@ class Position(object):
         s = self.decorator_re.sub('', s)
         matched = False
         mv = None
-    
+
         # examples: e4 e8=Q
         m = self.san_pawn_push_re.match(s)
         if m:
@@ -931,7 +931,7 @@ class Position(object):
                         raise IllegalMoveError('illegal promotion')
                 else:
                     mv = Move(self, fr, to, new_ep=new_ep)
-                
+
         # examples: dxe4 dxe8=Q
         m = None
         if not mv:
@@ -944,7 +944,7 @@ class Position(object):
                     assert(prom == prom.upper())
                 else:
                     prom = prom.lower()
-                    
+
             is_ep = to == self.ep
             if is_ep:
                 assert(self.board[to] == '-')
@@ -1206,17 +1206,17 @@ class Normal(Variant):
             elif illegal:
                 conn.write('Illegal move (%s)\n' % s)
             else:
-                #if mv.to_san() != s:
-                #    print 'hmm %s; %s' % (mv.san, s)
-                #assert(mv.to_san() == s)
                 mv.to_san()
                 self.pos.make_move(mv)
                 self.pos.detect_check()
                 mv.add_san_decorator()
+                if mv.to_san() != s:
+                    print 'hmm %s; %s' % (mv.to_san(), s)
+                assert(mv.to_san() == s)
                 self.game.next_move()
 
         return mv or illegal
-    
+
     def get_turn(self):
         return WHITE if self.pos.wtm else BLACK
 
