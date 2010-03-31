@@ -99,17 +99,15 @@ class Game(object):
     
         self.white.write(create_str)
         self.black.write(create_str)
-        
+
         create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.variant_and_speed)
-        self.white.write_prompt(create_str_2)
-        self.black.write_prompt(create_str_2)
+        self.white.write(create_str_2)
+        self.black.write(create_str_2)
 
         self.variant = variant_factory.get(chal.variant_name, self)
 
-        self.white.send_board(self.variant)
-        self.black.send_board(self.variant)
-        for u in self.observers:
-            u.send_board(self.variant)
+        self.white.send_board(self)
+        self.black.send_board(self)
 
     def __eq__(self, other):
         return self.number == other.number
@@ -144,11 +142,11 @@ class Game(object):
             time_str = timer.hms(0.0)
         self.variant.pos.get_last_move().time_str = time_str
 
-        self.white.send_board(self.variant)
-        self.black.send_board(self.variant)
+        self.white.send_board(self)
+        self.black.send_board(self)
         for u in self.observers:
-            u.send_board(self.variant)
-               
+            u.send_board(self)
+
         if self.variant.pos.is_checkmate:
             if self.variant.get_turn() == WHITE:
                 self.result('%s checkmated' % self.white.name, '0-1')
@@ -206,8 +204,8 @@ class Game(object):
         self.when_ended = datetime.datetime.utcnow()
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
             self.white.name, self.black.name, msg, result_code)
-        self.white.write_prompt(line)
-        self.black.write_prompt(line)
+        self.white.write(line)
+        self.black.write(line)
         for u in self.observers:
             u.write(line)
 
@@ -219,7 +217,7 @@ class Game(object):
 
     def unobserve(self, u):
         """Remove the given user as an observer and notify the user."""
-        u.write_prompt(_('Removing game %d from observation list.\n')
+        u.write(_('Removing game %d from observation list.\n')
             % self.number)
         u.session.observed.remove(self)
         self.observers.remove(u)

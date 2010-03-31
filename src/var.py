@@ -3,6 +3,8 @@ import copy
 import trie
 import lang
 
+from config import config
+
 vars = trie.Trie()
 ivars = trie.Trie()
 ivar_number = {}
@@ -210,7 +212,7 @@ class VarList(object):
         IntVar("style", 12, min=0, max=12).add_as_var()
 
         StringVar("interface", None).add_as_var()
-        PromptVar("prompt", "fics% ").add_as_var()
+        PromptVar("prompt", config.prompt).add_as_var()
 
         LangVar("lang", "en").persist().add_as_var()
 

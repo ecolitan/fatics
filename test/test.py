@@ -44,20 +44,20 @@ class Test(unittest.TestCase):
     def connect_as_guest(self):
         t = connect()
         t.write("guest\n\n")
-        t.read_until('fics%', 4)
+        t.read_until('fics%', 5)
         return t
 
     def connect_as_admin(self):
         t = connect()
         t.write("admin\n%s\n" % admin_passwd)
-        s = t.read_until('fics%', 4)
+        s = t.read_until('fics%', 5)
         assert('fics%' in s)
         return t
 
     def connect_as_user(self, name, passwd):
         t = connect()
         t.write("%s\n%s\n" % (name, passwd))
-        s = t.read_until('fics%', 4)
+        s = t.read_until('fics%', 5)
         assert('fics%' in s)
         return t
 

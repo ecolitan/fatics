@@ -6,7 +6,7 @@ class Notify(object):
         name = user.name
         for u in online:
             if name in u.notifiers:
-                u.write_prompt(msg)
+                u.write(msg)
 notify = Notify()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

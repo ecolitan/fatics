@@ -121,7 +121,7 @@ class CommandList(object):
         if u:
             # disallow clearing history for higher adminlevels?
             u.clear_history()
-            u.write_prompt(A_('\nHistory of %s cleared.\n') % conn.user.name)
+            u.write(A_('\nHistory of %s cleared.\n') % conn.user.name)
 
     def addlist(self, args, conn):
         try:
@@ -193,7 +193,7 @@ class CommandList(object):
         for u in online.itervalues():
             if u != conn.user:
                 count = count + 1
-                u.write_prompt("\n\n    **ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
+                u.write("\n\n    **ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
         conn.write("(%d) **ANNOUNCEMENT** from %s: %s\n\n" % (count, conn.user.name, args[0]))
 
     def areload(self, args, conn):
@@ -213,7 +213,7 @@ class CommandList(object):
                 u.set_admin_level(level)
                 conn.write('''Admin level of %s set to %d.\n''' % (name, level))
                 if u.is_online:
-                    u.write_prompt('''\n\n%s has set your admin level to %d.\n\n''' % (conn.user.name, level))
+                    u.write('''\n\n%s has set your admin level to %d.\n\n''' % (conn.user.name, level))
 
     def asetpasswd(self, args, conn):
         [name, passwd] = args
@@ -229,7 +229,7 @@ class CommandList(object):
                 u.set_passwd(passwd)
                 conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
                 if u.is_online:
-                    u.write_prompt(_('\n%s has changed your password.\n') % conn.user.name)
+                    u.write(_('\n%s has changed your password.\n') % conn.user.name)
     
     def cshout(self, args, conn):
         if conn.user.is_guest:
@@ -243,7 +243,7 @@ class CommandList(object):
             for u in online.itervalues():
                 if u.vars['cshout']:
                     if name not in u.censor:
-                        u.write_prompt(_("%s c-shouts: %s\n") %
+                        u.write(_("%s c-shouts: %s\n") %
                             (dname, args[0]))
                         count += 1
             conn.write(ngettext("(c-shouted to %d player)\n", "(c-shouted to %d players)\n", count) % count)
@@ -501,7 +501,7 @@ class CommandList(object):
                 assert(conn.user not in g.observers)
                 conn.user.session.observed.add(g)
                 g.observers.add(conn.user)
-                conn.user.send_board(g.variant)
+                conn.user.send_board(g)
 
     def password(self, args, conn):
         if conn.user.is_guest:
@@ -575,8 +575,8 @@ class CommandList(object):
             else:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
                 return
-        conn.user.send_board(g.variant)
-    
+        conn.user.send_board(g)
+
     def resign(self, args, conn):
         if args[0] is not None:
             conn.write('TODO: RESIGN PLAYER\n')
@@ -613,7 +613,7 @@ class CommandList(object):
             for u in online.itervalues():
                 if u.vars['shout']:
                     if name not in u.censor:
-                        u.write_prompt(_("%s shouts: %s\n") % (name, args[0]))
+                        u.write(_("%s shouts: %s\n") % (name, args[0]))
                         count += 1
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
 
@@ -752,7 +752,7 @@ class CommandList(object):
                     admin.level.user:
                 conn.write(_("%s is censoring you.\n") % u.name)
             else:
-                u.write_prompt('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
+                u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                 conn.write(_("(told %s)") % u.name + '\n')
 
         return (u, ch)

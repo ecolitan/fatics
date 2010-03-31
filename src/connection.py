@@ -14,6 +14,10 @@ from timeseal import timeseal
 from session import Session
 from login import login
 
+# the set of users we have sent messages to and to whom we should
+# thefore send prompts
+written_users = set()
+
 class Connection(basic.LineReceiver):
     implements(twisted.internet.interfaces.IProtocol)
     # the telnet transport changes all '\r\n' to '\n',
@@ -119,16 +123,23 @@ class Connection(basic.LineReceiver):
         self.timeout_check.cancel()
         self.user.log_on(self)
         assert(self.user.is_online)
-        self.user.write_prompt(None)
-        self.state = 'online'
+        self.user.send_prompt()
+        self.state = 'prompt'
 
-    def lineReceived_online(self, line):
+    def lineReceived_prompt(self, line):
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])
+        written_users.clear()
+        written_users.add(self.user)
         try:
             command_parser.parser.run(line, self)
-            self.user.write_prompt(None)
         except command.QuitException:
             self.loseConnection('quit')
+        finally:
+            for u in written_users:
+                if u.is_online:
+                    u.send_prompt()
+            written_users.clear()
+            assert(not written_users)
 
     def loseConnection(self, reason):
         if reason == 'logged in again':

@@ -7,6 +7,7 @@ import admin
 import var
 import channel
 import notify
+import connection
 from db import db
 from online import online
 from config import config
@@ -54,14 +55,13 @@ class BaseUser(object):
 
     def write(self, s):
         assert(self.is_online)
+        connection.written_users.add(self)
         self.session.conn.write(s)
 
-    def write_prompt(self, s):
+    def send_prompt(self):
         assert(self.is_online)
-        if s is not None:
-            self.session.conn.write(s)
         if self.session.ivars['defprompt']:
-            self.session.conn.write('fics% ')
+            self.session.conn.write(config.prompt)
         else:
             self.session.conn.write(self.vars['prompt'])
 
@@ -131,10 +131,10 @@ class BaseUser(object):
             return '++++'
         else:
             return '----'
-    
-    def send_board(self, vari):
-        self.write_prompt(vari.to_style12(self))
-       
+
+    def send_board(self, game):
+        self.write(game.variant.to_style12(self))
+
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
             result_reason, when_ended):
