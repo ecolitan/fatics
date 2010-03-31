@@ -504,14 +504,20 @@ class CommandList(object):
         raise QuitException()
 
     def qtell(self, args, conn):
-        # 0 means success
         if 'TD' not in conn.user.get_titles():
             conn.write('Only TD programs are allowed to use this command\n')
             return
+        msg = args[1].replace('\\n', '\n:').replace('\\b', '\x07').replace('\\H', '\x1b[7m').replace('\\h', '\x1b[0m')
+        msg = '\n:%s\n' % msg
+        ret = 0 # 0 means success
         if type(args[0]) == type(1):
             # qtell channel
-            conn.write('NOT IMPLEMENTED\n')
-            conn.write('*qtell %d 1*\n' % args[0])
+            try:
+                ch = channel.chlist[args[0]]
+            except KeyError:
+                ret = 1
+            else:
+                ch.qtell(msg)
         else:
             # qtell user
             try:
@@ -520,12 +526,10 @@ class CommandList(object):
                     ret = 1
                 else:
                     args[0] = u.name
-                    msg = args[1].replace('\\n', '\n:').replace('\\b', '\x07').replace('\\H', '\x1b[7m').replace('\\h', '\x1b[0m')
-                    u.write('\n:%s\n' % msg)
-                    ret = 0
+                    u.write(msg)
             except user.UsernameException:
                 ret = 1
-            conn.write('*qtell %s %d*\n' % (args[0], ret))
+        conn.write('*qtell %s %d*\n' % (args[0], ret))
 
     def remplayer(self, args, conn):
         name = args[0]

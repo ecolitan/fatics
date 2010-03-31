@@ -32,7 +32,7 @@ class TestList(Test):
             self.expect('admin(SR)(*) tells you: foo bar', t)
         finally:
             t.write('-sr admin\n')
-        
+
         self.expect("admin removed from the SR list.", t)
         self.close(t)
 
@@ -179,7 +179,7 @@ class TestCensor(Test):
             t = self.connect_as_admin()
             t2.write('t admin test 123\n')
             self.expect('test 123', t)
-        
+
             t.write('-ch 1\n')
             t2.write('-ch 1\n')
             self.close(t)
@@ -195,7 +195,7 @@ class TestNoplay(Test):
 
         t.write('+noplay GuestDEFG\n')
         self.expect('GuestDEFG added to your noplay list.', t)
-        
+
         t.write("=noplay\n")
         self.expect('noplay list: 1 name', t)
         self.expect('GuestDEFG', t)
@@ -205,14 +205,14 @@ class TestNoplay(Test):
 
         t.write('-noplay GuestDEFG\n')
         self.expect('GuestDEFG removed from your noplay list.', t)
-        
+
         t2.write('match guestabcd\n')
         self.expect("Issuing:", t2)
         self.expect("Challenge:", t)
 
         self.close(t)
         self.close(t2)
-    
+
     def test_noplay_user(self):
         self.adduser('TestPlayer', 'test')
 
@@ -223,10 +223,10 @@ class TestNoplay(Test):
 
             t.write('+noplay TestPlayer\n')
             self.expect('TestPlayer added to your noplay list.', t)
-            
+
             t.write('+noplay TestPlayer\n')
             self.expect('TestPlayer is already on your noplay list.', t)
-        
+
             t.write("=noplay\n")
             self.expect('noplay list: 1 name', t)
             self.expect('TestPlayer', t)
@@ -240,10 +240,10 @@ class TestNoplay(Test):
 
             t.write('-noplay testplayer\n')
             self.expect('TestPlayer removed from your noplay list.', t)
-            
+
             t.write('-noplay testplayer\n')
             self.expect('TestPlayer is not on your noplay list.', t)
-            
+
             t2.write('match admin\n')
             self.expect("Issuing:", t2)
             self.expect("Challenge:", t)
@@ -254,7 +254,7 @@ class TestNoplay(Test):
             t2.write('match admin\n')
             self.expect("Issuing:", t2)
             self.expect("Challenge:", t)
-        
+
             self.close(t)
             self.close(t2)
 

@@ -29,6 +29,10 @@ class Channel(object):
                 count += 1
         return count
 
+    def qtell(self, msg):
+        for u in self.online:
+            u.write(msg)
+
     def log_on(self, user):
         self.online.append(user)
 

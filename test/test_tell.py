@@ -95,6 +95,17 @@ class QtellTest(Test):
             t2.write('qtell tdplayer test\n')
             self.expect('Only TD programs are allowed to use this command', t2)
 
+
+            t2.write('+ch 55\n')
+            self.expect('added', t2)
+            t.write('qtell -1 hello world\n')
+            self.expect('*qtell -1 1*', t)
+            t.write('qtell 55 !!! ###\n')
+            self.expect('*qtell 55 0*', t)
+            self.expect('!!! ###', t2)
+            t2.write('-ch 55\n')
+            self.expect('removed', t2)
+
             self.close(t2)
             self.close(t)
         finally:
