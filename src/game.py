@@ -215,6 +215,12 @@ class Game(object):
             history.history.save_game(self, msg, result_code)
         self.free()
 
+    def observe(self, u):
+        u.session.observed.add(self)
+        self.observers.add(u)
+        u.write(_('You are now observing game %d.\n') % self.number)
+        u.send_board(self)
+
     def unobserve(self, u):
         """Remove the given user as an observer and notify the user."""
         u.write(_('Removing game %d from observation list.\n')
@@ -303,5 +309,14 @@ class Game(object):
             conn.write('\n')
 
         conn.write('      {Still in progress} *\n\n')
+
+    def show_observers(self, conn):
+        if self.observers:
+            olist = [u.get_display_name() for u in self.observers]
+            conn.write(ngettext('Observing %d [%s vs. %s]: %s (%d user)\n',
+                    'Observing %d [%s vs. %s]: %s (%d users)\n',
+                    len(olist)) %
+                (self.number, self.white.name, self.black.name,
+                ' '.join(olist), len(olist)))
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

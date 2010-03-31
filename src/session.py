@@ -59,7 +59,7 @@ class Session(object):
             self.conn.write('Your game will be lost because adjourning is not implemented.\n')
 
         # unobserve games
-        for g in self.observed:
+        for g in copy.copy(self.observed):
             g.unobserve(self.user)
         assert(not self.observed)
 

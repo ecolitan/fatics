@@ -348,11 +348,11 @@ class TestRefresh(Test):
         t3.write('re\n')
         self.expect('You are not playing, examining, or observing', t3)
         t3.write('re 999\n')
-        self.expect('no such game', t3)
+        self.expect('There is no such game', t3)
         t3.write('re 1\n')
         self.expect('<12> ', t3)
         t3.write('re nosuchuser\n')
-        self.expect('No user named "nosuchuser"', t3)
+        self.expect('No user named "nosuchuser" is logged in', t3)
         t3.write('REF GUESTDEF\n')
         self.expect('GuestDEFG is not playing or examining', t3)
         t3.write('re admi\n')
@@ -371,6 +371,12 @@ class TestMoves(Test):
 
         t2.write('moves\n')
         self.expect('You are not playing, examining, or observing a game', t2)
+
+        t2.write('moves 1\n')
+        self.expect('There is no such game', t2)
+
+        t2.write('moves nosuchuser\n')
+        self.expect('No user named "nosuchuser" is logged in', t2)
 
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
@@ -393,71 +399,5 @@ class TestMoves(Test):
 
         t2.write('moves\n')
         self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t2)
-
-class TestObserve(Test):
-    def test_observe_unobserve(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
-        t3 = self.connect_as_user('GuestIJKL', '')
-
-        t.write('set style 12\n')
-        t.write('observe\n')
-        self.expect('Usage:', t)
-        t.write('unobserve\n')
-        self.expect('You are not observing any games', t)
-
-        t.write('observe GuestABCD\n')
-        self.expect('GuestABCD is not playing or examining a game', t)
-
-        t.write('unobserve GuestABCD\n')
-        self.expect('GuestABCD is not playing or examining a game', t)
-
-        t.write('observe admin\n')
-        self.expect('No user named "admin" is logged in', t)
-
-        t2.write('match guestijkl 1 0 w\n')
-        self.expect('Challenge:', t3)
-        t3.write('a\n')
-        self.expect('Creating:', t2)
-        self.expect('Creating:', t3)
-
-        t2.write('o 1\n')
-        self.expect('You cannot observe yourself', t2)
-        t3.write('o 1\n')
-        self.expect('You cannot observe yourself', t3)
-
-        t.write('o Guestijkl\n')
-        self.expect('<12>', t)
-
-        t2.write('h4\n')
-        self.expect('<12>', t)
-        self.expect('P/h2-h4', t)
-
-        t.write('unobserve\n')
-        self.expect('Removing game 1 from observation list.', t)
-        t.write('unobserve guestefgh\n')
-        self.expect('You are not observing game 1', t)
-
-        t.write('o 1\n')
-        self.expect('<12> ', t)
-        t.write('o guestefgh\n')
-        self.expect('You are already observing game 1', t)
-
-        t.write('unob 1\n')
-        self.expect('Removing game 1 from observation list.', t)
-        t.write('ob 1\n')
-        self.expect('<12> ', t)
-        t.write('unob Guestefgh\n')
-        self.expect('Removing game 1 from observation list.', t)
-        t.write('ob guestijkl\n')
-        self.expect('<12> ', t)
-
-        t2.write('res\n')
-        self.expect('GuestEFGH resigns} 0-1', t)
-        self.expect('Removing game 1 from observation list.', t)
-
-        self.close(t)
-        self.close(t2)
-        self.close(t3)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

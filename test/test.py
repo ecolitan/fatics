@@ -20,11 +20,19 @@ def connect():
     return t
 
 class Test(unittest.TestCase):
-    def expect(self, str, t, msg=None, timeout=2):
-        ret = t.read_until(str, timeout)
-        if not str in ret:
-            print "\ngot {{%s}}\nexp {{%s}}\n" % (repr(ret), repr(str))
-        self.assert_(str in ret)
+    def expect(self, s, t, msg=None, timeout=2):
+        ret = t.read_until(s, timeout)
+        if not s in ret:
+            print("\ngot {{%s}}\nexp {{%s}}\n" % (repr(ret), repr(s)))
+        self.assert_(s in ret)
+
+    def expect_command_prints_nothing(self, cmd, t, timeout=0.2):
+        t.read_very_eager()
+        t.write(cmd)
+        ret = t.read_until('foo', timeout)
+        if ret != 'fics% ':
+            print("\ngot {{%s}}" % repr(ret))
+        self.assert_(ret == 'fics% ')
 
     def expect_not(self, str, t):
         ret = t.read_until(str, 0.3)

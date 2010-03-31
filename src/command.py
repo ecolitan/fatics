@@ -43,6 +43,7 @@ class CommandList(object):
         self._add(Command('addlist', 'ww', self.addlist, admin.Level.user))
         self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
         self._add(Command('alias', 'oT', self.alias, admin.Level.user))
+        self._add(Command('allobservers', 'o', self.allobservers, admin.Level.user))
         self._add(Command('announce', 'S', self.announce, admin.Level.admin))
         self._add(Command('areload', '', self.areload, admin.Level.god))
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
@@ -149,7 +150,7 @@ class CommandList(object):
                 passwd = user.create.passwd()
                 user.create.new(name, email, passwd, real_name)
                 conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
-    
+
     def alias(self, args, conn):
         if args[0] is None:
             # show list of aliases
@@ -186,6 +187,15 @@ class CommandList(object):
             conn.write(_('Alias "%s" changed.\n') % aname)
         else:
             conn.write(_('Alias "%s" set.\n') % aname)
+
+    def allobservers(self, args, conn):
+        if args[0] is not None:
+            g = game.from_name_or_number(args[0], conn)
+            if g:
+                g.show_observers(conn)
+        else:
+            for g in game.games.values():
+                g.show_observers(conn)
 
     def announce(self, args, conn):
         count = 0
@@ -253,8 +263,7 @@ class CommandList(object):
         #conn.write(_("Local time     - %s\n") % )
         conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(t)))
         conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
-    
-    
+
     def decline(self, args, conn):
         if len(conn.user.session.offers_received) == 0:
             conn.write(_('You have no pending offers from other players.\n'))
@@ -266,7 +275,7 @@ class CommandList(object):
             conn.user.session.offers_received[0].decline()
         else:
             conn.write('TODO: DECLINE PARAM\n')
-    
+
     def draw(self, args, conn):
         if args[0] is None:
             if len(conn.user.session.games) == 0:
@@ -289,7 +298,6 @@ class CommandList(object):
             conn.write(_(' ECO[%3d]: %s\n') % (ply, eco))
             conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
-
         else:
             conn.write('TODO: ECO PARAM\n')
 
@@ -431,7 +439,7 @@ class CommandList(object):
         if u == conn.user:
             conn.write(_("You can't match yourself.\n"))
             return
-        
+
         if conn.user.name in u.censor:
             conn.write(_("%s is censoring you.\n") % u.name)
             return
@@ -480,14 +488,13 @@ class CommandList(object):
         g = game.from_name_or_number(args[0], conn)
         if g:
             if g in conn.user.session.observed:
-                conn.write(_('You are already observing game %d\n' % g.number))
+                conn.write(_('You are already observing game %d.\n' % g.number))
             elif conn.user == g.white or conn.user == g.black:
                 conn.write(_('You cannot observe yourself.\n'))
             else:
                 assert(conn.user not in g.observers)
                 conn.user.session.observed.add(g)
-                g.observers.add(conn.user)
-                conn.user.send_board(g)
+                g.observe(conn.user)
 
     def password(self, args, conn):
         if conn.user.is_guest:
