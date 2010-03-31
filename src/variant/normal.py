@@ -1021,13 +1021,14 @@ class Position(object):
 
     def move_from_castle(self, s):
         mv = None
+        s = self.decorator_re.sub('', s)
         if not mv and s in ['O-O', 'OO', 'o-o']:
             if self.wtm:
                 mv = Move(self, E1, G1, is_oo=True)
             else:
                 mv = Move(self, E8, G8, is_oo=True)
-        
-        if not mv and s in ['O-O-O', 'OOO', 'o-o']:
+
+        if not mv and s in ['O-O-O', 'OOO', 'o-o-o']:
             if self.wtm:
                 mv = Move(self, E1, C1, is_ooo=True)
             else:
