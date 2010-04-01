@@ -192,7 +192,11 @@ class CommandList(object):
         if args[0] is not None:
             g = game.from_name_or_number(args[0], conn)
             if g:
-                g.show_observers(conn)
+                if not g.observers:
+                    conn.write(_('No one is observing game %d.\n')
+                        % g.number)
+                else:
+                    g.show_observers(conn)
         else:
             for g in game.games.values():
                 g.show_observers(conn)

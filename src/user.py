@@ -45,7 +45,6 @@ class BaseUser(object):
         notify.notify.users(self, _("Notification: %s has arrived.\n") % self.name)
         online.add(self)
         self.is_online = True
-        conn.write(_('**** Starting session as %s ****\n\n') % self.name)
 
     def log_off(self):
         for ch in self.channels:
@@ -360,10 +359,10 @@ class GuestUser(BaseUser):
         self.vars = var.varlist.get_default_vars()
 
     def log_on(self, conn):
-        BaseUser.log_on(self, conn)
-        self._history = []
         self._titles = set(['U'])
         self._title_str = '(U)'
+        BaseUser.log_on(self, conn)
+        self._history = []
 
     def get_history(self):
         assert(self._history is not None)

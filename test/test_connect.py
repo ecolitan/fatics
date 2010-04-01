@@ -32,7 +32,7 @@ class LoginTest(Test):
 
         # anonymous guest login complete
         t.write('\n')
-        self.expect(' Starting', t)
+        self.expect(' Starting FICS session as ', t)
         self.close(t)
 
     """User should not actually be logged in until a correct password
@@ -56,9 +56,9 @@ class LoginTest(Test):
         self.expect('*** Incorrect password ***', t)
 
         t.write('ADMIN\n')
-        self.expect('admin is a registered name', t)
+        self.expect('"admin" is a registered name', t)
         t.write(admin_passwd + '\n')
-        self.expect(' Starting', t, "registered user login complete")
+        self.expect(' Starting FICS session as admin(*)', t)
         self.close(t)
 
     def test_double_login(self):

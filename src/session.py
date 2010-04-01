@@ -24,6 +24,7 @@ class Session(object):
 
     def set_user(self, user):
         self.user = user
+        self.conn.write(_('**** Starting FICS session as %s ****\n\n') % user.get_display_name())
 
     """returns a human-readable string"""
     def get_idle_time(self):
@@ -67,7 +68,7 @@ class Session(object):
         """Parse a %b string sent by Jin to set ivars before logging in."""
         for (i, val) in enumerate(s):
             self.ivars[var.ivar_number[i].name] = val
-        self.conn.write(_("Ivars set.\n"))
+        self.conn.write("#Ivars set.\n")
     
     def set_ivar(self, v, val):
         if val is not None:

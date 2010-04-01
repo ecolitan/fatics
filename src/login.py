@@ -23,7 +23,7 @@ class Login(object):
                         conn.write(_('Sorry, %s is already logged in. Try again.\n') % name)
                         u = None
                     else:
-                        conn.write(_('\n%s is a registered name.  If it is yours, type the password.\nIf not, just hit return to try another name.\n\npassword: ') % u.name)
+                        conn.write(_('\n"%s" is a registered name.  If it is yours, type the password.\nIf not, just hit return to try another name.\n\npassword: ') % u.name)
                 else:
                     u = user.GuestUser(name)
                     conn.write(_('\n"%s" is not a registered name.  You may play unrated games as a guest.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter the server as "%s":') % (name, name))
