@@ -96,7 +96,8 @@ def show_for_user(user, conn):
     conn.write(_('                  Opponent      Type         ECO End Date\n'))
     for entry in hist:
         entry['when_ended_str'] = entry['when_ended'].strftime("%Y-%m-%d %H:%M %Z")
-        conn.write('%(num)2d: %(result_char)1s %(user_rating)4s %(color_char)1s %(opp_rating)4s %(opp_name)-14s[%(flags)3s%(time)3s %(inc)3s] %(eco)-3s %(result_reason)-3s %(when_ended_str)-s\n' %
+        entry['opp_str'] = entry['opp_name'][0:14]
+        conn.write('%(num)2d: %(result_char)1s %(user_rating)4s %(color_char)1s %(opp_rating)4s %(opp_str)-14s[%(flags)3s%(time)3s %(inc)3s] %(eco)-3s %(result_reason)-3s %(when_ended_str)-s\n' %
             entry)
 
 history = History()
