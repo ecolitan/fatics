@@ -190,16 +190,18 @@ CREATE TABLE `eco` (
   `eco` char(5) NOT NULL,
   `long_` varchar(128) NOT NULL,
   `hash` bigint(12) UNSIGNED NOT NULL UNIQUE,
+  `fen` varchar(88) NOT NULL UNIQUE COLLATE utf8_bin,
   PRIMARY KEY (`eco_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_bin;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `nic`;
 CREATE TABLE `nic` (
   `nic_id` int(4) NOT NULL AUTO_INCREMENT,
   `nic` char(5) NOT NULL,
   `hash` bigint(12) UNSIGNED NOT NULL UNIQUE,
+  `fen` varchar(88) NOT NULL UNIQUE COLLATE utf8_bin,
   PRIMARY KEY (`nic_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE utf8_bin;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- notifications
 DROP TABLE IF EXISTS `user_notify`;

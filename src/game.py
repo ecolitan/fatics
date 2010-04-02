@@ -265,7 +265,7 @@ class Game(object):
         if row:
             ret = (i, row['nic'])
         else:
-            ret = (0, '--.--')
+            ret = (0, '-----')
         return ret
 
     def get_moves(self):

@@ -292,13 +292,30 @@ class DB(object):
         row = cursor.fetchone()
         cursor.close()
         return row
-    
+
     def get_nic(self, hash):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT nic FROM nic WHERE hash=%s""", hash)
         row = cursor.fetchone()
         cursor.close()
         return row
+
+    def look_up_eco(self, eco):
+        cursor = self.db.cursor(cursors.DictCursor)
+        if len(eco) == 3:
+            # match all subvariations
+            eco = '%s%%' % eco
+        cursor.execute("""SELECT eco,nic,long_,eco.fen AS fen FROM eco LEFT JOIN nic USING(hash) WHERE eco LIKE %s LIMIT 100""", (eco,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def look_up_nic(self, nic):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT eco,nic,long_,nic.fen AS fen FROM nic LEFT JOIN eco USING(hash) WHERE nic = %s LIMIT 100""", (nic,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
 
     # game
     def game_add(self, white_name, white_rating, black_name, black_rating,

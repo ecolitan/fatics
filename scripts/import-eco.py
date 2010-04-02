@@ -32,8 +32,8 @@ def main():
         assert(m)
         (fen, eco, long) = (m.group(1), m.group(2), m.group(3))
         pos = variant.normal.Position(fen + ' 0 1')
-        cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, hash=%s""",
-            (eco,long,pos.hash))
+        cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, hash=%s, fen=%s""",
+            (eco,long,pos.hash,fen))
         count += 1
     print 'imported %d eco codes' % count
    
@@ -54,8 +54,8 @@ def main():
             nic = m.group(1)
             pos = variant.normal.Position(fen + ' 0 1')
             try:
-                cursor.execute("""INSERT INTO nic SET nic=%s, hash=%s""",
-                    (nic,pos.hash))
+                cursor.execute("""INSERT INTO nic SET nic=%s, hash=%s, fen=%s""",
+                    (nic,pos.hash,fen))
             except:
                 print 'dupe for %s' % nic
                 raise

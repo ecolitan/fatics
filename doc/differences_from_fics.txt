@@ -119,10 +119,10 @@ promotion piece with the move; for example, e8=N (SAN) or
 e7e8=N (long algebraic notation).  If no promotion piece is
 specified, queen is always assumed.
 
-* ECO codes for openings now the database from scid
-( http://scid.sourceforge.net ).  ECO codes are looked up by
-moves rather than positions.  NIC codes are no longer
-supported.
+* ECO codes for openings now use the database from scid
+( http://scid.sourceforge.net ).  ECO now considers castling
+and en passant rights.
+
 Rationale:
 The scid database is more comprehensive, and subdivides ECO codes for
 more specificity.  Also, transpositions may be handled better.  I could

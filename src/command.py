@@ -9,11 +9,14 @@ import channel
 import offer
 import game
 import history
+import re
+
 from timer import timer
 from online import online
 from reload import reload
 from server import server
 from command_parser import BadCommandError
+from db import db
 
 class QuitException(Exception):
     pass
@@ -52,7 +55,7 @@ class CommandList(object):
         self._add(Command('date', '', self.date, admin.Level.user))
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
         self._add(Command('draw', 'o', self.draw, admin.Level.user))
-        self._add(Command('eco', 't', self.eco, admin.Level.user))
+        self._add(Command('eco', 'oo', self.eco, admin.Level.user))
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
         self._add(Command('flag', '', self.flag, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
@@ -290,20 +293,53 @@ class CommandList(object):
         else:
             conn.write('TODO: DRAW PARAM\n')
 
+    eco_pat = re.compile(r'[a-z][0-9][0-9][a-z]?')
+    nic_pat = re.compile(r'[a-z][a-z]\.[0-9][0-9]')
     def eco(self, args, conn):
-        if args[0] is None:
+        g = None
+        if args[1] is not None:
+            assert(args[0] is not None)
+            rows = []
+            if args[0] == 'e':
+                if not self.eco_pat.match(args[1]):
+                    conn.write(_("You haven't specified a valid ECO code.\n"))
+                else:
+                    rows = db.look_up_eco(args[1])
+            elif args[0] == 'n':
+                if not self.nic_pat.match(args[1]):
+                    conn.write(_("You haven't specified a valid NIC code.\n"))
+                else:
+                    rows = db.look_up_nic(args[1])
+            else:
+                raise BadCommandError()
+            for row in rows:
+                if row['eco'] is None:
+                    row['eco'] = 'A00'
+                if row['nic'] is None:
+                    row['nic'] = '-----'
+                if row['long_'] is None:
+                    row['long_'] = 'Unknown / not matched'
+                assert(row['fen'] is not None)
+                conn.write('\n')
+                conn.write('  ECO: %s\n' % row['eco'])
+                conn.write('  NIC: %s\n' % row['nic'])
+                conn.write(' LONG: %s\n' % row['long_'])
+                conn.write('  FEN: %s\n' % row['fen'])
+        elif args[0] is not None:
+            g = game.from_name_or_number(args[0], conn)
+        else:
             if len(conn.user.session.games) == 0:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
-                return
-            g = conn.user.session.games.values()[0]
+            else:
+                g = conn.user.session.games.values()[0]
+
+        if g is not None:
             (ply, eco, long) = g.get_eco()
             (nicply, nic) = g.get_nic()
             conn.write(_('Eco for game %d (%s vs. %s):\n') % (g.number, g.white.name, g.black.name))
             conn.write(_(' ECO[%3d]: %s\n') % (ply, eco))
             conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
-        else:
-            conn.write('TODO: ECO PARAM\n')
 
     def finger(self, args, conn):
         u = None
@@ -374,7 +410,7 @@ class CommandList(object):
         else:
             cmds = [c.name for c in command_list.cmds.itervalues()]
         conn.write('This server is under development.\n\nRecognized commands: %s\n' % ' '.join(cmds))
-    
+
     def history(self, args, conn):
         u = None
         if args[0] is not None:
@@ -383,7 +419,7 @@ class CommandList(object):
             u = conn.user
         if u:
             history.show_for_user(u, conn)
-                
+
     def inchannel(self, args, conn):
         if args[0] is not None:
             if type(args[0]) != str:
