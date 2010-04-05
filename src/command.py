@@ -1,4 +1,5 @@
 import time
+import re
 
 import user
 import trie
@@ -9,7 +10,7 @@ import channel
 import offer
 import game
 import history
-import re
+import rating
 
 from timer import timer
 from online import online
@@ -358,8 +359,11 @@ class CommandList(object):
                     conn.write(_('%s has never connected.\n\n') % u.name)
                 else:
                     conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
-            if u.is_guest:
-                conn.write(_('%s is NOT a registered player.\n') % u.name)
+
+            #if u.is_guest:
+            #    conn.write(_('%s is NOT a registered player.\n') % u.name)
+            if not u.is_guest:
+                rating.show_ratings(u, conn)
             if u.admin_level > admin.Level.user:
                 conn.write(A_('Admin level: %s\n') % admin.level.to_str(u.admin_level))
             if conn.user.admin_level > admin.Level.user:
@@ -368,7 +372,7 @@ class CommandList(object):
                     conn.write(A_('Real name:   %s\n') % u.real_name)
                 if u.is_online:
                     conn.write(A_('Host:        %s\n') % u.session.conn.ip)
-               
+
             if u.is_online:
                 if u.session.use_timeseal:
                     conn.write(_('Timeseal:    On\n'))

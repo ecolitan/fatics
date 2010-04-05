@@ -122,14 +122,17 @@ class Draw(Offer):
         Offer.accept(self)
         self.game.pending_offers.remove(self)
         self.game.result('Game drawn by agreement', '1/2-1/2')
-    
+
     def decline(self, notify=True):
         Offer.decline(self, notify)
         self.game.pending_offers.remove(self)
-        
+
     def withdraw(self, notify=True):
         if notify:
             self.a.write(_('You cannot withdraw a draw offer.\n'))
+
+#class InvalidOfferError(Exception):
+#    pass
 
 class Challenge(Offer):
     """represents a match offer from one player to another"""
@@ -151,7 +154,7 @@ class Challenge(Offer):
 
         if opts is not None:
             self._parse_opts(opts)
-     
+
         if self.rated is None:
             if a.is_guest or b.is_guest:
                 a.write(N_('Setting match offer to unrated.\n'))
@@ -159,15 +162,19 @@ class Challenge(Offer):
             else:
                 # historically, this was set according to the rated var
                 self.rated = True
+        elif a.is_guest or b.is_guest:
+            a.write(_('Only registered users can play rated games.\n'))
+            #raise InvalidOfferError()
+            return
 
         #a.write('%(aname) (%(arat))%(acol) %(bname) %(brat) %(rat) %(variant)')
         if self.side is not None:
             side_str = " [%s]" % game.side_to_str(self.side)
         else:
             side_str = ''
-        
-        self.a_rating = a.get_rating(self.variant_name)
-        self.b_rating = b.get_rating(self.variant_name)
+
+        self.a_rating_str = a.get_rating_str(self.variant_name)
+        self.b_rating_str = b.get_rating_str(self.variant_name)
 
         rated_str = "rated" if self.rated else "unrated"
 
@@ -190,7 +197,7 @@ class Challenge(Offer):
             self.variant_and_speed = '%s %s' % (self.variant_name,self.speed)
 
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
-        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.variant_and_speed, time_str)
+        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating_str, side_str, self.b.name, self.b_rating_str, rated_str, self.variant_and_speed, time_str)
 
 
         #if self.board is not None:
@@ -211,7 +218,7 @@ class Challenge(Offer):
         if self in a_sent:
             a.write(N_('You are already offering an identical match to %s.\n') % b.name)
             return
-        
+
         o = next((o for o in b_sent if o.name == self.name), None)
         if o:
             a.write(N_('Declining the offer from %s and proposing a counteroffer.\n') % b.name)
@@ -231,7 +238,7 @@ class Challenge(Offer):
         a.write('Issuing: %s\n' % challenge_str)
         b.write('Challenge: %s\n' % challenge_str)
         b.write(N_('You can "accept", "decline", or propose different parameters.\n'))
-       
+
     def __eq__(self, other):
         if (self.name == other.name and
                 self.a == other.a and
@@ -241,7 +248,7 @@ class Challenge(Offer):
                 self.side == other.side):
             return True
         return False
-    
+
     def __hash__(self, other):
         return hash((self.a, self.b, self.time, self.inc, self.side))
 
@@ -261,10 +268,10 @@ class Challenge(Offer):
             return True
 
         return False
-        
+
     def accept(self):
         Offer.accept(self)
-        
+
         g = game.Game(self)
         self.a.session.games[self.b.name] = g
         self.b.session.games[self.a.name] = g
@@ -274,13 +281,13 @@ class Challenge(Offer):
         if self.rated is not None:
             raise command_parser.BadCommandError()
         self.rated = val
-    
+
     def _set_side(self, val):
         assert(val in [WHITE, BLACK])
         if self.side is not None:
             raise command_parser.BadCommandError()
         self.side = val
-    
+
     def _set_wild(self, val):
         self.variant_name = val
 
@@ -305,16 +312,16 @@ class Challenge(Offer):
 
             if w in ['unrated', 'u']:
                 self._set_rated(False)
-            
+
             elif w in ['rated', 'r']:
                 self._set_rated(False)
 
             elif w in ['white', 'w']:
                 self._set_side(WHITE)
-            
+
             elif w in ['black', 'b']:
                 self._set_side(BLACK)
-         
+
             else:
                 m = re.match('w(\d+)', w)
                 if m:

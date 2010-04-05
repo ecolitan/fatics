@@ -238,6 +238,40 @@ CREATE TABLE user_alias (
   PRIMARY KEY (`alias_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+-- speeds and variants
+DROP TABLE IF EXISTS `speed`;
+CREATE TABLE speed (
+  `speed_id` int(8) NOT NULL AUTO_INCREMENT,
+  `speed_name` varchar(16) NOT NULL,
+  PRIMARY KEY(`speed_id`)
+);
+DROP TABLE IF EXISTS `variant`;
+CREATE TABLE variant (
+  `variant_id` int(8) NOT NULL AUTO_INCREMENT,
+  `variant_name` varchar(16) NOT NULL,
+  PRIMARY KEY(`variant_id`)
+);
+-- ratings
+DROP TABLE IF EXISTS `rating`;
+CREATE TABLE rating (
+  `rating_id` int(8) NOT NULL AUTO_INCREMENT, -- is this necessary?
+  `user_id` int(8) NOT NULL,
+  `variant_id` int(8) NOT NULL,
+  `speed_id` int(8) NOT NULL,
+  `rating` int(6) NOT NULL,
+  `rd` float NOT NULL,
+  `volatility` float NOT NULL,
+  `win` int(7) NOT NULL,
+  `loss` int(7) NOT NULL,
+  `draw` int(7) NOT NULL,
+  `total` int(7) NOT NULL COMMENT 'equals win + loss + draw, but included for efficiency',
+  `ltime` timestamp NOT NULL,
+  UNIQUE KEY (`user_id`, `variant_id`),
+  INDEX(`user_id`),
+  PRIMARY KEY(`rating_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+
 -- data
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
@@ -268,5 +302,18 @@ UNLOCK TABLES;
 
 LOCK TABLES `user_title` WRITE;
 INSERT INTO `user_title` VALUES (1,1,1);
+UNLOCK TABLES;
+
+LOCK TABLES `speed` WRITE;
+INSERT INTO `speed` VALUES (NULL,'nonstandard');
+INSERT INTO `speed` VALUES (NULL,'lightning');
+INSERT INTO `speed` VALUES (NULL,'blitz');
+INSERT INTO `speed` VALUES (NULL,'standard');
+INSERT INTO `speed` VALUES (NULL,'correspondence');
+UNLOCK TABLES;
+
+LOCK TABLES `variant` WRITE;
+INSERT INTO `variant` VALUES (NULL,'normal');
+INSERT INTO `variant` VALUES (NULL,'crazyhouse');
 UNLOCK TABLES;
 

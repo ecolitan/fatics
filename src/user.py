@@ -101,7 +101,7 @@ class BaseUser(object):
             self.aliases[name] = val
         else:
             del self.aliases[name]
-    
+
     def add_channel(self, id):
         assert(type(id) == type(1) or type(id) == type(1l))
         self.channels.append(id)
@@ -125,18 +125,12 @@ class BaseUser(object):
 
     def remove_censor(self, user):
         self.censor.remove(user.name)
-    
+
     def add_noplay(self, user):
         self.noplay.add(user.name)
 
     def remove_noplay(self, user):
         self.noplay.remove(user.name)
-
-    def get_rating(self, variant):
-        if self.is_guest:
-            return '++++'
-        else:
-            return '----'
 
     def send_board(self, game):
         self.write(game.variant.to_style12(self))
@@ -334,6 +328,23 @@ class User(BaseUser):
         BaseUser.clear_history(self)
         db.user_del_history(self.id)
 
+    def get_rating(self, variant):
+        if self._rating is None:
+            self._load_ratings()
+        if variant in self._rating:
+            return self._rating[variant]
+        else:
+            return rating.NoRating(is_guest=False)
+
+    def _load_ratings(self):
+        self._rating = []
+        for row in db.user_get_all_ratings(self.id):
+            speed_variant = SpeedAndVariant(row['speed_id'],
+                row['variant_id'])
+            self.rating[speed_variant] = rating.Rating(row['rating'],
+                row['rd'], row['volatility'])
+                #, row['win'], row['loss'], row['draw'], row['total'])
+
 class GuestUser(BaseUser):
     def __init__(self, name):
         BaseUser.__init__(self)
@@ -367,6 +378,9 @@ class GuestUser(BaseUser):
     def get_history(self):
         assert(self._history is not None)
         return self._history
+
+    def get_rating(self, variant):
+        return rating.NoRating(is_guest=True)
 
 class AmbiguousException(Exception):
     def __init__(self, names):

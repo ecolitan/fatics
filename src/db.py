@@ -338,7 +338,7 @@ class DB(object):
         #for row in rows:
         #    row['when_ended'] = row['when_ended'].timetuple()
         return rows
-    
+
     def user_add_history(self, entry, user_id):
         cursor = self.db.cursor()
         entry.update({'user_id': user_id})
@@ -350,6 +350,13 @@ class DB(object):
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM history WHERE user_id=%s""", user_id)
         cursor.close()
+
+    def user_get_ratings(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT * FROM (SELECT rating.variant_id as variant_id,rating.speed_id as speed_id,variant_name,speed_name,rating,rd,volatility,win,loss,draw,total,ltime FROM rating LEFT JOIN variant USING (variant_id) LEFT JOIN speed USING (speed_id) WHERE user_id=%s ORDER BY total DESC LIMIT 5) as tmp ORDER BY variant_id,speed_id""", user_id)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
 
 db = DB()
 

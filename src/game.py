@@ -1,7 +1,9 @@
 import random
 import time
 import datetime
+
 import user
+import ratings
 
 (WHITE, BLACK) = range(2)
 
@@ -64,15 +66,13 @@ class Game(object):
         if side == WHITE:
             self.white = chal.a
             self.black = chal.b
-            self.white_rating = chal.a_rating
-            self.black_rating = chal.b_rating
         else:
             assert(side == BLACK)
             self.white = chal.b
             self.black = chal.a
-            self.white_rating = chal.b_rating
-            self.black_rating = chal.a_rating
 
+        self.white_rating = self.white.get_rating()
+        self.black_rating = self.black.get_rating()
         self.white_time = chal.time
         self.black_time = chal.time
         self.inc = chal.inc
@@ -213,6 +213,16 @@ class Game(object):
         self.is_active = False
         if result_code != '*':
             history.history.save_game(self, msg, result_code)
+            if self.rated:
+                if result_code == '1-0':
+                    (white_score, black_score) = (1.0, 0.0)
+                elif result_code == '1/2-1/2':
+                    (white_score, black_score) = (0.5, 0.5)
+                elif result_code == '0-1':
+                    (white_score, black_score) = (0.0, 1.0)
+                else:
+                    raise RuntimeError('game.result: unexpected result code')
+                ratings.update_ratings(self, white_score, black_score)
         self.free()
 
     def observe(self, u):
