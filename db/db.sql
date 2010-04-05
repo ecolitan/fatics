@@ -243,12 +243,14 @@ DROP TABLE IF EXISTS `speed`;
 CREATE TABLE speed (
   `speed_id` int(8) NOT NULL AUTO_INCREMENT,
   `speed_name` varchar(16) NOT NULL,
+  `speed_abbrev` char(2) NOT NULL,
   PRIMARY KEY(`speed_id`)
 );
 DROP TABLE IF EXISTS `variant`;
 CREATE TABLE variant (
   `variant_id` int(8) NOT NULL AUTO_INCREMENT,
   `variant_name` varchar(16) NOT NULL,
+  `variant_abbrev` char(2) NOT NULL,
   PRIMARY KEY(`variant_id`)
 );
 -- ratings
@@ -266,7 +268,7 @@ CREATE TABLE rating (
   `draw` int(7) NOT NULL,
   `total` int(7) NOT NULL COMMENT 'equals win + loss + draw, but included for efficiency',
   `ltime` timestamp NOT NULL,
-  UNIQUE KEY (`user_id`, `variant_id`),
+  UNIQUE KEY (`user_id`, `variant_id`, `speed_id`),
   INDEX(`user_id`),
   PRIMARY KEY(`rating_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
@@ -305,15 +307,16 @@ INSERT INTO `user_title` VALUES (1,1,1);
 UNLOCK TABLES;
 
 LOCK TABLES `speed` WRITE;
-INSERT INTO `speed` VALUES (NULL,'nonstandard');
-INSERT INTO `speed` VALUES (NULL,'lightning');
-INSERT INTO `speed` VALUES (NULL,'blitz');
-INSERT INTO `speed` VALUES (NULL,'standard');
-INSERT INTO `speed` VALUES (NULL,'correspondence');
+INSERT INTO `speed` VALUES (NULL,'nonstandard','?');
+INSERT INTO `speed` VALUES (NULL,'lightning','l');
+INSERT INTO `speed` VALUES (NULL,'blitz','b');
+INSERT INTO `speed` VALUES (NULL,'standard','s');
+INSERT INTO `speed` VALUES (NULL,'slow','o');
+INSERT INTO `speed` VALUES (NULL,'corr','c');
 UNLOCK TABLES;
 
 LOCK TABLES `variant` WRITE;
-INSERT INTO `variant` VALUES (NULL,'normal');
-INSERT INTO `variant` VALUES (NULL,'crazyhouse');
+INSERT INTO `variant` VALUES (NULL,'normal','n');
+INSERT INTO `variant` VALUES (NULL,'crazyhouse','z');
 UNLOCK TABLES;
 

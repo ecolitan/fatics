@@ -25,6 +25,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 import math
 
+import rating
+
 scale = 400 / math.log(10)
 
 class Player:
@@ -147,7 +149,7 @@ class Player:
         self._preRatingRD()
 
     def get_glicko(self):
-        return Rating.rating(self.rating * self.scale + 1500,
+        return rating.Rating(self.rating * self.scale + 1500,
             self.rd * self.scale)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

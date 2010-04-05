@@ -358,6 +358,36 @@ class DB(object):
         cursor.close()
         return rows
 
+    def user_get_all_ratings(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT variant_id,speed_id,rating,rd,volatility,win,loss,draw,total,ltime FROM rating WHERE user_id=%s""", user_id)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def user_update_rating(self, user_id, speed_id, variant_id,
+            rating, rd, vol, win, loss, draw, total):
+        cursor = self.db.cursor()
+        cursor.execute("""UPDATE rating SET rating=%s,rd=%s,vol=%s,win=win+%s,loss=loss+%s,draw=draw+%s,total=total+%s WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (rating, rd, vol, win, loss, draw, total, user_id, speed_id, variant_id))
+        if cursor.rowcount == 0:
+            cursor.execute("""INSERT INTO rating SET rating=%s,rd=%s,vol=%s,win=%s,loss=%s,draw=%s,total=%s,user_id=%s,speed_id=%s,variant_id=%s""", (rating, rd, vol, win, loss, draw, total, user_id, speed_id, variant_id))
+        assert(cursor.rowcount == 1)
+        cursor.close()
+
+    def get_variants(self):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT variant_id,variant_name,variant_abbrev FROM variant""")
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def get_speeds(self):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT speed_id,speed_name,speed_abbrev FROM speed""")
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
 db = DB()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -28,41 +28,18 @@ class History(object):
         else:
             raise RuntimeError('could not abbreviate result message: %s' % msg)
 
-        try:
-            white_rating = int(game.white_rating, 10)
-        except ValueError:
-            white_rating = None
-
-        try:
-            black_rating = int(game.black_rating, 10)
-        except ValueError:
-            black_rating = None
+        white_rating = str(game.white_rating)
+        black_rating = str(game.black_rating)
 
         (i, eco, long) = game.get_eco()
         game_id = db.game_add(game.white.name, white_rating, game.black.name,
-            black_rating, eco, game.variant.name, game.speed,
+            black_rating, eco, game.variant.name, game.speed_variant.speed,
             game.white_time, game.inc, result_code, game.rated,
             result_reason, game.get_moves(), game.when_ended)
 
-        flags = ''
-        if game.speed.name == 'lightning':
-            flags += 'l'
-        elif game.speed.name == 'blitz':
-            flags += 'b'
-        elif game.speed.name == 'standard':
-            flags += 's'
-        elif game.speed.name == 'slow':
-            flags += 'S'
-        elif game.speed.name == 'correspondence':
-            flags += 'c'
-        else:
-            flags += '?'
-        if game.variant.name == 'normal':
-            flags += 'n'
-        elif game.variant.name == 'crazyhouse':
-            flags += 'z'
-        else:
-            flags += '?'
+        flags = '%s%s' % (game.speed_variant.speed.abbrev,
+            game.speed_variant.variant.abbrev)
+
         flags += 'r' if game.rated else 'u'
 
         if result_code == '1-0':
@@ -76,11 +53,11 @@ class History(object):
             white_result_char = '='
             black_result_char = '='
         game.white.save_history(game_id, white_result_char,
-            game.white_rating, 'W', game.black.name, game.black_rating,
+            white_rating, 'W', game.black.name, black_rating,
             eco[0:3], flags, game.white_time, game.inc, result_reason,
             game.when_ended)
         game.black.save_history(game_id, black_result_char,
-            game.black_rating, 'B', game.white.name, game.white_rating,
+            black_rating, 'B', game.white.name, white_rating,
             eco[0:3], flags, game.white_time, game.inc, result_reason,
             game.when_ended)
         return game_id

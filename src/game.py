@@ -3,7 +3,7 @@ import time
 import datetime
 
 import user
-import ratings
+import rating
 
 (WHITE, BLACK) = range(2)
 
@@ -71,8 +71,9 @@ class Game(object):
             self.white = chal.b
             self.black = chal.a
 
-        self.white_rating = self.white.get_rating()
-        self.black_rating = self.black.get_rating()
+        self.speed_variant = chal.speed_variant
+        self.white_rating = self.white.get_rating(self.speed_variant)
+        self.black_rating = self.black.get_rating(self.speed_variant)
         self.white_time = chal.time
         self.black_time = chal.time
         self.inc = chal.inc
@@ -80,8 +81,6 @@ class Game(object):
         self.white.session.is_white = True
         self.black.session.is_white = False
 
-        self.speed = chal.speed
-        self.variant_and_speed = chal.variant_and_speed
         self.rated = chal.rated
         self.rated_str = 'rated' if self.rated else 'unrated'
         time_str = '%d %d' % (self.white_time,self.inc)
@@ -95,16 +94,17 @@ class Game(object):
             self.black_time * 60.0, self.inc)
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
-        create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.variant_and_speed, time_str)
-    
+        create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.speed_variant, time_str)
+
         self.white.write(create_str)
         self.black.write(create_str)
 
-        create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.variant_and_speed)
+        create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.speed_variant)
         self.white.write(create_str_2)
         self.black.write(create_str_2)
 
-        self.variant = variant_factory.get(chal.variant_name, self)
+        self.variant = variant_factory.get(self.speed_variant.variant.name,
+            self)
 
         self.white.send_board(self)
         self.black.send_board(self)
@@ -222,7 +222,7 @@ class Game(object):
                     (white_score, black_score) = (0.0, 1.0)
                 else:
                     raise RuntimeError('game.result: unexpected result code')
-                ratings.update_ratings(self, white_score, black_score)
+                rating.update_ratings(self, white_score, black_score)
         self.free()
 
     def observe(self, u):
@@ -291,13 +291,13 @@ class Game(object):
     def write_moves(self, conn):
         # don't translate for now since clients parse these messages
         conn.write("\nMovelist for game %d:\n\n" % self.number)
-   
+
         conn.write("%s (%s) vs. %s (%s) --- %s\n" % (self.white.name,
             self.white_rating, self.black.name, self.black_rating,
             time.strftime("%a %b %e, %H:%M %Z %Y",
                 time.localtime(self.start_time))))
         conn.write("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
-            (self.rated_str.capitalize(), self.variant_and_speed,
+            (self.rated_str.capitalize(), self.speed_variant,
                 self.white_time, self.inc))
         assert(len(self.black.name) <= 23)
         conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (self.white.name, self.black.name))

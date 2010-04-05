@@ -10,7 +10,7 @@ from array import array
 
 #from game import WHITE, BLACK
 (WHITE, BLACK) = range(2)
-from variant import Variant
+from speed_variant import Variant
 from timer import timer
 
 """

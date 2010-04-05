@@ -4,6 +4,7 @@ from db import db
 
 INITIAL_RATING = 1720
 INITIAL_RD = 350
+INITIAL_VOLATILITY = 0.6
 
 class Rating(object):
     def __init__(self, rating, rd, volatility): #, win, loss, draw, total):
@@ -24,6 +25,16 @@ class NoRating(object):
     def __init__(self, is_guest):
         self.is_guest = is_guest
         self.rating = None
+
+        self.volatility = INITIAL_VOLATILITY
+
+    def glicko2_rating(self):
+        assert(not self.is_guest)
+        return (INITIAL_RATING - 1500) / glicko2.scale
+
+    def glicko2_rd(self):
+        assert(not self.is_guest)
+        return INITIAL_RD / glicko2.scale
 
     def __str__(self):
         if self.is_guest:
@@ -62,10 +73,10 @@ def update_ratings(game, white_score, black_score):
     wpg = wp.get_glicko()
     bpg = bp.get_glicko()
 
-    game.white.update_rating(game.white.id, game.speed_id, game.variant.id,
+    game.white.update_rating(game.speed_variant,
         wpg.rating, wpg.rd, wp.vol,
         white_wins, white_losses, white_draws, white_total)
-    game.black.update_ratings(game.black.id, game.speed_id, game.variant.id,
+    game.black.update_ratings(game.speed_variant,
         bpg.rating, bpg.rd, bp.vol,
         black_wins, black_losses, black_draws, black_total)
 

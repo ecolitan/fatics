@@ -8,6 +8,8 @@ import var
 import channel
 import notify
 import connection
+import rating
+import speed_variant
 from db import db
 from online import online
 from config import config
@@ -174,6 +176,7 @@ class User(BaseUser):
             self.formula[f['num']] = f['f']
         for note in db.user_get_notes(self.id):
             self.notes[note['num']] = note['txt']
+        self._rating = None
 
     def get_display_name(self):
         """Get the name displayed for other users, e.g. admin(*)(SR)"""
@@ -328,20 +331,27 @@ class User(BaseUser):
         BaseUser.clear_history(self)
         db.user_del_history(self.id)
 
-    def get_rating(self, variant):
+    def get_rating(self, speed_variant):
         if self._rating is None:
             self._load_ratings()
-        if variant in self._rating:
-            return self._rating[variant]
+        if speed_variant in self._rating:
+            return self._rating[speed_variant]
         else:
             return rating.NoRating(is_guest=False)
 
+    def update_rating(self, speed_variant,
+            rating, rd, vol, win, loss, draw, total):
+        db.user_update_rating(self.id, speed_variant.speed.id,
+            speed_variant.variant.id, rating, rd, vol, win, loss, draw,
+            total)
+        self._load_ratings() # TODO: don't reload all ratings
+
     def _load_ratings(self):
-        self._rating = []
+        self._rating = {}
         for row in db.user_get_all_ratings(self.id):
-            speed_variant = SpeedAndVariant(row['speed_id'],
+            sv = speed_variant.from_ids(row['speed_id'],
                 row['variant_id'])
-            self.rating[speed_variant] = rating.Rating(row['rating'],
+            self.rating[sv] = rating.Rating(row['rating'],
                 row['rd'], row['volatility'])
                 #, row['win'], row['loss'], row['draw'], row['total'])
 
@@ -379,7 +389,7 @@ class GuestUser(BaseUser):
         assert(self._history is not None)
         return self._history
 
-    def get_rating(self, variant):
+    def get_rating(self, speed_variant):
         return rating.NoRating(is_guest=True)
 
 class AmbiguousException(Exception):

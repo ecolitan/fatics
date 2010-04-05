@@ -1,6 +1,6 @@
 import re
 
-import speed
+import speed_variant
 import command_parser
 import game
 from game import WHITE, BLACK
@@ -162,7 +162,7 @@ class Challenge(Offer):
             else:
                 # historically, this was set according to the rated var
                 self.rated = True
-        elif a.is_guest or b.is_guest:
+        elif self.rated and (a.is_guest or b.is_guest):
             a.write(_('Only registered users can play rated games.\n'))
             #raise InvalidOfferError()
             return
@@ -173,31 +173,28 @@ class Challenge(Offer):
         else:
             side_str = ''
 
-        self.a_rating_str = a.get_rating_str(self.variant_name)
-        self.b_rating_str = b.get_rating_str(self.variant_name)
-
         rated_str = "rated" if self.rated else "unrated"
 
         time_str = "%d %d" % (self.time, self.inc)
         expected_duration = self.time + self.inc * float(2) / 3
         assert(expected_duration > 0)
         if expected_duration < 3.0:
-            self.speed = speed.lightning
+            speed_name = 'lightning'
         elif expected_duration < 15.0:
-            self.speed = speed.blitz
+            speed_name = 'blitz'
         elif expected_duration < 75.0:
-            self.speed = speed.standard
+            speed_name = 'standard'
         else:
-            self.speed = speed.slow
+            speed_name = 'slow'
 
-        if self.variant_name == 'normal':
-            # normal chess has no variant name, e.g. "blitz"
-            self.variant_and_speed = self.speed
-        else:
-            self.variant_and_speed = '%s %s' % (self.variant_name,self.speed)
+        self.speed_variant = speed_variant.from_names(speed_name,
+            self.variant_name)
+        self.a_rating = a.get_rating(self.speed_variant)
+        self.b_rating = b.get_rating(self.speed_variant)
+
 
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
-        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating_str, side_str, self.b.name, self.b_rating_str, rated_str, self.variant_and_speed, time_str)
+        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, time_str)
 
 
         #if self.board is not None:
@@ -253,7 +250,7 @@ class Challenge(Offer):
         return hash((self.a, self.b, self.time, self.inc, self.side))
 
     def equivalent_to(self, other):
-        if self.variant_name != other.variant_name:
+        if self.speed_variant.variant != other.speed_variant.variant:
             return False
 
         # opposite but equivalent?
@@ -314,7 +311,7 @@ class Challenge(Offer):
                 self._set_rated(False)
 
             elif w in ['rated', 'r']:
-                self._set_rated(False)
+                self._set_rated(True)
 
             elif w in ['white', 'w']:
                 self._set_side(WHITE)
