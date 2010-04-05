@@ -24,6 +24,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 """
 
 import math
+import time
+import datetime
 
 import rating
 
@@ -35,22 +37,23 @@ class Player:
     # the change in volatility over time.
     _tau = 0.5
 
-    def __init__(self, rating = 0, rd = 200 / scale, vol = 0.06):
-        # For testing purposes, preload the values
-        # assigned to an unrated player.
+    def __init__(self, rating, rd, vol, ltime):
+        """ Values are on a glicko 2 scale; use to_glicko() to convert
+        to original glicko scale """
         self.rating = rating
-        self.rd = rd
+        self.ltime = ltime
+        self._rd = rd
         self.vol = vol
 
-    def _preRatingRD(self):
-        """ Calculates and updates the player's rating deviation for the
-        beginning of a rating period.
-
-        preRatingRD() -> None
-
-        """
-        self.rd = math.sqrt(math.pow(self.rd, 2) + math.pow(self.vol, 2))
-        #self.rd = math.sqrt(self.rd * self.rd + self.vol * self.vol)
+    def get_current_rd(self):
+        """ Calculates the player's current rating deviation. """
+        # number of 1-minute rating periods passed since the last rd update
+        t = (time.mktime(datetime.datetime.utcnow().timetuple())
+            - time.mktime(self.ltime.timetuple())) / 60.0
+        ret = math.sqrt(math.pow(self._rd, 2) + t * math.pow(self.vol, 2))
+        #print '%f minutes, vol %f = %f' % (t, self.vol, ret)
+        ret = min(ret, 350.0 / scale)
+        return ret
 
     def update_player(self, rating_list, RD_list, outcome_list):
         """ Calculates the new rating and rating deviation of the player.
@@ -60,15 +63,15 @@ class Player:
         """
         v = self._v(rating_list, RD_list)
         self.vol = self._newVol(rating_list, RD_list, outcome_list, v)
-        self._preRatingRD()
 
-        self.rd = 1 / math.sqrt((1 / math.pow(self.rd, 2)) + (1 / v))
+        self._rd = 1 / math.sqrt((1 / math.pow(self.get_current_rd(), 2)) +
+            (1 / v))
 
         tempSum = 0
         for i in range(len(rating_list)):
             tempSum += self._g(RD_list[i]) * \
                        (outcome_list[i] - self._E(rating_list[i], RD_list[i]))
-        self.rating += math.pow(self.rd, 2) * tempSum
+        self.rating += math.pow(self._rd, 2) * tempSum
 
 
     def _newVol(self, rating_list, RD_list, outcome_list, v):
@@ -139,17 +142,9 @@ class Player:
         return 1 / math.sqrt(1 + 3 * math.pow(RD, 2) / math.pow(math.pi, 2))
 
 
-    def did_not_compete(self):
-        """ Applies Step 6 of the algorithm. Use this for
-        players who did not compete in the rating period.
-
-        did_not_compete() -> None
-
-        """
-        self._preRatingRD()
-
     def get_glicko(self):
-        return rating.Rating(self.rating * self.scale + 1500,
-            self.rd * self.scale)
+        return rating.Rating(self.rating * scale + 1500,
+            self.get_current_rd() * scale, self.vol,
+            datetime.datetime.utcnow())
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

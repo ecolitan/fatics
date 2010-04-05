@@ -353,24 +353,24 @@ class DB(object):
 
     def user_get_ratings(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT * FROM (SELECT rating.variant_id as variant_id,rating.speed_id as speed_id,variant_name,speed_name,rating,rd,volatility,win,loss,draw,total,ltime FROM rating LEFT JOIN variant USING (variant_id) LEFT JOIN speed USING (speed_id) WHERE user_id=%s ORDER BY total DESC LIMIT 5) as tmp ORDER BY variant_id,speed_id""", user_id)
+        cursor.execute("""SELECT * FROM (SELECT rating.variant_id as variant_id,rating.speed_id as speed_id,variant_name,speed_name,rating,rd,volatility,win,loss,draw,total,best,when_best,ltime FROM rating LEFT JOIN variant USING (variant_id) LEFT JOIN speed USING (speed_id) WHERE user_id=%s ORDER BY total DESC LIMIT 5) as tmp ORDER BY variant_id,speed_id""", user_id)
         rows = cursor.fetchall()
         cursor.close()
         return rows
 
     def user_get_all_ratings(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT variant_id,speed_id,rating,rd,volatility,win,loss,draw,total,ltime FROM rating WHERE user_id=%s""", user_id)
+        cursor.execute("""SELECT variant_id,speed_id,rating,rd,volatility,win,loss,draw,total,best,when_best,ltime FROM rating WHERE user_id=%s""", user_id)
         rows = cursor.fetchall()
         cursor.close()
         return rows
 
     def user_update_rating(self, user_id, speed_id, variant_id,
-            rating, rd, vol, win, loss, draw, total):
+            rating, rd, volatility, win, loss, draw, total,ltime):
         cursor = self.db.cursor()
-        cursor.execute("""UPDATE rating SET rating=%s,rd=%s,vol=%s,win=win+%s,loss=loss+%s,draw=draw+%s,total=total+%s WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (rating, rd, vol, win, loss, draw, total, user_id, speed_id, variant_id))
+        cursor.execute("""UPDATE rating SET rating=%s,rd=%s,volatility=%s,win=win+%s,loss=loss+%s,draw=draw+%s,total=total+%s,ltime=%s WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
         if cursor.rowcount == 0:
-            cursor.execute("""INSERT INTO rating SET rating=%s,rd=%s,vol=%s,win=%s,loss=%s,draw=%s,total=%s,user_id=%s,speed_id=%s,variant_id=%s""", (rating, rd, vol, win, loss, draw, total, user_id, speed_id, variant_id))
+            cursor.execute("""INSERT INTO rating SET rating=%s,rd=%s,volatility=%s,win=%s,loss=%s,draw=%s,total=%s,ltime=%suser_id=%s,speed_id=%s,variant_id=%s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
         assert(cursor.rowcount == 1)
         cursor.close()
 

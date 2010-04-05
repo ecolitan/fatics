@@ -1,16 +1,25 @@
 import glicko2
+import speed_variant
+import datetime
 
 from db import db
 
 INITIAL_RATING = 1720
 INITIAL_RD = 350
-INITIAL_VOLATILITY = 0.6
+
+# I solved 350 = sqrt(0^2 + 1051897*vol^2), so a rd of 0 would increase to
+# 350 in about 2 years.
+INITIAL_VOLATILITY = .00196 # 0.6
 
 class Rating(object):
-    def __init__(self, rating, rd, volatility): #, win, loss, draw, total):
+    def __init__(self, rating, rd, volatility, ltime, best=None,
+            when_best=None):
         self.rating = rating
         self.rd = rd
         self.volatility = volatility
+        self.best = best
+        self.when_best = when_best
+        self.ltime = ltime
 
     def glicko2_rating(self):
         return (self.rating - 1500) / glicko2.scale
@@ -44,12 +53,14 @@ class NoRating(object):
 
 def update_ratings(game, white_score, black_score):
     wp = glicko2.Player(game.white_rating.glicko2_rating(),
-        game.white_rating.glicko2_rd(), game.white_rating.volatility)
+        game.white_rating.glicko2_rd(), game.white_rating.volatility,
+        game.white_rating.ltime)
     wp.update_player([game.black_rating.glicko2_rating()],
         [game.black_rating.glicko2_rd()], [white_score])
 
     bp = glicko2.Player(game.black_rating.glicko2_rating(),
-        game.black_rating.glicko2_rd(), game.black_rating.volatility)
+        game.black_rating.glicko2_rd(), game.black_rating.volatility,
+        game.black_rating.ltime)
     bp.update_player([game.white_rating.glicko2_rating()],
         [game.white_rating.glicko2_rd()], [black_score])
 
@@ -73,23 +84,39 @@ def update_ratings(game, white_score, black_score):
     wpg = wp.get_glicko()
     bpg = bp.get_glicko()
 
+    ltime = datetime.datetime.utcnow()
+
     game.white.update_rating(game.speed_variant,
         wpg.rating, wpg.rd, wp.vol,
-        white_wins, white_losses, white_draws, white_total)
-    game.black.update_ratings(game.speed_variant,
+        white_wins, white_losses, white_draws, white_total, ltime)
+    game.black.update_rating(game.speed_variant,
         bpg.rating, bpg.rd, bp.vol,
-        black_wins, black_losses, black_draws, black_total)
+        black_wins, black_losses, black_draws, black_total, ltime)
 
 def show_ratings(user, conn):
     rows = db.user_get_ratings(user.id)
     if not rows:
         conn.write(_('%s has not played any rated games.\n\n') % user.name)
     else:
-        conn.write(_('speed, variant          rating   RD  Vol. total  best\n'))
+        conn.write(_('speed & variant         rating  RD    Volat.    total  best\n'))
         for row in rows:
-            row['speed_variant'] = '%(speed)s %(variant)s' % row
-            row['total'] = row['win'] + row['loss'] + row['draw']
-            conn.write(_('%(speed_variant)-15s %(rating)4s %(rd)3.0s %(volatility)4.3s %(total)7s %(best)4s %(when_best)10s\n') % row)
+            ent = {}
+            ent['speed_variant'] = str(speed_variant.from_ids(row['speed_id'], row['variant_id']))
+            r = Rating(row['rating'], row['rd'],
+                row['volatility'], row['ltime'])
+            p = glicko2.Player(r.glicko2_rating(), r.glicko2_rd(),
+                r.volatility, r.ltime)
+            r = p.get_glicko()
+            ent['rating'] = r.rating
+            ent['rd'] = r.rd
+            ent['volatility'] = r.volatility
+            if row['best'] is None:
+                ent['best_str'] = ''
+            else:
+                ent['best_str'] = '%4d %10s' % (row['best'], row['when_best'])
+            ent['total'] = row['total']
+            conn.write('%(speed_variant)-24s %(rating)-6d %(rd)-3.0f %(volatility)9.6f %(total)7d %(best_str)s\n' % ent)
+        conn.write('\n')
 
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
