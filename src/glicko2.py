@@ -42,6 +42,7 @@ class Player:
         to original glicko scale """
         self.rating = rating
         self.ltime = ltime
+	assert(self.ltime is not None)
         self._rd = rd
         self.vol = vol
 

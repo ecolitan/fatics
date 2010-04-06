@@ -20,6 +20,7 @@ class Rating(object):
         self.best = best
         self.when_best = when_best
         self.ltime = ltime
+	assert(self.ltime is not None)
 
     def glicko2_rating(self):
         return (self.rating - 1500) / glicko2.scale
@@ -33,8 +34,8 @@ class Rating(object):
 class NoRating(object):
     def __init__(self, is_guest):
         self.is_guest = is_guest
-        self.rating = None
-
+        self.rating = INITIAL_RATING
+	self.ltime = datetime.datetime.utcnow()
         self.volatility = INITIAL_VOLATILITY
 
     def glicko2_rating(self):

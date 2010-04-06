@@ -366,11 +366,11 @@ class DB(object):
         return rows
 
     def user_update_rating(self, user_id, speed_id, variant_id,
-            rating, rd, volatility, win, loss, draw, total,ltime):
+            rating, rd, volatility, win, loss, draw, total, ltime):
         cursor = self.db.cursor()
         cursor.execute("""UPDATE rating SET rating=%s,rd=%s,volatility=%s,win=win+%s,loss=loss+%s,draw=draw+%s,total=total+%s,ltime=%s WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
         if cursor.rowcount == 0:
-            cursor.execute("""INSERT INTO rating SET rating=%s,rd=%s,volatility=%s,win=%s,loss=%s,draw=%s,total=%s,ltime=%suser_id=%s,speed_id=%s,variant_id=%s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
+            cursor.execute("""INSERT INTO rating SET rating=%s,rd=%s,volatility=%s,win=%s,loss=%s,draw=%s,total=%s,ltime=%s,user_id=%s,speed_id=%s,variant_id=%s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
         assert(cursor.rowcount == 1)
         cursor.close()
 

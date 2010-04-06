@@ -352,8 +352,8 @@ class User(BaseUser):
             sv = speed_variant.from_ids(row['speed_id'],
                 row['variant_id'])
             self._rating[sv] = rating.Rating(row['rating'],
-                row['rd'], row['volatility'], row['best'], row['when_best'],
-                row['ltime'])
+                row['rd'], row['volatility'], row['ltime'], row['best'],
+		row['when_best'])
                 #, row['win'], row['loss'], row['draw'], row['total'])
 
 class GuestUser(BaseUser):
