@@ -35,7 +35,7 @@ class Player:
     # Class attribute
     # The system constant, which constrains
     # the change in volatility over time.
-    _tau = 0.5
+    _tau = 0.3
 
     def __init__(self, rating, rd, vol, ltime):
         """ Values are on a glicko 2 scale; use to_glicko() to convert
@@ -81,25 +81,33 @@ class Player:
         _newVol(list, list, list) -> float
 
         """
-        i = 0
+        #i = 0
+        rd_squared = math.pow(self.get_current_rd(), 2)
         delta = self._delta(rating_list, RD_list, outcome_list, v)
         a = math.log(math.pow(self.vol, 2))
         tau = self._tau
-        x0 = a
-        x1 = 0
+        #x0 = a
+        #x1 = 1
+        x0 = 0
+        x1 = a
 
-        while x0 != x1:
+        print('a is %f' % a)
+        q = 0
+        while abs(x0 - x1) > .00000001:
+            q += 1
             # New iteration, so x(i) becomes x(i-1)
             x0 = x1
-            d = math.pow(self.rating, 2) + v + math.exp(x0)
-            h1 = -(x0 - a) / math.pow(tau, 2) - 0.5 * math.exp(x0) \
-            / d + 0.5 * math.exp(x0) * math.pow(delta / d, 2)
-            h2 = -1 / math.pow(tau, 2) - 0.5 * math.exp(x0) * \
-            (math.pow(self.rating, 2) + v) \
-            / math.pow(d, 2) + 0.5 * math.pow(delta, 2) * math.exp(x0) \
-            * (math.pow(self.rating, 2) + v - math.exp(x0)) / math.pow(d, 3)
+            d = rd_squared + v + math.exp(x0)
+            h1 = (-(x0 - a) / math.pow(tau, 2) - 0.5 * math.exp(x0) / d +
+                0.5 * math.exp(x0) * math.pow(delta / d, 2))
+            h2 = -1 / math.pow(tau, 2) - (0.5 * math.exp(x0) *
+                (rd_squared + v))
+                / math.pow(d, 2) + 0.5 * math.pow(delta, 2) * math.exp(x0)
+                * (rd_squared + v - math.exp(x0)) / math.pow(d, 3))
+            print('\tx0 = %f; d = %f; h1 = %f; h2 = %f' % (x0, d, h1, h2)
             x1 = x0 - (h1 / h2)
 
+        print 'iterted %d; vol %f -> %f' % (q, self.vol, math.exp(x1 / 2))
         return math.exp(x1 / 2)
 
     def _delta(self, rating_list, RD_list, outcome_list, v):
@@ -142,10 +150,10 @@ class Player:
         """
         return 1 / math.sqrt(1 + 3 * math.pow(RD, 2) / math.pow(math.pi, 2))
 
+    def get_glicko_rating(self):
+        return self.rating * scale + rating.INITIAL_RATING
 
-    def get_glicko(self):
-        return rating.Rating(self.rating * scale + 1500,
-            self.get_current_rd() * scale, self.vol,
-            datetime.datetime.utcnow())
+    def get_glicko_rd(self):
+        return self.get_current_rd() * scale
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
