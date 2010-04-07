@@ -20,7 +20,7 @@ class DB(object):
 
     def user_get_vars(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT tell,shout,cshout,open,silence,bell,time,inc,lang,autoflag,ptime FROM user WHERE user_id=%s""", (user_id,))
+        cursor.execute("""SELECT tell,shout,cshout,open,silence,bell,time,inc,lang,autoflag,ptime,height,width FROM user WHERE user_id=%s""", (user_id,))
         row = cursor.fetchone()
         cursor.close()
         return row
@@ -30,7 +30,7 @@ class DB(object):
         up = """UPDATE user SET %s""" % name
         cursor.execute(up + """=%s WHERE user_id=%s""", (val,user_id))
         cursor.close()
-    
+
     def user_get_formula(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT num,f FROM formula WHERE user_id=%s ORDER BY num ASC""", (user_id,))
@@ -365,13 +365,18 @@ class DB(object):
         cursor.close()
         return rows
 
-    def user_update_rating(self, user_id, speed_id, variant_id,
+    def user_set_rating(self, user_id, speed_id, variant_id,
             rating, rd, volatility, win, loss, draw, total, ltime):
         cursor = self.db.cursor()
-        cursor.execute("""UPDATE rating SET rating=%s,rd=%s,volatility=%s,win=win+%s,loss=loss+%s,draw=draw+%s,total=total+%s,ltime=%s WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
+        cursor.execute("""UPDATE rating SET rating=%s,rd=%s,volatility=%s,win=%s,loss=%s,draw=%s,total=%s,ltime=%s WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
         if cursor.rowcount == 0:
             cursor.execute("""INSERT INTO rating SET rating=%s,rd=%s,volatility=%s,win=%s,loss=%s,draw=%s,total=%s,ltime=%s,user_id=%s,speed_id=%s,variant_id=%s""", (rating, rd, volatility, win, loss, draw, total, ltime, user_id, speed_id, variant_id))
         assert(cursor.rowcount == 1)
+        cursor.close()
+
+    def user_del_rating(self, user_id, speed_id, variant_id):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM rating WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (user_id, speed_id, variant_id))
         cursor.close()
 
     def get_variants(self):

@@ -129,6 +129,11 @@ more specificity.  Also, transpositions may be handled better.  I could
 not find a database of NIC codes by moves, but it might be possible
 to create one if there is demand.
 
+* All ratings begin at 1720 for new users.
+Rationale: try to decrease the disparity between blitz and standard
+ratings; simpler to implement.  Previously standard ratings began
+at 1799.
+
 == Admin differences ==
 * The following commands now require an exact login and do not accept
 abbreviations of player names:  "asetadminlevel", "asetpasswd", "nuke".

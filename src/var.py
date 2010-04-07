@@ -208,7 +208,9 @@ class VarList(object):
 
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
-        
+        IntVar("height", 24, min=5).persist().add_as_var()
+        IntVar("width", 79, min=32).persist().add_as_var()
+
         IntVar("style", 12, min=0, max=12).add_as_var()
 
         StringVar("interface", None).add_as_var()

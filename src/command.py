@@ -1,4 +1,5 @@
 import time
+import datetime
 import re
 
 import user
@@ -11,6 +12,7 @@ import offer
 import game
 import history
 import rating
+import speed_variant
 
 from timer import timer
 from online import online
@@ -52,6 +54,7 @@ class CommandList(object):
         self._add(Command('areload', '', self.areload, admin.Level.god))
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
         self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
+        self._add(Command('asetrating', 'wwwddfddd', self.asetrating, admin.Level.admin))
         self._add(Command('cshout', 'S', self.cshout, admin.Level.user))
         self._add(Command('date', '', self.date, admin.Level.user))
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
@@ -174,7 +177,7 @@ class CommandList(object):
 
         if aname in ['quit', 'unalias']:
             conn.write(_('You cannot use "%s" as an alias.\n') % aname)
-            
+
         if args[1] is None:
             # show alias value
             if aname not in conn.user.aliases:
@@ -234,7 +237,7 @@ class CommandList(object):
                     u.write('''\n\n%s has set your admin level to %d.\n\n''' % (conn.user.name, level))
 
     def asetpasswd(self, args, conn):
-        [name, passwd] = args
+        (name, passwd) = args
         u = user.find.by_name_exact_for_user(name, conn)
         if u:
             if u.is_guest:
@@ -248,7 +251,32 @@ class CommandList(object):
                 conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
                 if u.is_online:
                     u.write(_('\n%s has changed your password.\n') % conn.user.name)
-    
+    def asetrating(self, args, conn):
+        (name, speed_name, variant_name, urating, rd, volatility, win,
+            loss, draw) = args
+        u = user.find.by_prefix_for_user(name, conn)
+        if not u:
+            return
+        if u.is_guest:
+            conn.write(A_('You cannot set the rating of an unregistered player.\n'))
+            return
+        try:
+            sv = speed_variant.from_names(speed_name, variant_name)
+        except KeyError:
+            conn.write(A_('Unknown speed and variant "%s %s".\n') %
+                speed_name, variant_name)
+            return
+        if urating == 0:
+            u.del_rating(sv)
+            conn.write(A_('Cleared %s %s rating for %s.\n' %
+                (speed_name, variant_name, name)))
+        else:
+            u.set_rating(sv, urating, rd, volatility, win, loss, draw,
+                datetime.datetime.utcnow())
+            conn.write(A_('Set %s %s rating for %s.\n' %
+                (speed_name, variant_name, name)))
+        # notify the user?
+
     def cshout(self, args, conn):
         if conn.user.is_guest:
             conn.write(_("Only registered players can use the cshout command.\n"))
@@ -767,7 +795,8 @@ class CommandList(object):
                 except KeyError:
                     conn.write(_('Invalid channel number.\n'))
                 else:
-                    if conn.user not in ch.online:
+                    if conn.user not in ch.online and (
+                            'TD' not in conn.user.get_titles()):
                         conn.user.write(_('''(Not sent because you are not in channel %s.)\n''') % ch.id)
                         ch = None
             else:
@@ -793,7 +822,7 @@ class CommandList(object):
             count = count + 1
         conn.write('\n')
         conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
-    
+
     def withdraw(self, args, conn):
         if len(conn.user.session.offers_sent) == 0:
             conn.write(_('You have no pending offers to other players.\n'))
@@ -805,7 +834,7 @@ class CommandList(object):
             conn.user.session.offers_sent[0].withdraw()
         else:
             conn.write('TODO: WITHDRAW PARAM\n')
-    
+
     def znotify(self, args, conn):
         if args[0] is not None:
             if args[0] != 'n':

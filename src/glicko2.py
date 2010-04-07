@@ -35,14 +35,13 @@ class Player:
     # Class attribute
     # The system constant, which constrains
     # the change in volatility over time.
-    _tau = 0.3
+    _tau = 120
 
     def __init__(self, rating, rd, vol, ltime):
         """ Values are on a glicko 2 scale; use to_glicko() to convert
         to original glicko scale """
         self.rating = rating
         self.ltime = ltime
-	assert(self.ltime is not None)
         self._rd = rd
         self.vol = vol
 
@@ -88,24 +87,26 @@ class Player:
         tau = self._tau
         #x0 = a
         #x1 = 1
-        x0 = 0
-        x1 = a
+        x0 = a
 
-        print('a is %f' % a)
+        print('a is %f, delta %f, rdsq %f, v %f' % (a, delta, rd_squared, v))
         q = 0
-        while abs(x0 - x1) > .00000001:
+        while 1:
             q += 1
-            # New iteration, so x(i) becomes x(i-1)
-            x0 = x1
             d = rd_squared + v + math.exp(x0)
             h1 = (-(x0 - a) / math.pow(tau, 2) - 0.5 * math.exp(x0) / d +
                 0.5 * math.exp(x0) * math.pow(delta / d, 2))
-            h2 = -1 / math.pow(tau, 2) - (0.5 * math.exp(x0) *
+            h2 = -1 / math.pow(tau, 2) - ((0.5 * math.exp(x0) *
                 (rd_squared + v))
-                / math.pow(d, 2) + 0.5 * math.pow(delta, 2) * math.exp(x0)
-                * (rd_squared + v - math.exp(x0)) / math.pow(d, 3))
-            print('\tx0 = %f; d = %f; h1 = %f; h2 = %f' % (x0, d, h1, h2)
+                / math.pow(d, 2)) + (0.5 * math.pow(delta, 2) * math.exp(x0)
+                * (rd_squared + v - math.exp(x0))) / math.pow(d, 3)
+            print('\tx0 = %f; d = %f; h1 = %lf; h2 = %f' % (x0, d, h1, h2))
             x1 = x0 - (h1 / h2)
+            #if abs(x0 - x1) < .000000001:
+            if x0 == x1:
+                break
+            # New iteration, so x(i) becomes x(i-1)
+            x0 = x1
 
         print 'iterted %d; vol %f -> %f' % (q, self.vol, math.exp(x1 / 2))
         return math.exp(x1 / 2)
@@ -131,6 +132,7 @@ class Player:
         for i in range(len(rating_list)):
             tempE = self._E(rating_list[i], RD_list[i])
             tempSum += math.pow(self._g(RD_list[i]), 2) * tempE * (1 - tempE)
+        print 'v is %f' % (1 / tempSum)
         return 1 / tempSum
 
     def _E(self, p2rating, p2RD):

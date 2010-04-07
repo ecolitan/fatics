@@ -13,6 +13,8 @@ country var for displaying a flag
 
 onotify for observers
 
+should style be persistent?
+
 tests
 =====
 update existing match offer

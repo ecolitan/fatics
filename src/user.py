@@ -339,12 +339,17 @@ class User(BaseUser):
         else:
             return rating.NoRating(is_guest=False)
 
-    def update_rating(self, speed_variant,
-            rating, rd, vol, win, loss, draw, total, ltime):
-        db.user_update_rating(self.id, speed_variant.speed.id,
-            speed_variant.variant.id, rating, rd, vol, win, loss, draw,
-            total, ltime)
+    def set_rating(self, speed_variant,
+            rating, rd, volatility, win, loss, draw, ltime):
+        db.user_set_rating(self.id, speed_variant.speed.id,
+            speed_variant.variant.id, rating, rd, volatility, win, loss,
+            draw, win + loss + draw, ltime)
         self._load_ratings() # TODO: don't reload all ratings
+
+    def del_rating(self, sv):
+        db.user_del_rating(self.id, sv.speed.id, sv.variant.id)
+        if sv in self._rating:
+            del self.rating[sv]
 
     def _load_ratings(self):
         self._rating = {}
@@ -352,9 +357,9 @@ class User(BaseUser):
             sv = speed_variant.from_ids(row['speed_id'],
                 row['variant_id'])
             self._rating[sv] = rating.Rating(row['rating'],
-                row['rd'], row['volatility'], row['ltime'], row['best'],
-		row['when_best'])
-                #, row['win'], row['loss'], row['draw'], row['total'])
+                row['rd'], row['volatility'], row['ltime'],
+                row['win'], row['loss'], row['draw'], row['best'],
+                row['when_best'])
 
 class GuestUser(BaseUser):
     def __init__(self, name):

@@ -83,7 +83,7 @@ class CommandParser(object):
     def parse_args(self, s, param_str):
         args = []
         for c in param_str:
-            if c in ['d', 'i', 'w', 'W']:
+            if c in ['d', 'i', 'w', 'W', 'f']:
                 # required argument
                 if s is None:
                     raise BadCommandError()
@@ -103,6 +103,11 @@ class CommandParser(object):
                         except ValueError:
                             if c == 'd':
                                 raise BadCommandError()
+                    elif c == 'f':
+                        try:
+                            param = float(param)
+                        except ValueError:
+                            raise BadCommandError()
                     s = m[1] if len(m) > 1 else None
             elif c in ['o', 'n', 'p']:
                 # optional argument

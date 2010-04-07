@@ -12,18 +12,20 @@ INITIAL_RD = 350
 INITIAL_VOLATILITY = .00196 # 0.6
 
 class Rating(object):
-    def __init__(self, rating, rd, volatility, ltime, best=None,
-            when_best=None):
+    def __init__(self, rating, rd, volatility, ltime, win, loss, draw,
+            best=None, when_best=None):
         self.rating = rating
         self.rd = rd
         self.volatility = volatility
+        self.win = win
+        self.loss = loss
+        self.draw = draw
         self.best = best
         self.when_best = when_best
         self.ltime = ltime
-	assert(self.ltime is not None)
 
     def glicko2_rating(self):
-        return (self.rating - 1500) / glicko2.scale
+        return (self.rating - INITIAL_RATING) / glicko2.scale
 
     def glicko2_rd(self):
         return self.rd / glicko2.scale
@@ -35,12 +37,15 @@ class NoRating(object):
     def __init__(self, is_guest):
         self.is_guest = is_guest
         self.rating = INITIAL_RATING
-	self.ltime = datetime.datetime.utcnow()
+        self.ltime = datetime.datetime.utcnow()
         self.volatility = INITIAL_VOLATILITY
+        self.win = 0
+        self.loss = 0
+        self.draw = 0
 
     def glicko2_rating(self):
         assert(not self.is_guest)
-        return (INITIAL_RATING - 1500) / glicko2.scale
+        return (INITIAL_RATING - INITIAL_RATING) / glicko2.scale
 
     def glicko2_rd(self):
         assert(not self.is_guest)
@@ -65,34 +70,38 @@ def update_ratings(game, white_score, black_score):
     bp.update_player([game.white_rating.glicko2_rating()],
         [game.white_rating.glicko2_rd()], [black_score])
 
+    white_win = game.white_rating.win
+    white_loss = game.white_rating.loss
+    white_draw = game.white_rating.draw
+    black_win = game.black_rating.win
+    black_loss = game.black_rating.loss
+    black_draw = game.black_rating.draw
+    assert(black_score + white_score == 1.0)
     if white_score == 0.0:
-        (white_wins, white_losses, white_draws, white_total) = (0, 1, 0, 1)
+        white_loss += 1
+        black_win += 1
     elif white_score == 0.5:
-        (white_wins, white_losses, white_draws, white_total) = (0, 0, 1, 1)
+        white_draw += 1
+        black_draw += 1
     elif white_score == 1.0:
-        (white_wins, white_losses, white_draws, white_total) = (1, 0, 0, 1)
-    else:
-        raise RuntimeError('rating.update_ratings(): unexpected score')
-    if black_score == 0.0:
-        (black_wins, black_losses, black_draws, black_total) = (0, 1, 0, 1)
-    elif black_score == 0.5:
-        (black_wins, black_losses, black_draws, black_total) = (0, 0, 1, 1)
-    elif black_score == 1.0:
-        (black_wins, black_losses, black_draws, black_total) = (1, 0, 0, 1)
+        white_win += 1
+        black_loss += 1
     else:
         raise RuntimeError('rating.update_ratings(): unexpected score')
 
-    wpg = wp.get_glicko()
-    bpg = bp.get_glicko()
+    white_rating = wp.get_glicko_rating()
+    white_rd = wp.get_glicko_rd()
+    black_rating = bp.get_glicko_rating()
+    black_rd = bp.get_glicko_rd()
 
     ltime = datetime.datetime.utcnow()
 
-    game.white.update_rating(game.speed_variant,
-        wpg.rating, wpg.rd, wp.vol,
-        white_wins, white_losses, white_draws, white_total, ltime)
-    game.black.update_rating(game.speed_variant,
-        bpg.rating, bpg.rd, bp.vol,
-        black_wins, black_losses, black_draws, black_total, ltime)
+    game.white.set_rating(game.speed_variant,
+        white_rating, white_rd, wp.vol,
+        white_win, white_loss, white_draw, ltime)
+    game.black.set_rating(game.speed_variant,
+        black_rating, black_rd, bp.vol,
+        black_win, black_loss, black_draw, ltime)
 
 def show_ratings(user, conn):
     rows = db.user_get_ratings(user.id)
@@ -104,12 +113,12 @@ def show_ratings(user, conn):
             ent = {}
             ent['speed_variant'] = str(speed_variant.from_ids(row['speed_id'], row['variant_id']))
             r = Rating(row['rating'], row['rd'],
-                row['volatility'], row['ltime'])
+                row['volatility'], row['ltime'], row['win'], row['loss'],
+                row['draw'])
             p = glicko2.Player(r.glicko2_rating(), r.glicko2_rd(),
                 r.volatility, r.ltime)
-            r = p.get_glicko()
-            ent['rating'] = r.rating
-            ent['rd'] = r.rd
+            ent['rating'] = p.get_glicko_rating()
+            ent['rd'] = p.get_glicko_rd()
             ent['volatility'] = r.volatility
             if row['best'] is None:
                 ent['best_str'] = ''

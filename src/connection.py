@@ -116,7 +116,7 @@ class Connection(basic.LineReceiver):
             elif self.user.check_passwd(passwd):
                 self.prompt()
             else:
-                self.write('\n**** Incorrect password ****\n\n')
+                self.write('\n**** Invalid password! ****\n\n')
                 self.login()
         assert(self.state != 'passwd')
 

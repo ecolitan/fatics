@@ -51,9 +51,9 @@ class LoginTest(Test):
         # registered login start
         t.write('admin\n')
         self.expect('is a registered', t)
-        
+
         t.write('not the password\n')
-        self.expect('*** Incorrect password ***', t)
+        self.expect('*** Invalid password! ***', t)
 
         t.write('ADMIN\n')
         self.expect('"admin" is a registered name', t)
