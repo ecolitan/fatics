@@ -94,9 +94,12 @@ class ChannelList(MyList):
             ch = channel.chlist[val]
         except KeyError:
             raise ListError(_('Invalid channel number.\n'))
-        
-        ch.add(conn.user)
-        conn.user.write(_('[%d] added to your channel list.\n') % val)
+
+        if ch.id == 0 and conn.user.admin_level < admin.level.admin:
+            conn.write(_('Only admins can join channel 0.\n'))
+        else:
+            ch.add(conn.user)
+            conn.user.write(_('[%d] added to your channel list.\n') % val)
 
     def sub(self, item, conn):
         try:
@@ -108,7 +111,7 @@ class ChannelList(MyList):
             ch = channel.chlist[val]
         except KeyError:
             raise ListError(_('Invalid channel number.\n'))
-           
+
         ch.remove(conn.user)
         conn.user.write(_('[%d] removed from your channel list.\n') % val)
 

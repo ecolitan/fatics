@@ -20,12 +20,15 @@ class TestChannel(Test):
 
         t.write('-ch 1\n')
         self.expect("[1] removed from your channel list", t)
-        
+
         t.write('-ch 1\n')
         self.expect("[1] is not on your channel list", t)
 
         t.write('t 1 foo bar baz\n')
-        self.expect("not in channel", t)
+        self.expect("not in channel 1", t)
+
+        t.write('+ch 0\n')
+        self.expect("Only admins can join channel 0.", t)
 
         self.close(t)
 
@@ -73,6 +76,12 @@ class TestChannel(Test):
         t = self.connect_as_admin()
         t.write('-ch 100\n')
         self.expect("is not on your channel list", t)
+
+        t.write('+ch 0\n')
+        self.expect("[0] added to your channel list", t)
+        t.write('-ch 0\n')
+        self.expect("[0] removed from your channel list", t)
+
         self.close(t)
 
 class TestInchannel(Test):
