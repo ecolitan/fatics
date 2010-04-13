@@ -158,6 +158,9 @@ class BaseUser(object):
     def clear_history(self):
         self._history = []
 
+    def has_timeseal(self):
+        return self.session.use_timeseal or self.session.use_zipseal
+
 # a registered user
 class User(BaseUser):
     def __init__(self, u):

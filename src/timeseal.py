@@ -27,13 +27,17 @@ class Timeseal(object):
         if not m:
             return (0, None)
         return (int(m.group(1), 16), m.group(2))
-    
+
     def compress_zipseal(self, line):
         self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
         count = int(self.zipseal_encoder.stdout.read(4), 16)
-        ret = self.zipseal_encoder.stdout.read(count)
-        self.zipseal_in += len(line)
-        self.zipseal_out += len(ret)
+        try:
+            ret = self.zipseal_encoder.stdout.read(count)
+        except IOError:
+            ret = None
+        else:
+            self.zipseal_in += len(line)
+            self.zipseal_out += len(ret)
         return ret
 
     def print_stats(self):

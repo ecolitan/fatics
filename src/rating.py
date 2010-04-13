@@ -30,6 +30,9 @@ class Rating(object):
     def glicko2_rd(self):
         return self.rd / glicko2.scale
 
+    def ginfo_str(self):
+        return str(self.rating)
+
     def __str__(self):
         return str(self.rating)
 
@@ -50,6 +53,10 @@ class NoRating(object):
     def glicko2_rd(self):
         assert(not self.is_guest)
         return INITIAL_RD / glicko2.scale
+
+    def ginfo_str(self):
+        #return '0P'
+        return '0'
 
     def __str__(self):
         if self.is_guest:

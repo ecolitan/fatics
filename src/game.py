@@ -86,6 +86,7 @@ class Game(object):
         time_str = '%d %d' % (self.white_time,self.inc)
 
         self.flip = False
+        self.private = False
         self.start_time = time.time()
         self.is_active = True
 
@@ -102,6 +103,20 @@ class Game(object):
         create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.speed_variant)
         self.white.write(create_str_2)
         self.black.write(create_str_2)
+
+        if self.white.session.ivars['gameinfo'] or \
+                self.black.session.ivars['gameinfo']:
+            # The order of fields FICS sends differs from the
+            # "help iv_gameinfo" documentation; the it= field gives
+            # the initial time increment for white, and the i= field
+            # does the same for black.  This seems wrong since "it" was
+            # supposed to stand for "initial time", but compatability
+            # with FICS is more important than being logical.
+            gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, 60 * self.white_time, self.inc, 60 * self.black_time, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
+            if self.white.session.ivars['gameinfo']:
+                self.white.write(gameinfo_str)
+            if self.black.session.ivars['gameinfo']:
+                self.black.write(gameinfo_str)
 
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)

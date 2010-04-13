@@ -109,4 +109,21 @@ class TestIvars(Test):
         self.expect("Ivars set.", t)
         t.close()
 
+
+class TestGameinfo(Test):
+    def test_gameinfo(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        t.write("match admin 2 12 u white\n")
+        t.write('iset gamei 1\n')
+        self.expect('gameinfo set.', t)
+        self.expect("Challenge:", t2)
+        t2.write('a\n')
+
+        self.expect('<g1> 1 p=0 t=normal r=0 u=1,0 it=120,12 i=120,12 pt=0 rt=0,0 ts=0,0 m=2 n=0', t)
+        t.write('abort\n')
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

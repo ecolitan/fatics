@@ -70,7 +70,7 @@ class Abort(Offer):
     def decline(self, notify=True):
         Offer.decline(self, notify)
         self.game.pending_offers.remove(self)
-        
+
     def accept(self):
         Offer.accept(self)
         self.game.pending_offers.remove(self)

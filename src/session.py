@@ -35,7 +35,7 @@ class Session(object):
     def get_online_time(self):
         assert(self.login_time is not None)
         return timer.hms_words(time.time() - self.login_time)
-        
+
     def close(self):
         for v in self.offers_sent[:]:
             if v.name not in ['match offer', 'pause request']:
