@@ -19,13 +19,13 @@ class FischerClock(Clock):
         self.inc = inc
         running_clocks.append(self)
         self.started_time = None
-    
+
     def start(self, side):
         self.is_ticking = True
         self._side_ticking = side
         self.started_time = time.time()
 
-    def update(self, side):
+    def update(self, side, elapsed=None):
         """Record the time remaining for the player whose clock was
         ticking, and stop the clock.  Returns a string representing
         the time taken for the move."""
@@ -33,7 +33,9 @@ class FischerClock(Clock):
         assert(self._side_ticking == side)
 
         self.stop()
-        elapsed = time.time() - self.started_time
+        if elapsed is None:
+            # no timeseal, so use our own timer
+            elapsed = time.time() - self.started_time
         if side == WHITE:
             self._white_time -= elapsed
         else:

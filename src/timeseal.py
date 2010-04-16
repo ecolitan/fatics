@@ -1,6 +1,12 @@
 import re
 import subprocess
 
+PING = '[G]'
+REPLY = '\x02\x39' # also known as "\x2""9" or "9"
+
+class TimesealError(Exception):
+    pass
+
 class Timeseal(object):
     _timeseal_pat = re.compile(r'''^(\d+): (.*)\n$''')
     _zipseal_pat = re.compile(r'''^([0-9a-f]+): (.*)\n$''')
@@ -17,7 +23,7 @@ class Timeseal(object):
         m = self._timeseal_pat.match(dec)
         if not m:
             print('failed to match: {{%s}}' % dec)
-            return (0, None)
+            raise TimesealError()
         return (int(m.group(1), 10), m.group(2))
 
     def decode_zipseal(self, line):
@@ -25,13 +31,13 @@ class Timeseal(object):
         dec = self.zipseal_decoder.stdout.readline()
         m = self._zipseal_pat.match(dec)
         if not m:
-            return (0, None)
+            raise TimesealError()
         return (int(m.group(1), 16), m.group(2))
 
     def compress_zipseal(self, line):
-        self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
-        count = int(self.zipseal_encoder.stdout.read(4), 16)
         try:
+            self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
+            count = int(self.zipseal_encoder.stdout.read(4), 16)
             ret = self.zipseal_encoder.stdout.read(count)
         except IOError:
             ret = None

@@ -6,6 +6,7 @@ import utf8
 import trie
 import admin
 import command
+import timeseal
 
 class InternalException(Exception):
     pass
@@ -14,12 +15,19 @@ class BadCommandError(Exception):
 
 class CommandParser(object):
     command_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
-    def run(self, s, conn):
-        #s = s.lstrip()
+    def run(self, s, t, conn):
         s = s.strip()
 
-        if len(conn.user.session.games) > 0:
-            if conn.user.session.games.values()[0].variant.do_move(s, conn):
+        if s == timeseal.REPLY:
+            if not conn.session.ping_sent:
+                conn.write('protocol error: got reply without ping')
+                conn.loseConnection('protocol error: got reply without ping')
+            else:
+                conn.session.ping_reply_time = t
+            return
+
+        if conn.session.games:
+            if conn.session.games.values()[0].variant.parse_move(s, t, conn):
                 return
 
         if not utf8.checker.check_user_utf8(s):
@@ -40,6 +48,7 @@ class CommandParser(object):
         if len(s) == 0:
             # ignore blank line
             return
+
         if s[0] == '$':
             s = s[1:].lstrip()
         else:

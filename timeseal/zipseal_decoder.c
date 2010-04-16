@@ -34,41 +34,41 @@
 
 void decrypt(char *s)
 {
-	char *tmp_time,*tmp_end,*num_end;
-	static char tmp[BSIZE];
-	// first a consistency check
-	// decode the string
-	strcpy(tmp,s);
-	tmp_time=strrchr(tmp,'\x18');
-	if (!tmp_time) goto malformed_message;
-	*tmp_time++ = 0;
-	// find the timestamp end
-	tmp_end = tmp_time + strlen(tmp_time) - 1;
-	*tmp_end=0;
-	// check that the timestamp actually is a number
-	strtol(tmp_time,&num_end,16);
-	if(num_end!=tmp_end) goto malformed_message;
-	// assume we have got a valid message, and print it out
-	printf("%s: %s\n",tmp_time,tmp);
-	return;
-	// in case of a malformed message, just output 0: message\n
+        char *tmp_time,*tmp_end,*num_end;
+        static char tmp[BSIZE];
+        // first a consistency check
+        // decode the string
+        strcpy(tmp, s);
+        tmp_time = strrchr(tmp,'\x18');
+        if (!tmp_time) goto malformed_message;
+        *tmp_time++ = '\0';
+        // find the timestamp end
+        tmp_end = tmp_time + strlen(tmp_time);
+        *tmp_end='\0';
+        // check that the timestamp actually is a number
+        strtol(tmp_time,&num_end,16);
+        if(num_end!=tmp_end) goto malformed_message;
+        // assume we have got a valid message, and print it out
+        printf("%s: %s\n",tmp_time,tmp);
+        return;
+        // in case of a malformed message, just output 0: message\n
 malformed_message:
-	printf("0: %s\n",s);
-	return;
+        printf("0: %s\n",s);
+        return;
 }
 
 int main()
 {
-	static char buff[BSIZE];
-	static char inbuf[BUFSIZ];
-	static char outbuf[BUFSIZ];
-	if(setvbuf(stdin,inbuf,_IOLBF,BUFSIZ)) return 1;
-	if(setvbuf(stdout,outbuf,_IOLBF,BUFSIZ)) return 1;
-	while(fgets(buff,BSIZE,stdin)) {
-		int l=strlen(buff);
-		if(!l || buff[l-1]!='\n') return 1;
-		buff[l-1]=0;
-		decrypt(buff);
-	}
-	return 0;
+        static char buff[BSIZE];
+        static char inbuf[BUFSIZ];
+        static char outbuf[BUFSIZ];
+        if(setvbuf(stdin,inbuf,_IOLBF,BUFSIZ)) return 1;
+        if(setvbuf(stdout,outbuf,_IOLBF,BUFSIZ)) return 1;
+        while(fgets(buff,BSIZE,stdin)) {
+                int l=strlen(buff);
+                if(!l || buff[l-1]!='\n') return 1;
+                buff[l-1]=0;
+                decrypt(buff);
+        }
+        return 0;
 }

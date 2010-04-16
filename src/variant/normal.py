@@ -1174,7 +1174,7 @@ class Normal(Variant):
         self.pos = copy.deepcopy(initial_pos)
         self.name = 'normal'
 
-    def do_move(self, s, conn):
+    def parse_move(self, s, t, conn):
         """Try to parse a move and execute it.  If it looks like a move but
         is erroneous or illegal, raise an exception.  Return True if
         the move was handled, or False if it does not look like a move
@@ -1190,7 +1190,7 @@ class Normal(Variant):
             # long algebraic
             if not mv:
                 mv = self.pos.move_from_lalg(s)
-            
+
             # san
             if not mv:
                 mv = self.pos.move_from_san(s)
@@ -1198,7 +1198,7 @@ class Normal(Variant):
             #print e.reason
             #raise
             illegal = True
-            
+
         if mv or illegal:
             if (self.game.get_user_side(conn.user) == WHITE) != \
                     self.pos.wtm:
@@ -1215,7 +1215,7 @@ class Normal(Variant):
                     if mv.to_san() != s:
                         print 'hmm %s; %s' % (mv.to_san(), s)
                     assert(mv.to_san() == s)
-                self.game.next_move()
+                self.game.next_move(t, conn)
 
         return mv or illegal
 

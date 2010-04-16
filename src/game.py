@@ -4,6 +4,7 @@ import datetime
 
 import user
 import rating
+import timeseal
 
 (WHITE, BLACK) = range(2)
 
@@ -121,8 +122,19 @@ class Game(object):
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
 
+        self.send_boards()
+
+    def send_boards(self):
         self.white.send_board(self)
+        if self.white.has_timeseal():
+            self.white.write('%s\n' % timeseal.PING)
+            self.white.session.ping_sent = True
         self.black.send_board(self)
+        if self.black.has_timeseal():
+            self.black.write('%s\n' % timeseal.PING)
+            self.black.session.ping_sent = True
+        for u in self.observers:
+            u.send_board(self)
 
     def __eq__(self, other):
         return self.number == other.number
@@ -130,10 +142,10 @@ class Game(object):
     def __hash__(self):
         return self.number
 
-    def _pick_color(self, a, b): 
+    def _pick_color(self, a, b):
         return random.choice([WHITE, BLACK])
 
-    def next_move(self):
+    def next_move(self, t, conn):
         # decline all offers to the player who just moved
         u = self.get_user_to_move()
         offers = [o for o in self.pending_offers if o.a == u]
@@ -145,7 +157,13 @@ class Game(object):
         if self.is_active and self.variant.pos.ply > 1:
             moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
-                time_str = self.clock.update(moved_side)
+                if conn.user.has_timeseal():
+                    assert(conn.session.ping_reply_time != None)
+                    print("t %d, orig %d" % (t, conn.session.ping_reply_time))
+                    elapsed = (t - conn.session.ping_reply_time) / 1000.0
+                    time_str = self.clock.update(moved_side, elapsed)
+                else:
+                    time_str = self.clock.update(moved_side)
             if self.get_user_to_move().vars['autoflag']:
                 self.clock.check_flag(self, moved_side)
             if self.is_active:
@@ -157,10 +175,7 @@ class Game(object):
             time_str = timer.hms(0.0)
         self.variant.pos.get_last_move().time_str = time_str
 
-        self.white.send_board(self)
-        self.black.send_board(self)
-        for u in self.observers:
-            u.send_board(self)
+        self.send_boards()
 
         if self.variant.pos.is_checkmate:
             if self.variant.get_turn() == WHITE:

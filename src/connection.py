@@ -62,10 +62,12 @@ class Connection(basic.LineReceiver):
         elif self.session.use_zipseal:
             (t, line) = timeseal.decode_zipseal(line)
             assert(t != 0)
+        else:
+            t = None
         if self.state:
-            getattr(self, "lineReceived_" + self.state)(line)
+            getattr(self, "lineReceived_" + self.state)(line, t)
 
-    def lineReceived_login(self, line):
+    def lineReceived_login(self, line, t):
         self.timeout_check.cancel()
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
         self.session.login_last_command = time.time()
@@ -100,7 +102,7 @@ class Connection(basic.LineReceiver):
             self.transport.wont(telnet.ECHO)
             self.write("login: ")
 
-    def lineReceived_passwd(self, line):
+    def lineReceived_passwd(self, line, t):
         self.timeout_check.cancel()
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
         self.session.login_last_command = time.time()
@@ -127,12 +129,12 @@ class Connection(basic.LineReceiver):
         self.user.send_prompt()
         self.state = 'prompt'
 
-    def lineReceived_prompt(self, line):
+    def lineReceived_prompt(self, line, t):
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])
         written_users.clear()
         written_users.add(self.user)
         try:
-            command_parser.parser.run(line, self)
+            command_parser.parser.run(line, t, self)
         except command.QuitException:
             self.loseConnection('quit')
         finally:

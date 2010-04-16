@@ -13,6 +13,8 @@ class Session(object):
         self.last_tell_user = None
         self.last_tell_ch = None
         self.use_timeseal = False
+        self.ping_sent = False
+        self.ping_reply_time = None
         self.use_zipseal = False
         self.check_for_timeseal = True
         self.offers_sent = []
