@@ -4,8 +4,11 @@
 and insert into the database in the format the server expects.  The
 EPD file I use comes from scid by way of its eco2epd tool. """
 
+import sys
 import MySQLdb
 import re
+
+sys.path.insert(0, 'src/')
 import variant.normal
 
 epd_file = 'data/scid.epd'

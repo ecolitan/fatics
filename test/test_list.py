@@ -180,12 +180,14 @@ class TestCensor(Test):
             t2.write('t admin test 123\n')
             self.expect('test 123', t)
 
+
+        finally:
             t.write('-ch 1\n')
             t2.write('-ch 1\n')
+            t.write('-cen testplayer\n')
             self.close(t)
             self.close(t2)
 
-        finally:
             self.deluser('TestPlayer')
 
 class TestNoplay(Test):
