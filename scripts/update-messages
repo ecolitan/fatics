@@ -1,6 +1,6 @@
 #!/bin/sh
 
-for lang in es; do
+for lang in es compat; do
 	msgmerge -U locale/$lang.po locale/chessd.pot
 	msgfmt -o locale/$lang/LC_MESSAGES/chessd.mo locale/$lang.po
 done
