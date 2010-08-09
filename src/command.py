@@ -78,6 +78,7 @@ class CommandList(object):
         self._add(Command('refresh', 'n', self.refresh, admin.Level.user))
         self._add(Command('remplayer', 'w', self.remplayer, admin.Level.admin))
         self._add(Command('resign', 'o', self.resign, admin.Level.user))
+        self._add(Command('rmatch', 'wwt', self.rmatch, admin.Level.user))
         self._add(Command('set', 'wT', self.set, admin.Level.user))
         self._add(Command('shout', 'S', self.shout, admin.Level.user))
         self._add(Command('showlist', 'o', self.showlist, admin.Level.user))
@@ -528,6 +529,28 @@ class CommandList(object):
             var.vars['open'].set(conn.user, '1')
         offer.Challenge(conn.user, u, args[1])
 
+    def rmatch(self, args, conn):
+        if 'TD' not in conn.user.get_titles():
+            conn.write(_('Only TD programs are allowed to use this command\n'))
+            return
+        u1 = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+        if not u1:
+            return
+        u2 = user.find.by_prefix_for_user(args[1], conn, online_only=True)
+        if not u2:
+            return
+        # ignore censor lists, noplay lists, and open var
+        if u1 == u2:
+            conn.write(_("A player cannot match himself or herself.\n"))
+            return
+        if len(u1.session.games) != 0:
+            conn.write(_("%s is playing a game.\n") % u1.name)
+            return
+        if len(u2.session.games) != 0:
+            conn.write(_("%s is playing a game.\n") % u2.name)
+            return
+        offer.Challenge(u1, u2, args[2])
+
     def moves(self, args, conn):
         # similar to "refresh"
         g = None
@@ -584,7 +607,7 @@ class CommandList(object):
 
     def qtell(self, args, conn):
         if 'TD' not in conn.user.get_titles():
-            conn.write('Only TD programs are allowed to use this command\n')
+            conn.write(_('Only TD programs are allowed to use this command\n'))
             return
         msg = args[1].replace('\\n', '\n:').replace('\\b', '\x07').replace('\\H', '\x1b[7m').replace('\\h', '\x1b[0m')
         msg = '\n:%s\n' % msg

@@ -26,6 +26,11 @@ class Test(unittest.TestCase):
             print("\ngot {{%s}}\nexp {{%s}}\n" % (repr(ret), repr(s)))
         self.assert_(s in ret)
 
+    def expect_re(self, s, t, timeout=2):
+        ret = t.expect([s], timeout)
+        self.assert_(ret[0] == 1)
+        return ret[1]
+
     def expect_command_prints_nothing(self, cmd, t, timeout=0.2):
         t.read_very_eager()
         t.write(cmd)

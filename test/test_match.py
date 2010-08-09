@@ -30,21 +30,21 @@ class TestMatch(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_bad_match(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin b c d e\n')
         self.expect('Usage: ', t)
-        
+
         t.write('match admin 1 2 3 4 5\n')
         self.expect('Usage: ', t)
 
         self.close(t)
         self.close(t2)
 
-    
+
     def test_withdraw_logout(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
@@ -56,7 +56,7 @@ class TestMatch(Test):
 
         self.expect('admin, who was challenging you, has departed', t)
         self.close(t)
-    
+
     def test_decline_logout(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
@@ -73,13 +73,13 @@ class TestMatch(Test):
     def test_accept(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
         self.expect('Accepting the match offer', t2)
         self.expect('accepts your match offer', t)
-        
+
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
 
@@ -89,7 +89,7 @@ class TestMatch(Test):
     def test_withdraw(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin\n')
         self.expect('Challenge:', t2)
         t.write('withdraw\n')
@@ -98,7 +98,7 @@ class TestMatch(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_decline(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
@@ -141,18 +141,18 @@ class TestMatch(Test):
     def test_offer_identical(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin 1 0 black\n')
         t.write('match admin 1 0 black\n')
         self.expect('already offering an identical match to admin', t)
 
         self.close(t)
         self.close(t2)
-    
+
     def test_accept_identical(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin 1 2 white\n')
         self.expect('Challenge:', t2)
         t2.write('match Guest 1 2 black\n')
@@ -161,5 +161,33 @@ class TestMatch(Test):
 
         self.close(t)
         self.close(t2)
+
+class TestRmatch(Test):
+    def test_rmatch(self):
+        self.adduser('tdplayer', 'tdplayer', ['td'])
+        self.adduser('testplayer', 'testplayer')
+        try:
+            t = self.connect_as_user('testplayer', 'testplayer')
+            t2 = self.connect_as_admin()
+            t3 = self.connect_as_user('tdplayer', 'tdplayer')
+
+            t.write('rmatch testplayer admin 3 0\n')
+            self.expect('Only TD programs', t)
+
+            t3.write('rmatch testplayer admin 3 0 white r\n')
+            self.expect('Issuing: testplayer (----) [white] admin (----) rated blitz 3 0', t)
+            self.expect('Challenge: testplayer (----) [white] admin (----) rated blitz 3 0', t2)
+
+            t2.write('a\n')
+            self.expect('Creating:', t)
+            self.expect('Creating:', t2)
+            t.write('abort\n')
+
+            self.close(t)
+            self.close(t2)
+            self.close(t3)
+        finally:
+            self.deluser('tdplayer\n')
+            self.deluser('testplayer\n')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
