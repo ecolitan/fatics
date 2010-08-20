@@ -16,6 +16,8 @@ class TestHistory(Test):
 
         self.expect('Creating:', t)
         self.expect('Creating:', t2)
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
         t.write('e4\n')
         self.expect('<12> ', t)
         self.expect('<12> ', t2)

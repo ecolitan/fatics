@@ -31,7 +31,7 @@ class History(object):
         white_rating = str(game.white_rating)
         black_rating = str(game.black_rating)
 
-        (i, eco, long) = game.get_eco()
+        (i, eco, longeco) = game.get_eco()
         game_id = db.game_add(game.white.name, white_rating, game.black.name,
             black_rating, eco, game.variant.name, game.speed_variant.speed,
             game.white_time, game.inc, result_code, game.rated,
