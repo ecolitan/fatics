@@ -22,6 +22,23 @@ class CommandTest(Test):
         self.close(t)
         self.close(t2)
 
+    def test_annunreg(self):
+        self.adduser('testplayer', 'passwd')
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+        t3 = self.connect_as_guest()
+        t4 = self.connect_as_user('testplayer', 'passwd')
+
+        t.write("annunreg x Y z\n")
+        self.expect('(2) **UNREG ANNOUNCEMENT** from admin: x Y z', t)
+        self.expect('**UNREG ANNOUNCEMENT** from admin: x Y z', t2)
+        self.expect('**UNREG ANNOUNCEMENT** from admin: x Y z', t3)
+        self.expect_not('**UNREG ANNOUNCEMENT**', t4)
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
     def test_nuke(self):
         t = self.connect_as_admin()
 

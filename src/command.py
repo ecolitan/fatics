@@ -51,6 +51,7 @@ class CommandList(object):
         self._add(Command('alias', 'oT', self.alias, admin.Level.user))
         self._add(Command('allobservers', 'o', self.allobservers, admin.Level.user))
         self._add(Command('announce', 'S', self.announce, admin.Level.admin))
+        self._add(Command('annunreg', 'S', self.annunreg, admin.Level.admin))
         self._add(Command('areload', '', self.areload, admin.Level.god))
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
         self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
@@ -217,6 +218,15 @@ class CommandList(object):
                 count = count + 1
                 u.write("\n\n    **ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
         conn.write("(%d) **ANNOUNCEMENT** from %s: %s\n\n" % (count, conn.user.name, args[0]))
+
+    def annunreg(self, args, conn):
+        count = 0
+        # the announcement message isn't localized
+        for u in online.itervalues():
+            if u != conn.user and u.is_guest:
+                count = count + 1
+                u.write("\n\n    **UNREG ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
+        conn.write("(%d) **UNREG ANNOUNCEMENT** from %s: %s\n\n" % (count, conn.user.name, args[0]))
 
     def areload(self, args, conn):
         reload.reload_all(conn)
