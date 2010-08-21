@@ -3,7 +3,7 @@ from test import  *
 class FingerTest(Test):
     def test_finger(self):
         t = self.connect_as_admin()
-        t.write('finger\r\n')
+        t.write('finger\n')
         self.expect('Finger of admin(*):', t)
         self.expect('On for:', t)
         self.expect('Email:', t)
@@ -18,16 +18,16 @@ class FingerTest(Test):
         self.expect('Finger of admin(*):', t)
 
         # finger with prefix
-        t.write('finger ad\r\n')
+        t.write('finger ad\n')
         self.expect('Finger of admin(*):', t)
 
-        t.write('finger a\r\n')
+        t.write('finger a\n')
         self.expect('need to specify at least', t)
 
-        t.write('finger notarealuser\r\n')
+        t.write('finger notarealuser\n')
         self.expect('no player matching', t, "nonexistent user")
 
-        t.write('finger admin1\r\n')
+        t.write('finger admin1\n')
         self.expect('not a valid handle', t, "invalid name")
 
         self.close(t)
@@ -36,18 +36,18 @@ class FingerTest(Test):
         self.adduser('admintwo', 'admintwo')
         t = self.connect_as_admin()
 
-        t.write('finger ad\r\n')
+        t.write('finger ad\n')
         self.expect('Finger of admin(*):', t, "finger with prefix ignores offline user")
         t2 = self.connect_as_user('admintwo', 'admintwo')
         # ambiguous, both users online
-        t2.write('finger ad\r\n')
+        t2.write('finger ad\n')
         self.expect('Matches: admin admintwo', t2)
         self.close(t2)
         self.close(t)
 
         # ambiguous, both users offline
         t = self.connect_as_guest()
-        t.write('finger ad\r\n')
+        t.write('finger ad\n')
         self.expect('Matches: admin admintwo', t)
         self.close(t)
 
@@ -57,18 +57,18 @@ class FingerTest(Test):
         t = self.connect_as_guest()
 
         # finger guest
-        t.write('finger\r\n')
+        t.write('finger\n')
         self.expect('Finger of Guest', t)
 
         # finger offline user
-        t.write('finger admin\r\n')
+        t.write('finger admin\n')
         self.expect('Last disconnected:', t)
 
         # finger offline user prefix
-        t.write('finger ad\r\n')
+        t.write('finger ad\n')
         self.expect('Last disconnected:', t)
 
-        t.write('finger admi\r\n')
+        t.write('finger admi\n')
         self.expect('Last disconnected:', t)
 
         t.close()

@@ -68,6 +68,7 @@ class CommandList(object):
         self._add(Command('history', 'o', self.history, admin.Level.user))
         self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
         self._add(Command('iset', 'wS', self.iset, admin.Level.user))
+        self._add(Command('it', 'S', self.it, admin.Level.user))
         self._add(Command('ivariables', 'o', self.ivariables, admin.Level.user))
         self._add(Command('match', 'wt', self.match, admin.Level.user))
         self._add(Command('moves', 'n', self.moves, admin.Level.user))
@@ -496,7 +497,24 @@ class CommandList(object):
             conn.write(_('No such ivariable "%s".\n') % name)
         except var.BadVarError:
             conn.write(_('Bad value given for ivariable "%s".\n') % v.name)
-    
+
+    def it(self, args, conn):
+        if conn.user.is_guest:
+            conn.write(_("Only registered players can use the it command.\n"))
+        elif not conn.user.vars['shout']:
+            conn.write(_("(Did not it-shout because you are not listening to shouts)\n"))
+        else:
+            count = 0
+            name = conn.user.name
+            dname = conn.user.get_display_name()
+            for u in online.itervalues():
+                if u.vars['shout']:
+                    if name not in u.censor:
+                        u.write(_("--> %s %s\n") %
+                            (dname, args[0]))
+                        count += 1
+            conn.write(ngettext("(it-shouted to %d player)\n", "(it-shouted to %d players)\n", count) % count)
+
     def ivariables(self, args, conn):
         if args[0] is None:
             u = conn.user
