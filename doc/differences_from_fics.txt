@@ -83,6 +83,9 @@ to you, but rather replaces it with asterisks.
 Rationale: make it harder from someone else to read the password
 over your shoulder, although it is still visible when you type it.
 
+* You can no longer use the "it" command if you are not listening to shouts.
+Rationale: Help prevent accidentally sending "i" shouts.
+
 == Differences for interface and bot authors ==
 * Newlines are now sent after carriage returns ('\r\n'), rather than
 vice versa ('\n\r'). (This affects some bots and interfaces, but typical

@@ -39,7 +39,7 @@ class TestTimesealWindows(Test):
         process.stdin.write('%s\r\n' % admin_passwd)
         process.stdin.write('finger\n')
         process.stdin.write('quit\n')
-        time.sleep(5)
+        time.sleep(10)
         [out, err] = process.communicate()
         self.assert_('fics%' in out)
         self.assert_('Finger of admin' in out)

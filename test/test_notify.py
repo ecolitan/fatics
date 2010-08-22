@@ -55,17 +55,40 @@ class TestNotify(Test):
 
             t.write('-NOTIFY testplayer\n')
             self.expect('TestPlayer removed from your notify list', t)
-            
+
             t.write('-not testplayer\n')
             self.expect('TestPlayer is not on your notify list', t)
 
             t2 = self.connect_as_user('testplayer', 'test')
             self.expect_not("TestPlayer", t)
-            
+
             self.close(t2)
             self.close(t)
         finally:
             self.deluser('TestPlayer')
+
+class TestSummon(Test):
+    def test_summon(self):
+        self.adduser('TestPlayer', 'test')
+        t = self.connect_as_admin()
+        t2 = self.connect_as_user('testplayer', 'test')
+        t.write('summon\n')
+        self.expect('Usage:', t)
+
+        t.write('summo admin\n')
+        self.expect('summon yourself', t)
+
+        t.write('summo testp\n')
+        self.expect('Summoning sent to "TestPlayer".\r\n', t)
+        self.expect('admin needs to speak to you', t2)
+
+        t.write('+cen testplayer\n')
+        t2.write('+cen admin\n')
+        t.write('summo testp\n')
+        self.expect('admin needs to speak to you', t2)
+        t2.write('summon admin\n')
+        self.expect('admin is censoring you.\r\n', t2)
+
 
 class TestZnotify(Test):
     def test_znotify(self):

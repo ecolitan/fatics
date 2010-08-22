@@ -61,6 +61,7 @@ class CommandList(object):
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
         self._add(Command('draw', 'o', self.draw, admin.Level.user))
         self._add(Command('eco', 'oo', self.eco, admin.Level.user))
+        self._add(Command('examine', 'on', self.examine, admin.Level.user))
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
         self._add(Command('flag', '', self.flag, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
@@ -85,6 +86,7 @@ class CommandList(object):
         self._add(Command('shout', 'S', self.shout, admin.Level.user))
         self._add(Command('showlist', 'o', self.showlist, admin.Level.user))
         self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
+        self._add(Command('summon', 'w', self.summon, admin.Level.user))
         self._add(Command('style', 'd', self.style, admin.Level.user))
         self._add(Command('tell', 'nS', self.tell, admin.Level.user))
         self._add(Command('unalias', 'w', self.unalias, admin.Level.user))
@@ -382,6 +384,11 @@ class CommandList(object):
             conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
 
+    def examine(self, args, conn):
+        if args[1] == 'b':
+            conn.write('TODO: EXAMINE BOARD\n')
+            return
+
     def finger(self, args, conn):
         u = None
         if args[0] is not None:
@@ -484,7 +491,7 @@ class CommandList(object):
                 on = ch.get_online()
                 if len(on) > 0:
                     conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
-    
+
     def iset(self, args, conn):
         [name, val] = args
         try:
@@ -755,7 +762,23 @@ class CommandList(object):
                 ls.sub(args[1], conn)
             except list.ListError as e:
                 conn.write(e.reason)
-    
+
+    def summon(self, args, conn):
+        u = user.find.by_prefix_for_user(args[0], conn)
+        if u == conn.user:
+            conn.write(_("You can't summon yourself.\n"))
+        if conn.user.admin_level <= admin.level.user:
+            if conn.user.name in u.censor:
+                conn.write(_("%s is censoring you.\n") % u.name)
+                return
+            if conn.user.name not in u.notifiers:
+                conn.write(_('You cannot summon a player who doesn\'t have you on his/her notify list.\n'))
+                return
+        # TODO: localize for the user being summoned
+        u.write('\a\n%s needs to speak to you.  To contact him/her type "tell %s hello".\n' % (conn.user.name, conn.user.name))
+        conn.write(_('Summoning sent to "%s".\n') % u.name)
+        # TODO: add to idlenotify list
+
     def style(self, args, conn):
         #conn.write('Warning: the "style" command is deprecated.  Please use "set style" instead.\n')
         var.vars['style'].set(conn.user, str(args[0]))
