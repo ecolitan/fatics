@@ -269,9 +269,7 @@ class Challenge(Offer):
     def accept(self):
         Offer.accept(self)
 
-        g = game.Game(self)
-        self.a.session.games[self.b.name] = g
-        self.b.session.games[self.a.name] = g
+        g = game.PlayedGame(self)
 
     def _set_rated(self, val):
         assert(val in [True, False])

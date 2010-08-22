@@ -5,6 +5,7 @@ import datetime
 import user
 import rating
 import timeseal
+import speed_variant
 
 (WHITE, BLACK) = range(2)
 
@@ -14,6 +15,9 @@ from timer import timer
 from db import db
 
 games = {}
+
+# game types
+(EXAMINED, PLAYED) = range(2)
 
 from variant.variant_factory import variant_factory
 
@@ -34,7 +38,7 @@ def find_free_slot():
         if i not in games:
             return i
         i += 1
-        
+
 def from_name_or_number(arg, conn):
     g = None
     try:
@@ -56,73 +60,11 @@ def from_name_or_number(arg, conn):
     return g
 
 class Game(object):
-    def __init__(self, chal):
+    def __init__(self):
         self.number = find_free_slot()
         games[self.number] = self
         self.observers = set()
-
-        side = chal.side
-        if side is None:
-            side = self._pick_color(chal.a, chal.b)
-        if side == WHITE:
-            self.white = chal.a
-            self.black = chal.b
-        else:
-            assert(side == BLACK)
-            self.white = chal.b
-            self.black = chal.a
-
-        self.speed_variant = chal.speed_variant
-        self.white_rating = self.white.get_rating(self.speed_variant)
-        self.black_rating = self.black.get_rating(self.speed_variant)
-        self.white_time = chal.time
-        self.black_time = chal.time
-        self.inc = chal.inc
-
-        self.white.session.is_white = True
-        self.black.session.is_white = False
-
-        self.rated = chal.rated
-        self.rated_str = 'rated' if self.rated else 'unrated'
-        time_str = '%d %d' % (self.white_time,self.inc)
-
-        self.flip = False
-        self.private = False
-        self.start_time = time.time()
-        self.is_active = True
-
         self.pending_offers = []
-        self.clock = clock.FischerClock(self.white_time * 60.0,
-            self.black_time * 60.0, self.inc)
-
-        # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
-        create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.speed_variant, time_str)
-
-        self.white.write(create_str)
-        self.black.write(create_str)
-
-        create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.speed_variant)
-        self.white.write(create_str_2)
-        self.black.write(create_str_2)
-
-        if self.white.session.ivars['gameinfo'] or \
-                self.black.session.ivars['gameinfo']:
-            # The order of fields FICS sends differs from the
-            # "help iv_gameinfo" documentation; the it= field gives
-            # the initial time increment for white, and the i= field
-            # does the same for black.  This seems wrong since "it" was
-            # supposed to stand for "initial time", but compatability
-            # with FICS is more important than being logical.
-            gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, 60 * self.white_time, self.inc, 60 * self.black_time, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
-            if self.white.session.ivars['gameinfo']:
-                self.white.write(gameinfo_str)
-            if self.black.session.ivars['gameinfo']:
-                self.black.write(gameinfo_str)
-
-        self.variant = variant_factory.get(self.speed_variant.variant.name,
-            self)
-
-        self.send_boards()
 
     def send_boards(self):
         self.white.send_board(self)
@@ -141,9 +83,6 @@ class Game(object):
 
     def __hash__(self):
         return self.number
-
-    def _pick_color(self, a, b):
-        return random.choice([WHITE, BLACK])
 
     def next_move(self, t, conn):
         # decline all offers to the player who just moved
@@ -194,7 +133,7 @@ class Game(object):
             return BLACK
         else:
             raise RuntimeError('Game.get_side(): got a non-player')
-    
+
     def get_user_opp_side(self, user):
         if user == self.white:
             return BLACK
@@ -218,17 +157,6 @@ class Game(object):
             return self.white
         else:
             return self.black
-
-    def abort(self, msg):
-        self.result(msg, '*')
-
-    def resign(self, user):
-        side = self.get_user_side(user)
-        if side == WHITE:
-            self.result('%s resigns' % user.name, '0-1')
-        else:
-            assert(side == BLACK)
-            self.result('%s resigns' % user.name, '1-0')
 
     def result(self, msg, result_code):
         self.when_ended = datetime.datetime.utcnow()
@@ -275,8 +203,6 @@ class Game(object):
         for u in self.observers.copy():
             self.unobserve(u)
         assert(not self.observers)
-        del self.white.session.games[self.black.name]
-        del self.black.session.games[self.white.name]
 
     def get_eco(self):
         i = min(self.variant.pos.ply, 36)
@@ -292,7 +218,7 @@ class Game(object):
         else:
             ret = (0, 'A00', 'Unknown')
         return ret
-    
+
     def get_nic(self):
         i = min(self.variant.pos.ply, 36)
         row = None
@@ -358,5 +284,113 @@ class Game(object):
                     len(olist)) %
                 (self.number, self.white.name, self.black.name,
                 ' '.join(olist), len(olist)))
+
+
+class PlayedGame(Game):
+    def __init__(self, chal):
+        super(PlayedGame, self).__init__()
+        self.gtype = PLAYED
+
+        side = chal.side
+        if side is None:
+            side = self._pick_color(chal.a, chal.b)
+        if side == WHITE:
+            self.white = chal.a
+            self.black = chal.b
+        else:
+            assert(side == BLACK)
+            self.white = chal.b
+            self.black = chal.a
+
+        self.speed_variant = chal.speed_variant
+        self.white_rating = self.white.get_rating(self.speed_variant)
+        self.black_rating = self.black.get_rating(self.speed_variant)
+        self.white_time = chal.time
+        self.black_time = chal.time
+        self.inc = chal.inc
+
+        self.white.session.is_white = True
+        self.black.session.is_white = False
+
+        self.rated = chal.rated
+        self.rated_str = 'rated' if self.rated else 'unrated'
+        time_str = '%d %d' % (self.white_time,self.inc)
+
+        self.flip = False
+        self.private = False
+        self.start_time = time.time()
+        self.is_active = True
+
+        self.clock = clock.FischerClock(self.white_time * 60.0,
+            self.black_time * 60.0, self.inc)
+
+        # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
+        create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.speed_variant, time_str)
+
+        self.white.write(create_str)
+        self.black.write(create_str)
+
+        create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.speed_variant)
+        self.white.write(create_str_2)
+        self.black.write(create_str_2)
+
+        if self.white.session.ivars['gameinfo'] or \
+                self.black.session.ivars['gameinfo']:
+            # The order of fields FICS sends differs from the
+            # "help iv_gameinfo" documentation; the it= field gives
+            # the initial time increment for white, and the i= field
+            # does the same for black.  This seems wrong since "it" was
+            # supposed to stand for "initial time", but compatability
+            # with FICS is more important than being logical.
+            gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, 60 * self.white_time, self.inc, 60 * self.black_time, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
+            if self.white.session.ivars['gameinfo']:
+                self.white.write(gameinfo_str)
+            if self.black.session.ivars['gameinfo']:
+                self.black.write(gameinfo_str)
+
+        self.variant = variant_factory.get(self.speed_variant.variant.name,
+            self)
+
+        self.send_boards()
+
+        self.white.session.games[self.black.name] = self
+        self.black.session.games[self.white.name] = self
+
+    def _pick_color(self, a, b):
+        return random.choice([WHITE, BLACK])
+
+    def resign(self, user):
+        side = self.get_user_side(user)
+        if side == WHITE:
+            self.result('%s resigns' % user.name, '0-1')
+        else:
+            assert(side == BLACK)
+            self.result('%s resigns' % user.name, '1-0')
+
+    def abort(self, msg):
+        self.result(msg, '*')
+
+    def free(self):
+        super(PlayedGame, self).free()
+        del self.white.session.games[self.black.name]
+        del self.black.session.games[self.white.name]
+
+class ExaminedGame(Game):
+    def __init__(self, user):
+        super(ExaminedGame, self).__init__()
+        self.gtype = EXAMINED
+        self.user = user
+        user.session.games['[ex]'] = self
+        self.speed_variant = speed_variant.from_names('standard', 'normal')
+        self.variant = variant_factory.get(self.speed_variant.variant.name,
+            self)
+
+    def abort(self, msg):
+        self.user.write(_('You are no longer examining game %d.\n') % self.number)
+        self.free()
+
+    def free(self):
+        super(ExaminedGame, self).free()
+        del self.user.session.games['[ex]']
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

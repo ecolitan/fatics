@@ -385,9 +385,17 @@ class CommandList(object):
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
 
     def examine(self, args, conn):
+        if len(conn.user.session.games) != 0:
+            if conn.user.session.games[0].gtype == game.EXAMINE:
+                conn.write(_("You are already examining a game.\n"))
+            else:
+                conn.write(_("You are playing a game.\n"))
+            return
         if args[1] == 'b':
             conn.write('TODO: EXAMINE BOARD\n')
             return
+        conn.write(_("Starting a game in examine (scratch) mode.\n"))
+        game.ExaminedGame(conn.user)
 
     def finger(self, args, conn):
         u = None
