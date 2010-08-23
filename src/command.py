@@ -386,7 +386,7 @@ class CommandList(object):
 
     def examine(self, args, conn):
         if len(conn.user.session.games) != 0:
-            if conn.user.session.games[0].gtype == game.EXAMINE:
+            if conn.user.session.games.values()[0].gtype == game.EXAMINE:
                 conn.write(_("You are already examining a game.\n"))
             else:
                 conn.write(_("You are playing a game.\n"))
@@ -407,13 +407,23 @@ class CommandList(object):
             conn.write(_('Finger of %s:\n\n') % u.get_display_name())
 
             if u.is_online:
-                conn.write(_('On for: %s   Idle: %s\n\n') % (u.session.get_online_time(), u.session.get_idle_time()))
+                conn.write(_('On for: %s   Idle: %s\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 
+                if len(u.session.games) > 0:
+                    g = u.session.games.values()[0]
+                    if g.gtype == game.PLAYED:
+                        conn.write(_('(playing game %d: %s vs. %s)\n') % (g.number, g.white.name, g.black.name))
+                    elif g.gtype == game.EXAMINED:
+                        conn.write(_('(examining game %d)\n') % (g.number))
+                    else:
+                        assert(False)
             else:
                 if u.last_logout is None:
-                    conn.write(_('%s has never connected.\n\n') % u.name)
+                    conn.write(_('%s has never connected.\n') % u.name)
                 else:
-                    conn.write(_('Last disconnected: %s\n\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
+                    conn.write(_('Last disconnected: %s\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
+
+            conn.write('\n')
 
             #if u.is_guest:
             #    conn.write(_('%s is NOT a registered player.\n') % u.name)

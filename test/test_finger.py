@@ -73,5 +73,24 @@ class FingerTest(Test):
 
         t.close()
 
+    def test_finger_game(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: GuestABCD (++++) admin (----) unrated lightning 1 0', t)
+        self.expect('Creating: GuestABCD (++++) admin (----) unrated lightning 1 0', t2)
+
+        t.write('finger admin\n')
+        self.expect('(playing game 1: GuestABCD vs. admin)\r\n', t)
+        t.write('finger guestabcd\n')
+        self.expect('(playing game 1: GuestABCD vs. admin)\r\n', t)
+        t2.write('finger admin\n')
+        self.expect('(playing game 1: GuestABCD vs. admin)\r\n', t2)
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
