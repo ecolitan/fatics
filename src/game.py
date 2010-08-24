@@ -52,11 +52,11 @@ def from_name_or_number(arg, conn):
         u = user.find.by_prefix_for_user(arg, conn,
             online_only=True)
         if u:
-            if len(u.session.games) == 0:
+            if not u.session.games:
                 conn.write(_("%s is not playing or examining a game.\n")
                     % u.name)
             else:
-                g = u.session.games.values()[0]
+                g = u.session.games.primary()
     return g
 
 class Game(object):
@@ -85,35 +85,6 @@ class Game(object):
         return self.number
 
     def next_move(self, t, conn):
-        # decline all offers to the player who just moved
-        u = self.get_user_to_move()
-        offers = [o for o in self.pending_offers if o.a == u]
-        for o in offers:
-            o.decline()
-
-        #print(self.variant.to_style12(self.white))
-        time_str = None
-        if self.is_active and self.variant.pos.ply > 1:
-            moved_side = opp(self.variant.get_turn())
-            if self.clock.is_ticking:
-                if conn.user.has_timeseal():
-                    assert(conn.session.ping_reply_time != None)
-                    print("t %d, orig %d" % (t, conn.session.ping_reply_time))
-                    elapsed = (t - conn.session.ping_reply_time) / 1000.0
-                    time_str = self.clock.update(moved_side, elapsed)
-                else:
-                    time_str = self.clock.update(moved_side)
-            if self.get_user_to_move().vars['autoflag']:
-                self.clock.check_flag(self, moved_side)
-            if self.is_active:
-                if self.variant.pos.ply > 2:
-                    self.clock.add_increment(moved_side)
-                self.clock.start(self.variant.get_turn())
-
-        if time_str is None:
-            time_str = timer.hms(0.0)
-        self.variant.pos.get_last_move().time_str = time_str
-
         self.send_boards()
 
         if self.variant.pos.is_checkmate:
@@ -353,11 +324,44 @@ class PlayedGame(Game):
 
         self.send_boards()
 
-        self.white.session.games[self.black.name] = self
-        self.black.session.games[self.white.name] = self
+        self.white.session.games.add(self, self.black.name)
+        self.black.session.games.add(self, self.white.name)
 
     def _pick_color(self, a, b):
         return random.choice([WHITE, BLACK])
+
+    def next_move(self, t, conn):
+        # decline all offers to the player who just moved
+        u = self.get_user_to_move()
+        offers = [o for o in self.pending_offers if o.a == u]
+        for o in offers:
+            o.decline()
+
+        #print(self.variant.to_style12(self.white))
+        time_str = None
+        if self.is_active and self.variant.pos.ply > 1:
+            moved_side = opp(self.variant.get_turn())
+            if self.clock.is_ticking:
+                if conn.user.has_timeseal():
+                    assert(conn.session.ping_reply_time != None)
+                    print("t %d, orig %d" % (t, conn.session.ping_reply_time))
+                    elapsed = (t - conn.session.ping_reply_time) / 1000.0
+                    time_str = self.clock.update(moved_side, elapsed)
+                else:
+                    time_str = self.clock.update(moved_side)
+            if self.get_user_to_move().vars['autoflag']:
+                self.clock.check_flag(self, moved_side)
+            if self.is_active:
+                if self.variant.pos.ply > 2:
+                    self.clock.add_increment(moved_side)
+                self.clock.start(self.variant.get_turn())
+
+        if time_str is None:
+            time_str = timer.hms(0.0)
+        self.variant.pos.get_last_move().time_str = time_str
+
+        super(PlayedGame, self).next_move(t, conn)
+
 
     def resign(self, user):
         side = self.get_user_side(user)
@@ -372,15 +376,15 @@ class PlayedGame(Game):
 
     def free(self):
         super(PlayedGame, self).free()
-        del self.white.session.games[self.black.name]
-        del self.black.session.games[self.white.name]
+        self.white.session.games.free(self.black.name)
+        self.black.session.games.free(self.white.name)
 
 class ExaminedGame(Game):
     def __init__(self, user):
         super(ExaminedGame, self).__init__()
         self.gtype = EXAMINED
         self.user = user
-        user.session.games['[ex]'] = self
+        user.session.games.add(self, '[examined]')
         self.speed_variant = speed_variant.from_names('standard', 'normal')
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
@@ -391,6 +395,6 @@ class ExaminedGame(Game):
 
     def free(self):
         super(ExaminedGame, self).free()
-        del self.user.session.games['[ex]']
+        self.user.session.games.free('[examined]')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

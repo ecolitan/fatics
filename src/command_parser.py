@@ -27,7 +27,7 @@ class CommandParser(object):
             return
 
         if conn.session.games:
-            if conn.session.games.values()[0].variant.parse_move(s, t, conn):
+            if conn.session.games.primary().variant.parse_move(s, t, conn):
                 return
 
         if not utf8.checker.check_user_utf8(s):

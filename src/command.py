@@ -65,6 +65,7 @@ class CommandList(object):
         self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
         self._add(Command('flag', '', self.flag, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
+        self._add(Command('forward', 'p', self.forward, admin.Level.user))
         self._add(Command('help', 'o', self.help, admin.Level.user))
         self._add(Command('history', 'o', self.history, admin.Level.user))
         self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
@@ -110,7 +111,7 @@ class CommandList(object):
         if len(conn.user.session.games) > 1:
             conn.write(_('Please use "simabort" for simuls.\n'))
             return
-        g = conn.user.session.games.values()[0]
+        g = conn.user.session.games.primary()
         if g.variant.pos.ply < 2:
             g.abort('Game aborted on move 1 by %s' % conn.user.name)
         else:
@@ -210,7 +211,7 @@ class CommandList(object):
                 else:
                     g.show_observers(conn)
         else:
-            for g in game.games.values():
+            for g in game.games.itervalues():
                 g.show_observers(conn)
 
     def announce(self, args, conn):
@@ -331,7 +332,7 @@ class CommandList(object):
             if len(conn.user.session.games) == 0:
                 conn.write(_("You are not playing a game.\n"))
                 return
-            g = conn.user.session.games.values()[0]
+            g = conn.user.session.games.primary()
             offer.Draw(g, conn.user)
         else:
             conn.write('TODO: DRAW PARAM\n')
@@ -371,10 +372,10 @@ class CommandList(object):
         elif args[0] is not None:
             g = game.from_name_or_number(args[0], conn)
         else:
-            if len(conn.user.session.games) == 0:
+            if not conn.user.session.games:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
             else:
-                g = conn.user.session.games.values()[0]
+                g = conn.user.session.games.primary()
 
         if g is not None:
             (ply, eco, long) = g.get_eco()
@@ -410,7 +411,7 @@ class CommandList(object):
                 conn.write(_('On for: %s   Idle: %s\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 
                 if len(u.session.games) > 0:
-                    g = u.session.games.values()[0]
+                    g = u.session.games.primary()
                     if g.gtype == game.PLAYED:
                         conn.write(_('(playing game %d: %s vs. %s)\n') % (g.number, g.white.name, g.black.name))
                     elif g.gtype == game.EXAMINED:
@@ -466,12 +467,19 @@ class CommandList(object):
         if len(conn.user.session.games) == 0:
             conn.write(_("You are not playing a game.\n"))
             return
-        g = conn.user.session.games.values()[0]
+        g = conn.user.session.games.primary()
         if not g.clock.check_flag(g, g.get_user_opp_side(conn.user)):
             conn.write(_('Your opponent is not out of time.\n'))
 
     def follow(self, args, conn):
         conn.write('TODO: FOLLOW\n')
+
+    def forward(self, args, conn):
+        n = args[0] if args[0] is not None else 1
+        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
+            conn.write(_("You are not examining a game.\n"))
+            return
+        conn.write('TODO: forward %d\n' % n)
 
     def help(self, args, conn):
         if conn.user.admin_level > admin.level.user:
@@ -611,7 +619,7 @@ class CommandList(object):
             g = game.from_name_or_number(args[0], conn)
         else:
             if len(conn.user.session.games) > 0:
-                g = conn.user.session.games.values()[0]
+                g = conn.user.session.games.primary()
             else:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
         if g is not None:
@@ -704,7 +712,7 @@ class CommandList(object):
             g = game.from_name_or_number(args[0], conn)
         else:
             if len(conn.user.session.games) > 0:
-                g = conn.user.session.games.values()[0]
+                g = conn.user.session.games.primary()
             else:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
         if g is not None:
@@ -717,7 +725,7 @@ class CommandList(object):
         if len(conn.user.session.games) == 0:
             conn.write(_("You are not playing a game.\n"))
             return
-        g = conn.user.session.games.values()[0]
+        g = conn.user.session.games.primary()
         g.resign(conn.user)
 
     def set(self, args, conn):

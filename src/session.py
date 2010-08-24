@@ -3,6 +3,7 @@ import copy
 
 import var
 from timer import timer
+from game_list import GameList
 
 # user state that is per-session and not saved to persistent storage
 class Session(object):
@@ -19,7 +20,7 @@ class Session(object):
         self.check_for_timeseal = True
         self.offers_sent = []
         self.offers_received = []
-        self.games = {}
+        self.games = GameList()
         self.ivars = var.varlist.get_default_ivars()
         self.lag = 0
         self.observed = set()
@@ -51,14 +52,10 @@ class Session(object):
             v.decline(notify=False)
             v.b.write(_('Declining the match offer from %s.\n') % v.a.name)
             v.a.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
-        # python docs: "Using iteritems() while adding or deleting entries
-        # in the dictionary may raise a RuntimeError or fail to iterate
-        # over all entries."
-        for (k, v) in copy.copy(self.games).iteritems():
-            v.abort('%s aborted by disconnection' % self.user.name)
+        self.games.abort_all(self.user.name)
         del self.offers_received[:]
         del self.offers_sent[:]
-        if len(self.games) > 0:
+        if self.games:
             self.conn.write('Your game will be lost because adjourning is not implemented.\n')
 
         # unobserve games
