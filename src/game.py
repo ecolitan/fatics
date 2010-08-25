@@ -385,7 +385,7 @@ class ExaminedGame(Game):
         self.gtype = EXAMINED
         self.user = user
         user.session.games.add(self, '[examined]')
-        self.speed_variant = speed_variant.from_names('standard', 'normal')
+        self.speed_variant = speed_variant.from_names('standard', 'chess')
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
 

@@ -52,8 +52,8 @@ class TestKibitz(Test):
         t = self.connect_as_user('GuestEFGH', '')
         t2 = self.connect_as_admin()
 
-        t2.write('asetrating admin lightning normal 0 0 0 0 0 0\n')
-        self.expect('Cleared lightning normal rating for admin.', t2)
+        t2.write('asetrating admin lightning chess 0 0 0 0 0 0\n')
+        self.expect('Cleared lightning chess rating for admin.', t2)
 
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
@@ -65,8 +65,8 @@ class TestKibitz(Test):
         self.expect('kiblevel set to 1000.', t)
         t2.write('ki .\n')
         self.expect('(kibitzed to 0 players)', t2)
-        t2.write('asetrating admin lightning normal 1001 350 .01 0 0 0\n')
-        self.expect('Set lightning normal rating for admin.', t2)
+        t2.write('asetrating admin lightning chess 1001 350 .01 0 0 0\n')
+        self.expect('Set lightning chess rating for admin.', t2)
         t2.write('ki .\n')
         self.expect('admin(*)(1001)[1] kibitzes: .', t)
         self.expect('admin(*)(1001)[1] kibitzes: .', t2)
@@ -75,8 +75,8 @@ class TestKibitz(Test):
         t.write('abort\n')
         t2.write('abort\n')
 
-        t2.write('asetrating admin lightning normal 0 0 0 0 0 0\n')
-        self.expect('Cleared lightning normal rating for admin.', t2)
+        t2.write('asetrating admin lightning chess 0 0 0 0 0 0\n')
+        self.expect('Cleared lightning chess rating for admin.', t2)
 
         self.close(t)
         self.close(t2)

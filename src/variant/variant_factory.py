@@ -1,8 +1,8 @@
-import normal
+import chess
 
 class VariantFactory(object):
     def __init__(self):
-        self.variants = {'normal': normal.Normal}
+        self.variants = {'chess': chess.Chess}
 
     def get(self, name, game):
         return self.variants[name](game)

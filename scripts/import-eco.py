@@ -9,7 +9,7 @@ import MySQLdb
 import re
 
 sys.path.insert(0, 'src/')
-import variant.normal
+import variant.chess
 
 epd_file = 'data/scid.epd'
 nic_file = 'data/nic999.idx'
@@ -34,12 +34,12 @@ def main():
             print 'failed to match: %s' % line
         assert(m)
         (fen, eco, long) = (m.group(1), m.group(2), m.group(3))
-        pos = variant.normal.Position(fen + ' 0 1')
+        pos = variant.chess.Position(fen + ' 0 1')
         cursor.execute("""INSERT INTO eco SET eco=%s, long_=%s, hash=%s, fen=%s""",
             (eco,long,pos.hash,fen))
         count += 1
     print 'imported %d eco codes' % count
-   
+
     cursor.execute("""DELETE FROM nic""")
     count = 0
     f = open(nic_file, 'r')
@@ -55,7 +55,7 @@ def main():
             if not m:
                 raise RuntimeError('failed to match %s', line)
             nic = m.group(1)
-            pos = variant.normal.Position(fen + ' 0 1')
+            pos = variant.chess.Position(fen + ' 0 1')
             try:
                 cursor.execute("""INSERT INTO nic SET nic=%s, hash=%s, fen=%s""",
                     (nic,pos.hash,fen))

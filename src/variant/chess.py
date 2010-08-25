@@ -1167,12 +1167,12 @@ class Position(object):
         full_moves = self.ply // 2 + 1
         return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
 
-class Normal(Variant):
+class Chess(object):
     """normal chess"""
     def __init__(self, game):
         self.game = game
         self.pos = copy.deepcopy(initial_pos)
-        self.name = 'normal'
+        self.name = 'chess'
 
     def parse_move(self, s, t, conn):
         """Try to parse a move and execute it.  If it looks like a move but

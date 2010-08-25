@@ -3,6 +3,9 @@ from test import *
 class CommandTest(Test):
     def test_addplayer(self):
         t = self.connect_as_admin()
+        # try removing, in case the player still exists from an aborted
+        # run of the tests
+        t.write('remplayer testplayer\n')
         try:
             t.write('addplayer testplayer nobody@example.com Foo Bar\n')
             self.expect('Added:', t)
@@ -114,17 +117,17 @@ class CommandTest(Test):
 
     def test_asetrating(self):
         t = self.connect_as_admin()
-        t.write('asetrating admin blitz normal 2000 200 .005 100 75 35\n')
-        self.expect('Set blitz normal rating for admin.\r\n', t)
+        t.write('asetrating admin blitz chess 2000 200 .005 100 75 35\n')
+        self.expect('Set blitz chess rating for admin.\r\n', t)
         self.close(t)
 
         t = self.connect_as_admin()
         t.write('finger admin\n')
         self.expect('blitz                    2000   200  0.005000     210', t)
-        t.write('asetrating admin blitz normal 0 0 0 0 0 0\n')
-        self.expect('Cleared blitz normal rating for admin.\r\n', t)
+        t.write('asetrating admin blitz chess 0 0 0 0 0 0\n')
+        self.expect('Cleared blitz chess rating for admin.\r\n', t)
         t.write('finger admin\n')
-        self.expect_not('blitz normal', t)
+        self.expect_not('blitz chess', t)
         self.close(t)
 
 class PermissionsTest(Test):

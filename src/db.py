@@ -319,11 +319,11 @@ class DB(object):
 
     # game
     def game_add(self, white_name, white_rating, black_name, black_rating,
-            eco, variant_name, speed, time, inc, result, rated, result_reason,
+            eco, variant_id, speed_id, time, inc, result, rated, result_reason,
             moves, when_ended):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant=%s,speed=%s,time=%s,inc=%s,result=%s,rated=%s,result_reason=%s,moves=%s,when_ended=%s""", (white_name, white_rating,
-            black_name, black_rating, eco, variant_name, speed, time, inc,
+        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant_id=%s,speed_id=%s,time=%s,inc=%s,result=%s,rated=%s,result_reason=%s,moves=%s,when_ended=%s""", (white_name, white_rating,
+            black_name, black_rating, eco, variant_id, speed_id, time, inc,
             result, rated, result_reason, moves,
             when_ended))
         game_id = cursor.lastrowid

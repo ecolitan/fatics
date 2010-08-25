@@ -289,7 +289,7 @@ class CommandList(object):
             sv = speed_variant.from_names(speed_name, variant_name)
         except KeyError:
             conn.write(A_('Unknown speed and variant "%s %s".\n') %
-                speed_name, variant_name)
+                (speed_name, variant_name))
             return
         if urating == 0:
             u.del_rating(sv)

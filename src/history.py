@@ -33,9 +33,10 @@ class History(object):
 
         (i, eco, longeco) = game.get_eco()
         game_id = db.game_add(game.white.name, white_rating, game.black.name,
-            black_rating, eco, game.variant.name, game.speed_variant.speed,
-            game.white_time, game.inc, result_code, game.rated,
-            result_reason, game.get_moves(), game.when_ended)
+            black_rating, eco, game.speed_variant.variant.id,
+            game.speed_variant.speed.id, game.white_time, game.inc,
+            result_code, game.rated, result_reason, game.get_moves(),
+            game.when_ended)
 
         flags = '%s%s' % (game.speed_variant.speed.abbrev,
             game.speed_variant.variant.abbrev)

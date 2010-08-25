@@ -164,9 +164,8 @@ CREATE TABLE `game` (
   `black_name` varchar(17) NOT NULL,
   `black_rating` char(4),
   `eco` char(5) NOT NULL,
-  `variant` ENUM('normal', 'crazyhouse') NOT NULL,
-  `speed` ENUM ('lightning', 'blitz', 'standard', 'slow', 'correspondence')
-    NOT NULL,
+  `speed_id` TINYINT NOT NULL,
+  `variant_id` TINYINT NOT NULL,
   -- `private` BOOLEAN NOT NULL DEFAULT 0,
   `time` int(3) COMMENT 'initial time',
   `inc` int(3) COMMENT 'increment',
@@ -335,7 +334,7 @@ INSERT INTO `speed` VALUES (NULL,'corr','c');
 UNLOCK TABLES;
 
 LOCK TABLES `variant` WRITE;
-INSERT INTO `variant` VALUES (NULL,'normal','n');
+INSERT INTO `variant` VALUES (NULL,'chess','n');
 INSERT INTO `variant` VALUES (NULL,'crazyhouse','z');
 UNLOCK TABLES;
 

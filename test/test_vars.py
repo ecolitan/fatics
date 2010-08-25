@@ -120,7 +120,7 @@ class TestGameinfo(Test):
         self.expect("Challenge:", t2)
         t2.write('a\n')
 
-        self.expect('<g1> 1 p=0 t=normal r=0 u=1,0 it=120,12 i=120,12 pt=0 rt=0,0 ts=0,0 m=2 n=0', t)
+        self.expect('<g1> 1 p=0 t=chess r=0 u=1,0 it=120,12 i=120,12 pt=0 rt=0,0 ts=0,0 m=2 n=0', t)
         t.write('abort\n')
 
         self.close(t)

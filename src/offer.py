@@ -143,7 +143,7 @@ class Challenge(Offer):
         self.a = a
         self.b = b
 
-        self.variant_name = 'normal'
+        self.variant_name = 'chess'
 
         self.time = a.vars['time']
         self.inc = a.vars['inc']

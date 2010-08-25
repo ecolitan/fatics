@@ -45,11 +45,11 @@ class SpeedAndVariant(object):
         return self.speed == other.speed and self.variant == other.variant
 
     def __str__(self):
-        if self.variant.name == 'normal':
+        if self.variant.name == 'chess':
             # normal chess is not given explicitly, e.g. "blitz"
             return self.speed.name
         else:
-            return '%s %s' % (self.speed_name, self.variant.name)
+            return '%s %s' % (self.speed.name, self.variant.name)
 
 def init():
     for row in db.get_speeds():
