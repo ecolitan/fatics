@@ -112,6 +112,21 @@ class CommandTest(Test):
         self.deluser('testplayer')
         self.deluser('testplayer2')
 
+    def test_asetrating(self):
+        t = self.connect_as_admin()
+        t.write('asetrating admin blitz normal 2000 200 .005 100 75 35\n')
+        self.expect('Set blitz normal rating for admin.\r\n', t)
+        self.close(t)
+
+        t = self.connect_as_admin()
+        t.write('finger admin\n')
+        self.expect('blitz                    2000   200  0.005000     210', t)
+        t.write('asetrating admin blitz normal 0 0 0 0 0 0\n')
+        self.expect('Cleared blitz normal rating for admin.\r\n', t)
+        t.write('finger admin\n')
+        self.expect_not('blitz normal', t)
+        self.close(t)
+
 class PermissionsTest(Test):
     def test_permissions(self):
         t = self.connect_as_guest()

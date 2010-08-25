@@ -207,6 +207,7 @@ class VarList(object):
         BoolVar("ptime", False, N_("Your prompt will now show the time."), N_("Your prompt will now not show the time.")).persist().add_as_var()
         BoolVar("kibitz", True, N_("You will now hear kibitzes."), N_("You will not hear kibitzes.")).persist().add_as_var()
 
+        IntVar("kiblevel", 0, min=0, max=9999).persist().add_as_var()
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
         IntVar("height", 24, min=5).persist().add_as_var()

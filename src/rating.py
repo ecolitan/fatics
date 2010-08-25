@@ -36,6 +36,9 @@ class Rating(object):
     def __str__(self):
         return str(self.rating)
 
+    def __int__(self):
+        return self.rating
+
 class NoRating(object):
     def __init__(self, is_guest):
         self.is_guest = is_guest
@@ -63,6 +66,9 @@ class NoRating(object):
             return '++++'
         else:
             return '----'
+
+    def __int__(self):
+        return 0
 
 def update_ratings(game, white_score, black_score):
     wp = glicko2.Player(game.white_rating.glicko2_rating(),

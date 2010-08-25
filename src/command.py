@@ -655,7 +655,7 @@ class CommandList(object):
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
         for u in all:
-            if u.vars['kibitz']:
+            if u.vars['kibitz'] and (u.vars['kiblevel'] == 0 or int(rat) >= u.vars['kiblevel']):
                 if u != conn.user:
                     count += 1
                 # XXX localize for each user

@@ -351,8 +351,8 @@ class User(BaseUser):
 
     def del_rating(self, sv):
         db.user_del_rating(self.id, sv.speed.id, sv.variant.id)
-        if sv in self._rating:
-            del self.rating[sv]
+        if self._rating is not None and sv in self._rating:
+            del self._rating[sv]
 
     def _load_ratings(self):
         self._rating = {}
