@@ -38,6 +38,8 @@ class TestChannel(Test):
         t.write(', foo bar\n')
         self.expect("No previous channel", t)
 
+        t.write('-ch 100\n')
+
         t.write('+ch 100\n')
         self.expect("[100] added to your channel list", t)
 

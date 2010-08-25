@@ -6,7 +6,7 @@ import user
 import trie
 import admin
 import var
-import list
+import list_
 import channel
 import offer
 import game
@@ -79,6 +79,7 @@ class CommandList(object):
         self._add(Command('iset', 'wS', self.iset, admin.Level.user))
         self._add(Command('it', 'S', self.it, admin.Level.user))
         self._add(Command('ivariables', 'o', self.ivariables, admin.Level.user))
+        self._add(Command('kibitz', 'S', self.kibitz, admin.Level.user))
         self._add(Command('match', 'wt', self.match, admin.Level.user))
         self._add(Command('moves', 'n', self.moves, admin.Level.user))
         self._add(Command('news', 'p', self.news, admin.Level.user))
@@ -147,7 +148,7 @@ class CommandList(object):
 
     def addlist(self, args, conn):
         try:
-            ls = list.lists.get(args[0])
+            ls = list_.lists.get(args[0])
         except KeyError:
             conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
         except trie.NeedMore as e:
@@ -155,7 +156,7 @@ class CommandList(object):
         else:
             try:
                 ls.add(args[1], conn)
-            except list.ListError as e:
+            except list_.ListError as e:
                 conn.write(e.reason)
 
     def addplayer(self, args, conn):
@@ -638,27 +639,22 @@ class CommandList(object):
             var.vars['open'].set(conn.user, '1')
         offer.Challenge(conn.user, u, args[1])
 
-    def rmatch(self, args, conn):
-        if 'TD' not in conn.user.get_titles():
-            conn.write(_('Only TD programs are allowed to use this command\n'))
+    def kibitz(self, args, conn):
+        if conn.user.session.games:
+            g = conn.user.session.games.primary()
+        elif conn.user.session.observed:
+            g = list(conn.user.session.observed)[0]
+        else:
+            conn.write(_('You are not playing, examining, or observing a game.\n'))
             return
-        u1 = user.find.by_prefix_for_user(args[0], conn, online_only=True)
-        if not u1:
-            return
-        u2 = user.find.by_prefix_for_user(args[1], conn, online_only=True)
-        if not u2:
-            return
-        # ignore censor lists, noplay lists, and open var
-        if u1 == u2:
-            conn.write(_("A player cannot match himself or herself.\n"))
-            return
-        if len(u1.session.games) != 0:
-            conn.write(_("%s is playing a game.\n") % u1.name)
-            return
-        if len(u2.session.games) != 0:
-            conn.write(_("%s is playing a game.\n") % u2.name)
-            return
-        offer.Challenge(u1, u2, args[2])
+        name = conn.user.get_display_name()
+        all = list(g.observers)
+        if g.gtype == game.PLAYED:
+            all += [g.white, g.black]
+        assert(len(all) > 0)
+        for u in all:
+            # XXX localize for each user
+            u.write(_('%s(%s) kibitzes: %s\n') % (name, '----', args[0]))
 
     def moves(self, args, conn):
         # similar to "refresh"
@@ -669,6 +665,7 @@ class CommandList(object):
             if len(conn.user.session.games) > 0:
                 g = conn.user.session.games.primary()
             else:
+                # XXX observed games
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
         if g is not None:
             g.write_moves(conn)
@@ -786,6 +783,29 @@ class CommandList(object):
         g = conn.user.session.games.primary()
         g.resign(conn.user)
 
+    def rmatch(self, args, conn):
+        if 'TD' not in conn.user.get_titles():
+            conn.write(_('Only TD programs are allowed to use this command\n'))
+            return
+        u1 = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+        if not u1:
+            return
+        u2 = user.find.by_prefix_for_user(args[1], conn, online_only=True)
+        if not u2:
+            return
+        # ignore censor lists, noplay lists, and open var
+        if u1 == u2:
+            conn.write(_("A player cannot match himself or herself.\n"))
+            return
+        if len(u1.session.games) != 0:
+            conn.write(_("%s is playing a game.\n") % u1.name)
+            return
+        if len(u2.session.games) != 0:
+            conn.write(_("%s is playing a game.\n") % u2.name)
+            return
+        offer.Challenge(u1, u2, args[2])
+
+
     def set(self, args, conn):
         # val can be None if the user gave no value
         [name, val] = args
@@ -818,12 +838,12 @@ class CommandList(object):
 
     def showlist(self, args, conn):
         if args[0] is None:
-            for c in list.lists.itervalues():
+            for c in list_.lists.itervalues():
                 conn.write('%s\n' % c.name)
             return
 
         try:
-            ls = list.lists.get(args[0])
+            ls = list_.lists.get(args[0])
         except KeyError:
             conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
         except trie.NeedMore as e:
@@ -831,12 +851,12 @@ class CommandList(object):
         else:
             try:
                 ls.show(conn)
-            except list.ListError as e:
+            except list_.ListError as e:
                 conn.write(e.reason)
 
     def sublist(self, args, conn):
         try:
-            ls = list.lists.get(args[0])
+            ls = list_.lists.get(args[0])
         except KeyError:
             conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
         except trie.NeedMore as e:
@@ -844,7 +864,7 @@ class CommandList(object):
         else:
             try:
                 ls.sub(args[1], conn)
-            except list.ListError as e:
+            except list_.ListError as e:
                 conn.write(e.reason)
 
     def summon(self, args, conn):

@@ -17,6 +17,7 @@ class TestLang(Test):
     
     def test_lang_admin(self):
         t = self.connect_as_admin()
+        t.write('set lang en\n')
         t.write("who\n")
         self.expect("1 player displayed", t)
         t.write('set lang compat\n')
