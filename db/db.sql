@@ -275,6 +275,23 @@ CREATE TABLE rating (
   PRIMARY KEY(`rating_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+-- news
+DROP TABLE IF EXISTS `news_index`;
+CREATE TABLE news_index (
+  `news_id` int(4) NOT NULL AUTO_INCREMENT,
+  `news_title` VARCHAR(45) NOT NULL,
+  `news_date` date NOT NULL COMMENT 'when posted',
+  `news_poster` VARCHAR(17) NOT NULL,
+  `news_is_admin` BOOLEAN NOT NULL COMMENT 'normal or admin news item',
+  PRIMARY KEY(`news_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
+DROP TABLE IF EXISTS `news_line`;
+CREATE TABLE news_line (
+  `news_id` int(8) NOT NULL,
+  `num` tinyint UNSIGNED NOT NULL COMMENT 'line number',
+  `txt` VARCHAR(1024) NOT NULL COMMENT 'news line text'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- data
 LOCK TABLES `user` WRITE;

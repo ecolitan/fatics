@@ -73,7 +73,7 @@ class DB(object):
                 cursor.close()
                 raise DeleteError()
         cursor.close()
-    
+
     def user_set_alias(self, user_id, name, val):
         cursor = self.db.cursor()
         if val is not None:
@@ -84,7 +84,7 @@ class DB(object):
                 cursor.close()
                 raise DeleteError()
         cursor.close()
-    
+
     def user_get_aliases(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT name,val FROM user_alias WHERE user_id=%s ORDER BY name ASC""", (user_id,))
@@ -326,9 +326,9 @@ class DB(object):
             black_name, black_rating, eco, variant_name, speed, time, inc,
             result, rated, result_reason, moves,
             when_ended))
-        id = cursor.lastrowid
+        game_id = cursor.lastrowid
         cursor.close()
-        return id
+        return game_id
 
     def user_get_history(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
@@ -389,6 +389,23 @@ class DB(object):
     def get_speeds(self):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT speed_id,speed_name,speed_abbrev FROM speed""")
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    # news
+    def add_news(self, title, user, is_admin):
+        is_admin = '1' if is_admin else '0'
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO news_index SET news_title=%s,news_poster=%s,news_date=CURDATE(),news_is_admin=%s""", (title,user.name,is_admin))
+        news_id = cursor.lastrowid
+        cursor.close()
+        return news_id
+
+    def get_recent_news(self, is_admin):
+        is_admin = '1' if is_admin else '0'
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT news_id,news_title,news_date,news_poster FROM news_index WHERE news_is_admin=%s ORDER BY news_id DESC LIMIT 10""", (is_admin,))
         rows = cursor.fetchall()
         cursor.close()
         return rows

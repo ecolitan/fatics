@@ -56,6 +56,12 @@ class CommandList(object):
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
         self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
         self._add(Command('asetrating', 'wwwddfddd', self.asetrating, admin.Level.admin))
+        self._add(Command('cnewsd', 'd', self.cnewse, admin.Level.admin))
+        self._add(Command('cnewse', 'dp', self.cnewse, admin.Level.admin))
+        self._add(Command('cnewsf', 'dT', self.cnewsf, admin.Level.admin))
+        self._add(Command('cnewsi', 'S', self.cnewsi, admin.Level.admin))
+        self._add(Command('cnewsp', 'd', self.cnewsp, admin.Level.admin))
+        self._add(Command('cnewst', 'dS', self.cnewst, admin.Level.admin))
         self._add(Command('cshout', 'S', self.cshout, admin.Level.user))
         self._add(Command('date', '', self.date, admin.Level.user))
         self._add(Command('decline', 'n', self.decline, admin.Level.user))
@@ -74,6 +80,7 @@ class CommandList(object):
         self._add(Command('ivariables', 'o', self.ivariables, admin.Level.user))
         self._add(Command('match', 'wt', self.match, admin.Level.user))
         self._add(Command('moves', 'n', self.moves, admin.Level.user))
+        self._add(Command('news', 'p', self.news, admin.Level.user))
         self._add(Command('nuke', 'w', self.nuke, admin.Level.admin))
         self._add(Command('observe', 'i', self.observe, admin.Level.user))
         self._add(Command('password', 'WW', self.password, admin.Level.user))
@@ -266,6 +273,7 @@ class CommandList(object):
                 conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
                 if u.is_online:
                     u.write(_('\n%s has changed your password.\n') % conn.user.name)
+
     def asetrating(self, args, conn):
         (name, speed_name, variant_name, urating, rd, volatility, win,
             loss, draw) = args
@@ -291,6 +299,22 @@ class CommandList(object):
             conn.write(A_('Set %s %s rating for %s.\n' %
                 (speed_name, variant_name, name)))
         # notify the user?
+
+    def cnewsd(self, args, conn):
+        pass
+    def cnewse(self, args, conn):
+        pass
+    def cnewsf(self, args, conn):
+        pass
+    def cnewsi(self, args, conn):
+        if len(args[0]) > 45:
+            conn.write(A_('The news title exceeds the 45-character maximum length; not posted.\n'))
+            return
+        db.add_news(args[0], conn.user, is_admin=False)
+    def cnewsp(self, args, conn):
+        pass
+    def cnewst(self, args, conn):
+        pass
 
     def cshout(self, args, conn):
         if conn.user.is_guest:
@@ -624,6 +648,16 @@ class CommandList(object):
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
         if g is not None:
             g.write_moves(conn)
+
+    def news(self, args, conn):
+        if args[0] is not None:
+            conn.write('TODO: news #\n')
+        else:
+            news = db.get_recent_news(is_admin=False)
+            if len(news) == 0:
+                conn.write(_('There is no news.\n'))
+            for item in reversed(news):
+                conn.write('%4d (%s) %s\n' % (item['news_id'], item['news_date'], item['news_title']))
 
     def nuke(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)
