@@ -400,4 +400,27 @@ class TestMoves(Test):
         t2.write('moves\n')
         self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t2)
 
+
+class TestGames(Test):
+    def test_games(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('games\n')
+        self.expect('There are no games in progress', t)
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: GuestABCD (++++) admin (----) unrated lightning 1 0', t)
+        self.expect('Creating: GuestABCD (++++) admin (----) unrated lightning 1 0', t2)
+
+        t.write('games\n')
+        #self.expect('')
+        t.write('abort\n')
+        t2.write('abort\n')
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -66,6 +66,7 @@ class CommandList(object):
         self._add(Command('flag', '', self.flag, admin.Level.user))
         self._add(Command('follow', 'w', self.follow, admin.Level.user))
         self._add(Command('forward', 'p', self.forward, admin.Level.user))
+        self._add(Command('games', 'o', self.games, admin.Level.user))
         self._add(Command('help', 'o', self.help, admin.Level.user))
         self._add(Command('history', 'o', self.history, admin.Level.user))
         self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
@@ -480,6 +481,17 @@ class CommandList(object):
             conn.write(_("You are not examining a game.\n"))
             return
         conn.write('TODO: forward %d\n' % n)
+
+    def games(self, args, conn):
+        if not game.games.values():
+            conn.write(_('There are no games in progress.\n'))
+            return
+        if args[0] is not None:
+            conn.write('TODO: games PARAM\n')
+        count = 0
+        for g in game.games.values():
+            count += 1
+        conn.write(ngettext('  %(count)d game displayed (of %(total)3d in progress).\n', '  %(count)d games displayed (of %(total)d in progress).\n', count) % {'count': count, 'total': len(game.games)})
 
     def help(self, args, conn):
         if conn.user.admin_level > admin.level.user:
