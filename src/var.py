@@ -205,6 +205,7 @@ class VarList(object):
         BoolVar("bell", True, N_("You will now hear beeps."), N_("You will not hear beeps.")).persist().add_as_var()
         BoolVar("autoflag", True, N_("Auto-flagging enabled."), N_("Auto-flagging disabled.")).persist().add_as_var()
         BoolVar("ptime", False, N_("Your prompt will now show the time."), N_("Your prompt will now not show the time.")).persist().add_as_var()
+        BoolVar("kibitz", True, N_("You will now hear kibitzes."), N_("You will not hear kibitzes.")).persist().add_as_var()
 
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()

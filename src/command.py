@@ -652,9 +652,15 @@ class CommandList(object):
         if g.gtype == game.PLAYED:
             all += [g.white, g.black]
         assert(len(all) > 0)
+        count = 0
+        rat = conn.user.get_rating(g.speed_variant)
         for u in all:
-            # XXX localize for each user
-            u.write(_('%s(%s) kibitzes: %s\n') % (name, '----', args[0]))
+            if u.vars['kibitz']:
+                if u != conn.user:
+                    count += 1
+                # XXX localize for each user
+                u.write(_('%s(%s)[%d] kibitzes: %s\n') % (name, rat, g.number, args[0]))
+        conn.write(ngettext('(kibitzed to %d player)\n', '(kibitzed to %d players)\n', count) % count)
 
     def moves(self, args, conn):
         # similar to "refresh"
