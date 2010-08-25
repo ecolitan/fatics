@@ -402,6 +402,16 @@ class DB(object):
         cursor.close()
         return news_id
 
+    def delete_news(self, news_id):
+        cursor = self.db.cursor()
+        try:
+            cursor.execute("""DELETE FROM news_index WHERE news_id=%s LIMIT 1""", (news_id,))
+            if cursor.rowcount != 1:
+                raise DeleteError()
+            cursor.execute("""DELETE FROM news_line WHERE news_id=%s""", (news_id,))
+        finally:
+            cursor.close()
+
     def get_recent_news(self, is_admin):
         is_admin = '1' if is_admin else '0'
         cursor = self.db.cursor(cursors.DictCursor)

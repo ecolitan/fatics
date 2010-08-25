@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
 
     def expect_re(self, s, t, timeout=2):
         ret = t.expect([s], timeout)
-        self.assert_(ret[0] == 1)
+        self.assert_(ret[0] == 0)
         return ret[1]
 
     def expect_command_prints_nothing(self, cmd, t, timeout=0.2):

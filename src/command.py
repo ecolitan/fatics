@@ -19,7 +19,7 @@ from online import online
 from reload import reload
 from server import server
 from command_parser import BadCommandError
-from db import db
+from db import db, DeleteError
 
 class QuitException(Exception):
     pass
@@ -56,7 +56,7 @@ class CommandList(object):
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
         self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
         self._add(Command('asetrating', 'wwwddfddd', self.asetrating, admin.Level.admin))
-        self._add(Command('cnewsd', 'd', self.cnewse, admin.Level.admin))
+        self._add(Command('cnewsd', 'd', self.cnewsd, admin.Level.admin))
         self._add(Command('cnewse', 'dp', self.cnewse, admin.Level.admin))
         self._add(Command('cnewsf', 'dT', self.cnewsf, admin.Level.admin))
         self._add(Command('cnewsi', 'S', self.cnewsi, admin.Level.admin))
@@ -304,14 +304,26 @@ class CommandList(object):
     def cnewsd(self, args, conn):
         pass
     def cnewse(self, args, conn):
-        pass
+        exp = args[1]
+        if exp is None:
+            exp = 0
+        if exp != 0:
+            conn.write(A_('News expiration dates are not currently supported.\n'))
+            return
+        try:
+            db.delete_news(args[0])
+        except DeleteError:
+            conn.write(A_('News item %d not found.\n') % args[0])
+        else:
+            conn.write(A_('Deleted news item %d.\n') % args[0])
     def cnewsf(self, args, conn):
         pass
     def cnewsi(self, args, conn):
         if len(args[0]) > 45:
             conn.write(A_('The news title exceeds the 45-character maximum length; not posted.\n'))
             return
-        db.add_news(args[0], conn.user, is_admin=False)
+        news_id = db.add_news(args[0], conn.user, is_admin=False)
+        conn.write(A_('Created news item %d.\n') % news_id)
     def cnewsp(self, args, conn):
         pass
     def cnewst(self, args, conn):

@@ -73,6 +73,7 @@ class TestMatch(Test):
     def test_accept(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
+        t2.write('set open 1\n')
 
         t.write('match admin\n')
         self.expect('Challenge:', t2)
@@ -102,7 +103,7 @@ class TestMatch(Test):
     def test_decline(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin\n')
         self.expect('Challenge:', t2)
         t2.write('decline\n')
@@ -111,11 +112,11 @@ class TestMatch(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_counteroffer(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('match Guest 2 0\n')
@@ -124,11 +125,11 @@ class TestMatch(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_update_offer(self):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
-        
+
         t.write('match admin 1 0\n')
         self.expect('Challenge:', t2)
         t.write('match admin 1 0 white\n')
@@ -137,7 +138,7 @@ class TestMatch(Test):
 
         self.close(t)
         self.close(t2)
-    
+
     def test_offer_identical(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
