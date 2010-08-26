@@ -425,7 +425,7 @@ class CommandList(object):
 
     def examine(self, args, conn):
         if len(conn.user.session.games) != 0:
-            if conn.user.session.games.values()[0].gtype == game.EXAMINE:
+            if conn.user.session.games.primary().gtype == game.EXAMINED:
                 conn.write(_("You are already examining a game.\n"))
             else:
                 conn.write(_("You are playing a game.\n"))

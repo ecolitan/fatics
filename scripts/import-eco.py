@@ -8,6 +8,10 @@ import sys
 import MySQLdb
 import re
 
+import __builtin__
+__builtin__.__dict__['N_'] = lambda s: s
+__builtin__.__dict__['A_'] = lambda s: s
+
 sys.path.insert(0, 'src/')
 import variant.chess
 

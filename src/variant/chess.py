@@ -8,7 +8,9 @@ import copy
 import random
 from array import array
 
-from game import WHITE, BLACK
+#from game import WHITE, BLACK, PLAYED, EXAMINED
+(WHITE, BLACK) = range(2)
+(EXAMINED, PLAYED) = range(2)
 from timer import timer
 from speed_variant import IllegalMoveError
 
@@ -1218,15 +1220,29 @@ class Chess(object):
         w_ooo = int(check_castle_flags(self.pos.castle_flags, True, False))
         b_oo = int(check_castle_flags(self.pos.castle_flags, False, True))
         b_ooo = int(check_castle_flags(self.pos.castle_flags, False, False))
-        if self.game.white == user:
-            relation = 1 if self.pos.wtm else -1
+        if self.game.gtype == EXAMINED:
             flip = 0
-        elif self.game.black == user:
-            relation = 1 if not self.pos.wtm else -1
-            flip = 1
+            if user in self.game.players:
+                relation = 2
+            elif user in self.game.observers:
+                relation = -2
+            else:
+                relation = -3
+        elif self.game.gtype == PLAYED:
+            if self.game.white == user:
+                relation = 1 if self.pos.wtm else -1
+                flip = 0
+            elif self.game.black == user:
+                relation = 1 if not self.pos.wtm else -1
+                flip = 1
+            elif user in self.game.observers:
+                relation = 0
+                flip = 0
+            else:
+                relation = -3
+                flip = 0
         else:
-            relation = -3
-            flip = 0
+            assert(False)
         full_moves = self.pos.ply // 2 + 1
         if user.session.ivars['ms']:
             white_clock = int(round(1000 * self.game.clock.get_white_time()))

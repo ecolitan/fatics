@@ -67,14 +67,11 @@ class Game(object):
         self.pending_offers = []
 
     def send_boards(self):
-        self.white.send_board(self)
-        if self.white.has_timeseal():
-            self.white.write('%s\n' % timeseal.PING)
-            self.white.session.ping_sent = True
-        self.black.send_board(self)
-        if self.black.has_timeseal():
-            self.black.write('%s\n' % timeseal.PING)
-            self.black.session.ping_sent = True
+        for p in self.players:
+            p.send_board(self)
+            if p.has_timeseal():
+                p.write('%s\n' % timeseal.PING)
+                p.session.ping_sent = True
         for u in self.observers:
             u.send_board(self)
 
@@ -84,7 +81,7 @@ class Game(object):
     def __hash__(self):
         return self.number
 
-    def next_move(self, t, conn):
+    def next_move(self, mv, t, conn):
         self.send_boards()
 
         if self.variant.pos.is_checkmate:
@@ -216,7 +213,7 @@ class Game(object):
         return ret
 
     def write_moves(self, conn):
-        # don't translate for now since clients parse these messages
+        # don't translate since clients parse these messages
         conn.write("\nMovelist for game %d:\n\n" % self.number)
 
         conn.write("%s (%s) vs. %s (%s) --- %s\n" % (self.white.name,
@@ -272,7 +269,7 @@ class Game(object):
                 conn.write(_('Illegal move (%s)\n') % s)
             else:
                 self.variant.do_move(mv, s)
-                self.next_move(t, conn)
+                self.next_move(mv, t, conn)
         return parsed
 
 class PlayedGame(Game):
@@ -290,6 +287,7 @@ class PlayedGame(Game):
             assert(side == BLACK)
             self.white = chal.b
             self.black = chal.a
+        self.players = [self.white, self.black]
 
         self.speed_variant = chal.speed_variant
         self.white_rating = self.white.get_rating(self.speed_variant)
@@ -348,7 +346,7 @@ class PlayedGame(Game):
     def _pick_color(self, a, b):
         return random.choice([WHITE, BLACK])
 
-    def next_move(self, t, conn):
+    def next_move(self, mv, t, conn):
         # decline all offers to the player who just moved
         u = self.get_user_to_move()
         offers = [o for o in self.pending_offers if o.a == u]
@@ -378,7 +376,7 @@ class PlayedGame(Game):
             time_str = timer.hms(0.0)
         self.variant.pos.get_last_move().time_str = time_str
 
-        super(PlayedGame, self).next_move(t, conn)
+        super(PlayedGame, self).next_move(mv, t, conn)
 
 
     def resign(self, user):
@@ -402,10 +400,17 @@ class ExaminedGame(Game):
         super(ExaminedGame, self).__init__()
         self.gtype = EXAMINED
         self.user = user
+        self.players = [user]
         user.session.games.add(self, '[examined]')
         self.speed_variant = speed_variant.from_names('untimed', 'chess')
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
+
+    def next_move(self, mv, t, conn):
+        super(ExaminedGame, self).next_move(mv, t, conn)
+        for p in self.players + self.observers:
+            p.write(N_('%s moves: %s\n') % (conn.user.name, mv.to_san()))
+
 
     def abort(self, msg):
         self.user.write(_('You are no longer examining game %d.\n') % self.number)

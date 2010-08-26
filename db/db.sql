@@ -325,7 +325,7 @@ INSERT INTO `user_title` VALUES (1,1,1);
 UNLOCK TABLES;
 
 LOCK TABLES `speed` WRITE;
-INSERT INTO `speed` VALUES (NULL,'nonstandard','?');
+INSERT INTO `speed` VALUES (NULL,'untimed','?');
 INSERT INTO `speed` VALUES (NULL,'lightning','l');
 INSERT INTO `speed` VALUES (NULL,'blitz','b');
 INSERT INTO `speed` VALUES (NULL,'standard','s');
