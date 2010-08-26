@@ -5,6 +5,10 @@ variant_ids = {}
 speed_names = {}
 variant_names = {}
 
+class IllegalMoveError(Exception):
+    def __init__(self, reason):
+        self.reason = reason
+
 class Speed(object):
     def __init__(self, id, name, abbrev):
         self.id = id

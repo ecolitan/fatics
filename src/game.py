@@ -256,6 +256,24 @@ class Game(object):
                 (self.number, self.white.name, self.black.name,
                 ' '.join(olist), len(olist)))
 
+    def parse_move(self, s, t, conn):
+        try:
+            mv = self.variant.parse_move(s, t, conn)
+            parsed = mv is not None
+            illegal = False
+        except speed_variant.IllegalMoveError:
+            illegal = True
+            parsed = True
+        if parsed:
+            if self.gtype == PLAYED and (
+                    self.get_user_side(conn.user) != self.variant.get_turn()):
+                conn.write(_('It is not your move.\n'))
+            elif illegal:
+                conn.write(_('Illegal move (%s)\n') % s)
+            else:
+                self.variant.do_move(mv, s)
+                self.next_move(t, conn)
+        return parsed
 
 class PlayedGame(Game):
     def __init__(self, chal):
@@ -385,7 +403,7 @@ class ExaminedGame(Game):
         self.gtype = EXAMINED
         self.user = user
         user.session.games.add(self, '[examined]')
-        self.speed_variant = speed_variant.from_names('standard', 'chess')
+        self.speed_variant = speed_variant.from_names('untimed', 'chess')
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
 

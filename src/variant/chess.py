@@ -8,10 +8,9 @@ import copy
 import random
 from array import array
 
-#from game import WHITE, BLACK
-(WHITE, BLACK) = range(2)
-from speed_variant import Variant
+from game import WHITE, BLACK
 from timer import timer
+from speed_variant import IllegalMoveError
 
 """
 0x88 board representation; pieces are represented as ASCII,
@@ -30,9 +29,6 @@ the same as FEN. A blank square is '-'.
 
 class BadFenError(Exception):
     def __init__(self, reason=None):
-        self.reason = reason
-class IllegalMoveError(Exception):
-    def __init__(self, reason):
         self.reason = reason
 
 piece_moves = {
@@ -637,7 +633,7 @@ class Position(object):
             hash ^= zobrist.ep_hash(self.ep)
         hash ^= zobrist.castle_hash(self.castle_flags)
         return hash
-    
+
     def undo_move(self, mv):
         """undo the move"""
         self.wtm = not self.wtm
@@ -1181,7 +1177,6 @@ class Chess(object):
         and should be processed further."""
 
         mv = None
-        illegal = False
 
         try:
             # castling
@@ -1196,28 +1191,15 @@ class Chess(object):
                 mv = self.pos.move_from_san(s)
         except IllegalMoveError as e:
             #print e.reason
-            #raise
-            illegal = True
+            raise
 
-        if mv or illegal:
-            if (self.game.get_user_side(conn.user) == WHITE) != \
-                    self.pos.wtm:
-                #conn.write('user %d, wtm %d\n' % conn.user.session.is_white, self.pos.wtm)
-                conn.write(_('It is not your move.\n'))
-            elif illegal:
-                conn.write('Illegal move (%s)\n' % s)
-            else:
-                mv.to_san()
-                self.pos.make_move(mv)
-                self.pos.detect_check()
-                mv.add_san_decorator()
-                if False:
-                    if mv.to_san() != s:
-                        print 'hmm %s; %s' % (mv.to_san(), s)
-                    assert(mv.to_san() == s)
-                self.game.next_move(t, conn)
+        return mv
 
-        return mv or illegal
+    def do_move(self, mv, s):
+        mv.to_san()
+        self.pos.make_move(mv)
+        self.pos.detect_check()
+        mv.add_san_decorator()
 
     def get_turn(self):
         return WHITE if self.pos.wtm else BLACK
