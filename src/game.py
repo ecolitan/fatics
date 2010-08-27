@@ -411,6 +411,7 @@ class ExaminedGame(Game):
         self.speed_variant = speed_variant.from_names('untimed', 'chess')
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
+        self.send_boards()
 
     def next_move(self, mv, t, conn):
         self.variant.pos.get_last_move().time = 0.0
@@ -438,6 +439,10 @@ class ExaminedGame(Game):
             for p in self.observers:
                 p.write(N_('Game %d (which you were observing) has no examiners.\n') % self.number)
             self.free()
+
+    def result(self, msg, result_code):
+        for p in self.players + list(self.observers):
+            p.write(N_('Game %d: %s %s\n') % (self.number, msg, result_code))
 
     def free(self):
         super(ExaminedGame, self).free()

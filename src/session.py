@@ -3,6 +3,7 @@ import copy
 
 import var
 from timer import timer
+import game
 from game_list import GameList
 
 # user state that is per-session and not saved to persistent storage
@@ -58,7 +59,7 @@ class Session(object):
         self.games.leave_all(self.user)
         del self.offers_received[:]
         del self.offers_sent[:]
-        if self.games:
+        if self.games and self.games.primary().gtype == game.PLAYED:
             self.conn.write('Your game will be lost because adjourning is not implemented.\n')
 
         # unobserve games
