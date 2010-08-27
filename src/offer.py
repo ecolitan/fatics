@@ -143,7 +143,7 @@ class Challenge(Offer):
         self.a = a
         self.b = b
 
-        self.variant_name = 'chess'
+        self.variant_name = None
 
         self.time = a.vars['time']
         self.inc = a.vars['inc']
@@ -172,6 +172,10 @@ class Challenge(Offer):
             side_str = " [%s]" % game.side_to_str(self.side)
         else:
             side_str = ''
+
+        if self.variant_name is None:   
+            # chess is the default, of course
+            self.variant_name = 'chess'
 
         rated_str = "rated" if self.rated else "unrated"
 
@@ -283,58 +287,62 @@ class Challenge(Offer):
             raise command_parser.BadCommandError()
         self.side = val
 
-    def _set_wild(self, val):
+    def _set_variant_name(self, val):
+        if self.variant_name is not None:
+            # conflicting variants
+            raise command_parser.BadCommandError()
         self.variant_name = val
 
+    _wild_re = re.compile('w(\d+)')
     def _parse_opts(self, opts):
         args = re.split(r'\s+', opts)
-        times = []
+        if not args:
+            return
+
         do_wild = False
+        times = []
         for w in args:
-            try:
-                num = int(w, 10)
-            except ValueError:
-                pass
-            else:
-                if do_wild:
-                    do_wild = False
-                    self._set_wild(w)
-                if len(times) > 3:
-                    # no more than 4 time values should be given
-                    raise command_parser.BadCommandError()
-                times.append(num)
+            if not do_wild:
+                try:
+                    times.append(int(w))
+                    continue
+                except ValueError:
+                    pass
+
+            if do_wild:
+                self._set_variant_name(w)
+                do_wild = False
                 continue
 
             if w in ['unrated', 'u']:
                 self._set_rated(False)
-
             elif w in ['rated', 'r']:
                 self._set_rated(True)
-
             elif w in ['white', 'w']:
                 self._set_side(WHITE)
-
             elif w in ['black', 'b']:
                 self._set_side(BLACK)
 
+            elif w in speed_variant.variant_names:
+                self._set_variant_name(w)
+
+            elif w == 'wild':
+                do_wild = True
             else:
-                m = re.match('w(\d+)', w)
+                m = re.match(self._wild_re, w)
                 if m:
-                    self._set_wild(m.group(1))
-                elif w == 'wild':
-                    do_wild = True
+                    self._set_variant_name(m.group(1))
                 else:
+                    #print('got unknown keyword %s' % w)
                     raise command_parser.BadCommandError()
 
-        if len(times) == 0:
-            pass
-        elif len(times) == 1:
-            self.time = times[0]
-            self.inc = 0
+        if len(times) > 2:
+            # time odds not supported
+            raise command_parser.BadCommandError()
         elif len(times) == 2:
             self.time = times[0]
             self.inc = times[1]
-        else:
-            raise RuntimeError('internal error parsing match times')
+        elif len(times) == 1:
+            self.time = times[0]
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

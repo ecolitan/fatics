@@ -220,7 +220,7 @@ interest.
 * Time odds (It appears they were once possible with the old FICS but
 the feature was removed.)  A similar effect can be achieved if one
 player simply grants moretime at the beginning of a game.  It is not
-currently possible to give different increments to each player, but
+possible to give different increments to each player this way, but
 that seems like a very esoteric feature.
 * Increase history games to 100.  Just use hstat instead?
 
@@ -231,7 +231,7 @@ follows the principle of "gods can do anything".
 possible to set a guest's adminlevel).
 
 == Internal differences ==
-* Server is written in Python 2.6 with twisted (the original FICS
+* Server is written in Python 2.7 with twisted (the original FICS
 is in C).  I/O is asynchronous, and on Linux 2.6, epoll() is used for
 better scalability than the traditional select().
 * The server uses a relational database for better load balancing
@@ -243,4 +243,8 @@ stores each player's lists of challenges sent and received separately.
 tests for set membership in O(1) average time and O(n) worst-case.
 * (Minor) Channel tells no longer iterate over all logged-in users, but
 only users subscribed to the channel.
+
+== Errors in FICS documentation ==
+* "help match" says "Matching yourself ( "match your_handle") is a way to enter
+   examine mode".
 

@@ -41,6 +41,18 @@ class TestMatch(Test):
         t.write('match admin 1 2 3 4 5\n')
         self.expect('Usage: ', t)
 
+        # conflicting colors
+        t.write('match admin white black\n')
+        self.expect('Usage: ', t)
+
+        # conflicting variants
+        t.write('match admin chess crazyhouse\n')
+        self.expect('Usage: ', t)
+
+        # conflicting ratedness
+        t.write('match admin rated unrated\n')
+        self.expect('Usage: ', t)
+
         self.close(t)
         self.close(t2)
 
@@ -159,6 +171,20 @@ class TestMatch(Test):
         t2.write('match Guest 1 2 black\n')
         self.expect('Accepting the match offer', t2)
         self.expect('accepts your match offer', t)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_match_order(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t.write('withdraw\n')
+
+        t.write('match 1 0 admin white\n')
+        self.expect('No user named "1"', t)
 
         self.close(t)
         self.close(t2)
