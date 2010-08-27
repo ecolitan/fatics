@@ -231,7 +231,7 @@ class Game(object):
                 move_str = '...'
             else:
                 mv = self.variant.pos.history.get_move(i)
-                move_str = '%-7s (%s)' % (mv.to_san(), mv.time_str)
+                move_str = '%-7s (%s)' % (mv.to_san(), timer.hms(mv.time, conn.user))
             if i % 2 == 0:
                 conn.write('%3d.  %-23s ' % (int((i + 3) / 2),move_str))
             else:
@@ -354,17 +354,17 @@ class PlayedGame(Game):
             o.decline()
 
         #print(self.variant.to_style12(self.white))
-        time_str = None
+        time = 0.0
         if self.is_active and self.variant.pos.ply > 1:
             moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
                 if conn.user.has_timeseal():
                     assert(conn.session.ping_reply_time != None)
-                    print("t %d, orig %d" % (t, conn.session.ping_reply_time))
+                    #print("t %d, orig %d" % (t, conn.session.ping_reply_time))
                     elapsed = (t - conn.session.ping_reply_time) / 1000.0
-                    time_str = self.clock.update(moved_side, elapsed)
+                    time = self.clock.update(moved_side, elapsed)
                 else:
-                    time_str = self.clock.update(moved_side)
+                    time = self.clock.update(moved_side)
             if self.get_user_to_move().vars['autoflag']:
                 self.clock.check_flag(self, moved_side)
             if self.is_active:
@@ -372,9 +372,7 @@ class PlayedGame(Game):
                     self.clock.add_increment(moved_side)
                 self.clock.start(self.variant.get_turn())
 
-        if time_str is None:
-            time_str = timer.hms(0.0)
-        self.variant.pos.get_last_move().time_str = time_str
+        self.variant.pos.get_last_move().time = time
 
         super(PlayedGame, self).next_move(mv, t, conn)
 
@@ -409,7 +407,7 @@ class ExaminedGame(Game):
             self)
 
     def next_move(self, mv, t, conn):
-        self.variant.pos.get_last_move().time_str = '0:00'
+        self.variant.pos.get_last_move().time = 0.0
         super(ExaminedGame, self).next_move(mv, t, conn)
         for p in self.players + list(self.observers):
             p.write(N_('%s moves: %s\n') % (conn.user.name, mv.to_san()))

@@ -109,6 +109,32 @@ class TestIvars(Test):
         self.expect("Ivars set.", t)
         t.close()
 
+    def test_ms(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t3 = self.connect_as_guest()
+        t3.write('iset ms 0\n')
+        self.expect('ms unset', t3)
+        t3.write('ref 1\n')
+        self.expect('(0:00)', t3)
+        self.expect_not('(0:00.000)', t3)
+        t3.write('iset ms 1\n')
+        self.expect('ms set', t3)
+        t3.write('ref 1\n')
+        self.expect('(0:00.000)', t3)
+        self.expect_not('(0:00)', t3)
+        self.close(t3)
+
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.close(t)
+        self.close(t2)
 
 class TestGameinfo(Test):
     def test_gameinfo(self):

@@ -40,7 +40,7 @@ class FischerClock(Clock):
             self._white_time -= elapsed
         else:
             self._black_time -= elapsed
-        return '%s' % timer.timer.hms(elapsed)
+        return elapsed
 
     def get_white_time(self):
         ret = self._white_time

@@ -144,7 +144,7 @@ class Move(object):
         self.is_capture = self.capture != '-'
         self.is_ep = is_ep
         self.new_ep = new_ep
-        self.time_str = None
+        self.time = None
         self._san = None
         self._verbose_alg = None
 
@@ -1260,12 +1260,12 @@ class Chess(object):
         full_moves = self.pos.ply // 2 + 1
         last_mv = self.pos.get_last_move()
         if last_mv is None:
-            last_move_time_str = timer.hms(0.0)
+            last_move_time_str = timer.hms(0.0, user)
             last_move_san = 'none'
             last_move_verbose = 'none'
         else:
-            assert(last_mv.time_str != None)
-            last_move_time_str = last_mv.time_str
+            assert(last_mv.time is not None)
+            last_move_time_str = timer.hms(last_mv.time, user)
             last_move_san = last_mv.to_san()
             last_move_verbose = last_mv.to_verbose_alg()
 

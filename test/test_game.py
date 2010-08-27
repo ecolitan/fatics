@@ -334,13 +334,13 @@ class TestRefresh(Test):
         t.write('set style 12\n')
         t2.write('set style 12\n')
 
-        t.write('match admin white 1 0\n')
+        t.write('match admin white 7 9\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
 
-        self.expect('<12> ', t)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin 1 7 9 39 39 420 420 1 none (0:00) none 0 0 0', t)
         self.expect('<12> ', t2)
 
         t.write('refresh\n')
@@ -353,7 +353,7 @@ class TestRefresh(Test):
         t3.write('re 999\n')
         self.expect('There is no such game', t3)
         t3.write('re 1\n')
-        self.expect('<12> ', t3)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin -3 7 9 39 39 420 420 1 none (0:00) none 0 0 0', t3)
         t3.write('re nosuchuser\n')
         self.expect('No user named "nosuchuser" is logged in', t3)
         t3.write('REF GUESTDEF\n')
@@ -370,7 +370,9 @@ class TestMoves(Test):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
+        t.write('iset ms 1\n')
         t2.write('set style 12\n')
+        t2.write('iset ms 1\n')
 
         t2.write('moves\n')
         self.expect('You are not playing, examining, or observing a game', t2)

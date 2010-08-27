@@ -19,18 +19,24 @@ class Timer(object):
         ret = ret + ngettext("%d second", "%d seconds", secs) % secs
         return ret
 
-    def hms(self, secs):
+    def hms(self, secs, user):
         hours = int(secs // 3600)
         secs = secs % 3600
         mins = int(secs // 60)
         secs = secs % 60
 
-        if hours != 0:
-            ret = '%d:%d:%06.3f' % (hours, mins, secs)
+        if user.session.ivars['ms']:
+            if hours != 0:
+                ret = '%d:%02d:%06.3f' % (hours, mins, secs)
+            else:
+                ret = '%d:%06.3f' % (mins, secs)
         else:
-            ret = '%d:%06.3f' % (mins, secs)
+            if hours != 0:
+                ret = '%d:%02d:%02d' % (hours, mins, secs)
+            else:
+                ret = '%d:%02d' % (mins, secs)
         return ret
-        
+
 timer = Timer()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
