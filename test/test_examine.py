@@ -37,6 +37,11 @@ class TestExamine(Test):
         moves = ['e4', 'f5', 'h4', 'g5', 'Qh5#']
         self._assert_game_is_legal(moves, 'Game 1: Black checkmated 1-0')
 
+    def test_examine_stalemate(self):
+        # by Sam Loyd
+        moves = ['e3', 'a5', 'Qh5', 'Ra6', 'Qxa5', 'h5', 'Qxc7', 'Rah6', 'h4', 'f6', 'Qxd7+', 'Kf7', 'Qxb7', 'Qd3', 'Qxb8', 'Qh7', 'Qxc8', 'Kg6', 'Qe6']
+        self._assert_game_is_legal(moves, 'Game 1: Game drawn by stalemate 1/2-1/2')
+
     def _assert_game_is_legal(self, moves, result=None):
         t = self.connect_as_user('GuestWXYZ', '')
         t.write('ex\n')
