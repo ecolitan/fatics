@@ -399,7 +399,9 @@ class ExaminedGame(Game):
     def __init__(self, user):
         super(ExaminedGame, self).__init__()
         self.gtype = EXAMINED
-        self.user = user
+        self.white_time = 0
+        self.black_time = 0
+        self.inc = 0
         self.players = [user]
         user.session.games.add(self, '[examined]')
         self.speed_variant = speed_variant.from_names('untimed', 'chess')
@@ -407,17 +409,20 @@ class ExaminedGame(Game):
             self)
 
     def next_move(self, mv, t, conn):
+        self.variant.pos.get_last_move().time_str = '0:00'
         super(ExaminedGame, self).next_move(mv, t, conn)
-        for p in self.players + self.observers:
+        for p in self.players + list(self.observers):
             p.write(N_('%s moves: %s\n') % (conn.user.name, mv.to_san()))
 
 
     def abort(self, msg):
-        self.user.write(_('You are no longer examining game %d.\n') % self.number)
+        for p in self.players:
+            p.write(_('You are no longer examining game %d.\n') % self.number)
         self.free()
 
     def free(self):
         super(ExaminedGame, self).free()
-        self.user.session.games.free('[examined]')
+        for p in self.players:
+            p.session.games.free('[examined]')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

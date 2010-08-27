@@ -1228,6 +1228,11 @@ class Chess(object):
                 relation = -2
             else:
                 relation = -3
+            white_clock = 0
+            black_clock = 0
+            white_name = self.game.players[0].name
+            black_name = self.game.players[0].name
+            clock_is_ticking = 0
         elif self.game.gtype == PLAYED:
             if self.game.white == user:
                 relation = 1 if self.pos.wtm else -1
@@ -1241,15 +1246,18 @@ class Chess(object):
             else:
                 relation = -3
                 flip = 0
+            if user.session.ivars['ms']:
+                white_clock = int(round(1000 * self.game.clock.get_white_time()))
+                black_clock = int(round(1000 * self.game.clock.get_black_time()))
+            else:
+                white_clock = int(round(self.game.clock.get_white_time()))
+                black_clock = int(round(self.game.clock.get_black_time()))
+            white_name = self.game.white.name
+            black_name = self.game.black.name
+            clock_is_ticking = int(self.game.clock.is_ticking)
         else:
             assert(False)
         full_moves = self.pos.ply // 2 + 1
-        if user.session.ivars['ms']:
-            white_clock = int(round(1000 * self.game.clock.get_white_time()))
-            black_clock = int(round(1000 * self.game.clock.get_black_time()))
-        else:
-            white_clock = int(round(self.game.clock.get_white_time()))
-            black_clock = int(round(self.game.clock.get_black_time()))
         last_mv = self.pos.get_last_move()
         if last_mv is None:
             last_move_time_str = timer.hms(0.0)
@@ -1262,14 +1270,15 @@ class Chess(object):
             last_move_verbose = last_mv.to_verbose_alg()
 
         # board_str begins with a space
+        # XXX whose lag should we use?
         s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
-            self.pos.fifty_count, self.game.number, self.game.white.name,
-            self.game.black.name, relation, self.game.white_time,
+            self.pos.fifty_count, self.game.number, white_name,
+            black_name, relation, self.game.white_time,
             self.game.inc, self.pos.material[1], self.pos.material[0],
             white_clock, black_clock, full_moves, last_move_verbose,
             last_move_time_str, last_move_san, flip,
-            int(self.game.clock.is_ticking), int(user.session.lag))
+            clock_is_ticking, int(user.session.lag))
         return s
 
 def init_direction_table():
