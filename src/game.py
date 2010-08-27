@@ -84,16 +84,6 @@ class Game(object):
     def next_move(self, mv, t, conn):
         self.send_boards()
 
-        if self.variant.pos.is_checkmate:
-            if self.variant.get_turn() == WHITE:
-                self.result('%s checkmated' % self.white.name, '0-1')
-            else:
-                self.result('%s checkmated' % self.black.name, '1-0')
-        elif self.variant.pos.is_stalemate:
-            self.result('Game drawn by stalemate', '1/2-1/2')
-        elif self.variant.pos.is_draw_nomaterial:
-            self.result('Game drawn because neither player has mating material', '1/2-1/2')
-
     def get_user_side(self, user):
         if user == self.white:
             return WHITE
@@ -125,37 +115,6 @@ class Game(object):
             return self.white
         else:
             return self.black
-
-    def result(self, msg, result_code):
-        self.when_ended = datetime.datetime.utcnow()
-        line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
-            self.white.name, self.black.name, msg, result_code)
-        self.white.write(line)
-        self.black.write(line)
-        for u in self.observers:
-            u.write(line)
-
-        self.clock.stop()
-        self.is_active = False
-        if result_code != '*':
-            history.history.save_game(self, msg, result_code)
-            if self.rated:
-                if result_code == '1-0':
-                    (white_score, black_score) = (1.0, 0.0)
-                elif result_code == '1/2-1/2':
-                    (white_score, black_score) = (0.5, 0.5)
-                elif result_code == '0-1':
-                    (white_score, black_score) = (0.0, 1.0)
-                else:
-                    raise RuntimeError('game.result: unexpected result code')
-                rating.update_ratings(self, white_score, black_score)
-        self.free()
-
-    def observe(self, u):
-        u.session.observed.add(self)
-        self.observers.add(u)
-        u.write(_('You are now observing game %d.\n') % self.number)
-        u.send_board(self)
 
     def unobserve(self, u):
         """Remove the given user as an observer and notify the user."""
@@ -376,6 +335,47 @@ class PlayedGame(Game):
 
         super(PlayedGame, self).next_move(mv, t, conn)
 
+        if self.variant.pos.is_checkmate:
+            if self.variant.get_turn() == WHITE:
+                self.result('%s checkmated' % self.white.name, '0-1')
+            else:
+                self.result('%s checkmated' % self.black.name, '1-0')
+        elif self.variant.pos.is_stalemate:
+            self.result('Game drawn by stalemate', '1/2-1/2')
+        elif self.variant.pos.is_draw_nomaterial:
+            self.result('Game drawn because neither player has mating material', '1/2-1/2')
+
+    def result(self, msg, result_code):
+        self.when_ended = datetime.datetime.utcnow()
+        line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
+            self.white.name, self.black.name, msg, result_code)
+        self.white.write(line)
+        self.black.write(line)
+        for u in self.observers:
+            u.write(line)
+
+        self.clock.stop()
+        self.is_active = False
+        if result_code != '*':
+            history.history.save_game(self, msg, result_code)
+            if self.rated:
+                if result_code == '1-0':
+                    (white_score, black_score) = (1.0, 0.0)
+                elif result_code == '1/2-1/2':
+                    (white_score, black_score) = (0.5, 0.5)
+                elif result_code == '0-1':
+                    (white_score, black_score) = (0.0, 1.0)
+                else:
+                    raise RuntimeError('game.result: unexpected result code')
+                rating.update_ratings(self, white_score, black_score)
+        self.free()
+
+    def observe(self, u):
+        u.session.observed.add(self)
+        self.observers.add(u)
+        u.write(_('You are now observing game %d.\n') % self.number)
+        u.send_board(self)
+
 
     def resign(self, user):
         side = self.get_user_side(user)
@@ -385,8 +385,14 @@ class PlayedGame(Game):
             assert(side == BLACK)
             self.result('%s resigns' % user.name, '1-0')
 
-    def abort(self, msg):
-        self.result(msg, '*')
+    def leave(self, user):
+        side = self.get_user_side(user)
+        if user.is_guest: # or is an abuser
+            res = '0-1' if side == WHITE else '1-0'
+            self.result('%s forfeits by disconnection' % user.name, res)
+        else:
+            # TODO: store games between registered players
+            self.result('%s aborts by disconnection' % user.name, '*')
 
     def free(self):
         super(PlayedGame, self).free()
@@ -410,13 +416,28 @@ class ExaminedGame(Game):
         self.variant.pos.get_last_move().time = 0.0
         super(ExaminedGame, self).next_move(mv, t, conn)
         for p in self.players + list(self.observers):
-            p.write(N_('%s moves: %s\n') % (conn.user.name, mv.to_san()))
+            p.write(N_('Game %d: %s moves: %s\n') % (self.number, conn.user.name, mv.to_san()))
+        if self.variant.pos.is_checkmate:
+            if self.variant.get_turn() == WHITE:
+                self.result('White checkmated', '0-1')
+            else:
+                self.result('Black checkmated', '1-0')
+        elif self.variant.pos.is_stalemate:
+            self.result('Game drawn by stalemate', '1/2-1/2')
+        elif self.variant.pos.is_draw_nomaterial:
+            self.result('Game drawn because neither player has mating material', '1/2-1/2')
 
-
-    def abort(self, msg):
-        for p in self.players:
-            p.write(_('You are no longer examining game %d.\n') % self.number)
-        self.free()
+    def leave(self, user):
+        # user may be offline if he or she disconnected
+        self.players.remove(user)
+        if user.is_online:
+            user.write(N_('You are no longer examining game %d.\n') % self.number)
+        for p in self.players + list(self.observers):
+            p.write(N_('%s has stopped examining game %d.\n') % (user.name, self.number))
+        if not self.players:
+            for p in self.observers:
+                p.write(N_('Game %d (which you were observing) has no examiners.\n') % self.number)
+            self.free()
 
     def free(self):
         super(ExaminedGame, self).free()

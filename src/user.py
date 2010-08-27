@@ -49,6 +49,7 @@ class BaseUser(object):
         self.is_online = True
 
     def log_off(self):
+        assert(self.is_online)
         for ch in self.channels:
             channel.chlist[ch].log_off(self)
         notify.notify.users(self, _("Notification: %s has departed.\n") % self.name)

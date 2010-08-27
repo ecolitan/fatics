@@ -27,6 +27,7 @@ class Connection(basic.LineReceiver):
     state = 'prelogin'
     user = None
     logged_in_again = False
+    #quit = False
     ivar_pat = re.compile(r'%b([01]{32})')
 
     def connectionMade(self):
@@ -146,7 +147,17 @@ class Connection(basic.LineReceiver):
 
     def loseConnection(self, reason):
         if reason == 'logged in again':
+            # As a special case, we don't want to remove a user
+            # from the online list if we are losing this connection
+            # because the same user is logging in from another connection.
+            # This approach is necessary because when the user re-logs in,
+            # we don't want to have to wait for the first connection
+            # to finish closing before logging in.
             self.logged_in_again = True
+        # We prefer to call log_off() before the connection is closed so
+        # we can print messages such as forfeit by disconnection,
+        # but if the user disconnects abruptly then log_off() will be
+        # called in connectionLost() instead.
         if self.user and self.user.is_online:
             self.user.log_off()
         self.transport.loseConnection()
@@ -157,16 +168,17 @@ class Connection(basic.LineReceiver):
     def connectionLost(self, reason):
         basic.LineReceiver.connectionLost(self, reason)
         try:
-            # as a special case, we don't want to remove our user name
-            # from the online list if we are losing this connection
-            # because the same user is logging in from another connection
-            if self.user.is_online and not self.logged_in_again:
-                self.user.log_off()
-            self.session.close()
+            if self.user.is_online:
+                if self.logged_in_again:
+                    #self.session.close()
+                    self.logged_in_again = False
+                else:
+                    # abrupt disconnection
+                    self.user.log_off()
         except AttributeError:
+            # never logged in
             pass
         self.factory.connections.remove(self)
-
 
     def write(self, s):
         self.transport.write(s)

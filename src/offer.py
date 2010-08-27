@@ -74,7 +74,7 @@ class Abort(Offer):
     def accept(self):
         Offer.accept(self)
         self.game.pending_offers.remove(self)
-        self.game.abort('Game aborted by agreement')
+        self.game.result('Game aborted by agreement', '*')
 
     def withdraw(self, notify=True):
         Offer.withdraw(self, notify)

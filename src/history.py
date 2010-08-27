@@ -6,7 +6,7 @@ class History(object):
             result_reason = 'Adj'
         elif 'by agreement' in msg:
             result_reason = 'Agr'
-        elif 'by disonnection' in msg:
+        elif 'by disconnection' in msg:
             result_reason = 'Dis'
         elif 'forfeits on time' in msg:
             result_reason = 'Fla'

@@ -69,7 +69,7 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
 
-    def _assert_game_is_legal(self, moves):
+    def _assert_game_is_legal(self, moves, result=None):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
@@ -91,8 +91,12 @@ class TestGame(Test):
             self.expect('<12> ', t)
             self.expect('<12> ', t2)
             wtm = not wtm
-        t.write('abort\n')
-        t2.write('abort\n')
+        if result is not None:
+            self.expect(result, t)
+            self.expect(result, t2)
+        else:
+            t.write('abort\n')
+            t2.write('abort\n')
 
         self.close(t)
         self.close(t2)
@@ -167,33 +171,13 @@ class TestGame(Test):
         self.close(t2)
 
     def test_san_checkmate(self):
-        t = self.connect_as_guest()
-        t2 = self.connect_as_admin()
+        moves = ['f3', 'e5', 'g4', 'Qh4']
+        self._assert_game_is_legal(moves, 'checkmated} 0-1')
 
-        t.write('match admin white 1 0\n')
-        self.expect('Challenge:', t2)
-        t2.write('accept\n')
-        self.expect('Creating: ', t)
-        self.expect('Creating: ', t2)
-
-        t.write('f3\n')
-        self.expect('<12> ', t)
-        self.expect('<12> ', t2)
-
-        t2.write('e5\n')
-        self.expect('<12> ', t)
-        self.expect('<12> ', t2)
-
-        t.write('g4\n')
-        self.expect('<12> ', t)
-        self.expect('<12> ', t2)
-
-        t2.write('Qh4\n')
-        self.expect('Qh4#', t)
-        self.expect('Qh4#', t2)
-
-        self.close(t)
-        self.close(t2)
+    def test_san_stalemate(self):
+        # by Sam Loyd
+        moves = ['e3', 'a5', 'Qh5', 'Ra6', 'Qxa5', 'h5', 'Qxc7', 'Rah6', 'h4', 'f6', 'Qxd7+', 'Kf7', 'Qxb7', 'Qd3', 'Qxb8', 'Qh7', 'Qxc8', 'Kg6', 'Qe6']
+        self._assert_game_is_legal(moves, 'drawn by stalemate} 1/2-1/2')
 
     def test_draw_repetition(self):
         t = self.connect_as_user('GuestABCD', '')
@@ -427,5 +411,52 @@ class TestGames(Test):
 
         self.close(t)
         self.close(t2)
+
+class TestDisconnect(Test):
+    def test_forfeit_disconnection_quit(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.close()
+        self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD forfeits by disconnection} 0-1', t2)
+        self.close(t2)
+
+    def test_forfeit_disconnection_quit(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('quit\n')
+        self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD forfeits by disconnection} 0-1', t)
+        self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD forfeits by disconnection} 0-1', t2)
+        t.close()
+        self.close(t2)
+
+    def test_abort_disconnection(self):
+        t = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t2.write('quit\n')
+        self.expect('{Game 1 (GuestABCD vs. admin) admin aborts by disconnection} *', t)
+        self.expect('{Game 1 (GuestABCD vs. admin) admin aborts by disconnection} *', t2)
+        t2.close()
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

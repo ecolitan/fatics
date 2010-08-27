@@ -114,7 +114,7 @@ class CommandList(object):
             self.cmds[cmd.name] = cmd
 
     def abort(self, args, conn):
-        if not conn.user.session.games:
+        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.PLAYED:
             conn.write(_("You are not playing a game.\n"))
             return
         if len(conn.user.session.games) > 1:
@@ -122,7 +122,7 @@ class CommandList(object):
             return
         g = conn.user.session.games.primary()
         if g.variant.pos.ply < 2:
-            g.abort('Game aborted on move 1 by %s' % conn.user.name)
+            g.result('Game aborted on move 1 by %s' % conn.user.name, '*')
         else:
             offer.Abort(g, conn.user)
 

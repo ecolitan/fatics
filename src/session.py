@@ -24,6 +24,7 @@ class Session(object):
         self.ivars = var.varlist.get_default_ivars()
         self.lag = 0
         self.observed = set()
+        self.closed = False
 
     def set_user(self, user):
         self.user = user
@@ -40,6 +41,8 @@ class Session(object):
         return timer.hms_words(time.time() - self.login_time)
 
     def close(self):
+        assert(not self.closed)
+        self.closed = True
         for v in self.offers_sent[:]:
             if v.name not in ['match offer', 'pause request']:
                 continue
@@ -52,7 +55,7 @@ class Session(object):
             v.decline(notify=False)
             v.b.write(_('Declining the match offer from %s.\n') % v.a.name)
             v.a.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
-        self.games.abort_all(self.user.name)
+        self.games.leave_all(self.user)
         del self.offers_received[:]
         del self.offers_sent[:]
         if self.games:

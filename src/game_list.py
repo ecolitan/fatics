@@ -20,11 +20,11 @@ class GameList(object):
     def iter(self):
         return self.games.itervalues()
 
-    def abort_all(self, name):
+    def leave_all(self, user):
         # python docs: "Using iteritems() while adding or deleting entries
         # in the dictionary may raise a RuntimeError or fail to iterate
         # over all entries."
         for (k, v) in copy.copy(self.games).iteritems():
-            v.abort('%s aborted by disconnection' % name)
+            v.leave(user)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

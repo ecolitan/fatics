@@ -1,5 +1,7 @@
 from test import  *
 
+import time
+
 class ConnectTest(OneConnectionTest):
     def test_welcome(self):
         self.expect('Welcome', self.t, "welcome message")
@@ -34,6 +36,12 @@ class LoginTest(Test):
         t.write('\n')
         self.expect(' Starting FICS session as ', t)
         self.close(t)
+
+    def test_immediate_disconnect(self):
+        t = self.connect()
+        t.close()
+        # no tests here; we need to make sure this doesn't raise an
+        # exception in the server
 
     """User should not actually be logged in until a correct password
     is entered."""
@@ -74,18 +82,6 @@ class LoginTest(Test):
         self.close(t)
         self.close(t2)
 
-class LogoutTest(Test):
-    def test_unclean_disconnec(self):
-        t = self.connect_as_admin()
-        t2 = self.connect_as_guest()
-        t2.write('who\n')
-        self.expect('2 players', t2)
-        t.close()
-        t2.write('who\n')
-        time.sleep(0.1)
-        self.expect('1 player', t2)
-        self.close(t2)
-
 class PromptTest(Test):
     def test_prompt(self):
         t = self.connect()
@@ -99,6 +95,17 @@ class LogoutTest(Test):
         t.write('quit\n')
         self.expect('Thank you for using', t)
         t.close()
+
+    def test_unclean_disconnect(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+        t2.write('who\n')
+        self.expect('2 players', t2)
+        t.close()
+        time.sleep(0.1)
+        t2.write('who\n')
+        self.expect('1 player', t2)
+        self.close(t2)
 
 """ works but disabled for speed
 class TimeoutTest(Test):
