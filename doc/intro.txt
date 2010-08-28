@@ -70,6 +70,7 @@ interesting ideas.  Last updated in 2002.
 focuses on "FR bug, bronstein time control, etc.". Licensed under GPLv3.
 * [http://code.google.com/p/morphy-chess-server/ Morphy] is a
 rewrite in Java, by johnthegreat.
+* [http://code.google.com/p/chaturanga/source/list Chaturanga] "is an open-source chess server providing interfaces for a number of clients and support for XML-RPC in order to facilitate quick development of new client applications."
 
 If you know about any others, please add to the list.
 

@@ -397,7 +397,7 @@ class DB(object):
     def add_news(self, title, user, is_admin):
         is_admin = '1' if is_admin else '0'
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO news_index SET news_title=%s,news_poster=%s,news_date=CURDATE(),news_is_admin=%s""", (title,user.name,is_admin))
+        cursor.execute("""INSERT INTO news_index SET news_title=%s,news_poster=%s,news_date=UTC_DATE(),news_is_admin=%s""", (title,user.name,is_admin))
         news_id = cursor.lastrowid
         cursor.close()
         return news_id

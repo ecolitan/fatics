@@ -6,18 +6,13 @@ import user
 import rating
 import timeseal
 import speed_variant
-
-(WHITE, BLACK) = range(2)
-
 import clock
 import history
 from timer import timer
 from db import db
+from game_constants import *
 
 games = {}
-
-# game types
-(EXAMINED, PLAYED) = range(2)
 
 from variant.variant_factory import variant_factory
 

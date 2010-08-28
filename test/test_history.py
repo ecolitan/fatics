@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from test import *
 
@@ -31,7 +31,7 @@ class TestHistory(Test):
 
         t.write('history\n')
         self.expect('History for GuestABCD:\r\n                  Opponent      Type         ECO End Date', t)
-        self.expect(' 1: - ++++ W ++++ GuestEFGH     [bnu  2  12] B20 Res %s' % date.today(), t)
+        self.expect(' 1: - ++++ W ++++ GuestEFGH     [bnu  2  12] B20 Res %s' % datetime.utcnow().date(), t)
 
         t2.write('hi\n')
         self.expect('History for GuestEFGH:\r\n                  Opponent      Type         ECO End Date', t2)

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import datetime
 
 from test import *
 
@@ -26,7 +26,7 @@ class TestNews(Test):
         news_id = int(m.group(1))
 
         t.write('news\n')
-        self.expect('%4d (%s) This is a test news item.\r\n' % (news_id, date.today()), t)
+        self.expect('%4d (%s) This is a test news item.\r\n' % (news_id, datetime.utcnow().date()), t)
 
         t.write('cnewse -1\n')
         self.expect('News item -1 not found', t)

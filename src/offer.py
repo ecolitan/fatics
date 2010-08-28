@@ -3,7 +3,7 @@ import re
 import speed_variant
 import command_parser
 import game
-from game import WHITE, BLACK
+from game_constants import *
 
 class Offer(object):
     """represents an offer from one player to another"""

@@ -1,7 +1,7 @@
 import time
 
-from game import WHITE, BLACK
 import timer
+from game_constants import *
 
 class Clock(object):
     pass
