@@ -288,14 +288,14 @@ class DB(object):
     # eco
     def get_eco(self, hash):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT eco,long_ FROM eco WHERE hash=%s""", hash)
+        cursor.execute("""SELECT eco,long_ FROM eco WHERE hash=%s""", (hash,))
         row = cursor.fetchone()
         cursor.close()
         return row
 
     def get_nic(self, hash):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT nic FROM nic WHERE hash=%s""", hash)
+        cursor.execute("""SELECT nic FROM nic WHERE hash=%s""", (hash,))
         row = cursor.fetchone()
         cursor.close()
         return row

@@ -158,7 +158,7 @@ class Move(object):
         if self.drop:
             s = '%s@%s' % (self.pc.upper(), sq_to_str(self.to))
         else:
-            s = '%s%s' % (sq_to_str(self.fr), sq_to_str(self.to))
+            s = '%s-%s%s' % (self.pc, sq_to_str(self.fr), sq_to_str(self.to))
             if self.prom:
                 s += '=%s' % self.prom
         return s
@@ -288,8 +288,6 @@ class Move(object):
             assert(not self.is_ep)
             san = self.pc.upper()
             ambigs = self.pos.get_from_sqs(self.pc, self.to)
-            if len(ambigs) == 0:
-                print 'mv not ambig with itself: %s' % self.to_verbose_alg()
             assert(len(ambigs) >= 1)
             if len(ambigs) > 1:
                 r = rank(self.fr)
@@ -507,6 +505,24 @@ class Position(object):
                 sq = 0x10 * r + f
                 yield (sq, self.board[sq])
 
+    def _add_to_holding(self, pc, update_hash):
+        count = self.holding[pc]
+        assert(count >= 0)
+        self.holding[pc] += 1
+        if update_hash:
+            if count > 0:
+                self.hash ^= zobrist.holding_hash(pc, count)
+            self.hash ^= zobrist.holding_hash(pc, count + 1)
+
+    def _remove_from_holding(self, pc, update_hash):
+        count = self.holding[pc]
+        assert(count > 0)
+        self.holding[pc] -= 1
+        if update_hash:
+            self.hash ^= zobrist.holding_hash(pc, count)
+            if count - 1 > 0:
+                self.hash ^= zobrist.holding_hash(pc, count - 1)
+
     def make_move(self, mv):
         """make the move"""
         self._check_material()
@@ -532,29 +548,48 @@ class Position(object):
             self.board[mv.to] = mv.drop
             self.hash ^= zobrist.piece_hash(mv.to, mv.drop)
             self.fifty_count = 0
-            count = self.holding[mv.drop]
-            assert(count > 0)
-            self.hash ^= zobrist.holding_hash(mv.drop, count)
-            self.holding[mv.drop] -= 1
-            if count - 1 > 0:
-                self.hash ^= zobrist.holding_hash(mv.drop, count - 1)
+            self._remove_from_holding(mv.drop, True)
             # material does not change when dropping a piece
         else:
             self.board[mv.fr] = '-'
+
+            if mv.is_capture:
+                if self.promoted[mv.to]:
+                    # promoted piece reverts to a pawn
+                    holding_pc = 'P' if self.wtm else 'p'
+                    mv.undo.capture_was_promoted = True
+                    # clear the old promoted marker; if the capturing piece
+                    # is promoted, we'll re-set it below
+                    self.hash ^= zobrist.promoted_hash[mv.to]
+                    self.promoted[mv.to] = 0
+                else:
+                    holding_pc = switch_pc_color(mv.capture)
+                    mv.undo.capture_was_promoted = False
+                mv.undo.holding_pc = holding_pc
+                self._add_to_holding(holding_pc, True)
+                self.hash ^= zobrist.piece_hash(mv.to, mv.capture)
+                # add to capturer's material, since the piece is now in
+                # his or her holding
+                self.material[self.wtm] += piece_material[holding_pc.lower()]
+                self.material[not self.wtm] -= piece_material[mv.capture.lower()]
+            assert(not self.promoted[mv.to])
             if not mv.prom:
-                self.promoted[mv.fr] = 0
                 self.board[mv.to] = mv.pc
-                self.promoted[mv.to] = self.promoted[mv.fr]
-                self.hash ^= zobrist.piece_hash(mv.fr, mv.pc) ^ \
-                    zobrist.piece_hash(mv.to, mv.pc)
+                if self.promoted[mv.fr]:
+                    self.promoted[mv.to] = 1
+                    self.promoted[mv.fr] = 0
+                    self.hash ^= (zobrist.promoted_hash[mv.fr] ^
+                        zobrist.promoted_hash[mv.to])
+                self.hash ^= (zobrist.piece_hash(mv.fr, mv.pc) ^
+                    zobrist.piece_hash(mv.to, mv.pc))
             else:
                 self.promoted[mv.to] = 1
                 self.board[mv.to] = mv.prom
                 self.hash ^= (zobrist.piece_hash(mv.fr, mv.pc) ^
                     zobrist.piece_hash(mv.to, mv.prom) ^
                     zobrist.promoted_hash[mv.to])
-                self.material[self.wtm] += piece_material[mv.prom.lower()] \
-                    - piece_material['p']
+                self.material[self.wtm] += (piece_material[mv.prom.lower()] -
+                    piece_material['p'])
 
             if mv.pc == 'k':
                 self.king_pos[0] = mv.to
@@ -565,26 +600,6 @@ class Position(object):
                 self.fifty_count = 0
             else:
                 self.fifty_count += 1
-
-            if mv.is_capture:
-                if self.promoted[mv.to]:
-                    # promoted piece reverts to a pawn
-                    holding_pc = 'P' if self.wtm else 'p'
-                    mv.undo.capture_was_promoted = True
-                else:
-                    holding_pc = switch_pc_color(mv.capture)
-                    mv.undo.capture_was_promoted = False
-                count = self.holding[holding_pc]
-                assert(count >= 0)
-                if count > 0:
-                    self.hash ^= zobrist.holding_hash(holding_pc, count)
-                self.holding[holding_pc] += 1
-                self.hash ^= zobrist.piece_hash(mv.to, mv.capture)
-                self.hash ^= zobrist.holding_hash(holding_pc, count + 1)
-                # add to capturer's material, since the piece is now in
-                # his or her holding
-                self.material[self.wtm] += piece_material[holding_pc.lower()]
-                self.material[not self.wtm] -= piece_material[mv.capture.lower()]
 
             self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
             if self.castle_flags != mv.undo.castle_flags:
@@ -599,10 +614,12 @@ class Position(object):
                 assert(self.board[mv.to - 0x10] == 'p')
                 self.hash ^= zobrist.piece_hash(mv.to - 0x10, 'p')
                 self.board[mv.to - 0x10] = '-'
+                self._add_to_holding('P', True)
             else:
                 assert(self.board[mv.to + 0x10] == 'P')
                 self.hash ^= zobrist.piece_hash(mv.to + 0x10, 'P')
                 self.board[mv.to + 0x10] = '-'
+                self._add_to_holding('p', True)
         elif mv.is_oo:
             # move the rook
             if self.wtm:
@@ -640,7 +657,10 @@ class Position(object):
             self.hash ^= zobrist.ep_hash(self.ep)
 
         self.history.set_move(self.ply - 1 , mv)
-        assert(self.hash == self._compute_hash())
+        #assert(self.hash == self._compute_hash())
+        if self.hash != self._compute_hash():
+            print 'failed on move %d %s' % (self.ply, str(mv))
+            assert(False)
         self._check_material()
         self.history.set_hash(self.ply, self.hash)
 
@@ -708,13 +728,16 @@ class Position(object):
 
         if mv.drop:
             self.board[mv.to] = '-'
+            self._add_to_holding(mv.drop, False)
         elif mv.is_ep:
             if self.wtm:
                 assert(self.board[mv.to - 0x10] == '-')
                 self.board[mv.to - 0x10] = 'p'
+                self._remove_from_holding('P', False)
             else:
                 assert(self.board[mv.to + 0x10] == '-')
                 self.board[mv.to + 0x10] = 'P'
+                self._remove_from_holding('p', False)
         elif mv.is_oo:
             if self.wtm:
                 assert(self.board[F1] == 'R')
@@ -734,15 +757,18 @@ class Position(object):
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
 
+
         if mv.prom:
             self.promoted[mv.to] = 0
             assert(self.promoted[mv.fr] == 0)
-        elif mv.capture != '-':
-            self.promoted[mv.to] = mv.undo.capture_was_promoted
-            self.holding[switch_pc_color(mv.capture)] -= 1
-            assert(self.holding[switch_pc_color(mv.capture)] >= 0)
         else:
-            self.promoted[mv.to] = 0
+            self.promoted[mv.fr] = self.promoted[mv.to]
+            if mv.is_capture:
+                self.promoted[mv.to] = mv.undo.capture_was_promoted
+                self._remove_from_holding(mv.undo.holding_pc, False)
+            else:
+                self.promoted[mv.to] = 0
+
 
         self._check_material()
         assert(self.hash == self._compute_hash())

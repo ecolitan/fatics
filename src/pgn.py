@@ -4,7 +4,7 @@ import copy
 tag_re = re.compile(r'''\[(\w+)\s+"([^\n]*?)"\]\s*$''')
 space_re = re.compile(r'''\s+''')
 move_num_re = re.compile(r'''(\d+)\.*''')
-move_re = re.compile(r'''([NBRQK]?[a-h1-8x]{2,5}(?:=[NBRQK])?|O-O-O|O-O)([+#])?''')
+move_re = re.compile(r'''([NBRQK]?[a-h1-8x]{2,5}(?:=[NBRQK])?|[PNBRQpnbrq]@[a-h][1-8]|O-O-O|O-O)([+#])?''')
 dots_re = re.compile(r'''\.\.\.''')
 comment_re = re.compile(r'''\{(.*?)\}''', re.S)
 nag_re = re.compile(r'''\$(\d+)''')

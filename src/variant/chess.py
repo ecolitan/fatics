@@ -971,6 +971,8 @@ class Position(object):
                     raise IllegalMoveError('missing "x" to indicate capture')
 
             pc = m.group(1) if self.wtm else m.group(1).lower()
+            # TODO: it would be faster to disambiguate first, so we
+            # do not check whether moves are legal unnecessarily
             froms = self.get_from_sqs(pc, to)
 
             if m.group(2):
