@@ -103,7 +103,7 @@ class Zobrist(object):
         self._ep = self._rand_list(8)
         self._castle = self._rand_list(0x10)
         self.promoted_hash = self._rand_list(0x10 * 0x80)
-        self._holding = self._rand_list((10 << 3) + 7)
+        self._holding = self._rand_list((10 << 4) + 15)
         random.seed()
 
     def piece_hash(self, sq, pc):
@@ -120,8 +120,8 @@ class Zobrist(object):
         return self._castle[flags]
 
     def holding_hash(self, pc, count):
-        assert(1 <= count <= 8)
-        return self._holding[(self._piece_index[pc] << 3) | (count - 1)]
+        assert(1 <= count <= 16)
+        return self._holding[(self._piece_index[pc] << 4) | (count - 1)]
 
     def _rand_list(self, len):
         return [random.getrandbits(64) for i in xrange(0, len)]
@@ -507,7 +507,7 @@ class Position(object):
 
     def _add_to_holding(self, pc, update_hash):
         count = self.holding[pc]
-        assert(count >= 0)
+        assert(0 <= count <= 15)
         self.holding[pc] += 1
         if update_hash:
             if count > 0:
@@ -516,7 +516,7 @@ class Position(object):
 
     def _remove_from_holding(self, pc, update_hash):
         count = self.holding[pc]
-        assert(count > 0)
+        assert(1 <= count <= 16)
         self.holding[pc] -= 1
         if update_hash:
             self.hash ^= zobrist.holding_hash(pc, count)
@@ -757,8 +757,10 @@ class Position(object):
                 assert(self.board[D8] == 'r')
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
+        elif mv.is_capture:
+            self._remove_from_holding(mv.undo.holding_pc, False)
 
-
+        # restore the "promoted" markers
         if mv.prom:
             self.promoted[mv.to] = 0
             assert(self.promoted[mv.fr] == 0)
@@ -768,7 +770,6 @@ class Position(object):
             self.promoted[mv.fr] = self.promoted[mv.to]
             if mv.is_capture:
                 self.promoted[mv.to] = mv.undo.capture_was_promoted
-                self._remove_from_holding(mv.undo.holding_pc, False)
             else:
                 self.promoted[mv.to] = 0
 
@@ -787,6 +788,8 @@ class Position(object):
             else:
                 bmat += piece_material[pc] * count
 
+        if bmat != self.material[0]:
+            print self.to_xfen()
         assert(bmat == self.material[0])
         assert(wmat == self.material[1])
 
@@ -1132,7 +1135,7 @@ class Position(object):
             else:
                 pc = m.group(1).lower()
             to = str_to_sq(m.group(2).lower())
-            assert(0 <= self.holding[pc] <= 8)
+            assert(0 <= self.holding[pc] <= 16)
             if self.holding[pc] == 0:
                 raise IllegalMoveError('no such piece in holding')
             if self.board[to] != '-':
@@ -1243,7 +1246,7 @@ class Position(object):
                 i -= 2
 
         return False
-    
+
     def to_xfen(self):
         p = []
         for r in range(7, -1, -1):

@@ -48,7 +48,7 @@ class TestCrazyhouse(Test):
 
 class TestPgn(Test):
     def test_pgn(self):
-        raise unittest.SkipTest
+        #raise unittest.SkipTest
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_user('GuestEFGH', '')
 
@@ -77,7 +77,7 @@ class TestPgn(Test):
                     t2.write('%s%s\n' % (mv.text, mv.decorator))
                 self.expect('<12> ', t)
                 self.expect('<12> ', t2)
-                wtm = not wtm 
+                wtm = not wtm
 
             assert(not g.is_draw_nomaterial)
             if g.result == '1-0' and g.is_checkmate:
