@@ -173,7 +173,7 @@ class Challenge(Offer):
         else:
             side_str = ''
 
-        if self.variant_name is None:   
+        if self.variant_name is None:
             # chess is the default, of course
             self.variant_name = 'chess'
 

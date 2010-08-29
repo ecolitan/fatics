@@ -87,7 +87,7 @@ class Zobrist(object):
         'P': 6, 'N': 7, 'B': 8, 'R': 9, 'Q': 10, 'K': 11
     }
 
-    # Note: using 64-bit keys, the expected number of positions
+    # Note: using 64-bit hashes, the expected number of positions
     # before a collision is 2^32.  Given that a collision has to
     # occur within one game to be meaningful, and games are no
     # longer than 5949 moves, the chance of any affect should be
@@ -154,10 +154,10 @@ class Move(object):
         fact that the king cannot be left in check. Also sets en passant
         flags for this move. This is used for long algebraic moves,
         but not san, which does these checks implicitly."""
-        
+
         if self.pc == '-' or piece_is_white(self.pc) != self.pos.wtm:
             raise IllegalMoveError('can only move own pieces')
-       
+
         if self.is_capture and piece_is_white(self.capture) == self.pos.wtm:
             raise IllegalMoveError('cannot capture own piece')
 
@@ -272,8 +272,6 @@ class Move(object):
             assert(not self.is_ep)
             san = self.pc.upper()
             ambigs = self.pos.get_from_sqs(self.pc, self.to)
-            if len(ambigs) == 0:
-                print 'mv not abmig with itself: %s' % self.to_verbose_alg()
             assert(len(ambigs) >= 1)
             if len(ambigs) > 1:
                 r = rank(self.fr)
@@ -289,7 +287,7 @@ class Move(object):
                 san += 'x'
             san += sq_to_str(self.to)
         return san
-    
+
     def to_verbose_alg(self):
         if self._verbose_alg is None:
             self._verbose_alg = self._to_verbose_alg()
@@ -341,7 +339,7 @@ class PositionHistory(object):
 
     def get_hash(self, ply):
         return self.hashes[ply]
-    
+
     def get_move(self, ply):
         return self.moves[ply]
 
@@ -441,11 +439,11 @@ class Position(object):
                 self.castle_flags = to_castle_flags(w_oo, w_ooo,
                     b_oo, b_ooo)
             self.hash ^= zobrist.castle_hash(self.castle_flags)
-           
+
             self.fifty_count = int(fifty_count, 10)
             self.ply = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
             self.start_ply = self.ply
-            
+
             if ep == '-':
                 self.ep = None
             else:
@@ -462,7 +460,7 @@ class Position(object):
                     self.ep = None
                     self.hash ^= zobrist.ep_hash(self.ep)
 
-            assert(self.hash == self._compute_hash())
+            #assert(self.hash == self._compute_hash())
             self.history.set_hash(self.ply, self.hash)
 
             if detect_check:
@@ -523,11 +521,11 @@ class Position(object):
             self.fifty_count = 0
         else:
             self.fifty_count += 1
-       
+
         if mv.is_capture:
             self.hash ^= zobrist.piece_hash(mv.to, mv.capture)
             self.material[not self.wtm] -= piece_material[mv.capture.lower()]
-       
+
         if mv.is_ep:
             self.material[not self.wtm] -= piece_material['p']
             # remove the captured pawn
@@ -581,7 +579,7 @@ class Position(object):
             self.hash ^= zobrist.ep_hash(self.ep)
 
         self.history.set_move(self.ply - 1 , mv)
-        assert(self.hash == self._compute_hash())
+        #assert(self.hash == self._compute_hash())
         self.history.set_hash(self.ply, self.hash)
 
     def _is_legal_ep(self, ep):
@@ -632,12 +630,12 @@ class Position(object):
         self.fifty_count = mv.undo.fifty_count
         self.material = mv.undo.material
         self.hash = mv.undo.hash
-        
+
         if mv.pc == 'k':
             self.king_pos[0] = mv.fr
         elif mv.pc == 'K':
             self.king_pos[1] = mv.fr
-        
+
         if mv.is_ep:
             if self.wtm:
                 assert(self.board[mv.to - 0x10] == '-')
@@ -664,13 +662,13 @@ class Position(object):
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
         #self._check_material()
-        assert(self.hash == self._compute_hash())
+        #assert(self.hash == self._compute_hash())
 
     def _check_material(self):
         bmat = sum([piece_material[pc.lower()]
             for (sq, pc) in self if pc != '-' and not piece_is_white(pc)])
         assert(bmat == self.material[0])
-        assert(self.material[1] == sum([piece_material[pc.lower()]   
+        assert(self.material[1] == sum([piece_material[pc.lower()]
             for (sq, pc) in self if pc != '-' and piece_is_white(pc)]))
 
     def detect_check(self):
@@ -958,8 +956,8 @@ class Position(object):
                 raise IllegalMoveError('bad pawn capture file')
 
             mv = Move(self, fr, to, prom=prom, is_ep=is_ep)
-   
-        # examples: Nf3 Nxf3 Ng1xf3 
+
+        # examples: Nf3 Nxf3 Ng1xf3
         m = None
         if not mv:
             m = self.san_piece_re.match(s)
@@ -1021,7 +1019,7 @@ class Position(object):
             mv.check_legal()
 
         return mv
-    
+
     def get_from_sqs(self, pc, sq):
         '''given a piece (not including a pawn) and a destination square,
         return a list of all legal source squares'''
@@ -1048,7 +1046,7 @@ class Position(object):
         return self.fifty_count >= 100
 
     def is_draw_repetition(self, side):
-        assert(self.hash == self._compute_hash())
+        #assert(self.hash == self._compute_hash())
         """check for draw by repetition"""
 
         # Note that the most recent possible identical position is

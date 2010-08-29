@@ -7,5 +7,7 @@ syntax: glob
 *~
 *.mo
 *.po
+*.o
+*.a
 timeseal/*seal
 timeseal/*seal_decoder
