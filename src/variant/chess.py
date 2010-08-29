@@ -677,8 +677,9 @@ class Position(object):
         self.in_check = self.under_attack(self.king_pos[self.wtm],
             not self.wtm)
 
-        self.is_checkmate = self.in_check and not self._any_legal_moves()
-        self.is_stalemate = not self.in_check and not self._any_legal_moves()
+        any_legal = self._any_legal_moves()
+        self.is_checkmate = self.in_check and not any_legal
+        self.is_stalemate = not self.in_check and not any_legal
 
         self._check_mating_material()
         self.is_draw_nomaterial = (not self.white_has_mating_material and
@@ -718,7 +719,7 @@ class Position(object):
             return False
         pc = self.board[sq]
         return pc != '-' and piece_is_white(pc) != self.wtm
-    
+
     def _any_pc_moves(self, sq, pc):
         if pc == 'P':
             if self.board[sq + 0x10] == '-':

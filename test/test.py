@@ -93,6 +93,9 @@ class Test(unittest.TestCase):
         t.write('remplayer %s\n' % name)
         self.close(t)
 
+    def _skip(self):
+        raise unittest.SkipTest
+
 class OneConnectionTest(Test):
     def setUp(self):
         self.t = self.connect()

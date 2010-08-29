@@ -712,7 +712,8 @@ class Position(object):
         self.ply -= 1
         self.ep = mv.undo.ep
         self.board[mv.to] = mv.capture
-        self.board[mv.fr] = mv.pc
+        if not mv.drop:
+            self.board[mv.fr] = mv.pc
         self.in_check = mv.undo.in_check
         self.castle_flags = mv.undo.castle_flags
         self.fifty_count = mv.undo.fifty_count
@@ -761,6 +762,8 @@ class Position(object):
         if mv.prom:
             self.promoted[mv.to] = 0
             assert(self.promoted[mv.fr] == 0)
+        elif mv.drop:
+            assert(self.promoted[mv.to] == 0)
         else:
             self.promoted[mv.fr] = self.promoted[mv.to]
             if mv.is_capture:
@@ -768,7 +771,6 @@ class Position(object):
                 self._remove_from_holding(mv.undo.holding_pc, False)
             else:
                 self.promoted[mv.to] = 0
-
 
         self._check_material()
         assert(self.hash == self._compute_hash())
@@ -794,8 +796,9 @@ class Position(object):
         self.in_check = self.under_attack(self.king_pos[self.wtm],
             not self.wtm)
 
-        self.is_checkmate = self.in_check and not self._any_legal_moves()
-        self.is_stalemate = not self.in_check and not self._any_legal_moves()
+        any_legal = self._any_legal_moves()
+        self.is_checkmate = self.in_check and not any_legal
+        self.is_stalemate = not self.in_check and not any_legal
 
     def get_last_move(self):
         return self.history.get_move(self.ply - 1)
@@ -806,6 +809,26 @@ class Position(object):
         ksq = self.king_pos[self.wtm]
         if self._any_pc_moves(ksq, self.board[ksq]):
             return True
+
+        # try drops
+        if self.in_check:
+            # try dropping a piece
+            for (pc, count) in self.holding.iteritems():
+                if pc.isupper() == self.wtm and count > 0:
+                    # try dropping at all empty sqares adjacent to king;
+                    # note that trying drops farther away is superfluous
+                    for d in piece_moves['k']:
+                        if self._is_pc_at('-', ksq + d):
+                            if Move(self, None, ksq + d, drop=pc).is_legal():
+                                return True
+
+        else:
+            # if the player has any pieces in holding, then there
+            # is a legal move
+            for (pc, count) in self.holding.iteritems():
+                if pc.isupper() == self.wtm and count > 0:
+                    return True
+
         for (sq, pc) in self:
             #if pc != '-' and piece_is_white(pc) == self.wtm:
             if pc not in ['-', 'K', 'k'] and piece_is_white(pc) == self.wtm:
@@ -819,7 +842,7 @@ class Position(object):
             return False
         pc = self.board[sq]
         return pc != '-' and piece_is_white(pc) != self.wtm
-    
+
     def _any_pc_moves(self, sq, pc):
         if pc == 'P':
             if self.board[sq + 0x10] == '-':
@@ -859,14 +882,13 @@ class Position(object):
                 while valid_sq(cur_sq):
                     topc = self.board[cur_sq]
                     if topc == '-' or piece_is_white(topc) != self.wtm:
-                        
                         mv = Move(self, sq, cur_sq)
                         if mv.is_legal():
                             return True
                     if not pc in sliding_pieces or self.board[cur_sq] != '-':
                         break
                     cur_sq += d
-    
+
     def _is_pc_at(self, pc, sq):
         return valid_sq(sq) and self.board[sq] == pc
 

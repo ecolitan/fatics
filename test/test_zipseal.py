@@ -13,9 +13,7 @@ seal_prog = '../timeseal/zipseal'
 class TestZipseal(Test):
     def test_zipseal(self):
         if not os.path.exists(seal_prog):
-            # XXX unittest does not support skipping till
-            # python 2.7
-            #self.skip()
+            self._skip()
             return
         process = subprocess.Popen([seal_prog, host, '5001'], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         process.stdin.write('admin\n')

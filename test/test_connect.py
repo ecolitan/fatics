@@ -121,10 +121,10 @@ class TimeoutTest(Test):
         t.close()
 
     def test_guest_timeout(self):
-            t = self.connect()
-            t.write("guest\n")
-            self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
-            t.close()
+        t = self.connect()
+        t.write("guest\n")
+        self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
+        t.close()
 """
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
