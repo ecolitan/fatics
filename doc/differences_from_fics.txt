@@ -86,6 +86,14 @@ over your shoulder, although it is still visible when you type it.
 * You can no longer use the "it" command if you are not listening to shouts.
 Rationale: Help prevent accidentally sending "i" shouts.
 
+* Crazyhouse: draw by repetition now requires that the entire game
+state, including pieces in holding and which pieces are promoted
+from pawns, be repeated.  (Original FICS only considers the
+position on the board.)  http://www.tonyjh.com/chess/zh_notes.html
+describes this issue.  Also, the material strength sent with
+style 12 uses the crazyhouse values from that page rather than those
+of normal chess: P = 1; N,B,R = 2; Q = 4.
+
 == Differences for interface and bot authors ==
 * Newlines are now sent after carriage returns ('\r\n'), rather than
 vice versa ('\n\r'). (This affects some bots and interfaces, but typical

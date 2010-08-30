@@ -59,7 +59,7 @@ class TestPgn(Test):
         t.write('set style 12\n')
         t2.write('set style 12\n')
 
-        f = open('../data/zhdraw.pgn', 'r')
+        f = open('../data/zh.pgn', 'r')
 
         pgn = Pgn(f)
         for g in pgn:

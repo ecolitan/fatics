@@ -307,7 +307,6 @@ class PlayedGame(Game):
         for o in offers:
             o.decline()
 
-        #print(self.variant.to_style12(self.white))
         time = 0.0
         if self.is_active and self.variant.pos.ply > 1:
             moved_side = opp(self.variant.get_turn())

@@ -37,13 +37,14 @@ def dir(fr, to):
 
 sliding_pieces = frozenset(['b', 'r', 'q', 'B', 'R', 'Q'])
 
+# Use crazyhouse piece values rather than those for normal chess.
 piece_material = {
     '-': 0,
     'p': 1,
-    'n': 3,
-    'b': 3,
-    'r': 5,
-    'q': 9,
+    'n': 2,
+    'b': 2,
+    'r': 2,
+    'q': 4,
     'k': 0
 }
 
@@ -1291,6 +1292,14 @@ class Position(object):
         full_moves = self.ply // 2 + 1
         return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
 
+    def get_holding_str(self):
+        holding_white = ''
+        holding_black = ''
+        for pc in 'PNBRQ':
+            holding_white += pc * self.holding[pc]
+            holding_black += pc * self.holding[pc.lower()]
+        return (holding_white, holding_black)
+
 class Crazyhouse(object):
     def __init__(self, game):
         self.game = game
@@ -1334,6 +1343,17 @@ class Crazyhouse(object):
 
     def get_turn(self):
         return WHITE if self.pos.wtm else BLACK
+
+    def get_b1(self, passed=None):
+        (holding_white, holding_black) = self.pos.get_holding_str()
+
+        s = '<b1> game %d white [%s] black [%s]' % (self.game.number,
+            holding_white, holding_black)
+        if passed is not None:
+            s += ' <- %s\n' % passed
+        else:
+            s += '\n'
+        return s
 
     def to_style12(self, user):
         """returns a style12 string for a given user"""
@@ -1408,6 +1428,7 @@ class Crazyhouse(object):
             white_clock, black_clock, full_moves, last_move_verbose,
             last_move_time_str, last_move_san, flip,
             clock_is_ticking, int(user.session.lag))
+        s += self.get_b1()
         return s
 
 def init_direction_table():
