@@ -31,7 +31,7 @@
 
 #include "chuffman.h"
 
-#define BSIZE 1024
+#define BSIZE 2048
 
 //char hello[]="zipseal|zipseal|Running on an operating system|";
 

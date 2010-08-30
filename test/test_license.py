@@ -16,20 +16,17 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import re
+from test import *
 
-class Checker(object):
-    legal_chars_re = re.compile('''^[\t\x20-\xfd]*$''')
-    def check_user_utf8(self, s):
-        ret =  self.legal_chars_re.match(s)
-        if ret:
-            try:
-                s.decode('utf8')
-            except UnicodeDecodeError:
-                ret = False
-        return ret
+class TestLicense(Test):
+    def test_license(self):
+        t = self.connect()
+        t.write('g\n\n')
+        self.expect('The source code for the version of the server you are using', t)
 
-checker = Checker()
+        t.write('help license\n')
+        self.expect('GNU AFFERO GENERAL PUBLIC LICENSE', t)
 
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

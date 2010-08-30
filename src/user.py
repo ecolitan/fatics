@@ -1,3 +1,21 @@
+# Copyright (C) 2010  Wil Mahan <wmahan+fatics@gmail.com>
+#
+# This file is part of FatICS.
+#
+# FatICS is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# FatICS is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
+#
+
 import re
 import bcrypt
 import random
@@ -10,6 +28,7 @@ import notify
 import connection
 import rating
 import speed_variant
+from server import server
 from db import db
 from online import online
 from config import config
@@ -47,6 +66,7 @@ class BaseUser(object):
         notify.notify.users(self, _("Notification: %s has arrived.\n") % self.name)
         online.add(self)
         self.is_online = True
+        self.write(_(server.get_copyright_notice()))
 
     def log_off(self):
         assert(self.is_online)
