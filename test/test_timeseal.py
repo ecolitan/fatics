@@ -12,7 +12,7 @@ seal_prog_win = '/home/wmahan/chess/timeseal.exe'
 class TestTimeseal(Test):
     def test_timeseal(self):
         if not os.path.exists(seal_prog):
-            self._skip()
+            self._skip('no timeseal binary')
         process = subprocess.Popen([seal_prog, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         process.stdin.write('admin\n')
         process.stdin.write('%s\n' % admin_passwd)
@@ -28,7 +28,7 @@ class TestTimeseal(Test):
 class TestTimesealWindows(Test):
     def test_timeseal_windows(self):
         if not os.path.exists(seal_prog_win):
-            self._skip()
+            self._skip('no timeseal windows binary')
             return
         process = subprocess.Popen(['/usr/bin/wine', seal_prog_win, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 

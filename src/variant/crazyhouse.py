@@ -822,6 +822,9 @@ class Position(object):
                     # note that trying drops farther away is superfluous
                     for d in piece_moves['k']:
                         if self._is_pc_at('-', ksq + d):
+                            if pc in ['p', 'P'] and rank(ksq + d) in [0, 7]:
+                                # can't drop a pawn on the first or last rank
+                                continue
                             if Move(self, None, ksq + d, drop=pc).is_legal():
                                 return True
 

@@ -12,6 +12,10 @@ class TestCrazyhouse(Test):
         moves = ['d4', 'd5', 'Bh6', 'Nxh6', 'e4', 'c6', 'Be2', 'B@a6', 'Bxa6', 'Qc7', 'Be2', 'Qd7', 'Ba6', 'Qd8', 'Be2', 'Qd6', 'Ba6', 'Qd8', 'Be2', 'Qd6', 'Ba6', 'Qd8']
         self._assert_game_is_legal(moves, 'drawn by repetition} 1/2-1/2')
 
+    def test_crazyhouse_stalemate(self):
+        moves = ['d4', 'e5', 'Nf3', 'exd4', 'h3', 'Nc6', 'g3', 'P@e4', 'Bg2', 'exf3', 'O-O', 'fxg2', 'c3', 'gxf1=Q+', 'Qxf1', 'dxc3', 'Kh2', 'P@g2', 'Nxc3', 'gxf1=Q', 'Be3', 'Qxa1', 'g4', 'Qxb2', 'Kg3', 'Qxc3', 'Kf4', 'Qd2', 'Kf5', 'Qxa2', 'Ke4', 'Qxe2', 'f3', 'Qh2', 'Kd5', 'Qxh3', 'Bd4', 'Qxf3+', 'Kc4', 'Qxg4', 'Kb5', 'P@d2', 'Kc4', 'P@c2', 'Kd5', 'R@f3', 'Kc4', 'Nxd4', 'Kd5', 'P@b2', 'Ke5', 'P@a2', 'Kd5', 'P@e2', 'Ke5', 'P@f2', 'Kd5', 'N@c4', 'Kxc4', 'N@b4', 'P@e7', 'Qxe7', 'P@d6', 'Qxd6', 'N@f6+', 'Qxf6']
+        self._assert_game_is_legal(moves, 'drawn by stalemate} 1/2-1/2')
+
     def _assert_game_is_legal(self, moves, result=None):
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_admin()
@@ -48,7 +52,7 @@ class TestCrazyhouse(Test):
 
 class TestPgn(Test):
     def test_pgn(self):
-        #raise unittest.SkipTest
+        self._skip('slow test')
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_user('GuestEFGH', '')
 
