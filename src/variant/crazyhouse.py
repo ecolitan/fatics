@@ -1362,20 +1362,24 @@ class Crazyhouse(object):
     def get_turn(self):
         return WHITE if self.pos.wtm else BLACK
 
+    # I think printing b1 lines is completely unnecessary for zh, but
+    # current FICS does it and some clients seem to depend on it.
     def get_b1(self, passed=None):
         (holding_white, holding_black) = self.pos.get_holding_str()
 
-        s = '<b1> game %d white [%s] black [%s]' % (self.game.number,
-            holding_white, holding_black)
         if passed is not None:
-            s += ' <- %s\n' % passed
+            passed_str = ' <- %s' % passed
         else:
-            s += '\n'
+            passed_str = ''
+
+        s = '<b1> game %d white [%s] black [%s]%s\n' % (self.game.number,
+            holding_white, holding_black, passed_str)
         return s
 
     def to_style12(self, user):
         """returns a style12 string for a given user"""
         # <12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 473 GuestPPMD GuestCWVQ -1 1 0 39 39 60000 60000 1 none (0:00.000) none 1 0 0
+        s = ''
         board_str = ''
         for r in range(7, -1, -1):
             board_str += ' '
@@ -1435,10 +1439,15 @@ class Crazyhouse(object):
             last_move_time_str = timer.hms(last_mv.time, user)
             last_move_san = last_mv.to_san()
             last_move_verbose = last_mv.to_verbose_alg()
+            if last_mv.is_capture:
+                if last_mv.undo.holding_pc.isupper():
+                    s += self.get_b1('W%s' % last_mv.undo.holding_pc)
+                else:
+                    s += self.get_b1('B%s' % last_mv.undo.holding_pc.upper())
 
         # board_str begins with a space
         # XXX whose lag should we use?
-        s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
+        s += '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, white_name,
             black_name, relation, self.game.white_time,

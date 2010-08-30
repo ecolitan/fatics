@@ -99,7 +99,8 @@ of normal chess: P = 1; N,B,R = 2; Q = 4.
 vice versa ('\n\r'). (This affects some bots and interfaces, but typical
 users should not have to worry about it.)
 Rationale: Dating back to the original teletype machines, the order is
-conventionally '\r\n'.
+conventionally '\r\n'. The current FICS order seems to cause
+problems on telnet apps on my Android phone.
 * In style 12, an en passant square is only set when there is a legal
 en passant capture.
 
@@ -120,7 +121,7 @@ possibly castling rights; I haven't checked) when checking a draw
 by repetition claim.  This is incorrect according to rule 9.2 of
 the FIDE laws of chess.  For discussion see
 http://en.wikipedia.org/wiki/Threefold_repetition#Incorrect_claims .
-For just one example of where FICS gets this wrong, see
+For one example of where FICS gets this wrong, see
 http://ficsgames.com/cgi-bin/show.cgi?ID=182672306;action=show .
 The new server fixes this bug.
 
@@ -207,7 +208,7 @@ player wants to log out, there's no way to stop him or her from
 closing the interface.  It's better that we know the user has
 intentionally logged out.
 * Numbers and punctuation in player names: possible, but perhaps too
-disruptive to the existing conventions and too ripe for abuse.
+disruptive to the existing conventions and too prone to abuse.
 * International (non-ASCII) characters in names: in my opinion
 this is bad because not all players can type non-ASCII characters,
 which could make it difficult to finger, tell, or match users with
@@ -219,7 +220,7 @@ to be careful to prevent spam.
 * Extra censor features like automatically expiring censor lists or
 censoring but still playing users.  Basically, I think censoring should
 be a last resort and don't want to encourage indiscriminate use of
-censor lists, because in my opinion they are a suboptimal solution to 
+censor lists, because in my opinion they are a suboptimal solution to
 antisocial behavior (maybe I should write up a more detailed explanation).
 * The ability to play games using the FIDE rules for draws, i.e.
 you can only claim a draw on your own turn and claims may only be based
@@ -255,4 +256,6 @@ only users subscribed to the channel.
 == Errors in FICS documentation ==
 * "help match" says "Matching yourself ( "match your_handle") is a way to enter
    examine mode".
+* "help style12" is wrong in some places; for example, it says that the
+initial time and increment are "in seconds".
 
