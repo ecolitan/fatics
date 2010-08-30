@@ -1,9 +1,9 @@
  _...with ICS, it isn't the technology that is important, it's the idea_ -- [http://members.cox.net/cpetroff/FICS/Archives/1995-03-06%20Rec.Games.Chess%20-%20ICS%20to%20ICC%20discussion%20%28M%20Moore%29.txt  Michael D. Moore, March 6, 1995]
 
-lics is a free and open source server that attempts to
-replicate and improve upon the functionality of FICS, the Free Internet
+FatICS is free software that attempts to replicate and improve upon the
+functionality of FICS, the Free Internet
 Chess Server.  It is written in [http://www.python.org/ Python]
-(version 2.6) using the [http://twistedmatrix.com/ twisted] framework.
+(version 2.7) using the [http://twistedmatrix.com/ twisted] framework.
 
 = New features =
 == Features for users ==
@@ -22,7 +22,7 @@ To be fair, I should also mention what doesn't work yet.
 = Questions and answers =
 
 ==Why a new server?==
-The existing FICS server has served well and continues to work fine.
+The existing FICS code has served well and continues to work fine.
 Anyone can play there for free, but unlike the original incarnation by
 Richard V. Nash and Michael D. Moore, the server is neither open source
 nor free software.[1]  My goal is to change that.
