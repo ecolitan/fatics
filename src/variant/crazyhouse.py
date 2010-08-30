@@ -13,9 +13,10 @@ the same as FEN. A blank square is '-'.
 """
 
 """ FICSgames.com indicates there are a few crazyhouse draws by
-stalemate per year, and I'm not sure if a draw by 50-move
-rule has ever occurred.  Nevertheless we handle both for completness.
-Draw by insufficient material is not checked, of course. """
+stalemate per year. There is no evidence of draws by 50-move
+rule occurring, and it would be difficult to implement because
+captures are reversible moves.  Draw by insufficient material is
+not checked, of course. """
 
 class BadFenError(Exception):
     def __init__(self, reason=None):
@@ -461,8 +462,7 @@ class Position(object):
                 self.castle_flags = to_castle_flags(w_oo, w_ooo,
                     b_oo, b_ooo)
             self.hash ^= zobrist.castle_hash(self.castle_flags)
-
-            self.fifty_count = int(fifty_count, 10)
+            self.fifty_count = 0 # ignored in zh
             self.ply = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
             self.start_ply = self.ply
 
@@ -533,7 +533,6 @@ class Position(object):
         mv.undo.ep = self.ep
         mv.undo.in_check = self.in_check
         mv.undo.castle_flags = self.castle_flags
-        mv.undo.fifty_count = self.fifty_count
         mv.undo.material = self.material[:]
         mv.undo.hash = self.hash
 
@@ -547,9 +546,9 @@ class Position(object):
             assert(mv.drop.isupper() if self.wtm else mv.drop.islower())
             self.board[mv.to] = mv.drop
             self.hash ^= zobrist.piece_hash(mv.to, mv.drop)
-            self.fifty_count = 0
             self._remove_from_holding(mv.drop, True)
             # material does not change when dropping a piece
+            # does not reset 50-move count because it's reversible
         else:
             self.board[mv.fr] = '-'
 
@@ -595,11 +594,6 @@ class Position(object):
                 self.king_pos[0] = mv.to
             elif mv.pc == 'K':
                 self.king_pos[1] = mv.to
-
-            if mv.pc in ['p', 'P'] or mv.is_capture:
-                self.fifty_count = 0
-            else:
-                self.fifty_count += 1
 
             self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
             if self.castle_flags != mv.undo.castle_flags:
@@ -716,7 +710,6 @@ class Position(object):
             self.board[mv.fr] = mv.pc
         self.in_check = mv.undo.in_check
         self.castle_flags = mv.undo.castle_flags
-        self.fifty_count = mv.undo.fifty_count
         self.material = mv.undo.material
         self.hash = mv.undo.hash
 
@@ -1188,11 +1181,8 @@ class Position(object):
         return ret
 
     def is_draw_fifty(self):
-        # If we checkmate comes on the move that causes the fifty-move
-        # counter to reach 100, the game is not a draw.  That shouldn't
-        # be a problem because if a player is checkmated, he or she
-        # won't have a chance to offer a draw and trigger this check.
-        return self.fifty_count >= 100
+        # never in crazyhouse
+        return False
 
     def is_draw_repetition(self, side):
         assert(self.hash == self._compute_hash())
@@ -1203,7 +1193,12 @@ class Position(object):
         # This is a well-known chess engine optimization.
         if self.ply < 8:
             return False
-        stop = max(self.ply - self.fifty_count, self.start_ply)
+
+        # TODO: it's not clear to me when we can stop searching for
+        # repetitions.  It seems to me that pawn pushes, captures,
+        # and drops are all theoretically reversible.  Maybe someone
+        # with zh knowledge can help optimize. -- wtm
+        stop = self.start_ply
 
         count = 0
         hash = self.history.get_hash(self.ply)

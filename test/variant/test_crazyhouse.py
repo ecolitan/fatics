@@ -52,14 +52,14 @@ class TestCrazyhouse(Test):
 
 class TestPgn(Test):
     def test_pgn(self):
-        self._skip('slow test')
+        #self._skip('slow test')
         t = self.connect_as_user('GuestABCD', '')
         t2 = self.connect_as_user('GuestEFGH', '')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
 
-        f = open('../data/zh.pgn', 'r')
+        f = open('../data/zhdraw.pgn', 'r')
 
         pgn = Pgn(f)
         for g in pgn:
@@ -94,16 +94,19 @@ class TestPgn(Test):
                 self.expect('drawn by stalemate} 1/2-1/2', t)
                 self.expect('drawn by stalemate} 1/2-1/2', t2)
             elif g.result == '1/2-1/2' and g.is_repetition:
+                """ Old FICS does not consider holding when detecting
+                repetitions, so a FICS draw by repetition won't necessarily
+                be a draw by our rules.
                 if wtm:
                     t.write('draw\n')
                 else:
                     t2.write('draw\n')
                 self.expect('drawn by repetition} 1/2-1/2', t)
-                self.expect('drawn by repetition} 1/2-1/2', t2)
-                #t.write('abort\n')
-                #t2.write('abort\n')
-                #self.expect('Game aborted', t)
-                #self.expect('Game aborted', t2)
+                self.expect('drawn by repetition} 1/2-1/2', t2)"""
+                t.write('abort\n')
+                t2.write('abort\n')
+                self.expect('Game aborted', t)
+                self.expect('Game aborted', t2)
             elif g.result == '1/2-1/2' and g.is_fifty:
                 # probably never happens
                 random.choice([t, t2]).write('draw\n')
