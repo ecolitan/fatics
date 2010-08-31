@@ -107,6 +107,9 @@ class TestSummon(Test):
         t2.write('summon admin\n')
         self.expect('admin is censoring you.\r\n', t2)
 
+        self.close(t)
+        self.close(t2)
+        self.deluser('TestPlayer')
 
 class TestZnotify(Test):
     def test_znotify(self):

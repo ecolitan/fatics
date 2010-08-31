@@ -1,8 +1,0 @@
-Python 2.6a
-Python Twisted
-python-bcrypt
-python-mysqldb
-
-MySQL server 5.0+
-
-zlib1g-dev (for timeseal compression) (remove?)

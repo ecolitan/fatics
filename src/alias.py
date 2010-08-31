@@ -172,7 +172,7 @@ class Alias(object):
     }
 
     """Expand system and user aliases in a given command."""
-    punct_re = re.compile(r'''^([@!#$%^&*\-+'"\/.,=]+)\s*(.*)''')
+    punct_re = re.compile(r'''^([@!#$%^&*\-+'"\/.,=])\s*(.*)''')
     alias_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
     space_re = re.compile(r'\s+')
     def expand(self, s, syslist, userlist, user):

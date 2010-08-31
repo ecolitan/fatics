@@ -59,6 +59,7 @@ class CommandTest(Test):
         self.close(t2)
         self.close(t3)
         self.close(t4)
+        self.deluser('testplayer')
 
     def test_nuke(self):
         t = self.connect_as_admin()
@@ -131,7 +132,7 @@ class CommandTest(Test):
         self.expect('Admin level of testtwo set', t2)
         self.close(t2)
         self.deluser('testplayer')
-        self.deluser('testplayer2')
+        self.deluser('testtwo')
 
     def test_asetrating(self):
         t = self.connect_as_admin()

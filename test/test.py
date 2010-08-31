@@ -104,11 +104,13 @@ class Test(unittest.TestCase):
         if lists:
             for lname in lists:
                 t.write('addlist %s %s\n' % (lname, name))
+        self.expect('Added: ', t)
         self.close(t)
 
     def deluser(self, name):
         t = self.connect_as_admin()
         t.write('remplayer %s\n' % name)
+        self.expect('removed', t)
         self.close(t)
 
     def _skip(self, reason):

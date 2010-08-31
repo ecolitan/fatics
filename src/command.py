@@ -122,6 +122,7 @@ class CommandList(object):
         self._add(Command('uptime', '', self.uptime, admin.Level.user))
         self._add(Command('variables', 'o', self.variables, admin.Level.user))
         self._add(Command('who', 'T', self.who, admin.Level.user))
+        self._add(Command('whisper', 'S', self.whisper, admin.Level.user))
         self._add(Command('withdraw', 'n', self.withdraw, admin.Level.user))
         self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
         self._add(Command('znotify', 'o', self.znotify, admin.Level.user))
@@ -668,6 +669,9 @@ class CommandList(object):
         else:
             conn.write(_('You are not playing, examining, or observing a game.\n'))
             return
+        if conn.user.is_guest and conn.user not in g.players:
+            conn.write(_("Only registered players may kibitz to others' games."))
+            return
         name = conn.user.get_display_name()
         all = list(g.observers)
         if g.gtype == game.PLAYED:
@@ -676,7 +680,9 @@ class CommandList(object):
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
         for u in all:
-            if u.vars['kibitz'] and (u.vars['kiblevel'] == 0 or int(rat) >= u.vars['kiblevel']):
+            if u.vars['kibitz'] and (u.vars['kiblevel'] == 0 or
+                    int(rat) >= u.vars['kiblevel'] or
+                    conn.user.admin_level > admin.Level.admin):
                 if u != conn.user:
                     count += 1
                 # XXX localize for each user
@@ -1019,6 +1025,30 @@ class CommandList(object):
                 conn.write(_("(told %s)") % u.name + '\n')
 
         return (u, ch)
+
+    def whisper(self, args, conn):
+        if conn.user.session.games:
+            g = conn.user.session.games.primary()
+        elif conn.user.session.observed:
+            g = list(conn.user.session.observed)[0]
+        else:
+            conn.write(_('You are not playing, examining, or observing a game.\n'))
+            return
+        if conn.user.is_guest and conn.user not in g.players:
+            conn.write(_("Only registered players may whisper to others' games."))
+            return
+        name = conn.user.get_display_name()
+        count = 0
+        rat = conn.user.get_rating(g.speed_variant)
+        for u in g.observers:
+            if (u.vars['kiblevel'] == 0 or int(rat) >= u.vars['kiblevel']
+                    or conn.user.admin_level >= admin.Level.admin):
+                if u != conn.user:
+                    count += 1
+                # XXX localize for each user
+                u.write(_('%s(%s)[%d] whispers: %s\n') % (name, rat, g.number, args[0]))
+        conn.write(ngettext('(whispered to %d player)\n', '(whispered to %d players)\n', count) % count)
+
 
     def who(self, args, conn):
         count = 0
