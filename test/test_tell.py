@@ -50,7 +50,7 @@ class TellTest(Test):
 
     def test_ambiguous_tell(self):
         self.adduser('aduser', 'test')
-        t = self.connect_as_user('aduser', 'test')
+        t = self.connect_as('aduser', 'test')
         t2 = self.connect_as_guest()
 
         # not ambiguous when admin is offline
@@ -93,7 +93,7 @@ class QtellTest(Test):
     def test_qtell(self):
         self.adduser('tdplayer', 'tdplayer', ['td'])
         try:
-            t = self.connect_as_user('tdplayer', 'tdplayer')
+            t = self.connect_as('tdplayer', 'tdplayer')
             t.write('qtell nonexistentname test\n')
             self.expect('*qtell nonexistentname 1*', t)
 

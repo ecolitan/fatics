@@ -88,7 +88,7 @@ class TestMatch(Test):
         self.close(t)
 
     def test_decline_logout(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin\n')
@@ -144,7 +144,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_counteroffer(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin 1 0\n')
@@ -157,7 +157,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_update_offer(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin 1 0\n')
@@ -212,9 +212,9 @@ class TestRmatch(Test):
         self.adduser('tdplayer', 'tdplayer', ['td'])
         self.adduser('testplayer', 'testplayer')
         try:
-            t = self.connect_as_user('testplayer', 'testplayer')
+            t = self.connect_as('testplayer', 'testplayer')
             t2 = self.connect_as_admin()
-            t3 = self.connect_as_user('tdplayer', 'tdplayer')
+            t3 = self.connect_as('tdplayer', 'tdplayer')
 
             t.write('rmatch testplayer admin 3 0\n')
             self.expect('Only TD programs', t)

@@ -75,6 +75,7 @@ class CommandList(object):
         self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
         self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
         self._add(Command('asetrating', 'wwwddfddd', self.asetrating, admin.Level.admin))
+        self._add(Command('backward', 'p', self.backward, admin.Level.user))
         self._add(Command('cnewsd', 'd', self.cnewsd, admin.Level.admin))
         self._add(Command('cnewse', 'dp', self.cnewse, admin.Level.admin))
         self._add(Command('cnewsf', 'dT', self.cnewsf, admin.Level.admin))
@@ -321,6 +322,14 @@ class CommandList(object):
             conn.write(A_('Set %s %s rating for %s.\n' %
                 (speed_name, variant_name, name)))
         # notify the user?
+
+    def backward(self, args, conn):
+        n = args[0] if args[0] is not None else 1
+        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
+            conn.write(_("You are not examining a game.\n"))
+            return
+        g = conn.user.session.games.primary()
+        g.backward(n, conn)
 
     def cnewsd(self, args, conn):
         pass

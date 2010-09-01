@@ -102,8 +102,8 @@ class TestTitle(Test):
 
 class TestCensor(Test):
     def test_censor_guest(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestDEFG', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestDEFG', '')
         
         t.write('+cen Nosuchplayer\n')
         self.expect('There is no player matching the name "nosuchplayer".', t)
@@ -162,7 +162,7 @@ class TestCensor(Test):
             self.close(t)
 
             t = self.connect_as_admin()
-            t2 = self.connect_as_user('TestPlayer', 'test')
+            t2 = self.connect_as('TestPlayer', 'test')
             t.write('+ch 1\n')
             t2.write('+ch 1\n')
 
@@ -210,8 +210,8 @@ class TestCensor(Test):
 
 class TestNoplay(Test):
     def test_noplay_guest(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestDEFG', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestDEFG', '')
 
         t.write('+noplay GuestDEFG\n')
         self.expect('GuestDEFG added to your noplay list.', t)
@@ -253,7 +253,7 @@ class TestNoplay(Test):
             self.close(t)
 
             t = self.connect_as_admin()
-            t2 = self.connect_as_user('TestPlayer', 'test')
+            t2 = self.connect_as('TestPlayer', 'test')
 
             t2.write('match admin\n')
             self.expect("You are on admin's noplay list", t2)

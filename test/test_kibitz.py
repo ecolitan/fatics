@@ -20,8 +20,8 @@ from test import *
 
 class TestKibitz(Test):
     def test_kibitz_guest(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
         t3 = self.connect_as_guest()
 
         t.write('kibitz hello\n')
@@ -66,8 +66,8 @@ class TestKibitz(Test):
         self.adduser('testplayer', 'testpass')
         self.adduser('testobs', 'testpass')
         t = self.connect_as_admin()
-        t2 = self.connect_as_user('testplayer', 'testpass')
-        t3 = self.connect_as_user('testobs', 'testpass')
+        t2 = self.connect_as('testplayer', 'testpass')
+        t3 = self.connect_as('testobs', 'testpass')
 
         t.write('kibitz hello\n')
         self.expect('You are not playing, examining, or observing a game', t)
@@ -110,8 +110,8 @@ class TestKibitz(Test):
 
     def test_kiblevel(self):
         self.adduser('testplayer', 'testpass')
-        t = self.connect_as_user('GuestEFGH', '')
-        t2 = self.connect_as_user('testplayer', 'testpass')
+        t = self.connect_as('GuestEFGH', '')
+        t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
 
         t3.write('asetrating testplayer lightning chess 0 0 0 0 0 0\n')
@@ -157,8 +157,8 @@ class TestKibitz(Test):
 
 class TestWhisper(Test):
     def test_whisper_guest(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
         t3 = self.connect_as_guest()
 
         t.write('whi hello\n')
@@ -202,8 +202,8 @@ class TestWhisper(Test):
         self.adduser('testplayer', 'testpass')
         self.adduser('testobs', 'testpass')
         t = self.connect_as_admin()
-        t2 = self.connect_as_user('testplayer', 'testpass')
-        t3 = self.connect_as_user('testobs', 'testpass')
+        t2 = self.connect_as('testplayer', 'testpass')
+        t3 = self.connect_as('testobs', 'testpass')
 
         t.write('whisper hello\n')
         self.expect('You are not playing, examining, or observing a game', t)
@@ -233,8 +233,8 @@ class TestWhisper(Test):
 
     def test_kiblevel_whisper(self):
         self.adduser('testplayer', 'testpass')
-        t = self.connect_as_user('GuestEFGH', '')
-        t2 = self.connect_as_user('testplayer', 'testpass')
+        t = self.connect_as('GuestEFGH', '')
+        t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
 
         t3.write('asetrating testplayer lightning chess 0 0 0 0 0 0\n')

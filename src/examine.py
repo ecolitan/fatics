@@ -59,6 +59,16 @@ class ExaminedGame(Game):
         self.variant.do_move(mv)
         self.send_boards()
 
+    def backward(self, n, conn):
+        assert(self.variant.pos.ply >= 0)
+        if self.variant.pos.ply <= 0:
+            conn.write(_("You're at the beginning of the game.\n"))
+            return
+        for p in self.players + list(self.observers):
+            p.write(N_('Game %d: %s goes backward %d move(s)\n') % (self.number, conn.user.name, n)) # XXX ngettext
+        self.variant.undo_move()
+        self.send_boards()
+
     def _check_result(self):
         if self.variant.pos.is_checkmate:
             if self.variant.get_turn() == WHITE:

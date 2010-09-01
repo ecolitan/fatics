@@ -21,7 +21,7 @@ from test import *
 class TestStyle12(Test):
     def test_style12(self):
         self.adduser('testplayer', 'testpass')
-        t = self.connect_as_user('testplayer', 'testpass')
+        t = self.connect_as('testplayer', 'testpass')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t.write('iset ms 1\n')

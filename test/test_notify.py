@@ -20,7 +20,7 @@ from test import *
 
 class TestNotify(Test):
     def test_notify_guest(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t.write('+not admin\n')
         self.expect("admin added to your notify list", t)
 
@@ -36,7 +36,7 @@ class TestNotify(Test):
 
         self.close(t)
         self.expect('Notification: GuestABCD has departed', t2)
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         self.expect('Notification: GuestABCD has arrived', t2)
 
         self.close(t)
@@ -59,7 +59,7 @@ class TestNotify(Test):
             t.write('+not testplayer\n')
             self.expect("TestPlayer is already on your notify list", t)
 
-            t2 = self.connect_as_user('testplayer', 'test')
+            t2 = self.connect_as('testplayer', 'test')
             self.expect("Notification: TestPlayer has arrived", t)
 
             self.close(t)
@@ -77,7 +77,7 @@ class TestNotify(Test):
             t.write('-not testplayer\n')
             self.expect('TestPlayer is not on your notify list', t)
 
-            t2 = self.connect_as_user('testplayer', 'test')
+            t2 = self.connect_as('testplayer', 'test')
             self.expect_not("TestPlayer", t)
 
             self.close(t2)
@@ -89,7 +89,7 @@ class TestSummon(Test):
     def test_summon(self):
         self.adduser('TestPlayer', 'test')
         t = self.connect_as_admin()
-        t2 = self.connect_as_user('testplayer', 'test')
+        t2 = self.connect_as('testplayer', 'test')
         t.write('summon\n')
         self.expect('Usage:', t)
 
@@ -120,8 +120,8 @@ class TestZnotify(Test):
             self.expect('No one from your notify list is logged on.\r\nNo one logged in has you on their notify list.', t)
 
             t.write('+notify testplayer\n')
-            t2 = self.connect_as_user('testplayer', 'test')
-            t3 = self.connect_as_user('GuestABCD', '')
+            t2 = self.connect_as('testplayer', 'test')
+            t3 = self.connect_as('GuestABCD', '')
             t3.write('+notify admin\n')
             self.expect('admin added to your notify list', t3)
 

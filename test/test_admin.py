@@ -48,7 +48,7 @@ class CommandTest(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
         t3 = self.connect_as_guest()
-        t4 = self.connect_as_user('testplayer', 'passwd')
+        t4 = self.connect_as('testplayer', 'passwd')
 
         t.write("annunreg x Y z\n")
         self.expect('(2) **UNREG ANNOUNCEMENT** from admin: x Y z', t)
@@ -70,13 +70,13 @@ class CommandTest(Test):
         t.write('nuke guesttest\n')
         self.expect('no player matching', t)
 
-        t2 = self.connect_as_user('GuestTest', '')
+        t2 = self.connect_as('GuestTest', '')
         t.write('nuke guesttest\n')
         self.expect('You have been kicked out', t2)
         self.expect('Nuked: GuestTest', t)
         t2.close()
 
-        t2 = self.connect_as_user('GuestTest', '')
+        t2 = self.connect_as('GuestTest', '')
         t.write('asetadmin guesttest 100\n')
         t2.write('nuke admin\n')
         self.expect('need a higher adminlevel', t2)
@@ -88,12 +88,12 @@ class CommandTest(Test):
         self.adduser('testplayer', 'passwd')
         t = self.connect_as_admin()
 
-        t2 = self.connect_as_user('GuestTest', '')
+        t2 = self.connect_as('GuestTest', '')
         t.write('asetpass GuestTest pass\n')
         self.expect('cannot set the password', t)
         self.close(t2)
 
-        t2 = self.connect_as_user('testplayer', 'passwd')
+        t2 = self.connect_as('testplayer', 'passwd')
         t.write('asetpass testplayer test\n')
         self.expect("Password of testplayer changed", t)
         self.expect("admin has changed your password", t2)
@@ -111,7 +111,7 @@ class CommandTest(Test):
         self.adduser('testplayer', 'passwd')
         self.adduser('testtwo', 'passwd')
         t = self.connect_as_admin()
-        t2 = self.connect_as_user('testplayer', 'passwd')
+        t2 = self.connect_as('testplayer', 'passwd')
         t.write('asetadmin testplayer 100\n')
         self.expect('Admin level of testplayer set to 100.', t)
         self.close(t)

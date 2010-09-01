@@ -20,9 +20,9 @@ from test import *
 
 class TestObserve(Test):
     def test_observe_unobserve(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
-        t3 = self.connect_as_user('GuestIJKL', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
 
         t.write('set style 12\n')
         t.write('observe\n')
@@ -89,10 +89,10 @@ class TestObserve(Test):
 
 class TestAllobservers(Test):
     def test_allobservers(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
-        t3 = self.connect_as_user('GuestIJKL', '')
-        t4 = self.connect_as_user('GuestMNOP', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
 
         self.expect_command_prints_nothing("allobservers\n", t)
 

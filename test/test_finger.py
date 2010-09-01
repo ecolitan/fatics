@@ -56,7 +56,7 @@ class FingerTest(Test):
 
         t.write('finger ad\n')
         self.expect('Finger of admin(*):', t, "finger with prefix ignores offline user")
-        t2 = self.connect_as_user('admintwo', 'admintwo')
+        t2 = self.connect_as('admintwo', 'admintwo')
         # ambiguous, both users online
         t2.write('finger ad\n')
         self.expect('Matches: admin admintwo', t2)
@@ -92,7 +92,7 @@ class FingerTest(Test):
         t.close()
 
     def test_finger_game(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')

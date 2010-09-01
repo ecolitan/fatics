@@ -22,8 +22,8 @@ from test import *
 
 class TestHistory(Test):
     def test_history_guest(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
 
         t.write('history\n')
         self.expect('GuestABCD has no history games', t)
@@ -65,7 +65,7 @@ class TestHistory(Test):
 class TestHistoryUser(Test):
     def test_history_user(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as_user('GuestABCD', '')
+        t2 = self.connect_as('GuestABCD', '')
        
         t.write('aclearhist admin\n')
         t.write('history\n')

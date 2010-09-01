@@ -20,7 +20,7 @@ from test import *
 
 class TestGame(Test):
     def test_game_basics(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -88,7 +88,7 @@ class TestGame(Test):
         self.close(t2)
 
     def _assert_game_is_legal(self, moves, result=None):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -198,7 +198,7 @@ class TestGame(Test):
         self._assert_game_is_legal(moves, 'drawn by stalemate} 1/2-1/2')
 
     def test_draw_repetition(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -231,7 +231,7 @@ class TestGame(Test):
         self.close(t2)
 
     def test_draw_repetition_claim_later(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -265,7 +265,7 @@ class TestGame(Test):
         self.close(t2)
 
     def test_draw_repetition_claim_too_late(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -298,7 +298,7 @@ class TestGame(Test):
 
 class TestResign(Test):
     def test_resign_white(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -314,7 +314,7 @@ class TestResign(Test):
         self.close(t2)
 
     def test_resign_black(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -331,7 +331,7 @@ class TestResign(Test):
 
 class TestRefresh(Test):
     def test_refresh(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -349,7 +349,7 @@ class TestRefresh(Test):
         self.expect('<12> ', t)
         self.expect_not('<12> ', t2)
 
-        t3 = self.connect_as_user('GuestDEFG', '')
+        t3 = self.connect_as('GuestDEFG', '')
         t3.write('re\n')
         self.expect('You are not playing, examining, or observing', t3)
         t3.write('re 999\n')
@@ -369,7 +369,7 @@ class TestRefresh(Test):
 
 class TestMoves(Test):
     def test_moves(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t.write('iset ms 1\n')
@@ -410,7 +410,7 @@ class TestMoves(Test):
 
 class TestGames(Test):
     def test_games(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('games\n')
@@ -432,7 +432,7 @@ class TestGames(Test):
 
 class TestDisconnect(Test):
     def test_forfeit_disconnection_quit(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -446,7 +446,7 @@ class TestDisconnect(Test):
         self.close(t2)
 
     def test_forfeit_disconnection_quit(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -462,7 +462,7 @@ class TestDisconnect(Test):
         self.close(t2)
 
     def test_abort_disconnection(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')

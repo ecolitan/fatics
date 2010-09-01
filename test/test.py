@@ -85,7 +85,7 @@ class Test(unittest.TestCase):
         assert('fics%' in s)
         return t
 
-    def connect_as_user(self, name, passwd):
+    def connect_as(self, name, passwd):
         t = connect()
         t.write("%s\n%s\n" % (name, passwd))
         s = t.read_until('fics%', 5)

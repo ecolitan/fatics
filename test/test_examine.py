@@ -22,14 +22,22 @@ import time
 
 class TestExamine(Test):
     def test_examine(self):
-        t = self.connect_as_user('GuestPQLQ', '')
+        t = self.connect_as('GuestPQLQ', '')
 
         t.write('forward\n')
+        self.expect('You are not examining a game', t)
+
+        t.write('backward\n')
         self.expect('You are not examining a game', t)
 
         t.write('examine\n')
         self.expect('Starting a game in examine (scratch) mode.', t)
         self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestPQLQ GuestPQLQ 2 0 0 39 39 0 0 1 none (0:00) none 0 0 0', t)
+
+        t.write('forward\n')
+        self.expect("You're at the end of the game.", t)
+        t.write('backward\n')
+        self.expect("You're at the beginning of the game.", t)
 
         t.write('examine\n')
         self.expect('You are already examining a game.', t)
@@ -41,7 +49,7 @@ class TestExamine(Test):
         self.expect('Illegal move (e2e5)', t)
 
         t.write('e2e4\n')
-        # diffference from fics: en passant file is -1 despite the last move
+        # difference from fics: en passant file is -1 despite the last move
         # being a double push, since there is no legal en passant capture
         self.expect('<12> rnbqkbnr pppppppp -------- -------- ----P--- -------- PPPP-PPP RNBQKBNR B -1 1 1 1 1 0 1 GuestPQLQ GuestPQLQ 2 0 0 39 39 0 0 1 P/e2-e4 (0:00) e4 0 0 0', t)
         self.expect('GuestPQLQ moves: e4', t)
@@ -61,7 +69,7 @@ class TestExamine(Test):
         self._assert_game_is_legal(moves, 'Game 1: Game drawn by stalemate 1/2-1/2')
 
     def _assert_game_is_legal(self, moves, result=None):
-        t = self.connect_as_user('GuestWXYZ', '')
+        t = self.connect_as('GuestWXYZ', '')
         t.write('ex\n')
         for mv in moves:
             t.write('%s\n' % mv)

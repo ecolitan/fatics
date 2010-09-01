@@ -21,7 +21,7 @@ from test import *
 
 class TestEco(Test):
     def test_eco(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('eco\n')
@@ -103,7 +103,7 @@ class TestEco(Test):
         self.close(t)
 
     def test_eco_out_of_book(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -132,7 +132,7 @@ class TestEco(Test):
         self.expect('LONG[  2]: Scandinavian (Centre Counter)', t)
 
     def test_eco_utf8(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')

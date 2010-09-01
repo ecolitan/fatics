@@ -35,7 +35,7 @@ class TestCrazyhouse(Test):
         self._assert_game_is_legal(moves, 'drawn by stalemate} 1/2-1/2')
 
     def test_crazyhouse_style12(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -78,7 +78,7 @@ class TestCrazyhouse(Test):
         self.close(t2)
 
     def _assert_game_is_legal(self, moves, result=None):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -114,8 +114,8 @@ class TestCrazyhouse(Test):
 class TestPgn(Test):
     def test_pgn(self):
         self._skip('slow test')
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')

@@ -56,7 +56,7 @@ class TestAbort(Test):
         self.close(t2)
 
     def test_abort_agreement(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -83,7 +83,7 @@ class TestAbort(Test):
         self.close(t2)
 
     def test_abort_decline(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -106,7 +106,7 @@ class TestAbort(Test):
         self.close(t2)
 
     def test_abort_autodecline(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -129,7 +129,7 @@ class TestAbort(Test):
         self.close(t2)
 
     def test_abort_accept(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -154,7 +154,7 @@ class TestAbort(Test):
         self.close(t2)
 
     def test_abort_withdraw(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -178,7 +178,7 @@ class TestAbort(Test):
 
 class TestDraw(Test):
     def test_agree_draw(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -200,7 +200,7 @@ class TestDraw(Test):
         self.close(t2)
 
     def test_draw_accept(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -222,7 +222,7 @@ class TestDraw(Test):
         self.close(t2)
 
     def test_draw_decline(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -242,7 +242,7 @@ class TestDraw(Test):
         self.close(t2)
 
     def test_draw_autodecline(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -270,7 +270,7 @@ class TestDraw(Test):
         self.close(t2)
 
     def test_withdraw_draw(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')
@@ -289,7 +289,7 @@ class TestDraw(Test):
         self.close(t2)
 
     def test_cancel_draw(self):
-        t = self.connect_as_user('GuestABCD', '')
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')

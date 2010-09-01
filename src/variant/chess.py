@@ -1206,6 +1206,9 @@ class Chess(object):
         self.pos.detect_check()
         mv.add_san_decorator()
 
+    def undo_move(self):
+        self.pos.undo_move(self.pos.get_last_move())
+
     def get_turn(self):
         return WHITE if self.pos.wtm else BLACK
 

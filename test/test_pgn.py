@@ -24,8 +24,8 @@ from pgn import Pgn
 
 class TestPgn(Test):
     def test_pgn(self):
-        t = self.connect_as_user('GuestABCD', '')
-        t2 = self.connect_as_user('GuestEFGH', '')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
