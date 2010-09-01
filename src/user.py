@@ -137,6 +137,9 @@ class BaseUser(object):
     def set_admin_level(self, level):
         self.admin_level = level
 
+    def is_admin(self):
+        return self.admin_level >= admin.Level.admin
+
     def add_notification(self, user):
         self.notifiers.add(user.name)
 

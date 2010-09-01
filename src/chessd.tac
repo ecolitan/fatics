@@ -50,8 +50,7 @@ if os.geteuid() == 0:
 class IcsFactory(ServerFactory):
     def __init__(self):
         #ServerFactory.__init__(self)
-        self.lc = task.LoopingCall(clock.heartbeat)
-        self.lc.start(10)
+        pass
 
     connections = []
     def buildProtocol(self, addr):
@@ -74,5 +73,8 @@ service.setServiceParent(application)
 if os.geteuid() == 0:
     service = getService(23)
     service.setServiceParent(application)
+
+lc = task.LoopingCall(clock.heartbeat)
+lc.start(5)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent ft=python

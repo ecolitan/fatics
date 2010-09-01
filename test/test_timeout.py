@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # Copyright (C) 2010  Wil Mahan <wmahan+fatics@gmail.com>
 #
 # This file is part of FatICS.
@@ -17,28 +16,33 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-class Config(object):
-    port = 5000
-    zipseal_port = 5001
+from test import *
 
-    db_host = "localhost"
-    db_db = "chess"
+class TestLoginTimeout(Test):
+    def setUp(self):
+        self._skip('slow test')
 
-    # login timout in seconds
-    login_timeout = 30
-    min_login_name_len = 3
+    def test_timeout(self):
+        t = self.connect()
+        self.expect('TIMEOUT', t, timeout=65)
+        t.close()
 
-    # max idle time in seconds
-    idle_timeout = 120
+    def test_guest_timeout_password(self):
+        t = self.connect()
+        t.write("guest\n")
+        self.expect('TIMEOUT', t, timeout=65)
+        t.close()
 
-    # Silly Babas requires freechess.org to be in the welcome message,
-    # so work it into a disclaimer.
-    welcome_msg = '''♙♘♗♖♕♔ Welcome to the fatICS! ♚♛♜♝♞♟\n\nThis server is not affiliated with or endorsed by freechess.org.\n\n'''
-    login_msg = '''If you are not a registered player, enter the login name "guest".\n\n'''
-    logout_msg = '''♙♙♙ Thank you for using FatICS. ♟♟♟\n'''
+    def test_guest_timeout(self):
+        t = self.connect()
+        t.write("guest\n")
+        self.expect('TIMEOUT', t, timeout=65)
+        t.close()
 
-    prompt = 'fics% '
-
-config = Config()
+class TestIdleTimeout(Test):
+    def test_idle_logout(self):
+        t = self.connect_as_guest()
+        self.expect("**** Auto-logout", t, timeout=60*60*2)
+        t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

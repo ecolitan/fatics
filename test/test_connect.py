@@ -125,24 +125,4 @@ class LogoutTest(Test):
         self.expect('1 player', t2)
         self.close(t2)
 
-""" works but disabled for speed
-class TimeoutTest(Test):
-    def test_timeout(self):
-        t = self.connect()
-        self.expect('TIMEOUT', t, "login timeout", timeout=65)
-        t.close()
-
-    def test_guest_timeout_password(self):
-        t = self.connect()
-        t.write("guest\n")
-        self.expect('TIMEOUT', t, "login timeout at password prompt", timeout=65)
-        t.close()
-
-    def test_guest_timeout(self):
-        t = self.connect()
-        t.write("guest\n")
-        self.expect('TIMEOUT', t, "login timeout guest", timeout=65)
-        t.close()
-"""
-
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

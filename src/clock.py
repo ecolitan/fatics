@@ -19,7 +19,10 @@
 import time
 
 import timer
+import online
+
 from game_constants import *
+from config import config
 
 class Clock(object):
     pass
@@ -27,7 +30,14 @@ class Clock(object):
 running_clocks = []
 
 def heartbeat():
-    pass
+    # idle timeout
+    if config.idle_timeout:
+        now = time.time()
+        for u in online.online:
+            if (now - u.session.last_command_time > config.idle_timeout and
+                    not u.is_admin() and 
+                    'TD' not in u.get_titles()):
+                u.session.conn.idle_timeout(config.idle_timeout // 60)
 
 class FischerClock(Clock):
     def __init__(self, white_start, black_start, inc):
