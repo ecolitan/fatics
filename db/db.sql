@@ -169,11 +169,12 @@ CREATE TABLE `game` (
   -- `private` BOOLEAN NOT NULL DEFAULT 0,
   `time` int(3) COMMENT 'initial time',
   `inc` int(3) COMMENT 'increment',
-  `result` ENUM('1-0', '0-1', '1/2-1/2', '*') NOT NULL, 
   `rated` BOOLEAN NOT NULL,
+  `result` ENUM('1-0', '0-1', '1/2-1/2', '*') NOT NULL,
   `result_reason` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Rep', 'Sta',
     'Res', 'TM', 'WLM', 'WNM', '50') NOT NULL,
-  `moves` TEXT,
+  `ply_count` SMALLINT NOT NULL,
+  `movetext` TEXT,
   `when_ended` TIMESTAMP NOT NULL,
   INDEX(`white_name`),
   INDEX(`black_name`),
@@ -182,7 +183,7 @@ CREATE TABLE `game` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- ECO codes
--- use import-eco.py to populate 
+-- use import-eco.py to populate
 DROP TABLE IF EXISTS `eco`;
 CREATE TABLE `eco` (
   `eco_id` int(4) NOT NULL AUTO_INCREMENT,

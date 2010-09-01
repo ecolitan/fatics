@@ -28,6 +28,7 @@ import list_
 import channel
 import offer
 import game
+import examine
 import history
 import rating
 import speed_variant
@@ -449,11 +450,42 @@ class CommandList(object):
             else:
                 conn.write(_("You are playing a game.\n"))
             return
-        if args[1] == 'b':
-            conn.write('TODO: EXAMINE BOARD\n')
+
+        if args[0] is None:
+            conn.write(_("Starting a game in examine (scratch) mode.\n"))
+            examine.ExaminedGame(conn.user)
             return
-        conn.write(_("Starting a game in examine (scratch) mode.\n"))
-        game.ExaminedGame(conn.user)
+
+        if args[0] == 'b':
+            conn.write('TODO: EXAMINE SCRATCH BOARD\n')
+            return
+
+        u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
+        if not u:
+            return
+
+        if args[1] is None:
+            conn.write('TODO: EXAMINE ADJOURNED GAME\n')
+            return
+
+        try:
+            num = int(args[1])
+            if num < 0:
+                conn.write('TODO: EXAMINE PREVIOUS GAME\n')
+            else:
+                # history game
+                h = u.get_history_game(num, conn)
+                examine.ExaminedGame(conn.user, h)
+            return
+        except ValueError:
+            pass
+
+        m = re.match(r'%(\d\d?)', args[1])
+        if m:
+            num = int(m.group(1))
+            conn.write('TODO: EXAMINE JOURNAL GAME\n')
+            return
+
 
     def finger(self, args, conn):
         u = None
@@ -536,7 +568,8 @@ class CommandList(object):
         if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        conn.write('TODO: forward %d\n' % n)
+        g = conn.user.session.games.primary()
+        g.forward(n, conn)
 
     def games(self, args, conn):
         if not game.games.values():

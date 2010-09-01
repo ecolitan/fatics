@@ -460,7 +460,7 @@ class Position(object):
 
             self.fifty_count = int(fifty_count, 10)
             self.ply = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
-            self.start_ply = self.ply
+            self.start_ply = self.ply # 0 for new games
 
             if ep == '-':
                 self.ep = None
@@ -1200,7 +1200,7 @@ class Chess(object):
 
         return mv
 
-    def do_move(self, mv, s):
+    def do_move(self, mv):
         mv.to_san()
         self.pos.make_move(mv)
         self.pos.detect_check()

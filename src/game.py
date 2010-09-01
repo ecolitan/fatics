@@ -174,7 +174,7 @@ class Game(object):
             ret = (0, '-----')
         return ret
 
-    def get_moves(self):
+    def get_movetext(self):
         i = self.variant.pos.start_ply
         moves = []
         while i < self.variant.pos.ply:
@@ -183,6 +183,9 @@ class Game(object):
             i += 1
         ret = ' '.join(moves)
         return ret
+
+    def get_ply_count(self):
+        return self.variant.pos.ply - self.variant.pos.start_ply
 
     def write_moves(self, conn):
         # don't translate since clients parse these messages
@@ -240,7 +243,7 @@ class Game(object):
             elif illegal:
                 conn.write(_('Illegal move (%s)\n') % s)
             else:
-                self.variant.do_move(mv, s)
+                self.variant.do_move(mv)
                 self.next_move(mv, t, conn)
         return parsed
 
@@ -343,7 +346,9 @@ class PlayedGame(Game):
                     self.clock.add_increment(moved_side)
                 self.clock.start(self.variant.get_turn())
 
-        self.variant.pos.get_last_move().time = time
+        #self.variant.pos.get_last_move().time = time
+        assert(mv == self.variant.pos.get_last_move())
+        mv.time = time
 
         super(PlayedGame, self).next_move(mv, t, conn)
 
@@ -410,55 +415,5 @@ class PlayedGame(Game):
         super(PlayedGame, self).free()
         self.white.session.games.free(self.black.name)
         self.black.session.games.free(self.white.name)
-
-class ExaminedGame(Game):
-    def __init__(self, user):
-        super(ExaminedGame, self).__init__()
-        self.gtype = EXAMINED
-        self.white_time = 0
-        self.black_time = 0
-        self.inc = 0
-        self.players = [user]
-        user.session.games.add(self, '[examined]')
-        self.speed_variant = speed_variant.from_names('untimed', 'chess')
-        self.variant = variant_factory.get(self.speed_variant.variant.name,
-            self)
-        self.send_boards()
-
-    def next_move(self, mv, t, conn):
-        self.variant.pos.get_last_move().time = 0.0
-        super(ExaminedGame, self).next_move(mv, t, conn)
-        for p in self.players + list(self.observers):
-            p.write(N_('Game %d: %s moves: %s\n') % (self.number, conn.user.name, mv.to_san()))
-        if self.variant.pos.is_checkmate:
-            if self.variant.get_turn() == WHITE:
-                self.result('White checkmated', '0-1')
-            else:
-                self.result('Black checkmated', '1-0')
-        elif self.variant.pos.is_stalemate:
-            self.result('Game drawn by stalemate', '1/2-1/2')
-        elif self.variant.pos.is_draw_nomaterial:
-            self.result('Game drawn because neither player has mating material', '1/2-1/2')
-
-    def leave(self, user):
-        # user may be offline if he or she disconnected
-        self.players.remove(user)
-        if user.is_online:
-            user.write(N_('You are no longer examining game %d.\n') % self.number)
-        for p in self.players + list(self.observers):
-            p.write(N_('%s has stopped examining game %d.\n') % (user.name, self.number))
-        if not self.players:
-            for p in self.observers:
-                p.write(N_('Game %d (which you were observing) has no examiners.\n') % self.number)
-            self.free()
-
-    def result(self, msg, result_code):
-        for p in self.players + list(self.observers):
-            p.write(N_('Game %d: %s %s\n') % (self.number, msg, result_code))
-
-    def free(self):
-        super(ExaminedGame, self).free()
-        for p in self.players:
-            p.session.games.free('[examined]')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

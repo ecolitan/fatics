@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (C) 2010  Wil Mahan <wmahan+fatics@gmail.com>
 #
 # This file is part of FatICS.
@@ -16,7 +17,6 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-#!/usr/bin/env python
 
 """This is a script to read a database of ECO openings in EPD format
 and insert into the database in the format the server expects.  The

@@ -1353,7 +1353,7 @@ class Crazyhouse(object):
 
         return mv
 
-    def do_move(self, mv, s):
+    def do_move(self, mv):
         mv.to_san()
         self.pos.make_move(mv)
         self.pos.detect_check()

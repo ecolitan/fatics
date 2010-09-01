@@ -179,6 +179,17 @@ class BaseUser(object):
     def clear_history(self):
         self._history = []
 
+    def get_history_game(self, num, conn):
+        if num < 0:
+            if num < -10:
+                conn.write(_('There are 10 entries maximum in history.\n'))
+            h = db.get_history_game_relative(self.id, num)
+            return
+        h = db.get_history_game(self.id, num)
+        if not h:
+            conn.write(_('There is no history game %d for %s.\n') % (num, self.name))
+        return h
+
     def has_timeseal(self):
         return self.session.use_timeseal or self.session.use_zipseal
 

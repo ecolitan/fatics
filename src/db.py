@@ -337,13 +337,13 @@ class DB(object):
 
     # game
     def game_add(self, white_name, white_rating, black_name, black_rating,
-            eco, variant_id, speed_id, time, inc, result, rated, result_reason,
-            moves, when_ended):
+            eco, variant_id, speed_id, time, inc, rated, result, result_reason,
+            ply_count, movetext, when_ended):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant_id=%s,speed_id=%s,time=%s,inc=%s,result=%s,rated=%s,result_reason=%s,moves=%s,when_ended=%s""", (white_name, white_rating,
-            black_name, black_rating, eco, variant_id, speed_id, time, inc,
-            result, rated, result_reason, moves,
-            when_ended))
+        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant_id=%s,speed_id=%s,time=%s,inc=%s,rated=%s,result=%s,result_reason=%s,ply_count=%s,movetext=%s,when_ended=%s""", (white_name,
+            white_rating, black_name, black_rating, eco, variant_id,
+            speed_id, time, inc, rated, result, result_reason, ply_count,
+            movetext, when_ended))
         game_id = cursor.lastrowid
         cursor.close()
         return game_id
@@ -353,9 +353,14 @@ class DB(object):
         cursor.execute("""SELECT game_id, num, result_char, user_rating, color_char, opp_name, opp_rating, eco, flags, time, inc, result_reason, when_ended FROM history WHERE user_id=%s""", user_id)
         rows = cursor.fetchall()
         cursor.close()
-        #for row in rows:
-        #    row['when_ended'] = row['when_ended'].timetuple()
         return rows
+
+    def get_history_game(self, user_id, num):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT white_name,white_rating,black_name,black_rating,game.eco,variant_id,speed_id,game.time,game.inc,rated,result,game.result_reason,ply_count,movetext,game.when_ended FROM game LEFT JOIN history USING (game_id) where user_id=%s AND num=%s""", (user_id, num))
+        row = cursor.fetchone()
+        cursor.close()
+        return row
 
     def user_add_history(self, entry, user_id):
         cursor = self.db.cursor()

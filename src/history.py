@@ -53,8 +53,8 @@ class History(object):
         game_id = db.game_add(game.white.name, white_rating, game.black.name,
             black_rating, eco, game.speed_variant.variant.id,
             game.speed_variant.speed.id, game.white_time, game.inc,
-            result_code, game.rated, result_reason, game.get_moves(),
-            game.when_ended)
+            game.rated, result_code, result_reason, game.get_ply_count(),
+            game.get_movetext(), game.when_ended)
 
         flags = '%s%s' % (game.speed_variant.speed.abbrev,
             game.speed_variant.variant.abbrev)
