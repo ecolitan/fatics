@@ -44,6 +44,17 @@ class CommandList(object):
         self.admin_cmds = trie.Trie()
 command_list = CommandList()
 
+# parameter format (taken from Lasker)
+# w - a word
+# o - an optional word
+# d - integer
+# p - optional integer
+# i - word or integer
+# n - optional word or integer
+# s - string to end
+# t - optional string to end
+# lowercase <-> case-insensitive
+
 class Command(object):
     def __init__(self, name, param_str, admin_level):
         assert(hasattr(self, 'run'))
@@ -396,36 +407,6 @@ class Ivariables(Command):
                     conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
 
-@ics_command('kibitz', 'S', admin.Level.user)
-class Kibitz(Command):
-    def run(self, args, conn):
-        if conn.user.session.games:
-            g = conn.user.session.games.primary()
-        elif conn.user.session.observed:
-            g = list(conn.user.session.observed)[0]
-        else:
-            conn.write(_('You are not playing, examining, or observing a game.\n'))
-            return
-        if conn.user.is_guest and conn.user not in g.players:
-            conn.write(_("Only registered players may kibitz to others' games."))
-            return
-        name = conn.user.get_display_name()
-        all = list(g.observers)
-        if g.gtype == game.PLAYED:
-            all += [g.white, g.black]
-        assert(len(all) > 0)
-        count = 0
-        rat = conn.user.get_rating(g.speed_variant)
-        for u in all:
-            if u.vars['kibitz'] and (u.vars['kiblevel'] == 0 or
-                    int(rat) >= u.vars['kiblevel'] or
-                    conn.user.admin_level > admin.Level.admin):
-                if u != conn.user:
-                    count += 1
-                # XXX localize for each user
-                u.write(_('%s(%s)[%d] kibitzes: %s\n') % (name, rat, g.number, args[0]))
-        conn.write(ngettext('(kibitzed to %d player)\n', '(kibitzed to %d players)\n', count) % count)
-
 @ics_command('match', 'wt', admin.Level.user)
 class Match(Command):
     def run(self, args, conn):
@@ -662,32 +643,6 @@ class Variables(Command):
                 if val is not None and v.display_in_vars:
                     conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
-
-@ics_command('whisper', 'S', admin.Level.user)
-class Whisper(Command):
-    def run(self, args, conn):
-        if conn.user.session.games:
-            g = conn.user.session.games.primary()
-        elif conn.user.session.observed:
-            g = list(conn.user.session.observed)[0]
-        else:
-            conn.write(_('You are not playing, examining, or observing a game.\n'))
-            return
-        if conn.user.is_guest and conn.user not in g.players:
-            conn.write(_("Only registered players may whisper to others' games."))
-            return
-        name = conn.user.get_display_name()
-        count = 0
-        rat = conn.user.get_rating(g.speed_variant)
-        for u in g.observers:
-            if (u.vars['kiblevel'] == 0 or int(rat) >= u.vars['kiblevel']
-                    or conn.user.admin_level >= admin.Level.admin):
-                if u != conn.user:
-                    count += 1
-                # XXX localize for each user
-                u.write(_('%s(%s)[%d] whispers: %s\n') % (name, rat, g.number, args[0]))
-        conn.write(ngettext('(whispered to %d player)\n', '(whispered to %d players)\n', count) % count)
-
 
 @ics_command('who', 'T', admin.Level.user)
 class Who(Command):

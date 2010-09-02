@@ -35,7 +35,6 @@ CREATE TABLE `user` (
   `highlight` SMALLINT(4) NOT NULL DEFAULT 0 COMMENT 'terminal highlight style',
   `open` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'open to match requests',
   -- `automail` BOOLEAN NOT NULL DEFAULT 0,
-  `kiblevel` SMALLINT(4) NOT NULL DEFAULT 0 COMMENT 'limit kibitzes',
   -- `availmin` SMALLINT(4) NOT NULL DEFAULT 0,
   `bell` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'beep on board updates',
   -- `pgn` BOOLEAN NOT NULL DEFAULT 1,

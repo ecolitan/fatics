@@ -272,4 +272,58 @@ class TestWhisper(Test):
         self.close(t2)
         self.close(t3)
 
+class TestXkibitz(Test):
+    @with_player('testplayer', 'testpass')
+    def test_xkibitz(self):
+        t = self.connect_as('GuestEFGH', '')
+        t2 = self.connect_as('testplayer', 'testpass')
+        t3 = self.connect_as_admin()
+
+        t3.write('xki 1 foo\n')
+        self.expect('no such game', t3)
+
+        t.write('match testplayer white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        t3.write('o 1\n')
+        self.expect('now observing game 1', t3)
+
+        t3.write('xki 1 sha la la\n')
+        self.expect('admin(*)(----)[1] kibitzes: sha la la\r\n', t)
+        self.expect('admin(*)(----)[1] kibitzes: sha la la\r\n', t2)
+        self.expect('admin(*)(----)[1] kibitzes: sha la la\r\n', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+class TestXwhisper(Test):
+    @with_player('testplayer', 'testpass')
+    def test_xwhisper(self):
+        t = self.connect_as('GuestEFGH', '')
+        t2 = self.connect_as('testplayer', 'testpass')
+        t3 = self.connect_as_admin()
+
+        t3.write('xwhi 1 foo\n')
+        self.expect('no such game', t3)
+
+        t.write('match testplayer white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        t3.write('o 1\n')
+        self.expect('now observing game 1', t3)
+
+        t.write('xwhi 1 sha la la\n')
+        self.expect('GuestEFGH(U)(++++)[1] whispers: sha la la\r\n', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
