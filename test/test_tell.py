@@ -129,4 +129,50 @@ class QtellTest(Test):
         finally:
             self.deluser('tdplayer')
 
+class SayTest(Test):
+    @with_player('testplayer', 'testpass')
+    def test_say(self):
+        t = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as_admin()
+
+        t.write('say hello\n')
+        self.expect("I don't know", t)
+
+        t.write('match admin white 1 0 u\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t.write('say Hello!\n')
+        self.expect('testplayer[1] says: Hello!\r\n', t2)
+        self.expect('(told admin', t)
+
+        t2.write('say hi\n')
+        self.expect('admin(*)[1] says: hi\r\n', t)
+        self.expect('(told testplayer', t2)
+
+        t.write('resign\n')
+        self.expect('testplayer resigns', t)
+        self.expect('testplayer resigns', t2)
+
+        t.write('say gg\n')
+        self.expect('testplayer says: gg', t2)
+        t2.write('say thanks\n')
+        self.expect('admin(*) says: thanks', t)
+
+        self.close(t)
+
+        t2.write('say bye\n')
+        self.expect('testplayer is no longer online.', t2)
+
+        t = self.connect_as('testplayer', 'testpass')
+        t2.write('say yo\n')
+        self.expect('admin(*) says: yo', t)
+        self.expect('(told testplayer', t2)
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

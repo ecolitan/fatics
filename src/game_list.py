@@ -22,7 +22,7 @@ class GameList(object):
     def __init__(self):
         self.games = {}
 
-    def primary(self):
+    def current(self):
         return self.games.values()[0]
 
     def add(self, game, opp_name):

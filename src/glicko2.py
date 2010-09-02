@@ -107,7 +107,7 @@ class Player:
         #x1 = 1
         x0 = a
 
-        print('a is %f, delta %f, rdsq %f, v %f' % (a, delta, rd_squared, v))
+        #print('a is %f, delta %f, rdsq %f, v %f' % (a, delta, rd_squared, v))
         q = 0
         while 1:
             q += 1
@@ -118,7 +118,7 @@ class Player:
                 (rd_squared + v))
                 / math.pow(d, 2)) + (0.5 * math.pow(delta, 2) * math.exp(x0)
                 * (rd_squared + v - math.exp(x0))) / math.pow(d, 3)
-            print('\tx0 = %f; d = %f; h1 = %lf; h2 = %f' % (x0, d, h1, h2))
+            #print('\tx0 = %f; d = %f; h1 = %lf; h2 = %f' % (x0, d, h1, h2))
             x1 = x0 - (h1 / h2)
             #if abs(x0 - x1) < .000000001:
             if x0 == x1:
@@ -126,7 +126,7 @@ class Player:
             # New iteration, so x(i) becomes x(i-1)
             x0 = x1
 
-        print 'iterted %d; vol %f -> %f' % (q, self.vol, math.exp(x1 / 2))
+        #print 'iterted %d; vol %f -> %f' % (q, self.vol, math.exp(x1 / 2))
         return math.exp(x1 / 2)
 
     def _delta(self, rating_list, RD_list, outcome_list, v):
@@ -150,7 +150,7 @@ class Player:
         for i in range(len(rating_list)):
             tempE = self._E(rating_list[i], RD_list[i])
             tempSum += math.pow(self._g(RD_list[i]), 2) * tempE * (1 - tempE)
-        print 'v is %f' % (1 / tempSum)
+        #print 'v is %f' % (1 / tempSum)
         return 1 / tempSum
 
     def _E(self, p2rating, p2RD):

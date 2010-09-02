@@ -28,6 +28,8 @@ import notify
 import connection
 import rating
 import speed_variant
+import lang
+
 from server import server
 from db import db
 from online import online
@@ -81,6 +83,12 @@ class BaseUser(object):
         assert(self.is_online)
         connection.written_users.add(self)
         self.session.conn.write(s)
+
+    # Like write(), but localizes for this user.
+    def write_(self, s, args):
+        connection.written_users.add(self)
+        self.session.conn.write(lang.langs[self.vars['lang']].gettext(s) %
+            args)
 
     def send_prompt(self):
         assert(self.is_online)

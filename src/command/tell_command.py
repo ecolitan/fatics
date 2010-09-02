@@ -109,4 +109,30 @@ class Qtell(Command):
                 ret = 1
         conn.write('*qtell %s %d*\n' % (args[0], ret))
 
+@ics_command('say', 'S')
+class Say(Command):
+    def run(self, args, conn):
+        if conn.user.session.games:
+            g = conn.user.session.games.current()
+            opp = g.get_opp(conn.user)
+            assert(opp.is_online)
+            opp.write_("%s[%d] says: %s\n", (conn.user.get_display_name(),
+                g.number, args[0]))
+            # TODO ", who is playing"; ", who is examining a game"
+            conn.write(_('(told %s)') % opp.name)
+        else:
+            opp = conn.user.session.last_opp
+            if opp:
+                if not opp.is_online:
+                    name = opp.name
+                    opp = online.find_exact(name)
+                    if not opp:
+                        conn.write(_('%s is no longer online.\n') % name)
+                if opp:
+                    opp.write_("%s says: %s\n", (conn.user.get_display_name(),
+                        args[0]))
+                    conn.write(_('(told %s)') % opp.name)
+            else:
+                conn.write(_("I don't know whom to say that to.\n"))
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

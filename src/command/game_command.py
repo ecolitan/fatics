@@ -25,13 +25,13 @@ class GameCommand(Command):
 @ics_command('abort', 'n', admin.Level.user)
 class Abort(GameCommand):
     def run(self, args, conn):
-        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.PLAYED:
+        if not conn.user.session.games or conn.user.session.games.current().gtype != game.PLAYED:
             conn.write(_("You are not playing a game.\n"))
             return
         if len(conn.user.session.games) > 1:
             conn.write(_('Please use "simabort" for simuls.\n'))
             return
-        g = conn.user.session.games.primary()
+        g = conn.user.session.games.current()
         if g.variant.pos.ply < 2:
             g.result('Game aborted on move 1 by %s' % conn.user.name, '*')
         else:
@@ -44,7 +44,7 @@ class Draw(Command):
             if len(conn.user.session.games) == 0:
                 conn.write(_("You are not playing a game.\n"))
                 return
-            g = conn.user.session.games.primary()
+            g = conn.user.session.games.current()
             offer.Draw(g, conn.user)
         else:
             conn.write('TODO: DRAW PARAM\n')
@@ -58,7 +58,7 @@ class Resign(Command):
         if len(conn.user.session.games) == 0:
             conn.write(_("You are not playing a game.\n"))
             return
-        g = conn.user.session.games.primary()
+        g = conn.user.session.games.current()
         g.resign(conn.user)
 
 class GameParam(object):
@@ -68,8 +68,8 @@ class GameParam(object):
         if param is not None:
             g = game.from_name_or_number(param, conn)
         else:
-            if len(conn.user.session.games) > 0:
-                g = conn.user.session.games.primary()
+            if conn.user.session.games:
+                g = conn.user.session.games.current()
             elif conn.user.session.observed:
                 g = list(conn.user.session.observed)[0]
             else:

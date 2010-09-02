@@ -180,7 +180,7 @@ class Finger(Command):
                 conn.write(_('On for: %s   Idle: %s\n') % (u.session.get_online_time(), u.session.get_idle_time()))
 
                 if len(u.session.games) > 0:
-                    g = u.session.games.primary()
+                    g = u.session.games.current()
                     if g.gtype == game.PLAYED:
                         conn.write(_('(playing game %d: %s vs. %s)\n') % (g.number, g.white.name, g.black.name))
                     elif g.gtype == game.EXAMINED:
@@ -238,7 +238,7 @@ class Flag(Command):
         if len(conn.user.session.games) == 0:
             conn.write(_("You are not playing a game.\n"))
             return
-        g = conn.user.session.games.primary()
+        g = conn.user.session.games.current()
         if not g.clock.check_flag(g, g.get_user_opp_side(conn.user)):
             conn.write(_('Your opponent is not out of time.\n'))
 
@@ -492,10 +492,10 @@ class Summon(Command):
                 conn.write(_("%s is censoring you.\n") % u.name)
                 return
             if conn.user.name not in u.notifiers:
-                conn.write(_('You cannot summon a player who doesn\'t have you on his/her notify list.\n'))
+                conn.write(_('You cannot summon a player who doesn\'t have you on his or her notify list.\n'))
                 return
         # TODO: localize for the user being summoned
-        u.write('\a\n%s needs to speak to you.  To contact him/her type "tell %s hello".\n' % (conn.user.name, conn.user.name))
+        u.write('\a\n%s needs to speak to you.  To contact him or her type "tell %s hello".\n' % (conn.user.name, conn.user.name))
         conn.write(_('Summoning sent to "%s".\n') % u.name)
         # TODO: add to idlenotify list
 

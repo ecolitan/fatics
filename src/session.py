@@ -32,6 +32,7 @@ class Session(object):
         self.last_command_time = time.time()
         self.last_tell_user = None
         self.last_tell_ch = None
+        self.last_opp = None
         self.use_timeseal = False
         self.ping_sent = False
         self.ping_reply_time = None
@@ -77,7 +78,7 @@ class Session(object):
         self.games.leave_all(self.user)
         del self.offers_received[:]
         del self.offers_sent[:]
-        if self.games and self.games.primary().gtype == game.PLAYED:
+        if self.games and self.games.current().gtype == game.PLAYED:
             self.conn.write('Your game will be lost because adjourning is not implemented.\n')
 
         # unobserve games

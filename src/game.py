@@ -69,7 +69,7 @@ def from_name_or_number(arg, conn):
                 conn.write(_("%s is not playing or examining a game.\n")
                     % u.name)
             else:
-                g = u.session.games.primary()
+                g = u.session.games.current()
     return g
 
 class Game(object):
@@ -313,10 +313,13 @@ class PlayedGame(Game):
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
 
-        self.send_boards()
-
         self.white.session.games.add(self, self.black.name)
         self.black.session.games.add(self, self.white.name)
+
+        self.white.session.last_opp = self.black
+        self.black.session.last_opp = self.white
+
+        self.send_boards()
 
     def _pick_color(self, a, b):
         return random.choice([WHITE, BLACK])

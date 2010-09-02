@@ -25,7 +25,7 @@ from command import *
 class Examine(Command):
     def run(self, args, conn):
         if len(conn.user.session.games) != 0:
-            if conn.user.session.games.primary().gtype == game.EXAMINED:
+            if conn.user.session.games.current().gtype == game.EXAMINED:
                 conn.write(_("You are already examining a game.\n"))
             else:
                 conn.write(_("You are playing a game.\n"))
@@ -70,20 +70,20 @@ class Examine(Command):
 class Backward(Command):
     def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
-        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
+        if not conn.user.session.games or conn.user.session.games.current().gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.games.primary()
+        g = conn.user.session.games.current()
         g.backward(n, conn)
 
 @ics_command('forward', 'p', admin.Level.user)
 class Forward(Command):
     def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
-        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
+        if not conn.user.session.games or conn.user.session.games.current().gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.games.primary()
+        g = conn.user.session.games.current()
         g.forward(n, conn)
 
 
