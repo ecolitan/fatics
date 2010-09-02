@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+export LIB="C:\Program Files\Microsoft Visual Studio\VC98\Lib"
+export INCLUDE="C:\Program Files\Microsoft Visual Studio\VC98\Include"
+
+wine "C:\Program Files\Microsoft Visual Studio\VC98\Bin\CL.EXE" /c /O2 huflocal.c
+wine "C:\Program Files\Microsoft Visual Studio\VC98\Bin\CL.EXE" /c /O2 bitarray.c
+wine "C:\Program Files\Microsoft Visual Studio\VC98\Bin\CL.EXE" /c /O2 bitfile.c
+wine "C:\Program Files\Microsoft Visual Studio\VC98\Bin\CL.EXE" /c /O2 chuffman.c
+wine "C:\Program Files\Microsoft Visual Studio\VC98\Bin\CL.EXE" /c /O2 zipseal_win32.c
+
+# link
+wine "C:\Program Files\Microsoft Visual Studio\VC98\Bin\CL.EXE" /O2 zipseal_win32.obj huflocal.obj bitarray.obj bitfile.obj chuffman.obj zlibstat.lib "C:\Program Files\Microsoft Visual Studio\VC98\Lib\WSOCK32.LIB" "C:\Program Files\Microsoft Visual Studio\VC98\Lib\WS2_32.LIB" /Fezipseal.exe

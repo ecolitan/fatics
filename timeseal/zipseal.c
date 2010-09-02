@@ -45,7 +45,7 @@ static int crypt(char *s,int l)
         return l;
 }
 
-int makeconn(char *hostname,int port)
+int makeconn(char *hostname, unsigned short port)
 {
         int sockfd;
         struct hostent* host_info;
@@ -126,7 +126,8 @@ void getfromfics(int fd, char *buff, int *rd)
 int main(int argc, char **argv)
 {
         char *hostname;
-        int port,fd,n;
+        int fd, n;
+        unsigned short port;
         struct CHuffman ch;
 
         if(argc==3) {
@@ -140,11 +141,11 @@ int main(int argc, char **argv)
                 return 1;
         }
 
-                ch.for_encode = 0;
-                if (!CHuffmanInit(&ch)) {
-                        fprintf(stderr, "initialization error\n");
-                        exit(1);
-                }
+        ch.for_encode = 0;
+        if (!CHuffmanInit(&ch)) {
+                fprintf(stderr, "initialization error\n");
+                exit(1);
+        }
 
         fd=makeconn(hostname,port);
         for(;;) {
@@ -178,12 +179,11 @@ int main(int argc, char **argv)
                         static int rd = 0;
                         static char buf[BSIZE];
                         static int dec_rd = 0;
-                        static char dec_buf[2*BSIZE];
+                        static char dec_buf[4*BSIZE];
                         int ret;
 
                         assert(rd == 0);
                         n = read(fd, buf + rd, sizeof(buf) - rd);
-                        rd += n;
                         //printf("read %d, total %d\n", n, rd);
                         if (!n) {
                                 fprintf(stderr, "Connection closed by ICS\n");
@@ -193,6 +193,7 @@ int main(int argc, char **argv)
                                 perror(NULL);
                                 exit(1);
                         }
+                        rd += n;
 
                         ch.inBuf = buf;
                         ch.inLen = rd;
@@ -218,3 +219,5 @@ int main(int argc, char **argv)
         }
 }
 
+/* vim: expandtab tabstop=8 softtabstop=8 shiftwidth=8 smarttab autoindent
+ */

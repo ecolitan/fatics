@@ -26,6 +26,7 @@ import time
 from test import *
 
 seal_prog = '../timeseal/zipseal'
+seal_prog_win = '../timeseal/win32/zipseal.exe'
 
 class TestZipseal(Test):
     def test_zipseal(self):
@@ -44,6 +45,26 @@ class TestZipseal(Test):
         self.assert_('Finger of admin' in out)
         self.assert_('Zipseal:     On' in out)
         self.assert_('''tells you: Les naïfs ægithales hâtifs pondant à Noël où il gèle sont sûrs d'être déçus et de voir leurs drôles d'œufs abîmés''' in out)
+        self.assert_('Thank you for using' in out)
+
+class TestZipsealWindows(Test):
+    def test_zipseal_windows(self):
+        if not os.path.exists(seal_prog_win):
+            self._skip('no zipseal windows binary')
+            return
+        process = subprocess.Popen(['/usr/bin/wine', seal_prog_win, host, '5001'], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        process.stdin.write('admin\r\n')
+        process.stdin.write('%s\r\n' % admin_passwd)
+        process.stdin.write('finger\n')
+        process.stdin.write('t admin В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.\n')
+        process.stdin.write('quit\n')
+        time.sleep(10)
+        [out, err] = process.communicate()
+        self.assert_('fics%' in out)
+        self.assert_('Finger of admin' in out)
+        self.assert_('Zipseal:     On' in out)
+        self.assert_('admin(*) tells you: В чащах юга жил-был цитрус? Да, но фальшивый экземпляр! ёъ.' in out)
         self.assert_('Thank you for using' in out)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
