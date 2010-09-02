@@ -17,6 +17,6 @@
 #
 
 __all__ = ['admin_command', 'command', 'examine_command', 'game_command',
-'news_command', 'tell_command']
+'list_command', 'news_command', 'offer_command', 'tell_command']
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

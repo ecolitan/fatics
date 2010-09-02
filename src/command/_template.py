@@ -17,5 +17,7 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from command import *
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

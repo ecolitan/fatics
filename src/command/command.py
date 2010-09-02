@@ -24,7 +24,6 @@ import user
 import trie
 import admin
 import var
-import list_
 import channel
 import offer
 import game
@@ -73,35 +72,6 @@ class ics_command(object):
         def wrapped_f(*args):
             raise RuntimeError('command objects should not be instantiated directly')
         return wrapped_f
-
-@ics_command('accept', 'n', admin.Level.user)
-class Accept(Command):
-    def run(self, args, conn):
-        if not conn.user.session.offers_received:
-            conn.write(_('You have no pending offers from other players.\n'))
-            return
-        if args[0] is None:
-            if len(conn.user.session.offers_received) > 1:
-                conn.write(_('You have more than one pending offer. Use "pending" to see them and "accept n" to choose one.\n'))
-                return
-            conn.user.session.offers_received[0].accept()
-        else:
-            conn.write('TODO: ACCEPT PARAM\n')
-
-@ics_command('addlist', 'ww',  admin.Level.user)
-class Addlist(Command):
-    def run(self, args, conn):
-        try:
-            ls = list_.lists.get(args[0])
-        except KeyError:
-            conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
-        except trie.NeedMore as e:
-            conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
-        else:
-            try:
-                ls.add(args[1], conn)
-            except list_.ListError as e:
-                conn.write(e.reason)
 
 @ics_command('alias', 'oT', admin.Level.user)
 class Alias(Command):
@@ -183,20 +153,6 @@ class Date(Command):
         #conn.write(_("Local time     - %s\n") % )
         conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(t)))
         conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
-
-@ics_command('decline', 'n', admin.Level.user)
-class Decline(Command):
-    def run(self, args, conn):
-        if len(conn.user.session.offers_received) == 0:
-            conn.write(_('You have no pending offers from other players.\n'))
-            return
-        if args[0] is None:
-            if len(conn.user.session.offers_received) > 1 and args[0] is None:
-                conn.write(_('You have more than one pending offer. Use "pending" to see them and "decline n" to choose one.\n'))
-                return
-            conn.user.session.offers_received[0].decline()
-        else:
-            conn.write('TODO: DECLINE PARAM\n')
 
 @ics_command('eco', 'oo', admin.Level.user)
 class Eco(Command):
@@ -624,41 +580,6 @@ class Shout(Command):
                         count += 1
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
 
-@ics_command('showlist', 'o', admin.Level.user)
-class Showlist(Command):
-    def run(self, args, conn):
-        if args[0] is None:
-            for c in list_.lists.itervalues():
-                conn.write('%s\n' % c.name)
-            return
-
-        try:
-            ls = list_.lists.get(args[0])
-        except KeyError:
-            conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
-        except trie.NeedMore as e:
-            conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
-        else:
-            try:
-                ls.show(conn)
-            except list_.ListError as e:
-                conn.write(e.reason)
-
-@ics_command('sublist', 'ww', admin.Level.user)
-class Sublist(Command):
-    def run(self, args, conn):
-        try:
-            ls = list_.lists.get(args[0])
-        except KeyError:
-            conn.write(_('''\"%s\" does not match any list name.\n''' % args[0]))
-        except trie.NeedMore as e:
-            conn.write(_('''Ambiguous list \"%s\". Matches: %s\n''') % (args[0], ' '.join([r.name for r in e.matches])))
-        else:
-            try:
-                ls.sub(args[1], conn)
-            except list_.ListError as e:
-                conn.write(e.reason)
-
 @ics_command('summon', 'w', admin.Level.user)
 class Summon(Command):
     def run(self, args, conn):
@@ -777,20 +698,6 @@ class Who(Command):
             count = count + 1
         conn.write('\n')
         conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
-
-@ics_command('withdraw', 'n', admin.Level.user)
-class Withdraw(Command):
-    def run(self, args, conn):
-        if len(conn.user.session.offers_sent) == 0:
-            conn.write(_('You have no pending offers to other players.\n'))
-            return
-        if args[0] is None:
-            if len(conn.user.session.offers_sent) > 1:
-                conn.write(_('You have more than one pending offer. Use "pending" to see them and "withdraw n" to choose one.\n'))
-                return
-            conn.user.session.offers_sent[0].withdraw()
-        else:
-            conn.write('TODO: WITHDRAW PARAM\n')
 
 @ics_command('znotify', 'o', admin.Level.user)
 class Znotify(Command):
