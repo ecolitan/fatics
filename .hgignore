@@ -9,6 +9,9 @@ syntax: glob
 *.po
 *.o
 *.a
-timeseal/*seal
-timeseal/*seal_decoder
 _trial_temp
+
+timeseal/*seal
+timeseal/*seal_{en,de}coder
+timeseal/win32/*.obj
+timeseal/maketable
