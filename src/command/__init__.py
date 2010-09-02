@@ -16,6 +16,7 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = ['admin_command', 'command', 'game_command', 'news_command', 'tell']
+__all__ = ['admin_command', 'command', 'examine_command', 'game_command',
+'news_command', 'tell_command']
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

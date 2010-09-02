@@ -28,7 +28,6 @@ import list_
 import channel
 import offer
 import game
-import examine
 import history
 import rating
 import speed_variant
@@ -89,16 +88,6 @@ class Accept(Command):
         else:
             conn.write('TODO: ACCEPT PARAM\n')
 
-@ics_command('aclearhistory', 'w', admin.Level.admin)
-class Aclearhistory(Command):
-    def run(self, args, conn):
-        name = args[0]
-        u = user.find.by_name_exact_for_user(name, conn)
-        if u:
-            # disallow clearing history for higher adminlevels?
-            u.clear_history()
-            u.write(A_('\nHistory of %s cleared.\n') % conn.user.name)
-
 @ics_command('addlist', 'ww',  admin.Level.user)
 class Addlist(Command):
     def run(self, args, conn):
@@ -113,22 +102,6 @@ class Addlist(Command):
                 ls.add(args[1], conn)
             except list_.ListError as e:
                 conn.write(e.reason)
-
-@ics_command('addplayer', 'WWS', admin.Level.admin)
-class Addplayer(Command):
-    def run(self, args, conn):
-        [name, email, real_name] = args
-        try:
-            u = user.find.by_name_exact(name)
-        except user.UsernameException as e:
-            conn.write(e.reason + '\n')
-        else:
-            if u:
-                conn.write('A player named %s is already registered.\n' % name)
-            else:
-                passwd = user.create.passwd()
-                user.create.new(name, email, passwd, real_name)
-                conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
 
 @ics_command('alias', 'oT', admin.Level.user)
 class Alias(Command):
@@ -184,17 +157,6 @@ class Allobservers(Command):
             for g in game.games.itervalues():
                 g.show_observers(conn)
 
-@ics_command('backward', 'p', admin.Level.user)
-class Backward(Command):
-    def run(self, args, conn):
-        n = args[0] if args[0] is not None else 1
-        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
-            conn.write(_("You are not examining a game.\n"))
-            return
-        g = conn.user.session.games.primary()
-        g.backward(n, conn)
-
-
 @ics_command('cshout', 'S', admin.Level.user)
 class Cshout(Command):
     def run(self, args, conn):
@@ -235,18 +197,6 @@ class Decline(Command):
             conn.user.session.offers_received[0].decline()
         else:
             conn.write('TODO: DECLINE PARAM\n')
-
-@ics_command('draw', 'o', admin.Level.user)
-class Draw(Command):
-    def run(self, args, conn):
-        if args[0] is None:
-            if len(conn.user.session.games) == 0:
-                conn.write(_("You are not playing a game.\n"))
-                return
-            g = conn.user.session.games.primary()
-            offer.Draw(g, conn.user)
-        else:
-            conn.write('TODO: DRAW PARAM\n')
 
 @ics_command('eco', 'oo', admin.Level.user)
 class Eco(Command):
@@ -297,52 +247,6 @@ class Eco(Command):
             conn.write(_(' ECO[%3d]: %s\n') % (ply, eco))
             conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
-
-@ics_command('examine', 'on', admin.Level.user)
-class Examine(Command):
-    def run(self, args, conn):
-        if len(conn.user.session.games) != 0:
-            if conn.user.session.games.primary().gtype == game.EXAMINED:
-                conn.write(_("You are already examining a game.\n"))
-            else:
-                conn.write(_("You are playing a game.\n"))
-            return
-
-        if args[0] is None:
-            conn.write(_("Starting a game in examine (scratch) mode.\n"))
-            examine.ExaminedGame(conn.user)
-            return
-
-        if args[0] == 'b':
-            conn.write('TODO: EXAMINE SCRATCH BOARD\n')
-            return
-
-        u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
-        if not u:
-            return
-
-        if args[1] is None:
-            conn.write('TODO: EXAMINE ADJOURNED GAME\n')
-            return
-
-        try:
-            num = int(args[1])
-            if num < 0:
-                conn.write('TODO: EXAMINE PREVIOUS GAME\n')
-            else:
-                # history game
-                h = u.get_history_game(num, conn)
-                examine.ExaminedGame(conn.user, h)
-            return
-        except ValueError:
-            pass
-
-        m = re.match(r'%(\d\d?)', args[1])
-        if m:
-            num = int(m.group(1))
-            conn.write('TODO: EXAMINE JOURNAL GAME\n')
-            return
-
 
 @ics_command('finger', 'ooo', admin.Level.user)
 class Finger(Command):
@@ -425,16 +329,6 @@ class Flag(Command):
 class Follow(Command):
     def run(self, args, conn):
         conn.write('TODO: FOLLOW\n')
-
-@ics_command('forward', 'p', admin.Level.user)
-class Forward(Command):
-    def run(self, args, conn):
-        n = args[0] if args[0] is not None else 1
-        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
-            conn.write(_("You are not examining a game.\n"))
-            return
-        g = conn.user.session.games.primary()
-        g.forward(n, conn)
 
 @ics_command('games', 'o', admin.Level.user)
 class Games(Command):
@@ -622,32 +516,6 @@ class Moves(Command):
         if g is not None:
             g.write_moves(conn)
 
-@ics_command('news', 'p', admin.Level.user)
-class News(Command):
-    def run(self, args, conn):
-        if args[0] is not None:
-            conn.write('TODO: news #\n')
-        else:
-            news = db.get_recent_news(is_admin=False)
-            if len(news) == 0:
-                conn.write(_('There is no news.\n'))
-            for item in reversed(news):
-                conn.write('%4d (%s) %s\n' % (item['news_id'], item['news_date'], item['news_title']))
-
-@ics_command('nuke', 'w', admin.Level.admin)
-class Nuke(Command):
-    def run(self, args, conn):
-        u = user.find.by_name_exact_for_user(args[0], conn)
-        if u:
-            if not admin.checker.check_user_operation(conn.user, u):
-                conn.write("You need a higher adminlevel to nuke %s!\n" % u.name)
-            elif not u.is_online:
-                conn.write("%s is not logged in.\n"  % u.name)
-            else:
-                u.write('\n\n**** You have been kicked out by %s! ****\n\n' % conn.user.name)
-                u.session.conn.loseConnection('nuked')
-                conn.write('Nuked: %s\n' % u.name)
-
 @ics_command('observe', 'i', admin.Level.user)
 class Observe(Command):
     def run(self, args, conn):
@@ -678,36 +546,6 @@ class Password(Command):
                 conn.user.set_passwd(newpass)
                 conn.write(_("Password changed to %s.\n") % ('*' * len(newpass)))
 
-@ics_command('qtell', 'iS', admin.Level.user)
-class Qtell(Command):
-    def run(self, args, conn):
-        if 'TD' not in conn.user.get_titles():
-            conn.write(_('Only TD programs are allowed to use this command\n'))
-            return
-        msg = args[1].replace('\\n', '\n:').replace('\\b', '\x07').replace('\\H', '\x1b[7m').replace('\\h', '\x1b[0m')
-        msg = '\n:%s\n' % msg
-        ret = 0 # 0 means success
-        if type(args[0]) == type(1):
-            # qtell channel
-            try:
-                ch = channel.chlist[args[0]]
-            except KeyError:
-                ret = 1
-            else:
-                ch.qtell(msg)
-        else:
-            # qtell user
-            try:
-                u = user.find.by_name_exact(args[0])
-                if not u or not u.is_online:
-                    ret = 1
-                else:
-                    args[0] = u.name
-                    u.write(msg)
-            except user.UsernameException:
-                ret = 1
-        conn.write('*qtell %s %d*\n' % (args[0], ret))
-
 @ics_command('quit', '', admin.Level.user)
 class Quit(Command):
     def run(self, args, conn):
@@ -726,32 +564,6 @@ class Refresh(Command):
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
         if g is not None:
             conn.user.send_board(g)
-
-@ics_command('remplayer', 'w', admin.Level.admin)
-class Remplayer(Command):
-    def run(self, args, conn):
-        name = args[0]
-        u = user.find.by_name_exact_for_user(name, conn)
-        if u:
-            if not admin.checker.check_user_operation(conn.user, u):
-                conn.write('''You can't remove an admin with a level higher than or equal to yourself.\n''')
-            elif u.is_online:
-                conn.write("%s is logged in.\n" % u.name)
-            else:
-                u.remove()
-                conn.write("Player %s removed.\n" % name)
-
-@ics_command('resign', 'o', admin.Level.user)
-class Resign(Command):
-    def run(self, args, conn):
-        if args[0] is not None:
-            conn.write('TODO: RESIGN PLAYER\n')
-            return
-        if len(conn.user.session.games) == 0:
-            conn.write(_("You are not playing a game.\n"))
-            return
-        g = conn.user.session.games.primary()
-        g.resign(conn.user)
 
 @ics_command('rmatch', 'wwt', admin.Level.user)
 class Rmatch(Command):

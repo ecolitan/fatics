@@ -19,6 +19,18 @@
 
 from command import *
 
+@ics_command('news', 'p', admin.Level.user)
+class News(Command):
+    def run(self, args, conn):
+        if args[0] is not None:
+            conn.write('TODO: news #\n')
+        else:
+            news = db.get_recent_news(is_admin=False)
+            if len(news) == 0:
+                conn.write(_('There is no news.\n'))
+            for item in reversed(news):
+                conn.write('%4d (%s) %s\n' % (item['news_id'], item['news_date'], item['news_title']))
+
 @ics_command('cnewsd', 'd', admin.Level.admin)
 class Cnewsd(Command):
     def run(self, args, conn):

@@ -19,6 +19,32 @@
 
 from command import *
 
+@ics_command('aclearhistory', 'w', admin.Level.admin)
+class Aclearhistory(Command):
+    def run(self, args, conn):
+        name = args[0]
+        u = user.find.by_name_exact_for_user(name, conn)
+        if u:
+            # disallow clearing history for higher adminlevels?
+            u.clear_history()
+            u.write(A_('\nHistory of %s cleared.\n') % conn.user.name)
+
+@ics_command('addplayer', 'WWS', admin.Level.admin)
+class Addplayer(Command):
+    def run(self, args, conn):
+        [name, email, real_name] = args
+        try:
+            u = user.find.by_name_exact(name)
+        except user.UsernameException as e:
+            conn.write(e.reason + '\n')
+        else:
+            if u:
+                conn.write('A player named %s is already registered.\n' % name)
+            else:
+                passwd = user.create.passwd()
+                user.create.new(name, email, passwd, real_name)
+                conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
+
 @ics_command('announce', 'S', admin.Level.admin)
 class Announce(Command):
     def run(self, args, conn):
@@ -110,5 +136,35 @@ class Asetrating(Command):
             conn.write(A_('Set %s %s rating for %s.\n' %
                 (speed_name, variant_name, name)))
         # XXX notify the user?
+
+@ics_command('nuke', 'w', admin.Level.admin)
+class Nuke(Command):
+    def run(self, args, conn):
+        u = user.find.by_name_exact_for_user(args[0], conn)
+        if u:
+            if not admin.checker.check_user_operation(conn.user, u):
+                conn.write("You need a higher adminlevel to nuke %s!\n" % u.name)
+            elif not u.is_online:
+                conn.write("%s is not logged in.\n"  % u.name)
+            else:
+                u.write('\n\n**** You have been kicked out by %s! ****\n\n' % conn.user.name)
+                u.session.conn.loseConnection('nuked')
+                conn.write('Nuked: %s\n' % u.name)
+
+@ics_command('remplayer', 'w', admin.Level.admin)
+class Remplayer(Command):
+    def run(self, args, conn):
+        name = args[0]
+        u = user.find.by_name_exact_for_user(name, conn)
+        if u:
+            if not admin.checker.check_user_operation(conn.user, u):
+                conn.write('''You can't remove an admin with a level higher than or equal to yourself.\n''')
+            elif u.is_online:
+                conn.write("%s is logged in.\n" % u.name)
+            else:
+                u.remove()
+                conn.write("Player %s removed.\n" % name)
+
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

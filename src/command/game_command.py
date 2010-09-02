@@ -37,5 +37,30 @@ class Abort(GameCommand):
         else:
             offer.Abort(g, conn.user)
 
+@ics_command('draw', 'o', admin.Level.user)
+class Draw(Command):
+    def run(self, args, conn):
+        if args[0] is None:
+            if len(conn.user.session.games) == 0:
+                conn.write(_("You are not playing a game.\n"))
+                return
+            g = conn.user.session.games.primary()
+            offer.Draw(g, conn.user)
+        else:
+            conn.write('TODO: DRAW PARAM\n')
+
+@ics_command('resign', 'o', admin.Level.user)
+class Resign(Command):
+    def run(self, args, conn):
+        if args[0] is not None:
+            conn.write('TODO: RESIGN PLAYER\n')
+            return
+        if len(conn.user.session.games) == 0:
+            conn.write(_("You are not playing a game.\n"))
+            return
+        g = conn.user.session.games.primary()
+        g.resign(conn.user)
+
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
 

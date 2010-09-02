@@ -79,4 +79,34 @@ class Xtell(TellCommand):
     def run(self, args, conn):
         self._do_tell(args, conn)
 
+@ics_command('qtell', 'iS', admin.Level.user)
+class Qtell(Command):
+    def run(self, args, conn):
+        if 'TD' not in conn.user.get_titles():
+            conn.write(_('Only TD programs are allowed to use this command\n'))
+            return
+        msg = args[1].replace('\\n', '\n:').replace('\\b', '\x07').replace('\\H', '\x1b[7m').replace('\\h', '\x1b[0m')
+        msg = '\n:%s\n' % msg
+        ret = 0 # 0 means success
+        if type(args[0]) == type(1):
+            # qtell channel
+            try:
+                ch = channel.chlist[args[0]]
+            except KeyError:
+                ret = 1
+            else:
+                ch.qtell(msg)
+        else:
+            # qtell user
+            try:
+                u = user.find.by_name_exact(args[0])
+                if not u or not u.is_online:
+                    ret = 1
+                else:
+                    args[0] = u.name
+                    u.write(msg)
+            except user.UsernameException:
+                ret = 1
+        conn.write('*qtell %s %d*\n' % (args[0], ret))
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
