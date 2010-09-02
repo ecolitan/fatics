@@ -157,7 +157,7 @@ class Connection(basic.LineReceiver):
         written_users.clear()
         written_users.add(self.user)
         try:
-            command_parser.parser.run(line, t, self)
+            command_parser.parser.parse(line, t, self)
         except command_parser.QuitException:
             self.loseConnection('quit')
         finally:

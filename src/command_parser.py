@@ -36,7 +36,7 @@ import timeseal
 
 class CommandParser(object):
     command_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
-    def run(self, s, t, conn):
+    def parse(self, s, t, conn):
         s = s.strip()
 
         if s == timeseal.REPLY:
@@ -87,28 +87,25 @@ class CommandParser(object):
 
         cmd = None
         m = self.command_re.match(s)
-        if m:
-            word = m.group(1).lower()
+        assert(m)
+        word = m.group(1).lower()
+        try:
+            cmd = cmds[word]
+        except KeyError:
+            conn.write(_("%s: Command not found.\n") % word)
+        except trie.NeedMore:
+            matches = cmds.all_children(word)
+            assert(len(matches) > 0)
+            if len(matches) == 1:
+                cmd = matches[0]
+            else:
+                conn.write(_("""Ambiguous command "%s". Matches: %s\n""") % (word, ' '.join([c.name for c in matches])))
+        if cmd:
             try:
-                cmd = cmds[word]
-            except KeyError:
-                conn.write(_("%s: Command not found.\n") % word)
-            except trie.NeedMore:
-                matches = cmds.all_children(word)
-                assert(len(matches) > 0)
-                if len(matches) == 1:
-                    cmd = matches[0]
-                else:
-                    conn.write(_("""Ambiguous command "%s". Matches: %s\n""") % (word, ' '.join([c.name for c in matches])))
-            if cmd:
-                try:
-                    args = self.parse_args(m.group(2), cmd.param_str)
-                    cmd.run(args, conn)
-                except BadCommandError:
-                    cmd.usage(conn)
-        else:
-            #conn.write(_("Command not found.\n"))
-            assert(False)
+                args = self.parse_args(m.group(2), cmd.param_str)
+                cmd.run(args, conn)
+            except BadCommandError:
+                cmd.usage(conn)
 
     def parse_args(self, s, param_str):
         args = []

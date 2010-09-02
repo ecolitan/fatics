@@ -149,6 +149,30 @@ class CommandTest(Test):
         self.expect_not('blitz chess', t)
         self.close(t)
 
+    def test_aclearhistory(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        t2.write('resign\n')
+        self.expect('admin resigns', t)
+        self.expect('admin resigns', t2)
+
+        t.write('history admin\n')
+        self.expect('History for admin:', t)
+
+        t2.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t2)
+
+        t.write('history admin\n')
+        self.expect('admin has no history games.', t)
+
+        self.close(t)
+        self.close(t2)
+
 class PermissionsTest(Test):
     def test_permissions(self):
         t = self.connect_as_guest()
@@ -157,14 +181,12 @@ class PermissionsTest(Test):
         self.close(t)
 
 
-"""not stable
 class AreloadTest(Test):
         def runTest(self):
-                self.skip()
+                self.skip('not stable')
                 t = self.connect()
                 t.write('areload\n')
                 self.expect('reloaded online', t, "server reload")
                 t.close()
-"""
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -31,7 +31,7 @@
 
 #include "chuffman.h"
 
-#define BSIZE 2048
+#define BSIZE 1024
 
 //char hello[]="zipseal|zipseal|Running on an operating system|";
 
@@ -178,7 +178,7 @@ int main(int argc, char **argv)
                         static int rd = 0;
                         static char buf[BSIZE];
                         static int dec_rd = 0;
-                        static char dec_buf[BSIZE];
+                        static char dec_buf[2*BSIZE];
                         int ret;
 
                         assert(rd == 0);

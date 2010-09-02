@@ -118,7 +118,7 @@ class Test(unittest.TestCase):
 
 
 # test decorators
-def with_guest(f):
+"""def with_guest(f):
     def new_f(self):
         t = self.connect_as_guest()
         f(self, t)
@@ -136,7 +136,7 @@ def with_admin(f):
 
     new_f.__name__ = f.__name__
     new_f.__dict__.update(f.__dict__)
-    return new_f
+    return new_f"""
 
 def with_player(pname, ppass, ptitles=None):
     def wrap(f):

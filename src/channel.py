@@ -32,10 +32,6 @@ class Channel(object):
         self.name = name
         self.desc = desc
         self.online = []
-        """for name in self.members:
-                u = online.find_exact(name)
-                if u:
-                        self.online.append(u)"""
 
     def tell(self, msg, user):
         msg = '%s(%s): %s\n' % (user.get_display_name(), self.id, msg)
