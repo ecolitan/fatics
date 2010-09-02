@@ -17,6 +17,8 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+from game_command import GameParam
+
 from command import *
 
 class KibitzCommand(Command):
@@ -53,14 +55,10 @@ class WhisperCommand(Command):
         conn.write(ngettext('(whispered to %d player)\n', '(whispered to %d players)\n', count) % count)
 
 @ics_command('kibitz', 'S', admin.Level.user)
-class Kibitz(KibitzCommand):
+class Kibitz(KibitzCommand, GameParam):
     def run(self, args, conn):
-        if conn.user.session.games:
-            g = conn.user.session.games.primary()
-        elif conn.user.session.observed:
-            g = list(conn.user.session.observed)[0]
-        else:
-            conn.write(_('You are not playing, examining, or observing a game.\n'))
+        g = self._game_param(None, conn)
+        if not g:
             return
         if conn.user.is_guest and conn.user not in g.players:
             conn.write(_("Only registered players may kibitz to others' games."))
@@ -68,14 +66,10 @@ class Kibitz(KibitzCommand):
         self._do_kibitz(g, args[0], conn)
 
 @ics_command('whisper', 'S', admin.Level.user)
-class Whisper(WhisperCommand):
+class Whisper(WhisperCommand, GameParam):
     def run(self, args, conn):
-        if conn.user.session.games:
-            g = conn.user.session.games.primary()
-        elif conn.user.session.observed:
-            g = list(conn.user.session.observed)[0]
-        else:
-            conn.write(_('You are not playing, examining, or observing a game.\n'))
+        g = self._game_param(None, conn)
+        if not g:
             return
         if conn.user.is_guest and conn.user not in g.players:
             conn.write(_("Only registered players may whisper to others' games."))

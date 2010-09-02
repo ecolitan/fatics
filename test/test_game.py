@@ -358,10 +358,15 @@ class TestRefresh(Test):
         self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin -3 7 9 39 39 420 420 1 none (0:00) none 0 0 0', t3)
         t3.write('re nosuchuser\n')
         self.expect('No user named "nosuchuser" is logged in', t3)
+        t3.write('re admi\n')
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin -3 7 9 39 39 420 420 1 none (0:00) none 0 0 0', t3)
+
+        t3.write('o 1\n')
+        self.expect('<12> ', t3)
         t3.write('REF GUESTDEF\n')
         self.expect('GuestDEFG is not playing or examining', t3)
-        t3.write('re admi\n')
-        self.expect('<12> ', t3)
+        t3.write('ref\n')
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin 0 7 9 39 39 420 420 1 none (0:00) none 0 0 0', t3)
         self.close(t3)
 
         self.close(t)
@@ -406,6 +411,23 @@ class TestMoves(Test):
 
         t2.write('moves\n')
         self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t2)
+
+        t3 = self.connect_as_guest()
+        t3.write('set style 12\n')
+        t3.write('iset ms 1\n')
+        t3.write('moves 1\n')
+        self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t3)
+        t3.write('moves admi\n')
+        self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t3)
+        t3.write('moves\n')
+        self.expect('You are not playing, examining, or observing a game', t3)
+        t3.write('o 1\n')
+        t3.write('moves\n')
+        self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t3)
+        self.close(t3)
+
+        self.close(t)
+        self.close(t2)
 
 
 class TestGames(Test):

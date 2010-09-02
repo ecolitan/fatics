@@ -75,6 +75,16 @@ class TestEco(Test):
         self.expect(' NIC[  2]: QP.08', t)
         self.expect('LONG[  6]: Blackmar-Diemer: Grosshans Defence', t)
 
+        # eco without an argument can also used an observed game
+        t3 = self.connect_as_guest()
+        t3.write('o 1\n')
+        t3.write('eco\n')
+        self.expect('Eco for game 1 (GuestABCD vs. admin):', t3)
+        self.expect(' ECO[  6]: D00l', t3)
+        self.expect(' NIC[  2]: QP.08', t3)
+        self.expect('LONG[  6]: Blackmar-Diemer: Grosshans Defence', t3)
+        self.close(t3)
+
         self.close(t)
         self.close(t2)
 

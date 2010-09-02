@@ -61,6 +61,81 @@ class Resign(Command):
         g = conn.user.session.games.primary()
         g.resign(conn.user)
 
+class GameParam(object):
+    """ A mixin to find a game from a command argument, currently being
+    played, examined, or observed, prioritized in that order. """
+    def _game_param(self, param, conn):
+        if param is not None:
+            g = game.from_name_or_number(param, conn)
+        else:
+            if len(conn.user.session.games) > 0:
+                g = conn.user.session.games.primary()
+            elif conn.user.session.observed:
+                g = list(conn.user.session.observed)[0]
+            else:
+                conn.write(_("You are not playing, examining, or observing a game.\n"))
+                g = None
+        return g
+
+@ics_command('eco', 'oo', admin.Level.user)
+class Eco(Command, GameParam):
+    eco_pat = re.compile(r'[a-z][0-9][0-9][a-z]?')
+    nic_pat = re.compile(r'[a-z][a-z]\.[0-9][0-9]')
+    def run(self, args, conn):
+        g = None
+        if args[1] is not None:
+            assert(args[0] is not None)
+            rows = []
+            if args[0] == 'e':
+                if not self.eco_pat.match(args[1]):
+                    conn.write(_("You haven't specified a valid ECO code.\n"))
+                else:
+                    rows = db.look_up_eco(args[1])
+            elif args[0] == 'n':
+                if not self.nic_pat.match(args[1]):
+                    conn.write(_("You haven't specified a valid NIC code.\n"))
+                else:
+                    rows = db.look_up_nic(args[1])
+            else:
+                raise BadCommandError()
+            for row in rows:
+                if row['eco'] is None:
+                    row['eco'] = 'A00'
+                if row['nic'] is None:
+                    row['nic'] = '-----'
+                if row['long_'] is None:
+                    row['long_'] = 'Unknown / not matched'
+                assert(row['fen'] is not None)
+                conn.write('\n')
+                conn.write('  ECO: %s\n' % row['eco'])
+                conn.write('  NIC: %s\n' % row['nic'])
+                conn.write(' LONG: %s\n' % row['long_'])
+                conn.write('  FEN: %s\n' % row['fen'])
+        else:
+            g = self._game_param(args[0], conn)
+
+        if g:
+            (ply, eco, long) = g.get_eco()
+            (nicply, nic) = g.get_nic()
+            conn.write(_('Eco for game %d (%s vs. %s):\n') % (g.number, g.white.name, g.black.name))
+            conn.write(_(' ECO[%3d]: %s\n') % (ply, eco))
+            conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
+            conn.write(_('LONG[%3d]: %s\n') % (ply, long))
+
+@ics_command('moves', 'n', admin.Level.user)
+class Moves(Command, GameParam):
+    def run(self, args, conn):
+        g = self._game_param(args[0], conn)
+        if g:
+            g.write_moves(conn)
+
+@ics_command('refresh', 'n', admin.Level.user)
+class Refresh(Command, GameParam):
+    def run(self, args, conn):
+        g = self._game_param(args[0], conn)
+        if g:
+            conn.user.send_board(g)
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
 
