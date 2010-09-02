@@ -21,8 +21,8 @@ import twisted.python.rebuild
 # don't reload connection because then we can't remove connections from
 # the list when logging out
 
-import admin, connection, db, session,  timer, user, command, login, telnet, timeseal, online, trie
-modules = [admin, connection, db, session,  timer, user, command, login, telnet, timeseal, online, trie]
+import admin, connection, db, session,  timer, user, login, telnet, timeseal, online, trie
+modules = [admin, connection, db, session,  timer, user, login, telnet, timeseal, online, trie]
 
 class Reload(object):
     def reload_all(self, conn):

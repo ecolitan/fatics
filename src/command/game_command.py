@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2010  Wil Mahan <wmahan+fatics@gmail.com>
 #
 # This file is part of FatICS.
@@ -16,33 +17,25 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from test import *
+from command import *
 
-class TestLoginTimeout(Test):
-    skip = 'slow test'
+class GameCommand(Command):
+    pass
 
-    def test_timeout(self):
-        t = self.connect()
-        self.expect('TIMEOUT', t, timeout=65)
-        t.close()
-
-    def test_guest_timeout_password(self):
-        t = self.connect()
-        t.write("guest\n")
-        self.expect('TIMEOUT', t, timeout=65)
-        t.close()
-
-    def test_guest_timeout(self):
-        t = self.connect()
-        t.write("guest\n")
-        self.expect('TIMEOUT', t, timeout=65)
-        t.close()
-
-class TestIdleTimeout(Test):
-    def test_idle_logout(self):
-        self._skip('slow test')
-        t = self.connect_as_guest()
-        self.expect("**** Auto-logout", t, timeout=60*60*2)
-        t.close()
+@ics_command('abort', 'n', admin.Level.user)
+class Abort(GameCommand):
+    def run(self, args, conn):
+        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.PLAYED:
+            conn.write(_("You are not playing a game.\n"))
+            return
+        if len(conn.user.session.games) > 1:
+            conn.write(_('Please use "simabort" for simuls.\n'))
+            return
+        g = conn.user.session.games.primary()
+        if g.variant.pos.ply < 2:
+            g.result('Game aborted on move 1 by %s' % conn.user.name, '*')
+        else:
+            offer.Abort(g, conn.user)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
+

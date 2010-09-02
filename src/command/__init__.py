@@ -16,33 +16,6 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from test import *
-
-class TestLoginTimeout(Test):
-    skip = 'slow test'
-
-    def test_timeout(self):
-        t = self.connect()
-        self.expect('TIMEOUT', t, timeout=65)
-        t.close()
-
-    def test_guest_timeout_password(self):
-        t = self.connect()
-        t.write("guest\n")
-        self.expect('TIMEOUT', t, timeout=65)
-        t.close()
-
-    def test_guest_timeout(self):
-        t = self.connect()
-        t.write("guest\n")
-        self.expect('TIMEOUT', t, timeout=65)
-        t.close()
-
-class TestIdleTimeout(Test):
-    def test_idle_logout(self):
-        self._skip('slow test')
-        t = self.connect_as_guest()
-        self.expect("**** Auto-logout", t, timeout=60*60*2)
-        t.close()
+__all__ = ['admin_command', 'command', 'game_command', 'news_command', 'tell']
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -37,18 +37,24 @@ from timer import timer
 from online import online
 from reload import reload
 from server import server
-from command_parser import BadCommandError
+from command_parser import BadCommandError, QuitException
 from db import db, DeleteError
 
-class QuitException(Exception):
-    pass
+class CommandList(object):
+    def __init__(self):
+        self.cmds = trie.Trie()
+        self.admin_cmds = trie.Trie()
+command_list = CommandList()
 
 class Command(object):
-    def __init__(self, name, param_str, run, admin_level):
+    def __init__(self, name, param_str, admin_level):
+        assert(hasattr(self, 'run'))
         self.name = name
         self.param_str = param_str
-        self.run = run
         self.admin_level = admin_level
+        command_list.admin_cmds[name] = self
+        if admin_level <= admin.Level.user:
+            command_list.cmds[name] = self
 
     def help(self, conn):
         conn.write("help for %s\n" % self.name)
@@ -56,98 +62,22 @@ class Command(object):
     def usage(self, conn):
         conn.write("Usage: TODO for %s\n" % self.name)
 
-class CommandList(object):
-    def __init__(self):
-        # the trie data structure allows for efficiently finding
-        # a command given a substring
-        self.cmds = trie.Trie()
-        self.admin_cmds = trie.Trie()
-        self._add(Command('abort', 'n', self.abort, admin.Level.user))
-        self._add(Command('accept', 'n', self.accept, admin.Level.user))
-        self._add(Command('aclearhistory', 'w', self.aclearhistory, admin.Level.admin))
-        self._add(Command('addlist', 'ww', self.addlist, admin.Level.user))
-        self._add(Command('addplayer', 'WWS', self.addplayer, admin.Level.admin))
-        self._add(Command('alias', 'oT', self.alias, admin.Level.user))
-        self._add(Command('allobservers', 'o', self.allobservers, admin.Level.user))
-        self._add(Command('announce', 'S', self.announce, admin.Level.admin))
-        self._add(Command('annunreg', 'S', self.annunreg, admin.Level.admin))
-        self._add(Command('areload', '', self.areload, admin.Level.god))
-        self._add(Command('asetadmin', 'wd', self.asetadmin, admin.Level.admin))
-        self._add(Command('asetpasswd', 'wW', self.asetpasswd, admin.Level.admin))
-        self._add(Command('asetrating', 'wwwddfddd', self.asetrating, admin.Level.admin))
-        self._add(Command('backward', 'p', self.backward, admin.Level.user))
-        self._add(Command('cnewsd', 'd', self.cnewsd, admin.Level.admin))
-        self._add(Command('cnewse', 'dp', self.cnewse, admin.Level.admin))
-        self._add(Command('cnewsf', 'dT', self.cnewsf, admin.Level.admin))
-        self._add(Command('cnewsi', 'S', self.cnewsi, admin.Level.admin))
-        self._add(Command('cnewsp', 'd', self.cnewsp, admin.Level.admin))
-        self._add(Command('cnewst', 'dS', self.cnewst, admin.Level.admin))
-        self._add(Command('cshout', 'S', self.cshout, admin.Level.user))
-        self._add(Command('date', '', self.date, admin.Level.user))
-        self._add(Command('decline', 'n', self.decline, admin.Level.user))
-        self._add(Command('draw', 'o', self.draw, admin.Level.user))
-        self._add(Command('eco', 'oo', self.eco, admin.Level.user))
-        self._add(Command('examine', 'on', self.examine, admin.Level.user))
-        self._add(Command('finger', 'ooo', self.finger, admin.Level.user))
-        self._add(Command('flag', '', self.flag, admin.Level.user))
-        self._add(Command('follow', 'w', self.follow, admin.Level.user))
-        self._add(Command('forward', 'p', self.forward, admin.Level.user))
-        self._add(Command('games', 'o', self.games, admin.Level.user))
-        self._add(Command('help', 'o', self.help, admin.Level.user))
-        self._add(Command('history', 'o', self.history, admin.Level.user))
-        self._add(Command('inchannel', 'n', self.inchannel, admin.Level.user))
-        self._add(Command('iset', 'wS', self.iset, admin.Level.user))
-        self._add(Command('it', 'S', self.it, admin.Level.user))
-        self._add(Command('ivariables', 'o', self.ivariables, admin.Level.user))
-        self._add(Command('kibitz', 'S', self.kibitz, admin.Level.user))
-        self._add(Command('match', 'wt', self.match, admin.Level.user))
-        self._add(Command('moves', 'n', self.moves, admin.Level.user))
-        self._add(Command('news', 'p', self.news, admin.Level.user))
-        self._add(Command('nuke', 'w', self.nuke, admin.Level.admin))
-        self._add(Command('observe', 'i', self.observe, admin.Level.user))
-        self._add(Command('password', 'WW', self.password, admin.Level.user))
-        self._add(Command('qtell', 'iS', self.qtell, admin.Level.user))
-        self._add(Command('quit', '', self.quit, admin.Level.user))
-        self._add(Command('refresh', 'n', self.refresh, admin.Level.user))
-        self._add(Command('remplayer', 'w', self.remplayer, admin.Level.admin))
-        self._add(Command('resign', 'o', self.resign, admin.Level.user))
-        self._add(Command('rmatch', 'wwt', self.rmatch, admin.Level.user))
-        self._add(Command('set', 'wT', self.set, admin.Level.user))
-        self._add(Command('shout', 'S', self.shout, admin.Level.user))
-        self._add(Command('showlist', 'o', self.showlist, admin.Level.user))
-        self._add(Command('sublist', 'ww', self.sublist, admin.Level.user))
-        self._add(Command('summon', 'w', self.summon, admin.Level.user))
-        self._add(Command('style', 'd', self.style, admin.Level.user))
-        self._add(Command('tell', 'nS', self.tell, admin.Level.user))
-        self._add(Command('unalias', 'w', self.unalias, admin.Level.user))
-        self._add(Command('unobserve', 'n', self.unobserve, admin.Level.user))
-        self._add(Command('uptime', '', self.uptime, admin.Level.user))
-        self._add(Command('variables', 'o', self.variables, admin.Level.user))
-        self._add(Command('who', 'T', self.who, admin.Level.user))
-        self._add(Command('whisper', 'S', self.whisper, admin.Level.user))
-        self._add(Command('withdraw', 'n', self.withdraw, admin.Level.user))
-        self._add(Command('xtell', 'nS', self.xtell, admin.Level.user))
-        self._add(Command('znotify', 'o', self.znotify, admin.Level.user))
+class ics_command(object):
+    def __init__(self, name, param_str, admin_level=admin.Level.user):
+        self.name = name
+        self.param_str = param_str
+        self.admin_level = admin_level
 
-    def _add(self, cmd):
-        self.admin_cmds[cmd.name] = cmd
-        if cmd.admin_level <= admin.Level.user:
-            self.cmds[cmd.name] = cmd
+    def __call__(self, f):
+        # instantiate the decorated class at decoration time
+        f(self.name, self.param_str, self.admin_level)
+        def wrapped_f(*args):
+            raise RuntimeError('command objects should not be instantiated directly')
+        return wrapped_f
 
-    def abort(self, args, conn):
-        if not conn.user.session.games or conn.user.session.games.primary().gtype != game.PLAYED:
-            conn.write(_("You are not playing a game.\n"))
-            return
-        if len(conn.user.session.games) > 1:
-            conn.write(_('Please use "simabort" for simuls.\n'))
-            return
-        g = conn.user.session.games.primary()
-        if g.variant.pos.ply < 2:
-            g.result('Game aborted on move 1 by %s' % conn.user.name, '*')
-        else:
-            offer.Abort(g, conn.user)
-
-    def accept(self, args, conn):
+@ics_command('accept', 'n', admin.Level.user)
+class Accept(Command):
+    def run(self, args, conn):
         if not conn.user.session.offers_received:
             conn.write(_('You have no pending offers from other players.\n'))
             return
@@ -159,7 +89,9 @@ class CommandList(object):
         else:
             conn.write('TODO: ACCEPT PARAM\n')
 
-    def aclearhistory(self, args, conn):
+@ics_command('aclearhistory', 'w', admin.Level.admin)
+class Aclearhistory(Command):
+    def run(self, args, conn):
         name = args[0]
         u = user.find.by_name_exact_for_user(name, conn)
         if u:
@@ -167,7 +99,9 @@ class CommandList(object):
             u.clear_history()
             u.write(A_('\nHistory of %s cleared.\n') % conn.user.name)
 
-    def addlist(self, args, conn):
+@ics_command('addlist', 'ww',  admin.Level.user)
+class Addlist(Command):
+    def run(self, args, conn):
         try:
             ls = list_.lists.get(args[0])
         except KeyError:
@@ -180,7 +114,9 @@ class CommandList(object):
             except list_.ListError as e:
                 conn.write(e.reason)
 
-    def addplayer(self, args, conn):
+@ics_command('addplayer', 'WWS', admin.Level.admin)
+class Addplayer(Command):
+    def run(self, args, conn):
         [name, email, real_name] = args
         try:
             u = user.find.by_name_exact(name)
@@ -194,7 +130,9 @@ class CommandList(object):
                 user.create.new(name, email, passwd, real_name)
                 conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
 
-    def alias(self, args, conn):
+@ics_command('alias', 'oT', admin.Level.user)
+class Alias(Command):
+    def run(self, args, conn):
         if args[0] is None:
             # show list of aliases
             if len(conn.user.aliases) == 0:
@@ -231,7 +169,9 @@ class CommandList(object):
         else:
             conn.write(_('Alias "%s" set.\n') % aname)
 
-    def allobservers(self, args, conn):
+@ics_command('allobservers', 'o', admin.Level.user)
+class Allobservers(Command):
+    def run(self, args, conn):
         if args[0] is not None:
             g = game.from_name_or_number(args[0], conn)
             if g:
@@ -244,86 +184,9 @@ class CommandList(object):
             for g in game.games.itervalues():
                 g.show_observers(conn)
 
-    def announce(self, args, conn):
-        count = 0
-        # the announcement message isn't localized
-        for u in online.itervalues():
-            if u != conn.user:
-                count = count + 1
-                u.write("\n\n    **ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
-        conn.write("(%d) **ANNOUNCEMENT** from %s: %s\n\n" % (count, conn.user.name, args[0]))
-
-    def annunreg(self, args, conn):
-        count = 0
-        # the announcement message isn't localized
-        for u in online.itervalues():
-            if u != conn.user and u.is_guest:
-                count = count + 1
-                u.write("\n\n    **UNREG ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
-        conn.write("(%d) **UNREG ANNOUNCEMENT** from %s: %s\n\n" % (count, conn.user.name, args[0]))
-
-    def areload(self, args, conn):
-        reload.reload_all(conn)
-
-    def asetadmin(self, args, conn):
-        [name, level] = args
-        u = user.find.by_name_exact_for_user(name, conn)
-        if u:
-            # Note: it's possible to set the admin level
-            # of a guest.
-            if not admin.checker.check_user_operation(conn.user, u):
-                conn.write('You can only set the adminlevel for players below your adminlevel.\n')
-            elif not admin.checker.check_level(conn.user.admin_level, level):
-                conn.write('''You can't promote someone to or above your adminlevel.\n''')
-            else:
-                u.set_admin_level(level)
-                conn.write('''Admin level of %s set to %d.\n''' % (name, level))
-                if u.is_online:
-                    u.write('''\n\n%s has set your admin level to %d.\n\n''' % (conn.user.name, level))
-
-    def asetpasswd(self, args, conn):
-        (name, passwd) = args
-        u = user.find.by_name_exact_for_user(name, conn)
-        if u:
-            if u.is_guest:
-                conn.write('You cannot set the password of an unregistered player!\n')
-            elif not admin.checker.check_user_operation(conn.user, u):
-                conn.write('You can only set the password of players below your adminlevel.\n')
-            elif not user.is_legal_passwd(passwd):
-                conn.write('"%s" is not a valid password.\n' % passwd)
-            else:
-                u.set_passwd(passwd)
-                conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
-                if u.is_online:
-                    u.write(_('\n%s has changed your password.\n') % conn.user.name)
-
-    def asetrating(self, args, conn):
-        (name, speed_name, variant_name, urating, rd, volatility, win,
-            loss, draw) = args
-        u = user.find.by_prefix_for_user(name, conn)
-        if not u:
-            return
-        if u.is_guest:
-            conn.write(A_('You cannot set the rating of an unregistered player.\n'))
-            return
-        try:
-            sv = speed_variant.from_names(speed_name, variant_name)
-        except KeyError:
-            conn.write(A_('Unknown speed and variant "%s %s".\n') %
-                (speed_name, variant_name))
-            return
-        if urating == 0:
-            u.del_rating(sv)
-            conn.write(A_('Cleared %s %s rating for %s.\n' %
-                (speed_name, variant_name, name)))
-        else:
-            u.set_rating(sv, urating, rd, volatility, win, loss, draw,
-                datetime.datetime.utcnow())
-            conn.write(A_('Set %s %s rating for %s.\n' %
-                (speed_name, variant_name, name)))
-        # notify the user?
-
-    def backward(self, args, conn):
+@ics_command('backward', 'p', admin.Level.user)
+class Backward(Command):
+    def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
         if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
@@ -331,35 +194,10 @@ class CommandList(object):
         g = conn.user.session.games.primary()
         g.backward(n, conn)
 
-    def cnewsd(self, args, conn):
-        pass
-    def cnewse(self, args, conn):
-        exp = args[1]
-        if exp is None:
-            exp = 0
-        if exp != 0:
-            conn.write(A_('News expiration dates are not currently supported.\n'))
-            return
-        try:
-            db.delete_news(args[0])
-        except DeleteError:
-            conn.write(A_('News item %d not found.\n') % args[0])
-        else:
-            conn.write(A_('Deleted news item %d.\n') % args[0])
-    def cnewsf(self, args, conn):
-        pass
-    def cnewsi(self, args, conn):
-        if len(args[0]) > 45:
-            conn.write(A_('The news title exceeds the 45-character maximum length; not posted.\n'))
-            return
-        news_id = db.add_news(args[0], conn.user, is_admin=False)
-        conn.write(A_('Created news item %d.\n') % news_id)
-    def cnewsp(self, args, conn):
-        pass
-    def cnewst(self, args, conn):
-        pass
 
-    def cshout(self, args, conn):
+@ics_command('cshout', 'S', admin.Level.user)
+class Cshout(Command):
+    def run(self, args, conn):
         if conn.user.is_guest:
             conn.write(_("Only registered players can use the cshout command.\n"))
         elif not conn.user.vars['cshout']:
@@ -376,13 +214,17 @@ class CommandList(object):
                         count += 1
             conn.write(ngettext("(c-shouted to %d player)\n", "(c-shouted to %d players)\n", count) % count)
 
-    def date(self, args, conn):
+@ics_command('date', '', admin.Level.user)
+class Date(Command):
+    def run(self, args, conn):
         t = time.time()
         #conn.write(_("Local time     - %s\n") % )
         conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(t)))
         conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
 
-    def decline(self, args, conn):
+@ics_command('decline', 'n', admin.Level.user)
+class Decline(Command):
+    def run(self, args, conn):
         if len(conn.user.session.offers_received) == 0:
             conn.write(_('You have no pending offers from other players.\n'))
             return
@@ -394,7 +236,9 @@ class CommandList(object):
         else:
             conn.write('TODO: DECLINE PARAM\n')
 
-    def draw(self, args, conn):
+@ics_command('draw', 'o', admin.Level.user)
+class Draw(Command):
+    def run(self, args, conn):
         if args[0] is None:
             if len(conn.user.session.games) == 0:
                 conn.write(_("You are not playing a game.\n"))
@@ -404,9 +248,11 @@ class CommandList(object):
         else:
             conn.write('TODO: DRAW PARAM\n')
 
+@ics_command('eco', 'oo', admin.Level.user)
+class Eco(Command):
     eco_pat = re.compile(r'[a-z][0-9][0-9][a-z]?')
     nic_pat = re.compile(r'[a-z][a-z]\.[0-9][0-9]')
-    def eco(self, args, conn):
+    def run(self, args, conn):
         g = None
         if args[1] is not None:
             assert(args[0] is not None)
@@ -452,7 +298,9 @@ class CommandList(object):
             conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
 
-    def examine(self, args, conn):
+@ics_command('examine', 'on', admin.Level.user)
+class Examine(Command):
+    def run(self, args, conn):
         if len(conn.user.session.games) != 0:
             if conn.user.session.games.primary().gtype == game.EXAMINED:
                 conn.write(_("You are already examining a game.\n"))
@@ -496,7 +344,9 @@ class CommandList(object):
             return
 
 
-    def finger(self, args, conn):
+@ics_command('finger', 'ooo', admin.Level.user)
+class Finger(Command):
+    def run(self, args, conn):
         u = None
         if args[0] is not None:
             u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
@@ -561,7 +411,9 @@ class CommandList(object):
                     prev_max = num
                 conn.write('\n')
 
-    def flag(self, args, conn):
+@ics_command('flag', '', admin.Level.user)
+class Flag(Command):
+    def run(self, args, conn):
         if len(conn.user.session.games) == 0:
             conn.write(_("You are not playing a game.\n"))
             return
@@ -569,10 +421,14 @@ class CommandList(object):
         if not g.clock.check_flag(g, g.get_user_opp_side(conn.user)):
             conn.write(_('Your opponent is not out of time.\n'))
 
-    def follow(self, args, conn):
+@ics_command('follow', 'w', admin.Level.user)
+class Follow(Command):
+    def run(self, args, conn):
         conn.write('TODO: FOLLOW\n')
 
-    def forward(self, args, conn):
+@ics_command('forward', 'p', admin.Level.user)
+class Forward(Command):
+    def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
         if not conn.user.session.games or conn.user.session.games.primary().gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
@@ -580,7 +436,9 @@ class CommandList(object):
         g = conn.user.session.games.primary()
         g.forward(n, conn)
 
-    def games(self, args, conn):
+@ics_command('games', 'o', admin.Level.user)
+class Games(Command):
+    def run(self, args, conn):
         if not game.games.values():
             conn.write(_('There are no games in progress.\n'))
             return
@@ -591,7 +449,9 @@ class CommandList(object):
             count += 1
         conn.write(ngettext('  %(count)d game displayed (of %(total)3d in progress).\n', '  %(count)d games displayed (of %(total)d in progress).\n', count) % {'count': count, 'total': len(game.games)})
 
-    def help(self, args, conn):
+@ics_command('help', 'o', admin.Level.user)
+class Help(Command):
+    def run(self, args, conn):
         if args[0] in ['license', 'license', 'copying', 'copyright']:
             conn.write(server.get_license())
             return
@@ -601,7 +461,9 @@ class CommandList(object):
             cmds = [c.name for c in command_list.cmds.itervalues()]
         conn.write('This server is under development.\n\nRecognized commands: %s\n' % ' '.join(cmds))
 
-    def history(self, args, conn):
+@ics_command('history', 'o', admin.Level.user)
+class History(Command):
+    def run(self, args, conn):
         u = None
         if args[0] is not None:
             u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
@@ -610,7 +472,9 @@ class CommandList(object):
         if u:
             history.show_for_user(u, conn)
 
-    def inchannel(self, args, conn):
+@ics_command('inchannel', 'n', admin.Level.user)
+class Inchannel(Command):
+    def run(self, args, conn):
         if args[0] is not None:
             if type(args[0]) != str:
                 try:
@@ -631,7 +495,9 @@ class CommandList(object):
                 if len(on) > 0:
                     conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
 
-    def iset(self, args, conn):
+@ics_command('iset', 'wS', admin.Level.user)
+class Iset(Command):
+    def run(self, args, conn):
         [name, val] = args
         try:
             v = var.ivars.get(name)
@@ -644,7 +510,9 @@ class CommandList(object):
         except var.BadVarError:
             conn.write(_('Bad value given for ivariable "%s".\n') % v.name)
 
-    def it(self, args, conn):
+@ics_command('it', 'S', admin.Level.user)
+class It(Command):
+    def run(self, args, conn):
         if conn.user.is_guest:
             conn.write(_("Only registered players can use the it command.\n"))
         elif not conn.user.vars['shout']:
@@ -661,7 +529,9 @@ class CommandList(object):
                         count += 1
             conn.write(ngettext("(it-shouted to %d player)\n", "(it-shouted to %d players)\n", count) % count)
 
-    def ivariables(self, args, conn):
+@ics_command('ivariables', 'o', admin.Level.user)
+class Ivariables(Command):
+    def run(self, args, conn):
         if args[0] is None:
             u = conn.user
         else:
@@ -676,34 +546,9 @@ class CommandList(object):
                     conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
 
-    def match(self, args, conn):
-        if len(conn.user.session.games) != 0:
-            conn.write(_("You can't challenge while you are playing a game.\n"))
-            return
-        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
-        if not u:
-            return
-        if u == conn.user:
-            conn.write(_("You can't match yourself.\n"))
-            return
-
-        if conn.user.name in u.censor:
-            conn.write(_("%s is censoring you.\n") % u.name)
-            return
-        if conn.user.name in u.noplay:
-            conn.write(_("You are on %s's noplay list.\n") % u.name)
-            return
-        if not u.vars['open']:
-            conn.write(_("%s is not open to match requests.\n") % u.name)
-            return
-        if len(u.session.games) != 0:
-            conn.write(_("%s is playing a game.\n") % u.name)
-
-        if not conn.user.vars['open']:
-            var.vars['open'].set(conn.user, '1')
-        offer.Challenge(conn.user, u, args[1])
-
-    def kibitz(self, args, conn):
+@ics_command('kibitz', 'S', admin.Level.user)
+class Kibitz(Command):
+    def run(self, args, conn):
         if conn.user.session.games:
             g = conn.user.session.games.primary()
         elif conn.user.session.observed:
@@ -731,7 +576,39 @@ class CommandList(object):
                 u.write(_('%s(%s)[%d] kibitzes: %s\n') % (name, rat, g.number, args[0]))
         conn.write(ngettext('(kibitzed to %d player)\n', '(kibitzed to %d players)\n', count) % count)
 
-    def moves(self, args, conn):
+@ics_command('match', 'wt', admin.Level.user)
+class Match(Command):
+    def run(self, args, conn):
+        if len(conn.user.session.games) != 0:
+            conn.write(_("You can't challenge while you are playing a game.\n"))
+            return
+        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+        if not u:
+            return
+        if u == conn.user:
+            conn.write(_("You can't match yourself.\n"))
+            return
+
+        if conn.user.name in u.censor:
+            conn.write(_("%s is censoring you.\n") % u.name)
+            return
+        if conn.user.name in u.noplay:
+            conn.write(_("You are on %s's noplay list.\n") % u.name)
+            return
+        if not u.vars['open']:
+            conn.write(_("%s is not open to match requests.\n") % u.name)
+            return
+        if len(u.session.games) != 0:
+            conn.write(_("%s is playing a game.\n") % u.name)
+
+        if not conn.user.vars['open']:
+            var.vars['open'].set(conn.user, '1')
+        offer.Challenge(conn.user, u, args[1])
+
+
+@ics_command('moves', 'n', admin.Level.user)
+class Moves(Command):
+    def run(self, args, conn):
         # similar to "refresh"
         g = None
         if args[0] is not None:
@@ -745,7 +622,9 @@ class CommandList(object):
         if g is not None:
             g.write_moves(conn)
 
-    def news(self, args, conn):
+@ics_command('news', 'p', admin.Level.user)
+class News(Command):
+    def run(self, args, conn):
         if args[0] is not None:
             conn.write('TODO: news #\n')
         else:
@@ -755,7 +634,9 @@ class CommandList(object):
             for item in reversed(news):
                 conn.write('%4d (%s) %s\n' % (item['news_id'], item['news_date'], item['news_title']))
 
-    def nuke(self, args, conn):
+@ics_command('nuke', 'w', admin.Level.admin)
+class Nuke(Command):
+    def run(self, args, conn):
         u = user.find.by_name_exact_for_user(args[0], conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
@@ -767,7 +648,9 @@ class CommandList(object):
                 u.session.conn.loseConnection('nuked')
                 conn.write('Nuked: %s\n' % u.name)
 
-    def observe(self, args, conn):
+@ics_command('observe', 'i', admin.Level.user)
+class Observe(Command):
+    def run(self, args, conn):
         if args[0] in ['/l', '/b', '/s', '/S', '/w', '/z', '/B', '/L', '/x']:
             conn.write('TODO: observe flag\n')
             return
@@ -782,7 +665,9 @@ class CommandList(object):
                 conn.user.session.observed.add(g)
                 g.observe(conn.user)
 
-    def password(self, args, conn):
+@ics_command('password', 'WW', admin.Level.user)
+class Password(Command):
+    def run(self, args, conn):
         if conn.user.is_guest:
             conn.write(_("Setting a password is only for registered players.\n"))
         else:
@@ -793,10 +678,9 @@ class CommandList(object):
                 conn.user.set_passwd(newpass)
                 conn.write(_("Password changed to %s.\n") % ('*' * len(newpass)))
 
-    def quit(self, args, conn):
-        raise QuitException()
-
-    def qtell(self, args, conn):
+@ics_command('qtell', 'iS', admin.Level.user)
+class Qtell(Command):
+    def run(self, args, conn):
         if 'TD' not in conn.user.get_titles():
             conn.write(_('Only TD programs are allowed to use this command\n'))
             return
@@ -824,19 +708,14 @@ class CommandList(object):
                 ret = 1
         conn.write('*qtell %s %d*\n' % (args[0], ret))
 
-    def remplayer(self, args, conn):
-        name = args[0]
-        u = user.find.by_name_exact_for_user(name, conn)
-        if u:
-            if not admin.checker.check_user_operation(conn.user, u):
-                conn.write('''You can't remove an admin with a level higher than or equal to yourself.\n''')
-            elif u.is_online:
-                conn.write("%s is logged in.\n" % u.name)
-            else:
-                u.remove()
-                conn.write("Player %s removed.\n" % name)
+@ics_command('quit', '', admin.Level.user)
+class Quit(Command):
+    def run(self, args, conn):
+        raise QuitException()
 
-    def refresh(self, args, conn):
+@ics_command('refresh', 'n', admin.Level.user)
+class Refresh(Command):
+    def run(self, args, conn):
         g = None
         if args[0] is not None:
             g = game.from_name_or_number(args[0], conn)
@@ -848,7 +727,23 @@ class CommandList(object):
         if g is not None:
             conn.user.send_board(g)
 
-    def resign(self, args, conn):
+@ics_command('remplayer', 'w', admin.Level.admin)
+class Remplayer(Command):
+    def run(self, args, conn):
+        name = args[0]
+        u = user.find.by_name_exact_for_user(name, conn)
+        if u:
+            if not admin.checker.check_user_operation(conn.user, u):
+                conn.write('''You can't remove an admin with a level higher than or equal to yourself.\n''')
+            elif u.is_online:
+                conn.write("%s is logged in.\n" % u.name)
+            else:
+                u.remove()
+                conn.write("Player %s removed.\n" % name)
+
+@ics_command('resign', 'o', admin.Level.user)
+class Resign(Command):
+    def run(self, args, conn):
         if args[0] is not None:
             conn.write('TODO: RESIGN PLAYER\n')
             return
@@ -858,7 +753,9 @@ class CommandList(object):
         g = conn.user.session.games.primary()
         g.resign(conn.user)
 
-    def rmatch(self, args, conn):
+@ics_command('rmatch', 'wwt', admin.Level.user)
+class Rmatch(Command):
+    def run(self, args, conn):
         if 'TD' not in conn.user.get_titles():
             conn.write(_('Only TD programs are allowed to use this command\n'))
             return
@@ -881,7 +778,9 @@ class CommandList(object):
         offer.Challenge(u1, u2, args[2])
 
 
-    def set(self, args, conn):
+@ics_command('set', 'wT', admin.Level.user)
+class Set(Command):
+    def run(self, args, conn):
         # val can be None if the user gave no value
         [name, val] = args
         try:
@@ -895,7 +794,9 @@ class CommandList(object):
         except var.BadVarError:
             conn.write(_('Bad value given for variable "%s".\n') % v.name)
 
-    def shout(self, args, conn):
+@ics_command('shout', 'S', admin.Level.user)
+class Shout(Command):
+    def run(self, args, conn):
         if conn.user.is_guest:
             conn.write(_("Only registered players can use the shout command.\n"))
         elif not conn.user.vars['shout']:
@@ -911,7 +812,9 @@ class CommandList(object):
                         count += 1
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
 
-    def showlist(self, args, conn):
+@ics_command('showlist', 'o', admin.Level.user)
+class Showlist(Command):
+    def run(self, args, conn):
         if args[0] is None:
             for c in list_.lists.itervalues():
                 conn.write('%s\n' % c.name)
@@ -929,7 +832,9 @@ class CommandList(object):
             except list_.ListError as e:
                 conn.write(e.reason)
 
-    def sublist(self, args, conn):
+@ics_command('sublist', 'ww', admin.Level.user)
+class Sublist(Command):
+    def run(self, args, conn):
         try:
             ls = list_.lists.get(args[0])
         except KeyError:
@@ -942,7 +847,9 @@ class CommandList(object):
             except list_.ListError as e:
                 conn.write(e.reason)
 
-    def summon(self, args, conn):
+@ics_command('summon', 'w', admin.Level.user)
+class Summon(Command):
+    def run(self, args, conn):
         u = user.find.by_prefix_for_user(args[0], conn)
         if u == conn.user:
             conn.write(_("You can't summon yourself.\n"))
@@ -958,18 +865,15 @@ class CommandList(object):
         conn.write(_('Summoning sent to "%s".\n') % u.name)
         # TODO: add to idlenotify list
 
-    def style(self, args, conn):
+@ics_command('style', 'd', admin.Level.user)
+class Style(Command):
+    def run(self, args, conn):
         #conn.write('Warning: the "style" command is deprecated.  Please use "set style" instead.\n')
         var.vars['style'].set(conn.user, str(args[0]))
 
-    def tell(self, args, conn):
-        (u, ch) = self._do_tell(args, conn)
-        if u is not None:
-            conn.session.last_tell_user = u
-        else:
-            conn.session.last_tell_ch = ch
-
-    def unalias(self, args, conn):
+@ics_command('unalias', 'w', admin.Level.user)
+class Unalias(Command):
+    def run(self, args, conn):
         aname = args[0]
         if not 1 <= len(aname) < 16:
             conn.write(_("Alias names may not be more than 15 characters long.\n"))
@@ -981,7 +885,9 @@ class CommandList(object):
             conn.user.set_alias(aname, None)
             conn.write(_('Alias "%s" unset.\n') % aname)
 
-    def unobserve(self, args, conn):
+@ics_command('unobserve', 'n', admin.Level.user)
+class Unobserve(Command):
+    def run(self, args, conn):
         if args[0] is not None:
             g = game.from_name_or_number(args[0], conn)
             if g:
@@ -1000,13 +906,17 @@ class CommandList(object):
                     #g.observers.remove(conn.user)
                 assert(not conn.user.session.observed)
 
-    def uptime(self, args, conn):
+@ics_command('uptime', '', admin.Level.user)
+class Uptime(Command):
+    def run(self, args, conn):
         conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
         conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
         conn.write(_("Up for: %s\n") % timer.hms_words(time.time() -
             server.start_time))
 
-    def variables(self, args, conn):
+@ics_command('variables', 'o', admin.Level.user)
+class Variables(Command):
+    def run(self, args, conn):
         if args[0] is None:
             u = conn.user
         else:
@@ -1020,55 +930,9 @@ class CommandList(object):
                     conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
 
-    def xtell(self, args, conn):
-        self._do_tell(args, conn)
-
-    def _do_tell(self, args, conn):
-        u = None
-        ch = None
-        if args[0] == '.':
-            u = conn.session.last_tell_user
-            if not u:
-                conn.write(_("No previous tell.\n"))
-            elif not u.is_online:
-                # try to find the user if he or she has logged off
-                # and since reconnected
-                name = u.name
-                u = online.find_exact(name)
-                if not u:
-                    conn.write(_('%s is no longer online.\n') % name)
-        elif args[0] == ',':
-            ch = conn.session.last_tell_ch
-            if not ch:
-                conn.write(_('No previous channel.\n'))
-        else:
-            if type(args[0]) != str:
-                try:
-                    ch = channel.chlist[args[0]]
-                except KeyError:
-                    conn.write(_('Invalid channel number.\n'))
-                else:
-                    if conn.user not in ch.online and (
-                            'TD' not in conn.user.get_titles()):
-                        conn.user.write(_('''(Not sent because you are not in channel %s.)\n''') % ch.id)
-                        ch = None
-            else:
-                u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
-
-        if ch:
-            count = ch.tell(args[1], conn.user)
-            conn.write(ngettext('(told %d player in channel %d)\n', '(told %d players in channel %d)\n', count) % (count, ch.id))
-        elif u:
-            if conn.user.name in u.censor and conn.user.admin_level <= \
-                    admin.level.user:
-                conn.write(_("%s is censoring you.\n") % u.name)
-            else:
-                u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
-                conn.write(_("(told %s)") % u.name + '\n')
-
-        return (u, ch)
-
-    def whisper(self, args, conn):
+@ics_command('whisper', 'S', admin.Level.user)
+class Whisper(Command):
+    def run(self, args, conn):
         if conn.user.session.games:
             g = conn.user.session.games.primary()
         elif conn.user.session.observed:
@@ -1092,7 +956,9 @@ class CommandList(object):
         conn.write(ngettext('(whispered to %d player)\n', '(whispered to %d players)\n', count) % count)
 
 
-    def who(self, args, conn):
+@ics_command('who', 'T', admin.Level.user)
+class Who(Command):
+    def run(self, args, conn):
         count = 0
         for u in online.itervalues():
             conn.write(u.get_display_name() + '\n')
@@ -1100,7 +966,9 @@ class CommandList(object):
         conn.write('\n')
         conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
 
-    def withdraw(self, args, conn):
+@ics_command('withdraw', 'n', admin.Level.user)
+class Withdraw(Command):
+    def run(self, args, conn):
         if len(conn.user.session.offers_sent) == 0:
             conn.write(_('You have no pending offers to other players.\n'))
             return
@@ -1112,7 +980,9 @@ class CommandList(object):
         else:
             conn.write('TODO: WITHDRAW PARAM\n')
 
-    def znotify(self, args, conn):
+@ics_command('znotify', 'o', admin.Level.user)
+class Znotify(Command):
+    def run(self, args, conn):
         if args[0] is not None:
             if args[0] != 'n':
                 raise BadCommandError()
@@ -1134,7 +1004,5 @@ class CommandList(object):
         else:
             conn.write(_('The following players have you on their notify list:\n   %s\n') %
                 ' '.join(notified))
-
-command_list = CommandList()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

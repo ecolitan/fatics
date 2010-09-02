@@ -208,9 +208,10 @@ class TestMatch(Test):
         self.close(t2)
 
 class TestRmatch(Test):
+    @with_player('testplayer', 'testplayer')
+    @with_player('tdplayer', 'tdplayer', ['td'])
     def test_rmatch(self):
-        self.adduser('tdplayer', 'tdplayer', ['td'])
-        self.adduser('testplayer', 'testplayer')
+        #self.adduser('tdplayer', 'tdplayer', ['td'])
         try:
             t = self.connect_as('testplayer', 'testplayer')
             t2 = self.connect_as_admin()
@@ -232,7 +233,8 @@ class TestRmatch(Test):
             self.close(t2)
             self.close(t3)
         finally:
-            self.deluser('tdplayer\n')
-            self.deluser('testplayer\n')
+            #self.deluser('tdplayer\n')
+            #self.deluser('testplayer\n')
+            pass
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

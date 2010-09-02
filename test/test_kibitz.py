@@ -62,9 +62,9 @@ class TestKibitz(Test):
         self.close(t2)
         self.close(t3)
 
+    @with_player('testplayer', 'testpass')
+    @with_player('testobs', 'testpass')
     def test_kibitz_user(self):
-        self.adduser('testplayer', 'testpass')
-        self.adduser('testobs', 'testpass')
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as('testobs', 'testpass')
@@ -105,11 +105,11 @@ class TestKibitz(Test):
         self.close(t)
         self.close(t2)
         self.close(t3)
-        self.deluser('testplayer')
-        self.deluser('testobs')
+        #self.deluser('testplayer')
+        #self.deluser('testobs')
 
+    @with_player('testplayer', 'testpass')
     def test_kiblevel(self):
-        self.adduser('testplayer', 'testpass')
         t = self.connect_as('GuestEFGH', '')
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
@@ -153,7 +153,6 @@ class TestKibitz(Test):
         self.close(t)
         self.close(t2)
         self.close(t3)
-        self.deluser('testplayer')
 
 class TestWhisper(Test):
     def test_whisper_guest(self):
@@ -198,9 +197,9 @@ class TestWhisper(Test):
         self.close(t2)
         self.close(t3)
 
+    @with_player('testplayer', 'testpass')
+    @with_player('testobs', 'testpass')
     def test_whisper_user(self):
-        self.adduser('testplayer', 'testpass')
-        self.adduser('testobs', 'testpass')
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as('testobs', 'testpass')
@@ -228,11 +227,9 @@ class TestWhisper(Test):
         self.close(t)
         self.close(t2)
         self.close(t3)
-        self.deluser('testplayer')
-        self.deluser('testobs')
 
+    @with_player('testplayer', 'testpass')
     def test_kiblevel_whisper(self):
-        self.adduser('testplayer', 'testpass')
         t = self.connect_as('GuestEFGH', '')
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
@@ -274,6 +271,5 @@ class TestWhisper(Test):
         self.close(t)
         self.close(t2)
         self.close(t3)
-        self.deluser('testplayer')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

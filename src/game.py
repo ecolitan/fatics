@@ -35,11 +35,11 @@ games = {}
 from variant.variant_factory import variant_factory
 
 def opp(side):
-    assert side in [WHITE, BLACK]
+    assert(side in [WHITE, BLACK])
     return BLACK if side == WHITE else WHITE
 
 def side_to_str(side):
-    assert side in [WHITE, BLACK]
+    assert(side in [WHITE, BLACK])
     return "white" if side == WHITE else "black"
 
 def find_free_slot():

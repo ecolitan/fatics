@@ -24,7 +24,6 @@ from twisted.internet import reactor
 from zope.interface import implements
 
 import telnet
-import command
 import command_parser
 import lang
 from config import config
@@ -159,7 +158,7 @@ class Connection(basic.LineReceiver):
         written_users.add(self.user)
         try:
             command_parser.parser.run(line, t, self)
-        except command.QuitException:
+        except command_parser.QuitException:
             self.loseConnection('quit')
         finally:
             for u in written_users:

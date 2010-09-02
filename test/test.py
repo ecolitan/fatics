@@ -116,11 +116,39 @@ class Test(unittest.TestCase):
     def _skip(self, reason):
         raise unittest.SkipTest(reason)
 
-class OneConnectionTest(Test):
-    def setUp(self):
-        self.t = self.connect()
 
-    def tearDown(self):
-        self.t.close()
+# test decorators
+def with_guest(f):
+    def new_f(self):
+        t = self.connect_as_guest()
+        f(self, t)
+        self.close(t)
+
+    new_f.__name__ = f.__name__
+    new_f.__dict__.update(f.__dict__)
+    return new_f
+
+def with_admin(f):
+    def new_f(self):
+        t = self.connect_as_admin()
+        f(self, t)
+        self.close(t)
+
+    new_f.__name__ = f.__name__
+    new_f.__dict__.update(f.__dict__)
+    return new_f
+
+def with_player(pname, ppass, ptitles=None):
+    def wrap(f):
+        def new_f(self):
+            self.adduser(pname, ppass, ptitles)
+            try:
+                f(self)
+            finally:
+                self.deluser(pname)
+        new_f.__name__ = f.__name__
+        new_f.__dict__.update(f.__dict__)
+        return new_f
+    return wrap
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

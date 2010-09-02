@@ -20,12 +20,16 @@ from test import  *
 
 import time
 
-class ConnectTest(OneConnectionTest):
+class ConnectTest(Test):
     def test_welcome(self):
-        self.expect('Welcome', self.t, "welcome message")
+        t = self.connect()
+        self.expect('Welcome', t, "welcome message")
+        t.close()
 
     def test_login(self):
-        self.expect('login:', self.t, "login prompt")
+        t = self.connect()
+        self.expect('login:', t, "login prompt")
+        t.close()
 
 class LoginTest(Test):
     def test_login(self):

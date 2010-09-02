@@ -19,17 +19,20 @@
 import time
 import re
 
-import alias
-import utf8
-import trie
-import admin
-import command
-import timeseal
-
 class InternalException(Exception):
     pass
 class BadCommandError(Exception):
     pass
+class QuitException(Exception):
+    pass
+
+import alias
+import utf8
+import trie
+import admin
+from command import *
+import timeseal
+
 
 class CommandParser(object):
     command_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
@@ -106,7 +109,7 @@ class CommandParser(object):
         else:
             #conn.write(_("Command not found.\n"))
             assert(False)
-    
+
     def parse_args(self, s, param_str):
         args = []
         for c in param_str:

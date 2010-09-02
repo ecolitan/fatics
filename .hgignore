@@ -11,3 +11,4 @@ syntax: glob
 *.a
 timeseal/*seal
 timeseal/*seal_decoder
+_trial_temp
