@@ -66,7 +66,7 @@ class TellCommand(Command):
         return (u, ch)
 
 @ics_command('tell', 'nS', admin.Level.user)
-class Tell_(TellCommand):
+class Tell(TellCommand):
     def run(self, args, conn):
         (u, ch) = self._do_tell(args, conn)
         if u is not None:
@@ -116,8 +116,8 @@ class Say(Command):
             g = conn.user.session.games.current()
             opp = g.get_opp(conn.user)
             assert(opp.is_online)
-            opp.write_("%s[%d] says: %s\n", (conn.user.get_display_name(),
-                g.number, args[0]))
+            opp.write_("%s[%d] says: %s\n", conn.user.get_display_name(),
+                g.number, args[0])
             # TODO ", who is playing"; ", who is examining a game"
             conn.write(_('(told %s)') % opp.name)
         else:
@@ -129,8 +129,8 @@ class Say(Command):
                     if not opp:
                         conn.write(_('%s is no longer online.\n') % name)
                 if opp:
-                    opp.write_("%s says: %s\n", (conn.user.get_display_name(),
-                        args[0]))
+                    opp.write_("%s says: %s\n", conn.user.get_display_name(),
+                        args[0])
                     conn.write(_('(told %s)') % opp.name)
             else:
                 conn.write(_("I don't know whom to say that to.\n"))

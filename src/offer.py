@@ -181,7 +181,7 @@ class Challenge(Offer):
                 # historically, this was set according to the rated var
                 self.rated = True
         elif self.rated and (a.is_guest or b.is_guest):
-            a.write(_('Only registered users can play rated games.\n'))
+            a.write(_('Only registered players can play rated games.\n'))
             #raise InvalidOfferError()
             return
 

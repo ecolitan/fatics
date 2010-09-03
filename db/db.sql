@@ -44,7 +44,6 @@ CREATE TABLE `user` (
   `bugopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for bughouse',
   `ctell` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show channel tells from guests',
   `gin` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show channel tells from guests',
-  
   `height` SMALLINT(4) NOT NULL DEFAULT 24 COMMENT 'terminal height in characters',
   `mailmess` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'email a copy of messages',
   `seek` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show seeks',
@@ -174,6 +173,7 @@ CREATE TABLE `game` (
     'Res', 'TM', 'WLM', 'WNM', '50') NOT NULL,
   `ply_count` SMALLINT NOT NULL,
   `movetext` TEXT,
+  `when_started` TIMESTAMP NOT NULL,
   `when_ended` TIMESTAMP NOT NULL,
   INDEX(`white_name`),
   INDEX(`black_name`),
@@ -212,7 +212,7 @@ CREATE TABLE `user_notify` (
 
 -- censor lists
 DROP TABLE IF EXISTS `censor`;
-CREATE TABLE censor (
+CREATE TABLE `censor` (
   `censorer` int(8) NOT NULL COMMENT 'id of the censoring user',
   `censored` int(8) NOT NULL COMMENT 'id of the user being censored',
   UNIQUE INDEX(`censorer`, `censored`)
@@ -220,7 +220,7 @@ CREATE TABLE censor (
 
 -- noplay lists
 DROP TABLE IF EXISTS `noplay`;
-CREATE TABLE noplay (
+CREATE TABLE `noplay` (
   `noplayer` int(8) NOT NULL COMMENT 'id of the noplaying user',
   `noplayed` int(8) NOT NULL COMMENT 'id of the user being noplayed',
   UNIQUE INDEX(`noplayer`, `noplayed`)
@@ -239,14 +239,14 @@ CREATE TABLE user_alias (
 
 -- speeds and variants
 DROP TABLE IF EXISTS `speed`;
-CREATE TABLE speed (
+CREATE TABLE `speed` (
   `speed_id` int(8) NOT NULL AUTO_INCREMENT,
   `speed_name` varchar(16) NOT NULL,
   `speed_abbrev` char(2) NOT NULL,
   PRIMARY KEY(`speed_id`)
 );
 DROP TABLE IF EXISTS `variant`;
-CREATE TABLE variant (
+CREATE TABLE `variant` (
   `variant_id` int(8) NOT NULL AUTO_INCREMENT,
   `variant_name` varchar(16) NOT NULL,
   `variant_abbrev` char(2) NOT NULL,
@@ -254,7 +254,7 @@ CREATE TABLE variant (
 );
 -- ratings
 DROP TABLE IF EXISTS `rating`;
-CREATE TABLE rating (
+CREATE TABLE `rating` (
   `rating_id` int(8) NOT NULL AUTO_INCREMENT, -- is this necessary?
   `user_id` int(8) NOT NULL,
   `variant_id` int(8) NOT NULL,
@@ -276,7 +276,7 @@ CREATE TABLE rating (
 
 -- news
 DROP TABLE IF EXISTS `news_index`;
-CREATE TABLE news_index (
+CREATE TABLE `news_index` (
   `news_id` int(4) NOT NULL AUTO_INCREMENT,
   `news_title` VARCHAR(45) NOT NULL,
   `news_date` date NOT NULL COMMENT 'when posted',
@@ -286,10 +286,24 @@ CREATE TABLE news_index (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `news_line`;
-CREATE TABLE news_line (
+CREATE TABLE `news_line` (
   `news_id` int(8) NOT NULL,
   `num` tinyint UNSIGNED NOT NULL COMMENT 'line number',
-  `txt` VARCHAR(1024) NOT NULL COMMENT 'news line text'
+  `txt` VARCHAR(1023) NOT NULL COMMENT 'news line text'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- messages
+DROP TABLE IF EXISTS `message`;
+CREATE TABLE `message` (
+  `message_id` int(8) NOT NULL AUTO_INCREMENT,
+  `from_user_id` int(8) NOT NULL COMMENT 'sender ID',
+  `forwarder_user_id` int(8) DEFAULT NULL,
+  `to_user_id` int(8) NOT NULL COMMENT 'receiver ID',
+  `txt` VARCHAR(1023) NOT NULL COMMENT 'full text of message',
+  `when_sent` TIMESTAMP NOT NULL,
+  `unread` BOOLEAN NOT NULL DEFAULT 1,
+  INDEX(`from_user_id`,`to_user_id`),
+  PRIMARY KEY(`message_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- data

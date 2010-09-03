@@ -28,6 +28,9 @@ class DB(object):
     def __init__(self):
         self.db = connect(host=config.db_host, db=config.db_db,
             read_default_file="~/.my.cnf")
+        cursor = self.db.cursor()
+        cursor.execute("""SET time_zone='+00:00'""")
+        cursor.close()
 
     def user_get(self, name):
         cursor = self.db.cursor(cursors.DictCursor)
@@ -71,7 +74,7 @@ class DB(object):
                 cursor.close()
                 raise DeleteError()
         cursor.close()
-    
+
     def user_get_notes(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT num,txt FROM note WHERE user_id=%s ORDER BY num ASC""", (user_id,))
@@ -256,7 +259,7 @@ class DB(object):
             cursor.close()
             raise DeleteError()
         cursor.close()
-    
+
     def user_get_censored(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT user_name FROM user LEFT JOIN censor ON (user.user_id=censor.censored) WHERE censorer=%s""", (user_id,))
@@ -338,12 +341,12 @@ class DB(object):
     # game
     def game_add(self, white_name, white_rating, black_name, black_rating,
             eco, variant_id, speed_id, time, inc, rated, result, result_reason,
-            ply_count, movetext, when_ended):
+            ply_count, movetext, when_started, when_ended):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant_id=%s,speed_id=%s,time=%s,inc=%s,rated=%s,result=%s,result_reason=%s,ply_count=%s,movetext=%s,when_ended=%s""", (white_name,
+        cursor.execute("""INSERT INTO game SET white_name=%s,white_rating=%s,black_name=%s,black_rating=%s,eco=%s,variant_id=%s,speed_id=%s,time=%s,inc=%s,rated=%s,result=%s,result_reason=%s,ply_count=%s,movetext=%s,when_started=%s,when_ended=%s""", (white_name,
             white_rating, black_name, black_rating, eco, variant_id,
             speed_id, time, inc, rated, result, result_reason, ply_count,
-            movetext, when_ended))
+            movetext, when_started, when_ended))
         game_id = cursor.lastrowid
         cursor.close()
         return game_id
@@ -442,6 +445,63 @@ class DB(object):
         rows = cursor.fetchall()
         cursor.close()
         return rows
+
+    # messages
+    def get_message_id(self, message_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT message_id,sender.user_name AS sender_name,forwarder.user_name AS forwarder_name,when_sent,txt FROM message LEFT JOIN user AS sender ON (message.from_user_id = sender.user_id) LEFT JOIN user AS forwarder ON (message.forwarder_user_id = forwarder.user_id) WHERE message_id=%s""",
+            (message_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        return row
+
+    def get_messages_all(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT message_id,sender.user_name AS sender_name,forwarder.user_name AS forwarder_name,when_sent,txt FROM message LEFT JOIN user AS sender ON (message.from_user_id = sender.user_id) LEFT JOIN user AS forwarder ON (message.forwarder_user_id = forwarder.user_id) WHERE to_user_id=%s""",
+            (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def get_messages_range(self, user_id, offset, limit):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT message_id,from_user_id,to_user_id FROM message WHERE to_user_id=%s LIMIT %s,%s""",
+            (user_id, offset, limit))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def send_message(self, from_user_id, to_user_id, txt):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO message SET from_user_id=%s,to_user_id=%s,txt=%s,when_sent=NOW(),unread=1""",
+            (from_user_id, to_user_id, txt))
+        message_id = cursor.lastrowid
+        cursor.close()
+        return message_id
+
+    def clear_messages_all(self, user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM message WHERE to_user_id=%s""",
+            (user_id,))
+        ret = cursor.rowcount
+        cursor.close()
+        return ret
+
+    def clear_messages_list(self, lst):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM message WHERE message_id IN (%s)""" %
+            (','.join(lst),))
+        ret = cursor.rowcount
+        cursor.close()
+        return ret
+
+    def clear_messages_from_to(self, from_user_id, to_user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM message WHERE from_user_id=%s AND to_user_id=%s""",
+            (from_user_id, to_user_id))
+        ret = cursor.rowcount
+        cursor.close()
+        return ret
 
 db = DB()
 

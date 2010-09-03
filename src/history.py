@@ -54,7 +54,7 @@ class History(object):
             black_rating, eco, game.speed_variant.variant.id,
             game.speed_variant.speed.id, game.white_time, game.inc,
             game.rated, result_code, result_reason, game.get_ply_count(),
-            game.get_movetext(), game.when_ended)
+            game.get_movetext(), game.when_started, game.when_ended)
 
         flags = '%s%s' % (game.speed_variant.speed.abbrev,
             game.speed_variant.variant.abbrev)

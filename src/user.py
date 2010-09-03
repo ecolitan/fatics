@@ -85,7 +85,7 @@ class BaseUser(object):
         self.session.conn.write(s)
 
     # Like write(), but localizes for this user.
-    def write_(self, s, args):
+    def write_(self, s, *args):
         connection.written_users.add(self)
         self.session.conn.write(lang.langs[self.vars['lang']].gettext(s) %
             args)
@@ -407,6 +407,24 @@ class User(BaseUser):
                 row['win'], row['loss'], row['draw'], row['best'],
                 row['when_best'])
 
+    #def get_messages_range(self, start, end):
+    #    return db.get_messages_range(self.id, start, end)
+    def get_messages_all(self):
+        msgs = db.get_messages_all(self.id)
+        return msgs
+    def send_message(self, to, txt):
+        return db.send_message(self.id, to.id, txt)
+    def clear_messages_all(self):
+        return db.clear_messages_all(self.id)
+    def clear_messages_range(self, start, end):
+        msgs = db.get_messages_range(self.id, start - 1, end - start + 1)
+        if msgs is None:
+            return None
+        ids = [str(msg['message_id']) for msg in msgs]
+        return db.clear_messages_list(ids)
+    def clear_messages_from(self, sender, conn):
+        return db.clear_messages_from_to(sender.id, self.id)
+
 class GuestUser(BaseUser):
     def __init__(self, name):
         BaseUser.__init__(self)
@@ -493,8 +511,7 @@ class Find(object):
                 raise AmbiguousException([u['user_name'] for u in ulist])
         return u
 
-    """Like by_prefix(), but writes an error message
-    on failure."""
+    """ Like by_prefix(), but writes an error message on failure. """
     def by_prefix_for_user(self, name, conn, min_len=0, online_only=False):
         u = None
         try:
@@ -513,7 +530,7 @@ class Find(object):
         except UsernameException:
             conn.write(_('"%s" is not a valid handle.\n') % name)
         except AmbiguousException as e:
-            conn.write("""Ambiguous name "%s". Matches: %s\n""" % (name, ' '.join(e.names)))
+            conn.write(_("""Ambiguous name "%s". Matches: %s\n""") % (name, ' '.join(e.names)))
         return u
 
     """Like by_name_exact, but writes an error message

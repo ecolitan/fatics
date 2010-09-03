@@ -30,9 +30,9 @@ class TestMatch(Test):
         self.expect('No user named "nonexistentname"', t)
 
         t.write('match admin 1 0 r\n')
-        self.expect('Only registered users can play rated games', t)
+        self.expect('Only registered players can play rated games', t)
         t2.write('match Guest 1 0 r\n')
-        self.expect('Only registered users can play rated games', t2)
+        self.expect('Only registered players can play rated games', t2)
 
         t.write('set open 0\n')
         t2.write('set open 0\n')

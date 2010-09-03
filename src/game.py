@@ -285,6 +285,7 @@ class PlayedGame(Game):
 
         self.clock = clock.FischerClock(self.white_time * 60.0,
             self.black_time * 60.0, self.inc)
+        self.when_started = datetime.datetime.utcnow()
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
         create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.speed_variant, time_str)

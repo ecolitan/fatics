@@ -78,11 +78,22 @@ class ics_command(object):
         self.admin_level = admin_level
 
     def __call__(self, f):
+        # just a check that the naming convention is correct
+        import inspect
+        assert(inspect.getmro(f)[0].__name__ == self.name.capitalize())
         # instantiate the decorated class at decoration time
         f(self.name, self.param_str, self.admin_level)
         def wrapped_f(*args):
             raise RuntimeError('command objects should not be instantiated directly')
         return wrapped_f
+
+def requires_registration(f):
+    def check_reg(self, args, conn):
+        if conn.user.is_guest:
+            conn.write(_("Only registered players can use the %s command.\n") % self.name)
+        else:
+            f(self, args, conn)
+    return check_reg
 
 @ics_command('alias', 'oT', admin.Level.user)
 class Alias(Command):
@@ -140,10 +151,9 @@ class Allobservers(Command):
 
 @ics_command('cshout', 'S', admin.Level.user)
 class Cshout(Command):
+    @requires_registration
     def run(self, args, conn):
-        if conn.user.is_guest:
-            conn.write(_("Only registered players can use the cshout command.\n"))
-        elif not conn.user.vars['cshout']:
+        if not conn.user.vars['cshout']:
             conn.write(_("(Did not c-shout because you are not listening to c-shouts)\n"))
         else:
             count = 0
@@ -323,10 +333,9 @@ class Iset(Command):
 
 @ics_command('it', 'S', admin.Level.user)
 class It(Command):
+    @requires_registration
     def run(self, args, conn):
-        if conn.user.is_guest:
-            conn.write(_("Only registered players can use the it command.\n"))
-        elif not conn.user.vars['shout']:
+        if not conn.user.vars['shout']:
             conn.write(_("(Did not it-shout because you are not listening to shouts)\n"))
         else:
             count = 0
@@ -465,10 +474,9 @@ class Set(Command):
 
 @ics_command('shout', 'S', admin.Level.user)
 class Shout(Command):
+    @requires_registration
     def run(self, args, conn):
-        if conn.user.is_guest:
-            conn.write(_("Only registered players can use the shout command.\n"))
-        elif not conn.user.vars['shout']:
+        if not conn.user.vars['shout']:
             conn.write(_("(Did not shout because you are not listening to shouts)\n"))
         else:
             count = 0
