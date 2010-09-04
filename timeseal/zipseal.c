@@ -159,15 +159,15 @@ int main(int argc, char **argv)
                         static int rd=0;
                         static char buff[BSIZE];
                         n = read(0, buff + rd, BSIZE - rd);
-                        rd += n;
-                        if(!n) {
-                                fprintf(stderr,"Gasp!\n");
+                        if (!n) {
+                                fprintf(stderr, "Connection closed by client\n");
                                 exit(0);
                         }
-                        if(n==-1) {
+                        if (n == -1) {
                                 perror(NULL);
                                 exit(1);
                         }
+                        rd += n;
                         sendtofics(fd,buff,&rd);
                         if (rd==BSIZE) {
                                 fprintf(stderr,"Line tooooo long! I die!\n");
