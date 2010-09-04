@@ -500,6 +500,16 @@ class DB(object):
         cursor.close()
         return message_id
 
+    def forward_message(self, forwarder_user_id, to_user_id, message_id):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO message (from_user_id,forwarder_user_id,to_user_id,txt,when_sent,unread)
+            (SELECT from_user_id,%s,%s,txt,when_sent,1 FROM message
+                WHERE message_id=%s)""",
+            (forwarder_user_id,to_user_id,message_id))
+        message_id = cursor.lastrowid
+        cursor.close()
+        return message_id
+
     def clear_messages_all(self, user_id):
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM message WHERE to_user_id=%s""",

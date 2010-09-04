@@ -1,1 +1,1 @@
-telnet localhost 5000
+./timeseal/zipseal localhost 5001

@@ -25,7 +25,7 @@ from db import db
 
 # maximum line length is 1024, but leave some room for the date and
 # user names
-MAX_LEN = 950
+#MAX_LEN = 950
 
 class DisplayMessage(object):
     def _display_msg(self, msg, u):
@@ -69,11 +69,24 @@ class Clearmessages(Command):
         conn.write(ngettext('Cleared %d message.\n', 'Cleared %d messages.\n', count) % count)
 
 @ics_command('fmessage', 'wd')
-class Fmessage(Command):
+class Fmessage(Command, DisplayMessage):
     @requires_registration
     def run(self, args, conn):
-        pass
-
+        u2 = user.find.by_prefix_for_user(args[0], conn)
+        if u2:
+            msgs = conn.user.get_messages_range(args[1], args[1])
+            if msgs:
+                msg = msgs[0]
+                message_id = msgs[0]['message_id']
+                msg['forwarder_name'] = conn.user.name
+                conn.user.forward_message(u2, message_id)
+                if u2.is_online:
+                    u2.write_('The following message was received:\n')
+                    self._display_msg(msg, u2)
+                conn.write(_('The following message was forwarded to %s:\n') % u2.name)
+                self._display_msg(msg, conn.user)
+            else:
+                conn.write(_('There is no such message.\n'))
 
 @ics_command('messages', 'nT')
 class Messages(Command, DisplayMessage):
@@ -95,6 +108,9 @@ class Messages(Command, DisplayMessage):
             if type(args[0]) == type(1):
                 i = int(args[0])
                 msgs = conn.user.get_messages_range(i, i)
+                if not msgs:
+                    conn.write(_('There is no such message.\n'))
+                    return
             else:
                 m = self.range_re.match(args[0])
                 if m:

@@ -41,8 +41,10 @@ class TestMessage(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
 
-        t2.write('clearmess *\n')
-        self.expect('Cleared 0 messages.', t2)
+        t.write('mess 5\n')
+        self.expect('There is no such message.', t)
+        t.write('mess abcdef test\n')
+        self.expect('There is no player matching the name "abcdef".', t)
 
         t.write('mess testplayer This is an important message from admin.\n')
         self.expect('The following message was sent to testplayer:', t)
@@ -141,5 +143,34 @@ class TestMessage(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('testplayer', 'testpass')
+    @with_player('testtwo', 'testpass')
+    def test_fmessage(self):
+        t = self.connect_as_admin()
+
+        t.write('mess testplayer Hello there\n')
+        self.expect(': Hello there', t)
+
+        t2 = self.connect_as('testplayer', 'testpass')
+        t2.write('mess\n')
+        self.expect(': Hello there', t2)
+        t2.write('fmess testtwo 2\n')
+        self.expect('There is no such message.', t2)
+        t2.write('fmess blahblah 1\n')
+        self.expect('There is no player matching the name "blahblah".', t2)
+
+        t3 = self.connect_as('testtwo', 'testpass')
+        t2.write('fmess testtwo 1\n')
+        self.expect('The following message was forwarded to testtwo:', t2)
+        self.expect('testplayer forwarded: admin at ', t2)
+        self.expect('The following message was received:', t3)
+        self.expect('testplayer forwarded: admin at ', t3)
+
+        t3.write('mess\n')
+        self.expect('1. testplayer forwarded: admin at ', t3)
+
+        self.close(t3)
+        self.close(t2)
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

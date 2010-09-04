@@ -416,6 +416,8 @@ class User(BaseUser):
         return db.get_messages_from_to(sender.id, self.id)
     def send_message(self, to, txt):
         return db.send_message(self.id, to.id, txt)
+    def forward_message(self, to, message_id):
+        return db.forward_message(self.id, to.id, message_id)
     def clear_messages_all(self):
         return db.clear_messages_all(self.id)
     def clear_messages_range(self, start, end):
