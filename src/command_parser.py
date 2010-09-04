@@ -32,28 +32,22 @@ import trie
 import admin
 from command import *
 import timeseal
+import block
 
 
 class CommandParser(object):
     command_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
-    def parse(self, s, t, conn):
+    def _do_parse(self, s, t, conn):
         s = s.strip()
-
-        if s == timeseal.REPLY:
-            if not conn.session.ping_sent:
-                conn.write('protocol error: got reply without ping')
-                conn.loseConnection('protocol error: got reply without ping')
-            else:
-                conn.session.ping_reply_time = t
-            return
 
         if conn.session.games:
             if conn.session.games.current().parse_move(s, t, conn):
-                return
+                return block.BLK_GAME_MOVE
 
         if not utf8.checker.check_user_utf8(s):
             conn.write(_("Command ignored: invalid characters.\n"))
-            return
+            # no exact code for this situation
+            return block.BLK_ERROR_BADCOMMAND
 
         update_idle = True
         # previously the prefix '$' was used to not expand aliases
@@ -68,7 +62,7 @@ class CommandParser(object):
 
         if len(s) == 0:
             # ignore blank line
-            return
+            return block.BLK_NULL
 
         if s[0] == '$':
             s = s[1:].lstrip()
@@ -78,13 +72,15 @@ class CommandParser(object):
                     conn.user.aliases, conn.user)
             except alias.AliasError:
                 conn.write(_("Command failed: There was an error expanding aliases.\n"))
-                return
+                # no exact code
+                return block.BLK_ERROR_BADCOMMAND
 
         if conn.user.admin_level > admin.Level.user:
             cmds = command.command_list.admin_cmds
         else:
             cmds = command.command_list.cmds
 
+        ret = block.BLK_SUCCESS
         cmd = None
         m = self.command_re.match(s)
         assert(m)
@@ -93,6 +89,7 @@ class CommandParser(object):
             cmd = cmds[word]
         except KeyError:
             conn.write(_("%s: Command not found.\n") % word)
+            ret = block.BLK_ERROR_BADCOMMAND
         except trie.NeedMore:
             matches = cmds.all_children(word)
             assert(len(matches) > 0)
@@ -100,12 +97,25 @@ class CommandParser(object):
                 cmd = matches[0]
             else:
                 conn.write(_("""Ambiguous command "%s". Matches: %s\n""") % (word, ' '.join([c.name for c in matches])))
+                ret = block.BLK_ERROR_AMBIGUOUS
         if cmd:
             try:
                 args = self.parse_args(m.group(2), cmd.param_str)
                 cmd.run(args, conn)
             except BadCommandError:
+                ret = block.BLK_ERROR_BADCOMMAND
                 cmd.usage(conn)
+
+        return ret
+
+    def parse(self, s, t, conn):
+        if not conn.session.ivars['block']:
+            self._do_parse(s, t, conn)
+        else:
+            (identifier, s) = block.block.start_block(s, conn)
+            if identifier is not None:
+                code = self._do_parse(s, t, conn)
+                block.block.end_block(identifier, code, conn)
 
     def parse_args(self, s, param_str):
         args = []

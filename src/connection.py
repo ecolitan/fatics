@@ -27,7 +27,7 @@ import telnet
 import command_parser
 import lang
 from config import config
-from timeseal import timeseal
+from timeseal import timeseal, REPLY as TIMESEAL_REPLY
 from session import Session
 from login import login
 
@@ -44,6 +44,7 @@ class Connection(basic.LineReceiver):
     state = 'prelogin'
     user = None
     logged_in_again = False
+    buffer_output = False
     #quit = False
     ivar_pat = re.compile(r'%b([01]{32})')
 
@@ -153,6 +154,14 @@ class Connection(basic.LineReceiver):
         self.state = 'prompt'
 
     def lineReceived_prompt(self, line, t):
+        if line.strip() == TIMESEAL_REPLY: # XXX is strip necessary?
+            if not self.session.ping_sent:
+                self.write('protocol error: got reply without ping')
+                self.loseConnection('protocol error: got reply without ping')
+            else:
+                self.session.ping_reply_time = t
+            return
+
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])
         written_users.clear()
         written_users.add(self.user)
@@ -203,6 +212,9 @@ class Connection(basic.LineReceiver):
         self.factory.connections.remove(self)
 
     def write(self, s):
-        self.transport.write(s)
+        if self.buffer_output:
+            self.output_buffer += s
+        else:
+            self.transport.write(s)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

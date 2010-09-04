@@ -18,39 +18,29 @@
 
 from test import *
 
-class TestCommand(Test):
-    def test_command(self):
+# right now we don't return the correct command codes
+success_code = 2
+
+class TestBlock(Test):
+    def test_block(self):
         t = self.connect_as_guest()
-        t.write('badcommand\n')
-        self.expect('Command not found', t)
+        t.write('iset block 1\n')
+        self.expect('block set.', t)
 
-        self.expect('fics% ', t)
         t.write('\n')
-        self.expect('fics% ', t)
+        # 519  == BLK_ERROR_NOSEQUENCE
+        # 0x15 == BLOCK_START
+        # 0x16 == BLOCK_SEPARATOR
+        # 0x17 == BLOCK_END
+        self.expect('%c0%c519%c%c\r\n' % (0x15, 0x16, 0x16, 0x17), t)
 
-        # abbreviate command
-        t.write('fin\n')
-        self.expect('Finger of ', t)
+        t.write('3 finger\n')
+        self.expect('%c3%c%s%cFinger of ' % (0x15, 0x16, success_code, 0x16), t)
+        self.expect('\r\n%c' % 0x17, t)
 
-        # don't update idle time
-        t.write('$$finger\n')
-        self.expect('Finger of ', t)
+        t.write('1 iset block 0\n')
+        self.expect('block unset.', t)
 
-        # commands are case-insensitive
-        t.write('DATE\n')
-        self.expect('Server time', t)
-
-        # ignore extranous whitespace
-        t.write(' \t  date  \t \n')
-        self.expect('Server time', t)
-
-        t.write('   \t \n')
-        self.expect_not('Bad command', t)
-        
-        t.write('tell\n')
-        self.expect('Usage: ', t)
-
-        t.close()
-    
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
