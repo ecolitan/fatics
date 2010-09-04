@@ -132,6 +132,8 @@ class TestAbort(Test):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -139,7 +141,11 @@ class TestAbort(Test):
         self.expect('Creating: ', t2)
 
         t.write('e4\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
         t2.write('e5\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
         t.write('abort\n')
 
         self.expect('GuestABCD requests to abort game 1', t2)

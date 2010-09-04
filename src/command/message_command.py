@@ -61,7 +61,7 @@ class Clearmessages(Command):
                     conn.write(_('You have no messages in that range.\n'))
                     return
             else:
-                sender = u.find_by_prefix_for_user(args[0], conn)
+                sender = user.find.by_prefix_for_user(args[0], conn)
                 if not sender:
                     return
                 count = conn.user.clear_messages_from(sender)
@@ -77,6 +77,7 @@ class Fmessage(Command):
 
 @ics_command('messages', 'nT')
 class Messages(Command, DisplayMessage):
+    range_re = re.compile('(\d+)-(\d+)')
     @requires_registration
     def run(self, args, conn):
         if args[0] is None:
@@ -86,18 +87,52 @@ class Messages(Command, DisplayMessage):
                 conn.write(_('You have no messages.\n'))
             else:
                 conn.write(_('Messages:\n'))
-                for (num, msg) in enumerate(msgs):
-                    conn.write(_('%d. ') % (num + 1))
+                for msg in msgs:
+                    conn.write(_('%d. ') % (msg['num']))
                     self._display_msg(msg, conn.user)
         elif args[1] is None:
             # display some messages
-            pass
+            if type(args[0]) == type(1):
+                i = int(args[0])
+                msgs = conn.user.get_messages_range(i, i)
+            else:
+                m = self.range_re.match(args[0])
+                if m:
+                    (start, end) = (int(m.group(1)), int(m.group(2)))
+                    # sanity checks
+                    if start < 1 or start > end or end > 9999:
+                        conn.write(_('Invalid message range.\n'))
+                        return
+                    msgs = conn.user.get_messages_range(start, end)
+                else:
+                    u2 = user.find.by_prefix_for_user(args[0], conn)
+                    if not u2:
+                        return
+                    msgs = u2.get_messages_from(conn.user)
+                    if not msgs:
+                        conn.write(_('You have no messages to %s.\n') % u2.name)
+                    else:
+                        conn.write(_('Messages to %s:\n') % u2.name)
+                        for msg in msgs:
+                            self._display_msg(msg, conn.user)
+                    conn.write('\n')
+
+                    msgs = conn.user.get_messages_from(u2)
+                    if not msgs:
+                        conn.write(_('You have no messages from %s.\n') % u2.name)
+                    else:
+                        conn.write(_('Messages from %s:\n') % u2.name)
+                        for msg in msgs:
+                            self._display_msg(msg, conn.user)
+            for msg in msgs:
+                conn.write(_('%d. ') % (msg['num']))
+                self._display_msg(msg, conn.user)
         else:
             # send a message
             to = user.find.by_prefix_for_user(args[0], conn)
             if to:
                 if to.is_guest:
-                    conn.write(_('message to unregistered player\n'))
+                    conn.write(_('Only registered players can have messages.\n'))
                     return
                 message_id = conn.user.send_message(to, args[1])
                 msg = db.get_message_id(message_id)

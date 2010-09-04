@@ -105,8 +105,6 @@ class TestKibitz(Test):
         self.close(t)
         self.close(t2)
         self.close(t3)
-        #self.deluser('testplayer')
-        #self.deluser('testobs')
 
     @with_player('testplayer', 'testpass')
     def test_kiblevel(self):

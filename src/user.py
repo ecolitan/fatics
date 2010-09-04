@@ -407,17 +407,19 @@ class User(BaseUser):
                 row['win'], row['loss'], row['draw'], row['best'],
                 row['when_best'])
 
-    #def get_messages_range(self, start, end):
-    #    return db.get_messages_range(self.id, start, end)
     def get_messages_all(self):
         msgs = db.get_messages_all(self.id)
         return msgs
+    def get_messages_range(self, start, end):
+        return db.get_messages_range(self.id, start, end)
+    def get_messages_from(self, sender):
+        return db.get_messages_from_to(sender.id, self.id)
     def send_message(self, to, txt):
         return db.send_message(self.id, to.id, txt)
     def clear_messages_all(self):
         return db.clear_messages_all(self.id)
     def clear_messages_range(self, start, end):
-        msgs = db.get_messages_range(self.id, start - 1, end - start + 1)
+        msgs = db.get_messages_range(self.id, start, end)
         if msgs is None:
             return None
         ids = [str(msg['message_id']) for msg in msgs]
