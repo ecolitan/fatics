@@ -16,7 +16,13 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import time
 from gettext import ngettext
+
+import online
+
+from config import config
+
 
 class Timer(object):
     def hms_words(self, secs):
@@ -56,5 +62,25 @@ class Timer(object):
         return ret
 
 timer = Timer()
+
+heartbeat_timeout = 5
+def heartbeat():
+    # idle timeout
+    if config.idle_timeout:
+        now = time.time()
+        for u in online.online:
+            if (now - u.session.last_command_time > config.idle_timeout and
+                    not u.is_admin() and
+                    'TD' not in u.get_titles()):
+                u.session.conn.idle_timeout(config.idle_timeout // 60)
+
+    # ping all zipseal clients
+    # I wonder if it would be better to spread out the pings in time,
+    # rather than sending a large number of ping requests all at once.
+    # However, this method is simple, and FICS timeseal 2 seems to do it
+    # this way (pinging all capable clients every 10 seconds).
+    for u in online.online:
+        if u.session.use_zipseal:
+            u.session.ping()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

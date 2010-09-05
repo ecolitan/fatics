@@ -178,7 +178,6 @@ class Date(Command):
 @ics_command('finger', 'ooo', admin.Level.user)
 class Finger(Command):
     def run(self, args, conn):
-        u = None
         if args[0] is not None:
             u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
         else:

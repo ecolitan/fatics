@@ -42,7 +42,7 @@ from config import config
 import telnet
 import connection
 import var
-import clock
+import timer
 
 if os.geteuid() == 0:
     sys.path.append('.')
@@ -74,7 +74,7 @@ if os.geteuid() == 0:
     service = getService(23)
     service.setServiceParent(application)
 
-lc = task.LoopingCall(clock.heartbeat)
-lc.start(5)
+lc = task.LoopingCall(timer.heartbeat)
+lc.start(timer.heartbeat_timeout)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent ft=python

@@ -154,12 +154,8 @@ class Connection(basic.LineReceiver):
         self.state = 'prompt'
 
     def lineReceived_prompt(self, line, t):
-        if line.strip() == TIMESEAL_REPLY: # XXX is strip necessary?
-            if not self.session.ping_sent:
-                self.write('protocol error: got reply without ping')
-                self.loseConnection('protocol error: got reply without ping')
-            else:
-                self.session.ping_reply_time = t
+        if line == TIMESEAL_REPLY:
+            self.session.pong(t)
             return
 
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])

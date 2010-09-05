@@ -20,9 +20,10 @@ import time
 import copy
 
 import var
-from timer import timer
 import game
+import timeseal
 from game_list import GameList
+from timer import timer
 
 # user state that is per-session and not saved to persistent storage
 class Session(object):
@@ -34,8 +35,8 @@ class Session(object):
         self.last_tell_ch = None
         self.last_opp = None
         self.use_timeseal = False
-        self.ping_sent = False
-        self.ping_reply_time = None
+        self.ping_sent = None
+        self.ping_time = []
         self.use_zipseal = False
         self.check_for_timeseal = True
         self.offers_sent = []
@@ -91,12 +92,30 @@ class Session(object):
         for (i, val) in enumerate(s):
             self.ivars[var.ivar_number[i].name] = val
         self.conn.write("#Ivars set.\n")
-    
+
     def set_ivar(self, v, val):
         if val is not None:
             self.ivars[v.name] = val
         else:
             if v.name in self.ivars:
                 del self.ivars[v.name]
+
+    def ping(self):
+        # don't send another ping if one is already pending
+        assert(self.use_timeseal or self.use_zipseal)
+        if not self.ping_sent:
+            self.ping_sent = time.time()
+            self.conn.write(timeseal.PING)
+
+    def pong(self, t):
+        if not self.ping_sent:
+            self.conn.write('protocol error: got reply without ping')
+            self.conn.loseConnection('protocol error: got reply without ping')
+        else:
+            reply_time = time.time() - self.ping_sent
+            self.ping_sent = None
+            if len(self.ping_time) > 4:
+                self.ping_time.pop(0)
+            self.ping_time.append(reply_time)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

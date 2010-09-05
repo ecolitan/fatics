@@ -29,15 +29,13 @@ import time
 from twisted.conch import telnet
 from twisted.internet import protocol, epollreactor
 import cProfile
-profile = 1
+profile = 0
 
 from test import host, port
 
 epollreactor.install()
 
 from twisted.internet import reactor
-
-port = 5001
 
 conn_count = 1000
 start_time = time.time()
@@ -68,6 +66,7 @@ class TestProtocol(telnet.Telnet):
     def connectionLost(self, reason):
         self.state = 'done'
 
+@unittest.skip('slow test')
 class TestLoad(unittest.TestCase):
     def test_load(self):
         fact = protocol.ClientFactory()

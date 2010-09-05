@@ -29,7 +29,7 @@ class Config(object):
     min_login_name_len = 3
 
     # max idle time in seconds
-    idle_timeout = 120
+    idle_timeout = 60 * 60
 
     # Silly Babas requires freechess.org to be in the welcome message,
     # so work it into a disclaimer.

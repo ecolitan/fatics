@@ -83,8 +83,7 @@ class Game(object):
         for p in self.players:
             p.send_board(self)
             if p.has_timeseal():
-                p.write('%s\n' % timeseal.PING)
-                p.session.ping_sent = True
+                p.ping()
         for u in self.observers:
             u.send_board(self)
 

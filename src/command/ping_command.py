@@ -19,9 +19,25 @@
 
 from command import *
 
-@ics_command('foo', '')
-class Foo(Command):
+@ics_command('ping', 'o')
+class Ping(Command):
     def run(self, args, conn):
-        pass
+        if args[0] is not None:
+            u2 = user.find.by_prefix_for_user(args[0], conn)
+        else:
+            u2 = conn.user
+
+        if u2:
+            pt = u2.session.ping_time
+            if not u2.has_timeseal():
+                conn.write(_('Ping time not available; %s is not using zipseal.\n') %
+                    u2.name)
+            elif len(pt) < 2:
+                conn.write(_('Ping time not available; please wait.\n'))
+            else:
+                conn.write(_('Ping time for %s, based on %d samples:\n') %
+                    (u2.name, len(pt)))
+                avg = 1000.0 * sum(pt) / len(pt)
+                conn.write(_('Average: %.3fms\n') % (avg))
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
