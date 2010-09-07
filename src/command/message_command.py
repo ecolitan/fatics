@@ -30,9 +30,9 @@ from db import db
 class DisplayMessage(object):
     def _display_msg(self, msg, u):
         if msg['forwarder_name']:
-            u.write_('%s forwarded: %s at %s: %s\n', msg['forwarder_name'], msg['sender_name'], msg['when_sent'], msg['txt'])
+            u.write_('%s forwarded: %s at %s: %s\n', (msg['forwarder_name'], msg['sender_name'], msg['when_sent'], msg['txt']))
         else:
-            u.write_('%s at %s: %s\n', msg['sender_name'], msg['when_sent'], msg['txt'])
+            u.write_('%s at %s: %s\n', (msg['sender_name'], msg['when_sent'], msg['txt']))
 
 @ics_command('clearmessages', 'n')
 class Clearmessages(Command):

@@ -18,7 +18,6 @@
 
 import trie
 import channel
-import admin
 import user
 
 from db import db, DuplicateKeyError, DeleteError
@@ -32,18 +31,23 @@ class MyList(object):
         self.name = name
         lists[name.lower()] = self
 
+    def _require_admin(self, user):
+        if not user.is_admin():
+            raise ListError(_("You don't have permission to do that.\n"))
+
 class ListError(Exception):
     def __init__(self, reason):
         self.reason = reason
 
 class TitleList(MyList):
-    def __init__(self, id, name, descr):
+    def __init__(self, id, name, descr, public):
         MyList.__init__(self, name)
         self.id = id
         self.descr = descr
+        self.public = public
 
     def add(self, item, conn):
-        if conn.user.admin_level < admin.level.admin:
+        if not conn.user.is_admin():
             raise ListError(_("You don't have permission to do that.\n"))
         u = user.find.by_prefix_for_user(item, conn)
         if u:
@@ -55,12 +59,14 @@ class TitleList(MyList):
             except DuplicateKeyError:
                 raise ListError(_('%(uname)s is already on the %(lname)s list.\n') %
                     {'uname': u.name, 'lname': self.name })
-            else:
-                conn.write(_('%s added to the %s list.\n') % (u.name, self.name))
+            conn.write(_('%s added to the %s list.\n') %
+                (u.name, self.name))
+            if u.is_online:
+                u.write_('%(aname)s has added you to the %(lname)s list.\n',
+                    {'aname': conn.user.name, 'lname': self.name})
 
     def sub(self, item, conn):
-        if conn.user.admin_level < admin.level.admin:
-            raise ListError(_("You don't have permission to do that.\n"))
+        self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
@@ -71,8 +77,13 @@ class TitleList(MyList):
                 raise ListError(_('%(uname)s is not on the %(lname)s list.\n') %
                     {'uname': u.name, 'lname': self.name })
             conn.write(_('%s removed from the %s list.\n') % (u.name, self.name))
-    
+            if u.is_online:
+                u.write_('%(aname)s has removed you from the %(lname)s list.\n',
+                    {'aname': conn.user.name, 'lname': self.name})
+
     def show(self, conn):
+        if not self.public:
+            self._require_admin(conn.user)
         tlist = db.title_get_users(self.id)
         conn.write(ngettext('-- %s list: %d name --\n', '-- %s list: %d names --\n', len(tlist)) % (self.name,len(tlist)))
         conn.write('%s\n' % ' '.join(tlist))
@@ -113,7 +124,7 @@ class ChannelList(MyList):
         except KeyError:
             raise ListError(_('Invalid channel number.\n'))
 
-        if ch.id == 0 and conn.user.admin_level < admin.level.admin:
+        if ch.id == 0 and not conn.user.is_admin():
             conn.write(_('Only admins can join channel 0.\n'))
         else:
             ch.add(conn.user)
@@ -193,7 +204,7 @@ class ListList(object):
         NoplayList("noplay")
 
         for title in db.title_get_all():
-            TitleList(title['title_id'], title['title_name'], title['title_descr'])
+            TitleList(title['title_id'], title['title_name'], title['title_descr'], title['title_public'])
 ListList()
 
 #  removedcom filter muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle, c50muzzle, c51muzzle,

@@ -100,11 +100,51 @@ class TestTitle(Test):
 
         self.close(t)
 
+class TestAbuser(Test):
+    def test_show_abusers(self):
+        t = self.connect_as_guest()
+        t.write('=abuser\n')
+        self.expect("You don't have permission", t)
+        self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_abuser(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t.write('=abuser\n')
+        self.expect('abuser list: ', t)
+
+        t.write('+abuser testplayer\n')
+        self.expect('TestPlayer added to the abuser list.', t)
+        self.expect('admin has added you to the abuser list.', t2)
+
+        # abuser status should not affect user's display name
+        t.write('f testplayer\n')
+        self.expect('Finger of TestPlayer:\r\n', t)
+
+        t.write('match testplayer 1 0\n')
+        self.expect('--** TestPlayer is an abuser **--', t)
+        t.write('withdraw\n')
+        self.expect('admin withdraws', t2)
+
+        t2.write('match admin 1 0\n')
+        self.expect('--** TestPlayer is an abuser **--', t)
+        t.write('decline\n')
+        self.expect('admin declines', t2)
+
+        t.write('-abuser testplaye\n')
+        self.expect('TestPlayer removed from the abuser list.', t)
+        self.expect('admin has removed you from the abuser list.', t2)
+
+        self.close(t)
+        self.close(t2)
+
 class TestCensor(Test):
     def test_censor_guest(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as('GuestDEFG', '')
-        
+
         t.write('+cen Nosuchplayer\n')
         self.expect('There is no player matching the name "nosuchplayer".', t)
 

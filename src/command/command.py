@@ -433,7 +433,7 @@ class Quit(Command):
 @ics_command('rmatch', 'wwt', admin.Level.user)
 class Rmatch(Command):
     def run(self, args, conn):
-        if 'TD' not in conn.user.get_titles():
+        if not conn.user.has_title('TD'):
             conn.write(_('Only TD programs are allowed to use this command\n'))
             return
         u1 = user.find.by_prefix_for_user(args[0], conn, online_only=True)

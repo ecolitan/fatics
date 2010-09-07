@@ -256,7 +256,15 @@ class Challenge(Offer):
 
         a.write('Issuing: %s\n' % challenge_str)
         b.write('Challenge: %s\n' % challenge_str)
-        b.write(N_('You can "accept", "decline", or propose different parameters.\n'))
+        if a.has_title('abuser'):
+            b.write_('--** %s is an abuser **--\n', (a.name,))
+        if b.has_title('abuser'):
+            a.write_('--** %s is an abuser **--\n', (b.name,))
+        if a.has_title('computer'):
+            b.write_('--** %s is a computer **--\n', (a.name,))
+        if b.has_title('computer'):
+            a.write_('--** %s is a computer **--\n', (b.name,))
+        b.write_('You can "accept", "decline", or propose different parameters.\n')
 
     def __eq__(self, other):
         if (self.name == other.name and

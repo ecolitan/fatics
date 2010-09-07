@@ -206,7 +206,7 @@ class DB(object):
 
     def user_get_titles(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT title_flag,display FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s ORDER BY title_id DESC""", (user_id,))
+        cursor.execute("""SELECT title_name,title_flag,title_light FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s ORDER BY title_id DESC""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows
@@ -294,7 +294,7 @@ class DB(object):
 
     def title_get_all(self):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT title_id,title_name,title_descr,title_flag FROM title""")
+        cursor.execute("""SELECT title_id,title_name,title_descr,title_flag,title_public FROM title""")
         rows = cursor.fetchall()
         cursor.close()
         return rows

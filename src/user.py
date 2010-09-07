@@ -85,7 +85,7 @@ class BaseUser(object):
         self.session.conn.write(s)
 
     # Like write(), but localizes for this user.
-    def write_(self, s, *args):
+    def write_(self, s, args={}):
         connection.written_users.add(self)
         self.session.conn.write(lang.langs[self.vars['lang']].gettext(s) %
             args)
@@ -101,9 +101,9 @@ class BaseUser(object):
         assert(self._title_str is not None)
         return '%s%s' % (self.name, self._title_str)
 
-    def get_titles(self):
+    def has_title(self, title):
         assert(self._titles is not None)
-        return self._titles
+        return title in self._titles
 
     def set_var(self, v, val):
         if val is not None:
@@ -234,9 +234,9 @@ class User(BaseUser):
         disp_list = []
         self._titles = set()
         for t in db.user_get_titles(self.id):
-            if t['display']:
+            if t['title_flag'] and t['title_light']:
                 disp_list.append('(%s)' % t['title_flag'])
-            self._titles.add(t['title_flag'])
+            self._titles.add(t['title_name'])
         self._title_str = ''.join(disp_list)
 
     def log_on(self, conn):
@@ -360,10 +360,10 @@ class User(BaseUser):
             self._history = [e for e in db.user_get_history(self.id)]
         return self._history
 
-    def get_titles(self):
+    def has_title(self, title):
         if self._titles is None:
             self._load_titles()
-        return BaseUser.get_titles(self)
+        return BaseUser.has_title(self, title)
 
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
@@ -454,7 +454,7 @@ class GuestUser(BaseUser):
         self.vars = var.varlist.get_default_vars()
 
     def log_on(self, conn):
-        self._titles = set(['U'])
+        self._titles = set(['unregistered'])
         self._title_str = '(U)'
         BaseUser.log_on(self, conn)
         self._history = []

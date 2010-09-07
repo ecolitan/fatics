@@ -71,7 +71,7 @@ def heartbeat():
         for u in online.online:
             if (now - u.session.last_command_time > config.idle_timeout and
                     not u.is_admin() and
-                    'TD' not in u.get_titles()):
+                    not u.has_title('TD')):
                 u.session.conn.idle_timeout(config.idle_timeout // 60)
 
     # ping all zipseal clients

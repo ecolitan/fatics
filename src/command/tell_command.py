@@ -46,7 +46,7 @@ class TellCommand(Command):
                     conn.write(_('Invalid channel number.\n'))
                 else:
                     if conn.user not in ch.online and (
-                            'TD' not in conn.user.get_titles()):
+                            not conn.user.has_title('TD')):
                         conn.user.write(_('''(Not sent because you are not in channel %s.)\n''') % ch.id)
                         ch = None
             else:
@@ -82,7 +82,7 @@ class Xtell(TellCommand):
 @ics_command('qtell', 'iS', admin.Level.user)
 class Qtell(Command):
     def run(self, args, conn):
-        if 'TD' not in conn.user.get_titles():
+        if not conn.user.has_title('TD'):
             conn.write(_('Only TD programs are allowed to use this command\n'))
             return
         msg = args[1].replace('\\n', '\n:').replace('\\b', '\x07').replace('\\H', '\x1b[7m').replace('\\h', '\x1b[0m')
@@ -116,8 +116,8 @@ class Say(Command):
             g = conn.user.session.games.current()
             opp = g.get_opp(conn.user)
             assert(opp.is_online)
-            opp.write_("%s[%d] says: %s\n", conn.user.get_display_name(),
-                g.number, args[0])
+            opp.write_("%s[%d] says: %s\n", (conn.user.get_display_name(),
+                g.number, args[0]))
             # TODO ", who is playing"; ", who is examining a game"
             conn.write(_('(told %s)') % opp.name)
         else:
@@ -129,8 +129,8 @@ class Say(Command):
                     if not opp:
                         conn.write(_('%s is no longer online.\n') % name)
                 if opp:
-                    opp.write_("%s says: %s\n", conn.user.get_display_name(),
-                        args[0])
+                    opp.write_("%s says: %s\n", (conn.user.get_display_name(),
+                        args[0]))
                     conn.write(_('(told %s)') % opp.name)
             else:
                 conn.write(_("I don't know whom to say that to.\n"))
