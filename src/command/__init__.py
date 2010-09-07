@@ -16,7 +16,8 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = ['admin_command', 'command', 'examine_command', 'game_command',
+__all__ = ['admin_command', 'channel_command', 'command', 'examine_command',
+'game_command',
 'kibitz_command', 'list_command', 'message_command', 'news_command',
 'offer_command', 'ping_command', 'tell_command']
 

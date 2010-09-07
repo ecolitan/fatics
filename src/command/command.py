@@ -24,7 +24,6 @@ import user
 import trie
 import admin
 import var
-import channel
 import offer
 import game
 import history
@@ -291,29 +290,6 @@ class History(Command):
             u = conn.user
         if u:
             history.show_for_user(u, conn)
-
-@ics_command('inchannel', 'n', admin.Level.user)
-class Inchannel(Command):
-    def run(self, args, conn):
-        if args[0] is not None:
-            if type(args[0]) != str:
-                try:
-                    ch = channel.chlist.all[args[0]]
-                except KeyError:
-                    conn.write(_('Invalid channel number.\n'))
-                else:
-                    on = ch.get_online()
-                    if len(on) > 0:
-                        conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
-                    count = len(on)
-                    conn.write(ngettext('There is %d player in channel %d.\n', 'There are %d players in channel %d.\n', count) % (count, args[0]))
-            else:
-                conn.write("INCHANNEL USER\n")
-        else:
-            for ch in channel.chlist.all.values():
-                on = ch.get_online()
-                if len(on) > 0:
-                    conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
 
 @ics_command('iset', 'wS', admin.Level.user)
 class Iset(Command):

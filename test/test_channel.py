@@ -121,6 +121,9 @@ class TestInchannel(Test):
         self.expect('1 "help": Guest', t)
         self.expect('There is 1 player', t)
 
+        t.write('inch 999\n')
+        self.expect('There are 0 players in channel 999.', t)
+
         self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

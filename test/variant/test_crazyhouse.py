@@ -40,7 +40,7 @@ class TestCrazyhouse(Test):
         t.write('set style 12\n')
         t2.write('set style 12\n')
 
-        t.write('match admin white 3 0 crazyhouse\n')
+        t.write('match admin white 3 0 zh\n')
         self.expect('Issuing:', t)
         self.expect('Challenge:', t2)
         t2.write('accept\n')

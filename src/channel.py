@@ -27,7 +27,7 @@ class ChannelError(Exception):
 
 class Channel(object):
     def __init__(self, id, name, desc):
-        assert(type(id) == type(1) or type(id) == type(1l))
+        assert(type(id) == type(1) or type(id) == type(1L))
         self.id = id
         self.name = name
         self.desc = desc
@@ -86,7 +86,7 @@ class ChannelList(object):
             self.all[id] = Channel(id, ch['name'], ch['descr'])
 
     def __getitem__(self, key):
-        assert(type(key) == type(1) or type(key) == type(1l))
+        assert(type(key) == type(1) or type(key) == type(1L))
         if key < 0 or key > self.max:
             raise KeyError
         try:

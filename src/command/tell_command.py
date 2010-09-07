@@ -19,6 +19,8 @@
 
 from command import *
 
+import channel
+
 class TellCommand(Command):
     def _do_tell(self, args, conn):
         u = None
