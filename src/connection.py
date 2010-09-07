@@ -163,8 +163,6 @@ class Connection(basic.LineReceiver):
         written_users.add(self.user)
         try:
             command_parser.parser.parse(line, t, self)
-        except command_parser.QuitException:
-            self.loseConnection('quit')
         finally:
             for u in written_users:
                 if u.is_online:

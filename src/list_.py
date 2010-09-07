@@ -97,6 +97,9 @@ class NotifyList(MyList):
                     % u.name)
             conn.user.add_notification(u)
             conn.write(_('%s added to your notify list.\n') % (u.name))
+            if u.is_online:
+                u.write_('You have been added to the notify list of %s.\n',
+                    (conn.user.name,))
 
     def sub(self, item, conn):
         # would it be better to only search the notify list?
@@ -106,6 +109,8 @@ class NotifyList(MyList):
                 raise ListError(_('%s is not on your notify list.\n') % u.name)
             conn.user.remove_notification(u)
             conn.write(_('%s removed from your notify list.\n') % (u.name))
+            # We deliberately don't notify the user, to avoid
+            # embarrassment or hurt feelings.
 
     def show(self, conn):
         notlist = conn.user.notifiers

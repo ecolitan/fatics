@@ -82,6 +82,39 @@ class TestNotify(Test):
         self.close(t2)
         self.close(t)
 
+    @with_player('TestPlayer', 'test')
+    def test_notifiedby(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'test')
+
+        t2.write('set notifiedby 1\n')
+        self.expect('You will now hear if people notify you', t2)
+
+        t.write('+notify testplayer\n')
+        self.expect("TestPlayer added to your notify list", t)
+        self.expect("You have been added to the notify list of admin.", t2)
+
+        self.close(t)
+        self.expect("Notification: admin has departed and isn't on your notify list.", t2)
+
+
+        t = self.connect_as_admin()
+        self.expect("Notification: admin has arrived and isn't on your notify list.", t2)
+
+        t2.write('quit\n')
+        self.expect('The following players were notified of your departure: admin', t2)
+        t2.close()
+
+        t2 = self.connect()
+        t2.write('testplayer\ntest\n')
+        self.expect('The following players were notified of your arrival: admin', t2)
+
+        t.write('-not testplayer\n')
+        self.expect('TestPlayer removed from your notify list', t)
+
+        self.close(t2)
+        self.close(t)
+
 class TestSummon(Test):
     @with_player('TestPlayer', 'test')
     def test_summon(self):

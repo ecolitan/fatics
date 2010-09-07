@@ -18,13 +18,31 @@
 
 from online import online
 
-class Notify(object):
-    """Send a message to all users notified about the given user."""
-    def users(self, user, msg):
-        name = user.name
-        for u in online:
-            if name in u.notifiers:
-                u.write(msg)
-notify = Notify()
+def notify_users(user, arrived):
+    """ Send a message to all users notified about the given user. """
+    name = user.name
+    nots = user.notifiers
+    nlist = []
+    for u in online:
+        if name in u.notifiers:
+            if arrived:
+                u.write_("Notification: %s has arrived.\n", name)
+                nlist.append(u.name)
+            else:
+                u.write_("Notification: %s has departed.\n", name)
+                nlist.append(u.name)
+        elif u.name in nots and u.vars['notifiedby']:
+            if arrived:
+                u.write_("Notification: %s has arrived and isn't on your notify list.\n", name)
+            else:
+                u.write_("Notification: %s has departed and isn't on your notify list.\n", name)
+
+    if nlist and user.vars['notifiedby']:
+        if arrived:
+            user.write(_('The following players were notified of your arrival: %s\n') % ' '.join(nlist))
+        else:
+            user.write(_('The following players were notified of your departure: %s\n') % ' '.join(nlist))
+
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

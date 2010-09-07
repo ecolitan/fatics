@@ -35,7 +35,7 @@ from timer import timer
 from online import online
 from reload import reload
 from server import server
-from command_parser import BadCommandError, QuitException
+from command_parser import BadCommandError
 from db import db, DeleteError
 
 class CommandList(object):
@@ -428,7 +428,7 @@ class Password(Command):
 @ics_command('quit', '', admin.Level.user)
 class Quit(Command):
     def run(self, args, conn):
-        raise QuitException()
+        conn.loseConnection('quit')
 
 @ics_command('rmatch', 'wwt', admin.Level.user)
 class Rmatch(Command):

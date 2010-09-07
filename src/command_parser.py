@@ -23,8 +23,6 @@ class InternalException(Exception):
     pass
 class BadCommandError(Exception):
     pass
-class QuitException(Exception):
-    pass
 
 import alias
 import utf8
