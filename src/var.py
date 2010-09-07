@@ -20,6 +20,7 @@ import copy
 
 import trie
 import lang
+import formula
 
 from config import config
 
@@ -117,12 +118,17 @@ class LangVar(StringVar):
 class FormulaVar(Var):
     max_len = 1023
     def set(self, user, val):
-        if val is not None and len(val) > self.max_len:
-            raise BadVarError()
-        user.set_formula(self, val)
         if val is None:
+            user.set_formula(self, val)
             user.write(_('''%s unset.\n''') % self.name)
         else:
+            if len(val) > self.max_len:
+                raise BadVarError()
+            try:
+                formula.check_formula(None, val)
+            except formula.FormulaError:
+                raise BadVarError()
+            user.set_formula(self, val)
             user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
 
     def get_display_str(self, val):
@@ -295,7 +301,6 @@ class VarList(object):
             self.default_ivars[ivar.name] = ivar.default
 
     def get_default_vars(self):
-        assert('formula' in self.default_vars)
         return copy.copy(self.default_vars)
 
     def get_transient_vars(self):

@@ -35,9 +35,12 @@ import re
 all_tokens = {}
 
 class FormulaError(Exception):
-    pass
+    def __init__(self, msg):
+        super(FormulaError, self).__init__(self)
+        self.msg = msg
 
 class Symbol(object):
+    tokens = []
     def nud(self):
         raise FormulaError('unexpected use as unary operator')
 
@@ -65,7 +68,7 @@ class NumSymbol(Symbol):
 def advance(sym):
     global token
     if sym not in token.tokens:
-        assert(False)
+        raise FormulaError('expected %s' % sym)
     token = next()
 
 @Token(['!'])
@@ -86,6 +89,8 @@ class DivSymbol(Symbol):
     lbp = 80
     def led(self, left):
         right = expression(80)
+        if right == 0:
+            right = .001 # fudge factor
         return left // right
 
 @Token(['+'])
@@ -183,86 +188,104 @@ class EndSymbol(Symbol):
 class AbuserSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.a.has_title('abuser')
+        return chal.a.has_title('abuser') if chal else None
+
+@Token(['computer'])
+class ComputerSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.a.has_title('computer') if chal else None
 
 @Token(['time'])
 class TimeSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.time
+        return chal.time if chal else None
 
 @Token(['inc'])
 class IncSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.inc
+        return chal.inc if chal else None
 
 @Token(['rating'])
 class RatingSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.a.get_rating(chal.speed_variant)
+        return chal.a.get_rating(chal.speed_variant) if chal else None
 
 @Token(['myrating'])
 class MyratingSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.b.get_rating(chal.speed_variant)
+        return chal.b.get_rating(chal.speed_variant) if chal else None
 
 @Token(['ratingdiff'])
 class RatingdiffSymbol(Symbol):
     lbp = 0
     def nud(self):
         return (chal.a.get_rating(chal.speed_variant) -
-            chal.b.get_rating(chal.speed_variant))
+            chal.b.get_rating(chal.speed_variant)) if chal else None
 
 @Token(['white'])
 class WhiteSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.side == WHITE
+        return chal.side == WHITE if chal else None
 
 @Token(['black'])
 class BlackSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.side == BLACK
+        return chal.side == BLACK if chal else None
+
+@Token(['nocolor'])
+class NocolorSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return (chal.side not in [WHITE, BLACK]) if chal else None
 
 @Token(['slow'])
 class StandardSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.speed_variant.speed.name == 'slow'
+        return chal.speed_variant.speed.name == 'slow' if chal else None
 
 @Token(['standard'])
 class StandardSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.speed_variant.speed.name == 'standard'
+        return chal.speed_variant.speed.name == 'standard' if chal else None
 
 @Token(['blitz'])
 class BlitzSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.speed_variant.speed.name == 'blitz'
+        return chal.speed_variant.speed.name == 'blitz' if chal else None
 
 @Token(['lightning'])
 class LightningSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.speed_variant.speed.name == 'lightning'
+        return chal.speed_name == 'lightning' if chal else None
 
 @Token(['registered'])
 class RegisteredSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return 0 if chal.a.is_guest else 1
+        return 0 if chal.a.is_guest else 1 if chal else None
+
+@Token(['timeseal'])
+class TimesealSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.a.has_timeseal() if chal else None
 
 @Token(['crazyhouse'])
 class CrazyhouseSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.variant.name == 'crazyhouse'
+        return chal.variant.name == 'crazyhouse' if chal else None
 
 def expression(rbp = 0):
     global token
@@ -270,8 +293,9 @@ def expression(rbp = 0):
     try:
         token = next()
     except StopIteration:
+        raise FormulaError('unexpected end of formula')
         # consider an empty formula to be 1
-        return 1
+        #return 1
     left = t.nud()
     while rbp < token.lbp:
         t = token
@@ -312,13 +336,16 @@ def tokenize(s):
         raise FormulaError('Error parsing formula')
     yield EndSymbol()
 
-def check_formula(chal_, s, check_only_=False):
+def check_formula(chal_, s):
     """ Check whether the challenge CHAL meets the formula described by S.
+    If chal is None, we parse the formula for validity but don't worry
+    about its evaulation.
+
+    Raises FormulaError on an error.
     """
     assert(type(s) == str)
-    global token, next, chal, check_only
+    global token, next, chal
     chal = chal_
-    check_only = check_only_
     next = tokenize(s).next
     token = next()
     return expression()
@@ -327,5 +354,6 @@ def check_formula(chal_, s, check_only_=False):
 #print check_formula(None, '(2 + 5 * 5) - 1')
 #print check_formula(None, '(2 + 5 * 5) - 1')
 #print check_formula(None, '!lightning && !blitz')
+#print check_formula(None, '33-')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

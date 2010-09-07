@@ -69,10 +69,10 @@ class DB(object):
         if val is not None:
             cursor.execute("""INSERT INTO formula SET user_id=%s,num=%s,f=%s ON DUPLICATE KEY UPDATE f=%s""", (user_id,num,val,val))
         else:
+            # OK to not actually delete any rows; we are just unsetting an
+            # already unset variable.
             cursor.execute("""DELETE FROM formula WHERE user_id=%s AND num=%s""", (user_id,num))
-            if cursor.rowcount != 1:
-                cursor.close()
-                raise DeleteError()
+            assert(cursor.rowcount <= 1)
         cursor.close()
 
     def user_get_notes(self, user_id):

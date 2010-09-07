@@ -159,7 +159,7 @@ class Connection(basic.LineReceiver):
             return
 
         if TIMESEAL_REPLY in line:
-            conn.write('timeseal bug: "%r"' % linie)
+            conn.write('timeseal bug: "%r"' % line)
 
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])
         written_users.clear()

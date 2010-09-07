@@ -19,6 +19,31 @@
 from test import *
 
 class TestFormula(Test):
+    def test_formula_error(self):
+        t = self.connect_as_admin()
+        t.write('set form foo\n')
+        self.expect('Bad value given for variable "formula".', t)
+        t.write('set f1 33-\n')
+        self.expect('Bad value given for variable "f1".', t)
+        t.write('set f2 (77\n')
+        self.expect('Bad value given for variable "f2".', t)
+        t.write('set f3 *88\n')
+        self.expect('Bad value given for variable "f3".', t)
+        self.close(t)
+
+    def test_formula_unset(self):
+        t = self.connect_as_admin()
+        t.write('set formula blitz\n')
+        self.expect('formula set', t)
+        t.write('set formula\n')
+        self.expect('formula unset.', t)
+        t.write('set formula\n')
+        self.expect('formula unset.', t)
+
+        t.write('set f1\n')
+        self.expect('f1 unset.', t)
+        self.close(t)
+
     def test_formula_guest(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_guest()
@@ -39,6 +64,14 @@ class TestFormula(Test):
         t2.write('match guestabcd 3 0\n')
         self.expect('Ignoring (formula)', t)
         self.expect('Match request does not meet formula', t2)
+
+        t.write('set f1 blitz || lightning\n')
+        self.expect('f1 set to "blitz || lightning".', t)
+
+        t.write('set formula\n')
+        self.expect('formula unset.', t)
+        t.write('set f1\n')
+        self.expect('f1 unset.', t)
 
         self.close(t)
 
