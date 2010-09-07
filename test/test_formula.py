@@ -16,9 +16,30 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = ['admin_command', 'channel_command', 'command', 'examine_command',
-'game_command',
-'kibitz_command', 'list_command', 'message_command', 'news_command',
-'offer_command', 'ping_command', 'tell_command', 'var_command']
+from test import *
+
+class TestFormula(Test):
+    def test_formula_guest(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest()
+
+        t.write('set formula !blitz && time > 1\n')
+        self.expect('formula set to "!blitz && time > 1".', t)
+
+        t2.write('match guestabcd 1 0\n')
+        self.expect('Ignoring (formula)', t)
+        self.expect('Match request does not meet formula', t2)
+
+        t2.write('match guestabcd 2 1\n')
+        self.expect('Issuing: ', t2)
+        self.expect('Challenge: ', t)
+        t2.write('withdraw\n')
+        self.expect('withdraws', t)
+
+        t2.write('match guestabcd 3 0\n')
+        self.expect('Ignoring (formula)', t)
+        self.expect('Match request does not meet formula', t2)
+
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

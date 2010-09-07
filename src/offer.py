@@ -21,6 +21,7 @@ import re
 import speed_variant
 import command_parser
 import game
+import formula
 from game_constants import *
 
 shortcuts = {
@@ -88,10 +89,9 @@ class Abort(Offer):
             else:
                 o.accept()
         else:
-            # XXX should not substitute name till translation
             game.pending_offers.append(self)
-            user.write(N_('Requesting to abort game %d.\n') % game.number)
-            self.b.write(N_('%s requests to abort game %d.\n') % (user.name, game.number))
+            user.write_('Requesting to abort game %d.\n', (game.number,))
+            self.b.write_('%s requests to abort game %d.\n', (user.name, game.number))
             a_sent = user.session.offers_sent
             b_received = self.b.session.offers_received
             a_sent.append(self)
@@ -124,7 +124,7 @@ class Draw(Offer):
         if len(offers) > 0:
             o = offers[0]
             if o.a == self.a:
-                user.write(N_('You are already offering a draw.\n'))
+                user.write_('You are already offering a draw.\n')
             else:
                 o.accept()
         else:
@@ -140,14 +140,14 @@ class Draw(Offer):
                 return
 
             game.pending_offers.append(self)
-            user.write(N_('Offering a draw to %s.\n') % self.b.name)
-            self.b.write(N_('%s offers a draw.\n') % user.name)
+            user.write_('Offering a draw to %s.\n', (self.b.name,))
+            self.b.write_('%s offers a draw.\n', (user.name,))
 
             a_sent = user.session.offers_sent
             b_received = self.b.session.offers_received
             a_sent.append(self)
             b_received.append(self)
-    
+
     def accept(self):
         Offer.accept(self)
         self.game.pending_offers.remove(self)
@@ -226,7 +226,6 @@ class Challenge(Offer):
         self.a_rating = a.get_rating(self.speed_variant)
         self.b_rating = b.get_rating(self.speed_variant)
 
-
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
         challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, time_str)
 
@@ -249,6 +248,12 @@ class Challenge(Offer):
         if self in a_sent:
             a.write_('You are already offering an identical match to %s.\n',
                 (b.name,))
+            return
+
+        if b.vars['formula'] is not None and not formula.check_formula(self,
+                b.vars['formula']):
+            a.write_('Match request does not meet formula for %s:\n', b.name)
+            b.write_('Ignoring (formula): %s\n', challenge_str)
             return
 
         o = next((o for o in b_sent if o.name == self.name), None)

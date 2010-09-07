@@ -57,7 +57,6 @@ class BaseUser(object):
     def log_on(self, conn):
         self.vars.update(var.varlist.get_transient_vars())
         self.aliases = {}
-        self.formula = {}
         self.aliases = {}
         self.censor = set()
         self.noplay = set()
@@ -114,11 +113,11 @@ class BaseUser(object):
 
     def set_formula(self, v, val):
         if val is not None:
-            self.formula[v.name] = val
+            self.vars[v.name] = val
         else:
-            if v.name in self.formula:
-                del self.formula[v.name]
-    
+            if v.name in self.vars:
+                del self.vars[v.name]
+
     def set_note(self, v, val):
         num = int(v.name, 10)
         if val is not None:
@@ -126,7 +125,7 @@ class BaseUser(object):
         else:
             if num in self.notes:
                 del self.notes[num]
-    
+
     def set_alias(self, name, val):
         if val is not None:
             self.aliases[name] = val
@@ -218,8 +217,17 @@ class User(BaseUser):
         self.is_guest = False
         self.channels = db.user_get_channels(self.id)
         self.vars = db.user_get_vars(self.id)
+
+        self.vars['formula'] = None
+        for num in range(1, 10):
+            self.vars['f' + str(num)] = None
+
         for f in db.user_get_formula(self.id):
-            self.formula[f['num']] = f['f']
+            #self.formula[f['num']] = f['f']
+            if f['num'] == 0:
+                self.vars['formula'] = f['f']
+            else:
+                self.vars['f' + str(f['num'])] = f['f']
         for note in db.user_get_notes(self.id):
             self.notes[note['num']] = note['txt']
         self._rating = None
@@ -297,15 +305,15 @@ class User(BaseUser):
         BaseUser.set_var(self, v, val)
         if v.is_persistent:
             db.user_set_var(self.id, v.name, val)
-    
+
     def set_formula(self, v, val):
         BaseUser.set_formula(self, v, val)
         db.user_set_formula(self.id, v.name, val)
-    
+
     def set_note(self, v, val):
         BaseUser.set_note(self, v, val)
         db.user_set_note(self.id, v.name, val)
-    
+
     def set_alias(self, name, val):
         BaseUser.set_alias(self, name, val)
         db.user_set_alias(self.id, name, val)

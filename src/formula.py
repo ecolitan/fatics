@@ -34,11 +34,6 @@ import re
 
 all_tokens = {}
 
-
-# global state for parser
-token = None
-next = None
-
 class FormulaError(Exception):
     pass
 
@@ -184,6 +179,91 @@ class RParenSymbol(Symbol):
 class EndSymbol(Symbol):
     lbp = 0
 
+@Token(['abuser'])
+class AbuserSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.a.has_title('abuser')
+
+@Token(['time'])
+class TimeSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.time
+
+@Token(['inc'])
+class IncSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.inc
+
+@Token(['rating'])
+class RatingSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.a.get_rating(chal.speed_variant)
+
+@Token(['myrating'])
+class MyratingSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.b.get_rating(chal.speed_variant)
+
+@Token(['ratingdiff'])
+class RatingdiffSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return (chal.a.get_rating(chal.speed_variant) -
+            chal.b.get_rating(chal.speed_variant))
+
+@Token(['white'])
+class WhiteSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.side == WHITE
+
+@Token(['black'])
+class BlackSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.side == BLACK
+
+@Token(['slow'])
+class StandardSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.speed_variant.speed.name == 'slow'
+
+@Token(['standard'])
+class StandardSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.speed_variant.speed.name == 'standard'
+
+@Token(['blitz'])
+class BlitzSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.speed_variant.speed.name == 'blitz'
+
+@Token(['lightning'])
+class LightningSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.speed_variant.speed.name == 'lightning'
+
+@Token(['registered'])
+class RegisteredSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return 0 if chal.a.is_guest else 1
+
+@Token(['crazyhouse'])
+class CrazyhouseSymbol(Symbol):
+    lbp = 0
+    def nud(self):
+        return chal.variant.name == 'crazyhouse'
+
 def expression(rbp = 0):
     global token
     t = token
@@ -229,20 +309,23 @@ def tokenize(s):
             yield all_tokens[m.group(1)]()
             continue
 
-        print 'oops %s' % s
-        assert(False)
+        raise FormulaError('Error parsing formula')
     yield EndSymbol()
 
-def check_formula(chal, s):
+def check_formula(chal_, s, check_only_=False):
     """ Check whether the challenge CHAL meets the formula described by S.
     """
-    global token, next
+    assert(type(s) == str)
+    global token, next, chal, check_only
+    chal = chal_
+    check_only = check_only_
     next = tokenize(s).next
     token = next()
     return expression()
 
 #print check_formula(None, '7 * (3 * (3 + 2) /  2) - 42 * 2')
-print check_formula(None, '(2 + 5 * 5) - 1')
-
+#print check_formula(None, '(2 + 5 * 5) - 1')
+#print check_formula(None, '(2 + 5 * 5) - 1')
+#print check_formula(None, '!lightning && !blitz')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -205,7 +205,7 @@ class BoolVar(Var):
             user.write(_(self.on_msg) + '\n')
         else:
             user.write(_(self.off_msg) + '\n')
-    
+
     def get_display_str(self, val):
         return '''%s=%d''' % (self.name, int(val))
 
@@ -226,14 +226,13 @@ class VarList(object):
         BoolVar("kibitz", True, N_("You will now hear kibitzes."), N_("You will not hear kibitzes.")).persist().add_as_var()
         BoolVar("notifiedby", True, N_("You will now hear if people notify you, but you don't notify them."), N_("You will not hear if people notify you, but you don't notify them.")).persist().add_as_var()
 
-        IntVar("kiblevel", 0, min=0, max=9999).add_as_var()
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
         IntVar("height", 24, min=5).persist().add_as_var()
         IntVar("width", 79, min=32).persist().add_as_var()
 
         IntVar("style", 12, min=0, max=12).add_as_var()
-
+        IntVar("kiblevel", 0, min=0, max=9999).add_as_var()
         StringVar("interface", None).add_as_var()
         PromptVar("prompt", config.prompt).add_as_var()
 
@@ -296,11 +295,12 @@ class VarList(object):
             self.default_ivars[ivar.name] = ivar.default
 
     def get_default_vars(self):
+        assert('formula' in self.default_vars)
         return copy.copy(self.default_vars)
 
     def get_transient_vars(self):
         return copy.copy(self.transient_vars)
-    
+
     def get_default_ivars(self):
         return copy.copy(self.default_ivars)
 

@@ -291,21 +291,6 @@ class History(Command):
         if u:
             history.show_for_user(u, conn)
 
-@ics_command('iset', 'wS', admin.Level.user)
-class Iset(Command):
-    def run(self, args, conn):
-        [name, val] = args
-        try:
-            v = var.ivars.get(name)
-            v.set(conn.user, val)
-        except trie.NeedMore as e:
-            assert(len(e.matches) >= 2)
-            conn.write(_('Ambiguous ivariable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))
-        except KeyError:
-            conn.write(_('No such ivariable "%s".\n') % name)
-        except var.BadVarError:
-            conn.write(_('Bad value given for ivariable "%s".\n') % v.name)
-
 @ics_command('it', 'S', admin.Level.user)
 class It(Command):
     @requires_registration
@@ -323,23 +308,6 @@ class It(Command):
                             (dname, args[0]))
                         count += 1
             conn.write(ngettext("(it-shouted to %d player)\n", "(it-shouted to %d players)\n", count) % count)
-
-@ics_command('ivariables', 'o', admin.Level.user)
-class Ivariables(Command):
-    def run(self, args, conn):
-        if args[0] is None:
-            u = conn.user
-        else:
-            u = user.find.by_prefix_for_user(args[0], conn,
-                online_only=True)
-
-        if u:
-            conn.write(_("Interface variable settings of %s:\n\n") % u.name)
-            for (vname, val) in u.session.ivars.iteritems():
-                v = var.ivars[vname]
-                if val is not None and v.display_in_vars:
-                    conn.write("%s\n" % v.get_display_str(val))
-            conn.write("\n")
 
 @ics_command('match', 'wt', admin.Level.user)
 class Match(Command):
@@ -369,7 +337,6 @@ class Match(Command):
         if not conn.user.vars['open']:
             var.vars['open'].set(conn.user, '1')
         offer.Challenge(conn.user, u, args[1])
-
 
 @ics_command('observe', 'i', admin.Level.user)
 class Observe(Command):
@@ -431,22 +398,6 @@ class Rmatch(Command):
         offer.Challenge(u1, u2, args[2])
 
 
-@ics_command('set', 'wT', admin.Level.user)
-class Set(Command):
-    def run(self, args, conn):
-        # val can be None if the user gave no value
-        [name, val] = args
-        try:
-            v = var.vars.get(name)
-            v.set(conn.user, val)
-        except trie.NeedMore as e:
-            assert(len(e.matches) >= 2)
-            conn.write(_('Ambiguous variable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))
-        except KeyError:
-            conn.write(_('No such variable "%s".\n') % name)
-        except var.BadVarError:
-            conn.write(_('Bad value given for variable "%s".\n') % v.name)
-
 @ics_command('shout', 'S', admin.Level.user)
 class Shout(Command):
     @requires_registration
@@ -481,12 +432,6 @@ class Summon(Command):
         u.write('\a\n%s needs to speak to you.  To contact him or her type "tell %s hello".\n' % (conn.user.name, conn.user.name))
         conn.write(_('Summoning sent to "%s".\n') % u.name)
         # TODO: add to idlenotify list
-
-@ics_command('style', 'd', admin.Level.user)
-class Style(Command):
-    def run(self, args, conn):
-        #conn.write('Warning: the "style" command is deprecated.  Please use "set style" instead.\n')
-        var.vars['style'].set(conn.user, str(args[0]))
 
 @ics_command('unalias', 'w', admin.Level.user)
 class Unalias(Command):
@@ -530,22 +475,6 @@ class Uptime(Command):
         conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
         conn.write(_("Up for: %s\n") % timer.hms_words(time.time() -
             server.start_time))
-
-@ics_command('variables', 'o', admin.Level.user)
-class Variables(Command):
-    def run(self, args, conn):
-        if args[0] is None:
-            u = conn.user
-        else:
-            u = user.find.by_prefix_for_user(args[0], conn)
-
-        if u:
-            conn.write(_("Variable settings of %s:\n\n") % u.name)
-            for (vname, val) in u.vars.iteritems():
-                v = var.vars[vname]
-                if val is not None and v.display_in_vars:
-                    conn.write("%s\n" % v.get_display_str(val))
-            conn.write("\n")
 
 @ics_command('who', 'T', admin.Level.user)
 class Who(Command):

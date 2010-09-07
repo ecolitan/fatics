@@ -73,7 +73,7 @@ CREATE TABLE `user` (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `formula`;
-CREATE TABLE formula (
+CREATE TABLE `formula` (
   `formula_id` int(8) NOT NULL AUTO_INCREMENT,
   `user_id` int(8) NOT NULL,
   `num` tinyint(1) NOT NULL COMMENT 'the variable number; formula=0, f1=1',
@@ -83,7 +83,7 @@ CREATE TABLE formula (
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `note`;
-CREATE TABLE note (
+CREATE TABLE `note` (
   `note_id` int(8) NOT NULL AUTO_INCREMENT,
   `user_id` int(8) NOT NULL,
   `num` tinyint(1) NOT NULL COMMENT 'note number',

@@ -67,9 +67,9 @@ class DB(object):
         num = dbkeys[name]
         cursor = self.db.cursor()
         if val is not None:
-            cursor.execute("""INSERT INTO formula SET user_id=%s,num=%d,f=%s ON DUPLICATE KEY UPDATE""", (user_id,num,val))
+            cursor.execute("""INSERT INTO formula SET user_id=%s,num=%s,f=%s ON DUPLICATE KEY UPDATE f=%s""", (user_id,num,val,val))
         else:
-            cursor.execute("""DELETE FROM formula WHERE user_id=%s AND num=%d""", (user_id,num,val))
+            cursor.execute("""DELETE FROM formula WHERE user_id=%s AND num=%s""", (user_id,num))
             if cursor.rowcount != 1:
                 cursor.close()
                 raise DeleteError()
