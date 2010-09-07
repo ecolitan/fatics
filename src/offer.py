@@ -23,6 +23,18 @@ import command_parser
 import game
 from game_constants import *
 
+shortcuts = {
+    'r': 'rated',
+    'u': 'unrated',
+    'w': 'white',
+    'b': 'black',
+    'fischerrandom': 'chess960',
+    'fischerandom': 'chess960',
+    'fr': 'chess960',
+    'cra': 'crazyhouse',
+    'zh': 'crazyhouse',
+}
+
 class Offer(object):
     """represents an offer from one player to another"""
     def __init__(self, name):
@@ -72,7 +84,7 @@ class Abort(Offer):
         if len(offers) > 0:
             o = offers[0]
             if o.a == self.a:
-                user.write(N_('You are already offering to abort game %d.\n') % game.number)
+                user.write_('You are already offering to abort game %d.\n', (game.number,))
             else:
                 o.accept()
         else:
@@ -175,13 +187,13 @@ class Challenge(Offer):
 
         if self.rated is None:
             if a.is_guest or b.is_guest:
-                a.write(N_('Setting match offer to unrated.\n'))
+                a.write_('Setting match offer to unrated.\n')
                 self.rated = False
             else:
                 # historically, this was set according to the rated var
                 self.rated = True
         elif self.rated and (a.is_guest or b.is_guest):
-            a.write(_('Only registered players can play rated games.\n'))
+            a.write_('Only registered players can play rated games.\n')
             #raise InvalidOfferError()
             return
 
@@ -235,19 +247,20 @@ class Challenge(Offer):
         b_received = b.session.offers_received
 
         if self in a_sent:
-            a.write(N_('You are already offering an identical match to %s.\n') % b.name)
+            a.write_('You are already offering an identical match to %s.\n',
+                (b.name,))
             return
 
         o = next((o for o in b_sent if o.name == self.name), None)
         if o:
-            a.write(N_('Declining the offer from %s and proposing a counteroffer.\n') % b.name)
-            b.write(N_('%s declines your offer and proposes a counteroffer.\n') % a.name)
+            a.write_('Declining the offer from %s and proposing a counteroffer.\n', (b.name,))
+            b.write_('%s declines your offer and proposes a counteroffer.\n', (a.name,))
             o.decline(notify=False)
 
         o = next((o for o in a_sent if o.name == self.name), None)
         if o:
-            a.write(N_('Updating the offer already made to %s.\n') % b.name)
-            b.write(N_('%s updates the offer.\n') % a.name)
+            a.write_('Updating the offer already made to %s.\n', (b.name,))
+            b.write_('%s updates the offer.\n', (a.name,))
             a_sent.remove(o)
             b_received.remove(o)
 
@@ -321,6 +334,7 @@ class Challenge(Offer):
 
     _wild_re = re.compile('w(\d+)')
     def _parse_opts(self, opts):
+        opts = opts.lower()
         args = re.split(r'\s+', opts)
         if not args:
             return
@@ -328,6 +342,8 @@ class Challenge(Offer):
         do_wild = False
         times = []
         for w in args:
+            if w in shortcuts:
+                w = shortcuts[w]
             if not do_wild:
                 try:
                     times.append(int(w))
@@ -340,13 +356,13 @@ class Challenge(Offer):
                 do_wild = False
                 continue
 
-            if w in ['unrated', 'u']:
+            if w == 'unrated':
                 self._set_rated(False)
-            elif w in ['rated', 'r']:
+            elif w == 'rated':
                 self._set_rated(True)
-            elif w in ['white', 'w']:
+            elif w == 'white':
                 self._set_side(WHITE)
-            elif w in ['black', 'b']:
+            elif w == 'black':
                 self._set_side(BLACK)
 
             elif w in speed_variant.variant_names:
