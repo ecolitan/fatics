@@ -83,6 +83,9 @@ class Asetadmin(Command):
         if u:
             # Note: it's possible to set the admin level
             # of a guest.
+            if u == conn.user:
+                conn.write(A_("You can't change your own adminlevel.\n"))
+                return
             if not admin.checker.check_user_operation(conn.user, u):
                 conn.write(A_('You can only set the adminlevel for players below your adminlevel.\n'))
             elif not admin.checker.check_level(conn.user.admin_level, level):

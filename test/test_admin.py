@@ -116,14 +116,11 @@ class CommandTest(Test):
         self.expect('Admin level of testplayer set to 100.', t)
         self.close(t)
 
-        # need to excecute a command before admin commands are
-        # recognized.
         self.expect('admin has set your admin level to 100.', t2)
-        t2.write('\n')
         t2.write('asetadmin admin 100\n')
         self.expect('You can only set the adminlevel for players below', t2)
         t2.write('asetadmin testplayer 1000\n')
-        self.expect('You can only set the adminlevel for players below', t2)
+        self.expect("You can't change your own", t2)
 
         t2.write('asetadmin testtwo 100\n')
         self.expect('''You can't promote''', t2)
