@@ -27,6 +27,10 @@ class TestAlias(Test):
         t.write('.test 2\n')
         self.expect('admin(*) tells you: test 2', t)
 
+        # case-insensitivity
+        t.write("I is king\n")
+        self.expect("admin(*) is king", t)
+
         self.close(t)
 
 class TestSystemAlias(Test):

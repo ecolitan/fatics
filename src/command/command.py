@@ -418,7 +418,9 @@ class Shout(Command):
 @ics_command('summon', 'w', admin.Level.user)
 class Summon(Command):
     def run(self, args, conn):
-        u = user.find.by_prefix_for_user(args[0], conn)
+        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+        if not u:
+            return
         if u == conn.user:
             conn.write(_("You can't summon yourself.\n"))
         if conn.user.admin_level <= admin.level.user:
@@ -428,10 +430,10 @@ class Summon(Command):
             if conn.user.name not in u.notifiers:
                 conn.write(_('You cannot summon a player who doesn\'t have you on his or her notify list.\n'))
                 return
-        # TODO: localize for the user being summoned
-        u.write('\a\n%s needs to speak to you.  To contact him or her type "tell %s hello".\n' % (conn.user.name, conn.user.name))
+        u.write('\a\n')
+        u.write_('%s needs to speak to you.  To contact him or her type "tell %s hello".\n', ((conn.user.name, conn.user.name)))
         conn.write(_('Summoning sent to "%s".\n') % u.name)
-        # TODO: add to idlenotify list
+        conn.user.add_idlenotification(u)
 
 @ics_command('unalias', 'w', admin.Level.user)
 class Unalias(Command):

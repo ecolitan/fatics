@@ -171,11 +171,13 @@ class Alias(object):
             'mates': 'ptell $1 mates $o! $@'
     }
 
-    """Expand system and user aliases in a given command."""
+    # If this ever needs optimization, punctuation could be separated
+    # as part of normal command parsing instead.
     punct_re = re.compile(r'''^([@!#$%^&*\-+'"\/.,=])\s*(.*)''')
     alias_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
     space_re = re.compile(r'\s+')
     def expand(self, s, syslist, userlist, user):
+        """ Expand system and user aliases in a given command. """
         m = self.punct_re.match(s)
         if m:
             word = m.group(1)
@@ -183,7 +185,7 @@ class Alias(object):
         else:
             m = self.alias_re.match(s)
             if m:
-                word = m.group(1)
+                word = m.group(1).lower()
                 rest = m.group(2)
 
         if m:

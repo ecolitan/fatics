@@ -183,16 +183,22 @@ class TestSummon(Test):
     @with_player('TestPlayer', 'test')
     def test_summon(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'test')
+
+        t.write('summon testplayer\n')
+        self.expect('No player named "testplayer" is online', t)
         t.write('summon\n')
         self.expect('Usage:', t)
-
         t.write('summo admin\n')
         self.expect('summon yourself', t)
+
+        t2 = self.connect_as('testplayer', 'test')
 
         t.write('summo testp\n')
         self.expect('Summoning sent to "TestPlayer".\r\n', t)
         self.expect('admin needs to speak to you', t2)
+
+        t2.write('\n')
+        self.expect('Notification: TestPlayer has unidled.', t)
 
         t.write('+cen testplayer\n')
         t2.write('+cen admin\n')

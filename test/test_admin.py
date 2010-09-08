@@ -191,6 +191,11 @@ class CommandTest(Test):
 
         t.write('pose guestabcd badcommand\n')
         self.expect('badcommand: Command not found', t2)
+        self.close(t2)
+
+        t2 = self.connect_as('testplayer', 'testpass')
+        t.write('pose testplayer shout disregard that\n')
+        self.expect('TestPlayer shouts: disregard that', t)
 
         self.close(t)
         self.close(t2)

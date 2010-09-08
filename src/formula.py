@@ -308,6 +308,7 @@ def re_escape(s):
     return escaped_re.sub(r'\\\1', s)
 
 digit_re = re.compile(r'^(\d+)(.*)')
+fvar_re = re.compile(r'^f([1-9])(.*)')
 minute_re = re.compile(r'^\s*minutes?(.*)')
 tokenize_re = re.compile('^(' + '|'.join([re_escape(k) for k in sorted(all_tokens.keys(), key=len, reverse=True)]) + ')(.*)')
 comment_re = re.compile('#.*')
