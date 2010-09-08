@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import pstats
 p = pstats.Stats('profile-chessd.data')
-p.sort_stats('cumulative').print_stats()
+p = p.sort_stats('cum')
+p.print_stats()
+#p.print_callers()
 

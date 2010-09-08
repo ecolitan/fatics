@@ -22,22 +22,14 @@ class TestNotify(Test):
     def test_notify_guest(self):
         t = self.connect_as('GuestABCD', '')
         t.write('+not admin\n')
-        self.expect("admin added to your notify list", t)
+        self.expect('Only registered players', t)
 
         t.write('=not\n')
-        self.expect('notify list: 1 name', t)
-        self.expect('admin', t)
+        self.expect('Only registered players', t)
 
         t2 = self.connect_as_admin()
-        self.expect('Notification: admin has arrived', t)
-
         t2.write('+not guest\n')
-        self.expect("GuestABCD added to your notify list", t2)
-
-        self.close(t)
-        self.expect('Notification: GuestABCD has departed', t2)
-        t = self.connect_as('GuestABCD', '')
-        self.expect('Notification: GuestABCD has arrived', t2)
+        self.expect('You cannot add an unregistered', t2)
 
         self.close(t)
         self.close(t2)
@@ -45,6 +37,8 @@ class TestNotify(Test):
     def test_bad_notify(self):
         t = self.connect_as_admin()
         t.write('+not testplayer\n')
+        self.expect('There is no player matching the name "testplayer"', t)
+        t.write('-notify testplayer\n')
         self.expect('There is no player matching the name "testplayer"', t)
         self.close(t)
 
@@ -54,6 +48,10 @@ class TestNotify(Test):
 
         t.write('+notify testplayer\n')
         self.expect("TestPlayer added to your notify list", t)
+
+        t.write('=not\n')
+        self.expect('notify list: 1 name', t)
+        self.expect('TestPlayer', t)
 
         t.write('+not testplayer\n')
         self.expect("TestPlayer is already on your notify list", t)
@@ -142,6 +140,7 @@ class TestSummon(Test):
 
 class TestZnotify(Test):
     @with_player('TestPlayer', 'test')
+    @with_player('testtwo', 'test')
     def test_znotify(self):
         t = self.connect_as_admin()
         t.write('znotify\n')
@@ -149,12 +148,12 @@ class TestZnotify(Test):
 
         t.write('+notify testplayer\n')
         t2 = self.connect_as('testplayer', 'test')
-        t3 = self.connect_as('GuestABCD', '')
+        t3 = self.connect_as('testtwo', 'test')
         t3.write('+notify admin\n')
         self.expect('admin added to your notify list', t3)
 
         t.write('znot\n')
-        self.expect('Present company on your notify list:\r\n   TestPlayer\r\nThe following players have you on their notify list:\r\n   GuestABCD', t)
+        self.expect('Present company on your notify list:\r\n   TestPlayer\r\nThe following players have you on their notify list:\r\n   testtwo', t)
 
         t.write('-notify testplayer\n')
         self.close(t2)

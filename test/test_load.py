@@ -29,7 +29,7 @@ import time
 from twisted.conch import telnet
 from twisted.internet import protocol, epollreactor
 import cProfile
-profile = 0
+profile = 1
 
 from test import host, port
 
@@ -37,7 +37,7 @@ epollreactor.install()
 
 from twisted.internet import reactor
 
-conn_count = 1000
+conn_count = 2000
 start_time = time.time()
 conns = []
 class TestProtocol(telnet.Telnet):
@@ -79,8 +79,6 @@ class TestLoad(unittest.TestCase):
 
         reactor.callLater(500, self._shut_down)
 
-        print 'ok'
-
         # Let's go
         if not profile:
             reactor.run()
@@ -96,6 +94,5 @@ class TestLoad(unittest.TestCase):
         for c in conns:
             c.quit()
         reactor.stop()
-        
-        
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

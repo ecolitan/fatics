@@ -43,7 +43,6 @@ class BaseUser(object):
     def __init__(self):
         self.is_online = False
         self.notes = {}
-        self.notifiers = set()
         self._history = None
         self._titles = None
         self._title_str = None
@@ -57,7 +56,8 @@ class BaseUser(object):
     def log_on(self, conn):
         self.vars.update(var.varlist.get_transient_vars())
         self.aliases = {}
-        self.aliases = {}
+        self.notifiers = set()
+        self.notified = set()
         self.censor = set()
         self.noplay = set()
         self.session = conn.session
@@ -67,13 +67,11 @@ class BaseUser(object):
         online.add(self)
         self.is_online = True
         self.write(_(server.get_copyright_notice()))
-        notify.notify_users(self, arrived=True)
 
     def log_off(self):
         assert(self.is_online)
         for ch in self.channels:
             channel.chlist[ch].log_off(self)
-        notify.notify_users(self, arrived=False)
         self.session.close()
         self.is_online = False
         online.remove(self)
@@ -149,9 +147,13 @@ class BaseUser(object):
 
     def add_notification(self, user):
         self.notifiers.add(user.name)
+        if user.is_online:
+            user.notified.add(self.name)
 
     def remove_notification(self, user):
         self.notifiers.remove(user.name)
+        if user.is_online:
+            user.notified.remove(self.name)
 
     def add_censor(self, user):
         self.censor.add(user.name)
@@ -255,14 +257,20 @@ class User(BaseUser):
             #u.session.conn.write(_("**** %s has arrived - you can't both be logged in. ****\n\n") % self.name)
             u.session.conn.loseConnection('logged in again')
 
+        BaseUser.log_on(self, conn)
+
+        for dbu in db.user_get_notified(self.id):
+            name = dbu['user_name']
+            self.notified.add(name)
+
         nlist = []
         for dbu in db.user_get_notifiers(self.id):
             name = dbu['user_name']
+            self.notifiers.add(name)
             if online.is_online(name):
                 nlist.append(name)
-            self.notifiers.add(dbu['user_name'])
+        notify.notify_users(self, arrived=True)
 
-        BaseUser.log_on(self, conn)
         if nlist:
             self.write(_('Present company includes: %s\n') % ' '.join(nlist))
 
@@ -277,6 +285,7 @@ class User(BaseUser):
         self.get_history()
 
     def log_off(self):
+        notify.notify_users(self, arrived=False)
         BaseUser.log_off(self)
         db.user_set_last_logout(self.id)
 

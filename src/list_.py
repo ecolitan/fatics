@@ -90,8 +90,12 @@ class TitleList(MyList):
 
 class NotifyList(MyList):
     def add(self, item, conn):
+        if conn.user.is_guest:
+            raise ListError(_('Only registered players can have notify lists.\n'))
         u = user.find.by_prefix_for_user(item, conn)
         if u:
+            if u.is_guest:
+                raise ListError(_('You cannot add an unregistered user to your notify list.\n'))
             if u.name in conn.user.notifiers:
                 raise ListError(_('%s is already on your notify list.\n')
                     % u.name)
@@ -102,7 +106,8 @@ class NotifyList(MyList):
                     (conn.user.name,))
 
     def sub(self, item, conn):
-        # would it be better to only search the notify list?
+        if conn.user.is_guest:
+            raise ListError(_('Only registered players can have notify lists.\n'))
         u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.notifiers:
@@ -113,6 +118,8 @@ class NotifyList(MyList):
             # embarrassment or hurt feelings.
 
     def show(self, conn):
+        if conn.user.is_guest:
+            raise ListError(_('Only registered players can have notify lists.\n'))
         notlist = conn.user.notifiers
         conn.write(ngettext('-- notify list: %d name --\n', '-- notify list: %d names --\n', len(notlist)) % len(notlist))
         conn.write('%s\n' % ' '.join(notlist))
