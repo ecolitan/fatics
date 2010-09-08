@@ -566,7 +566,7 @@ class Find(object):
                 u = self.by_prefix(name, online_only=online_only)
                 if online_only:
                     if not u:
-                        conn.write(_('No user named "%s" is logged in.\n') % name)
+                        conn.write(_('No player named "%s" is online.\n') % name)
                         u = None
                     else:
                         assert(u.is_online)

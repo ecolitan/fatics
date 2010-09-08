@@ -37,7 +37,7 @@ class TestObserve(Test):
         self.expect('GuestABCD is not playing or examining a game', t)
 
         t.write('observe admin\n')
-        self.expect('No user named "admin" is logged in', t)
+        self.expect('No player named "admin" is online', t)
 
         t2.write('match guestijkl 1 0 w\n')
         self.expect('Challenge:', t3)
@@ -100,7 +100,7 @@ class TestAllobservers(Test):
         self.expect('There is no such game', t2)
 
         t2.write('allob nosuchuser\n')
-        self.expect('No user named "nosuchuser" is logged in', t2)
+        self.expect('No player named "nosuchuser" is online', t2)
 
         t2.write('allob i18n\n')
         self.expect('"i18n" is not a valid handle', t2)

@@ -150,7 +150,7 @@ class CommandTest(Test):
         self.close(t)
 
     def test_aclearhistory(self):
-        t = self.connect_as_guest()
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
@@ -169,6 +169,28 @@ class CommandTest(Test):
 
         t.write('history admin\n')
         self.expect('admin has no history games.', t)
+
+        t2.write('aclearhist guestabcd\n')
+        self.expect('History of GuestABCD cleared.', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_pose(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+
+        t.write('pose testplayer test\n')
+        self.expect('No player named "testplayer" is online', t)
+
+        t.write('pose guestabcd finger testplay\n')
+        self.expect('Command issued as GuestABCD.', t)
+        self.expect('admin has issued the following command on your behalf: finger testplay', t2)
+        self.expect('Finger of TestPlayer:', t2)
+
+        t.write('pose guestabcd badcommand\n')
+        self.expect('badcommand: Command not found', t2)
 
         self.close(t)
         self.close(t2)

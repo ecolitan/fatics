@@ -37,7 +37,7 @@ epollreactor.install()
 
 from twisted.internet import reactor
 
-conn_count = 2000
+conn_count = 8000
 start_time = time.time()
 conns = []
 class TestProtocol(telnet.Telnet):

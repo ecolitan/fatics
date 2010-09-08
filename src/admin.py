@@ -28,7 +28,7 @@ class Level(object):
 
     def __init__(self):
         pass
-   
+
     def to_str(self, lvl):
         """convert the level to a string"""
         if lvl == self.head:

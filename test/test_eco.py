@@ -31,7 +31,7 @@ class TestEco(Test):
         self.expect('admin is not playing or examining a game.', t)
 
         t.write('eco testplayer\n')
-        self.expect('No user named "testplayer" is logged in.', t)
+        self.expect('No player named "testplayer" is online.', t)
 
         t.write('eco 100\n')
         self.expect('There is no such game.', t)
@@ -92,9 +92,9 @@ class TestEco(Test):
         t = self.connect_as_guest()
 
         t.write('eco n\n')
-        self.expect('No user named "n" is logged in', t)
+        self.expect('No player named "n" is online', t)
         t.write('eco e\n')
-        self.expect('No user named "e" is logged in', t)
+        self.expect('No player named "e" is online', t)
         t.write('eco a b\n')
         self.expect('Usage:', t)
         t.write('eco A00\n')

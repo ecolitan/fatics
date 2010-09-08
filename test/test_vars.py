@@ -55,11 +55,11 @@ class TestVarsCommand(Test):
         self.expect('smartmove=0', t)
         self.close(t)
         self.close(t2)
-    
+
     def test_ivars_offline(self):
         t = self.connect_as_guest()
         t.write('ivars admin\n')
-        self.expect('No user named "admin" is logged in', t)
+        self.expect('No player named "admin" is online.', t)
         self.close(t)
 
 class TestVars(Test):

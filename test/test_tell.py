@@ -38,10 +38,10 @@ class TellTest(Test):
     def test_bad_tell(self):
         t = self.connect_as_guest()
         t.write('tell nonexistentname foo\n')
-        self.expect('No user named "nonexistentname"', t)
+        self.expect('No player named "nonexistentname"', t)
 
         t.write('tell admin foo bar\n')
-        self.expect('No user named "admin" is logged in', t)
+        self.expect('No player named "admin" is online', t)
 
         t.write('tell admin1 too baz\n')
         self.expect('not a valid handle', t)
@@ -66,11 +66,11 @@ class TellTest(Test):
         self.close(t3)
 
         t2.write('tell a blah blah\n')
-        self.expect('No user named "a" is logged in', t2)
+        self.expect('No player named "a" is online', t2)
 
         self.close(t2)
         self.deluser('aduser')
-    
+
     def test_tell_disconnected(self):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()

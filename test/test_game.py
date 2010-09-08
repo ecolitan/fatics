@@ -357,7 +357,7 @@ class TestRefresh(Test):
         t3.write('re 1\n')
         self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin -3 7 9 39 39 420 420 1 none (0:00) none 0 0 0', t3)
         t3.write('re nosuchuser\n')
-        self.expect('No user named "nosuchuser" is logged in', t3)
+        self.expect('No player named "nosuchuser" is online', t3)
         t3.write('re admi\n')
         self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin -3 7 9 39 39 420 420 1 none (0:00) none 0 0 0', t3)
 
@@ -388,7 +388,7 @@ class TestMoves(Test):
         self.expect('There is no such game', t2)
 
         t2.write('moves nosuchuser\n')
-        self.expect('No user named "nosuchuser" is logged in', t2)
+        self.expect('No player named "nosuchuser" is online', t2)
 
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)

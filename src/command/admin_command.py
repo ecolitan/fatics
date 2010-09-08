@@ -17,6 +17,9 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import user
+import command_parser
+
 from command import *
 
 @ics_command('aclearhistory', 'w', admin.Level.admin)
@@ -27,7 +30,7 @@ class Aclearhistory(Command):
         if u:
             # disallow clearing history for higher adminlevels?
             u.clear_history()
-            u.write(A_('\nHistory of %s cleared.\n') % conn.user.name)
+            conn.user.write(A_('History of %s cleared.\n') % u.name)
 
 @ics_command('addplayer', 'WWS', admin.Level.admin)
 class Addplayer(Command):
@@ -39,7 +42,7 @@ class Addplayer(Command):
             conn.write(e.reason + '\n')
         else:
             if u:
-                conn.write('A player named %s is already registered.\n' % name)
+                conn.write(A_('A player named %s is already registered.\n') % name)
             else:
                 passwd = user.create.passwd()
                 user.create.new(name, email, passwd, real_name)
@@ -81,14 +84,14 @@ class Asetadmin(Command):
             # Note: it's possible to set the admin level
             # of a guest.
             if not admin.checker.check_user_operation(conn.user, u):
-                conn.write('You can only set the adminlevel for players below your adminlevel.\n')
+                conn.write(A_('You can only set the adminlevel for players below your adminlevel.\n'))
             elif not admin.checker.check_level(conn.user.admin_level, level):
                 conn.write('''You can't promote someone to or above your adminlevel.\n''')
             else:
                 u.set_admin_level(level)
                 conn.write('''Admin level of %s set to %d.\n''' % (name, level))
                 if u.is_online:
-                    u.write('''\n\n%s has set your admin level to %d.\n\n''' % (conn.user.name, level))
+                    u.write(A_('''\n\n%s has set your admin level to %d.\n\n''') % (conn.user.name, level))
 #Asetadmin('asetadmin', 'wd', admin.Level.admin)
 
 @ics_command('asetpasswd', 'wW', admin.Level.admin)
@@ -107,7 +110,7 @@ class Asetpasswd(Command):
                 u.set_passwd(passwd)
                 conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
                 if u.is_online:
-                    u.write(_('\n%s has changed your password.\n') % conn.user.name)
+                    u.write_('\n%s has changed your password.\n', (conn.user.name,))
 
 @ics_command('asetrating', 'wwwddfddd', admin.Level.admin)
 class Asetrating(Command):
@@ -147,9 +150,22 @@ class Nuke(Command):
             elif not u.is_online:
                 conn.write("%s is not logged in.\n"  % u.name)
             else:
-                u.write('\n\n**** You have been kicked out by %s! ****\n\n' % conn.user.name)
+                u.write_('\n\n**** You have been kicked out by %s! ****\n\n', (conn.user.name,))
                 u.session.conn.loseConnection('nuked')
                 conn.write('Nuked: %s\n' % u.name)
+
+@ics_command('pose', 'wS', admin.Level.admin)
+class Pose(Command):
+    def run(self, args, conn):
+        u2 = user.find.by_prefix_for_user(args[0], conn.user,
+            online_only=True)
+        if u2:
+            if not admin.checker.check_user_operation(conn.user, u2):
+                conn.write(A_('You can only pose as players below your adminlevel.\n'))
+            else:
+                conn.write(A_('Command issued as %s.\n') % u2.name)
+                u2.write_('%s has issued the following command on your behalf: %s\n', (conn.user.name, args[1]))
+                command_parser.parser.parse(args[1], 0.0, u2.session.conn)
 
 @ics_command('remplayer', 'w', admin.Level.admin)
 class Remplayer(Command):
@@ -158,12 +174,12 @@ class Remplayer(Command):
         u = user.find.by_name_exact_for_user(name, conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
-                conn.write('''You can't remove an admin with a level higher than or equal to yourself.\n''')
+                conn.write(A_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
             elif u.is_online:
-                conn.write("%s is logged in.\n" % u.name)
+                conn.write(A_("%s is logged in.\n") % u.name)
             else:
                 u.remove()
-                conn.write("Player %s removed.\n" % name)
+                conn.write(A_("Player %s removed.\n") % name)
 
 
 
