@@ -117,6 +117,11 @@ class LangVar(StringVar):
 
 class FormulaVar(Var):
     max_len = 1023
+    def __init__(self, num):
+        name = 'formula' if num == 0 else 'f' + str(num)
+        super(FormulaVar, self).__init__(name, None)
+        self.num = num
+
     def set(self, user, val):
         if val is None:
             user.set_formula(self, val)
@@ -125,7 +130,7 @@ class FormulaVar(Var):
             if len(val) > self.max_len:
                 raise BadVarError()
             try:
-                formula.check_formula(None, val)
+                formula.check_formula(None, val, self.num)
             except formula.FormulaError:
                 raise BadVarError()
             user.set_formula(self, val)
@@ -244,9 +249,8 @@ class VarList(object):
 
         LangVar("lang", "en").persist().add_as_var()
 
-        FormulaVar("formula", None).persist().add_as_var()
-        for i in range(1, 10):
-            FormulaVar("f%d" % i, None).persist().add_as_var()
+        for i in range(0, 10):
+            FormulaVar(i).persist().add_as_var()
 
         for i in range(1, 11):
             NoteVar(str(i), None).persist().add_as_var()

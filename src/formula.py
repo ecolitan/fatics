@@ -36,7 +36,7 @@ all_tokens = {}
 
 class FormulaError(Exception):
     def __init__(self, msg):
-        super(FormulaError, self).__init__(self)
+        super(FormulaError, self).__init__()
         self.msg = msg
 
 class Symbol(object):
@@ -249,19 +249,19 @@ class NocolorSymbol(Symbol):
 class StandardSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.speed_variant.speed.name == 'slow' if chal else None
+        return chal.speed_name == 'slow' if chal else None
 
 @Token(['standard'])
 class StandardSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.speed_variant.speed.name == 'standard' if chal else None
+        return chal.speed_name == 'standard' if chal else None
 
 @Token(['blitz'])
 class BlitzSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.speed_variant.speed.name == 'blitz' if chal else None
+        return chal.speed_name == 'blitz' if chal else None
 
 @Token(['lightning'])
 class LightningSymbol(Symbol):
@@ -287,8 +287,26 @@ class CrazyhouseSymbol(Symbol):
     def nud(self):
         return chal.variant.name == 'crazyhouse' if chal else None
 
+class FSymbol(Symbol):
+    lbp = 0
+    def __init__(self, num):
+        self.num = num
+    def nud(self):
+        global token, next, chal, f_num
+        if self.num <= f_num:
+            raise FormulaError('A formula variable may not refer to itself or an earlier formula variable')
+        if not chal:
+            # no need to evaluate
+            return None
+        old_token = token
+        old_next = next
+        ret = check_formula(chal, chal.b.vars['f' + str(self.num)], self.num)
+        token = old_token
+        next = old_next
+        return ret
+
 def expression(rbp = 0):
-    global token
+    global token, next
     t = token
     try:
         token = next()
@@ -328,6 +346,14 @@ def tokenize(s):
                 s = m.group(1)
             yield NumSymbol(val)
             continue
+
+        m = fvar_re.match(s)
+        if m:
+            num = int(m.group(1))
+            s = m.group(2)
+            yield FSymbol(num)
+            continue
+
         m = tokenize_re.match(s)
         if m:
             s = m.group(2)
@@ -337,17 +363,27 @@ def tokenize(s):
         raise FormulaError('Error parsing formula')
     yield EndSymbol()
 
-def check_formula(chal_, s):
+def check_formula(chal_, s, num=0):
     """ Check whether the challenge CHAL meets the formula described by S.
     If chal is None, we parse the formula for validity but don't worry
     about its evaulation.
 
+    NUM is 0 for the main formula var, 1 for f1, 2 for f2, etc.
+
     Raises FormulaError on an error.
     """
+    if s is None:
+        # no formula
+        return 1
     assert(type(s) == str)
-    global token, next, chal
+    global token, next, chal, f_num
     chal = chal_
-    next = tokenize(s).next
+    try:
+        next = tokenize(s).next
+    except StopIteration:
+        # no tokens, such as a comment only
+        return 1
+    f_num = num
     token = next()
     return expression()
 

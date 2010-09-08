@@ -213,15 +213,15 @@ class Challenge(Offer):
         expected_duration = self.time + self.inc * float(2) / 3
         assert(expected_duration > 0)
         if expected_duration < 3.0:
-            speed_name = 'lightning'
+            self.speed_name = 'lightning'
         elif expected_duration < 15.0:
-            speed_name = 'blitz'
+            self.speed_name = 'blitz'
         elif expected_duration < 75.0:
-            speed_name = 'standard'
+            self.speed_name = 'standard'
         else:
-            speed_name = 'slow'
+            self.speed_name = 'slow'
 
-        self.speed_variant = speed_variant.from_names(speed_name,
+        self.speed_variant = speed_variant.from_names(self.speed_name,
             self.variant_name)
         self.a_rating = a.get_rating(self.speed_variant)
         self.b_rating = b.get_rating(self.speed_variant)
@@ -250,8 +250,7 @@ class Challenge(Offer):
                 (b.name,))
             return
 
-        if b.vars['formula'] is not None and not formula.check_formula(self,
-                b.vars['formula']):
+        if not formula.check_formula(self, b.vars['formula']):
             a.write_('Match request does not meet formula for %s:\n', b.name)
             b.write_('Ignoring (formula): %s\n', challenge_str)
             return

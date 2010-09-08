@@ -29,6 +29,8 @@ class TestFormula(Test):
         self.expect('Bad value given for variable "f2".', t)
         t.write('set f3 *88\n')
         self.expect('Bad value given for variable "f3".', t)
+        t.write('set f3 f2\n')
+        self.expect('Bad value given for variable "f3".', t)
         self.close(t)
 
     def test_formula_unset(self):
@@ -74,5 +76,36 @@ class TestFormula(Test):
         self.expect('f1 unset.', t)
 
         self.close(t)
+
+    def test_formula_fvar(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest()
+
+        t.write('set formula f1\n')
+        self.expect('formula set to "f1".', t)
+        t.write('set f1 2 + 2 == 4 && f2\n')
+        self.expect('f1 set to "2 + 2 == 4 && f2"', t)
+        t.write('set f2 f3 && f4 # test\n')
+        self.expect('f2 set to "f3 && f4 # test".', t)
+        t.write('set f3 !blitz\n')
+        self.expect('f3 set to "!blitz".', t)
+        t.write('set f4 !lightning\n')
+        self.expect('f4 set to "!lightning".', t)
+
+        t2.write('match guestabcd 3 0\n')
+        self.expect('Ignoring (formula)', t)
+        self.expect('Match request does not meet formula', t2)
+
+        t2.write('match guestabcd 3 0\n')
+        self.expect('Ignoring (formula)', t)
+        self.expect('Match request does not meet formula', t2)
+
+        t2.write('match guestabcd 15 0\n')
+        self.expect('Issuing: ', t2)
+        self.expect('Challenge:', t)
+
+        self.close(t)
+        self.close(t2)
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
