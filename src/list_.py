@@ -94,13 +94,15 @@ class NotifyList(MyList):
             raise ListError(_('Only registered players can have notify lists.\n'))
         u = user.find.by_prefix_for_user(item, conn)
         if u:
+            if u == conn.user:
+                raise ListError(_('You cannot notify yourself.\n'))
             if u.is_guest:
                 raise ListError(_('You cannot add an unregistered user to your notify list.\n'))
             if u.name in conn.user.notifiers:
                 raise ListError(_('%s is already on your notify list.\n')
                     % u.name)
             conn.user.add_notification(u)
-            conn.write(_('%s added to your notify list.\n') % (u.name))
+            conn.write(_('%s added to your notify list.\n') % u.name)
             if u.is_online:
                 u.write_('You have been added to the notify list of %s.\n',
                     (conn.user.name,))
@@ -113,7 +115,7 @@ class NotifyList(MyList):
             if u.name not in conn.user.notifiers:
                 raise ListError(_('%s is not on your notify list.\n') % u.name)
             conn.user.remove_notification(u)
-            conn.write(_('%s removed from your notify list.\n') % (u.name))
+            conn.write(_('%s removed from your notify list.\n') % u.name)
             # We deliberately don't notify the user, to avoid
             # embarrassment or hurt feelings.
 
@@ -123,6 +125,31 @@ class NotifyList(MyList):
         notlist = conn.user.notifiers
         conn.write(ngettext('-- notify list: %d name --\n', '-- notify list: %d names --\n', len(notlist)) % len(notlist))
         conn.write('%s\n' % ' '.join(notlist))
+
+class IdlenotifyList(MyList):
+    def add(self, item, conn):
+        u = user.find.by_prefix_for_user(item, conn, online_only=True)
+        if u:
+            if u == conn.user:
+                raise ListError(_('You cannot idlenotify yourself.\n'))
+            if conn.user in u.idlenotified:
+                raise ListError(_('%s is already on your idlenotify list.\n')
+                    % u.name)
+            conn.user.add_idlenotification(u)
+            conn.write(_('%s added to your idlenotify list.\n') % u.name)
+
+    def sub(self, item, conn):
+        u = user.find.by_prefix_for_user(item, conn, online_only=True)
+        if u:
+            if conn.user not in u.idlenotified:
+                raise ListError(_('%s is not on your idlenotify list.\n') % u.name)
+            conn.user.remove_idlenotification(u)
+            conn.write(_('%s removed from your idlenotify list.\n') % u.name)
+
+    def show(self, conn):
+        notlist = conn.user.idlenotifiers
+        conn.write(ngettext('-- idlenotify list: %d name --\n', '-- idlenotify list: %d names --\n', len(notlist)) % len(notlist))
+        conn.write('%s\n' % ' '.join([u.name for u in notlist]))
 
 class ChannelList(MyList):
     def add(self, item, conn):
@@ -212,6 +239,7 @@ class ListList(object):
     def __init__(self):
         ChannelList("channel")
         NotifyList("notify")
+        IdlenotifyList("idlenotify")
         CensorList("censor")
         NoplayList("noplay")
 

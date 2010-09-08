@@ -58,6 +58,8 @@ class BaseUser(object):
         self.aliases = {}
         self.notifiers = set()
         self.notified = set()
+        self.idlenotifiers = set()
+        self.idlenotified = set()
         self.censor = set()
         self.noplay = set()
         self.session = conn.session
@@ -70,6 +72,11 @@ class BaseUser(object):
 
     def log_off(self):
         assert(self.is_online)
+        for u in self.idlenotified:
+            u.write_("Notification: %s, whom you were idlenotifying, has departed.\n", (self.name,))
+            u.idlenotifiers.remove(self)
+        self.idlenotified.clear()
+
         for ch in self.channels:
             channel.chlist[ch].log_off(self)
         self.session.close()
@@ -154,6 +161,18 @@ class BaseUser(object):
         self.notifiers.remove(user.name)
         if user.is_online:
             user.notified.remove(self.name)
+
+    def add_idlenotification(self, user):
+        assert(self.is_online)
+        assert(user.is_online)
+        self.idlenotifiers.add(user)
+        user.idlenotified.add(self)
+
+    def remove_idlenotification(self, user):
+        assert(self.is_online)
+        assert(user.is_online)
+        self.idlenotifiers.remove(user)
+        user.idlenotified.remove(self)
 
     def add_censor(self, user):
         self.censor.add(user.name)
@@ -490,9 +509,7 @@ class AmbiguousException(Exception):
 
 """Various ways to look up a user."""
 class Find(object):
-    """Find a user, accepting only exact matches."""
-    username_re = re.compile('^[a-zA-Z_]+$')
-    def by_name_exact(self, name, min_len=config.min_login_name_len,online_only=False):
+    def _check_name(self, name, min_len):
         if len(name) < min_len:
             raise UsernameException(_('Names should be at least %d characters long.  Try again.\n') % min_len)
         elif len(name) > 17:
@@ -500,6 +517,10 @@ class Find(object):
         elif not self.username_re.match(name):
             raise UsernameException(_('Names should only consist of lower and upper case letters.  Try again.\n'))
 
+    """Find a user, accepting only exact matches."""
+    username_re = re.compile('^[a-zA-Z_]+$')
+    def by_name_exact(self, name, min_len=config.min_login_name_len,online_only=False):
+        self._check_name(name, min_len)
         u = online.find_exact(name)
         if not u and not online_only:
             dbu = db.user_get(name)
@@ -514,6 +535,8 @@ class Find(object):
         u = None
         if len(name) >= config.min_login_name_len:
             u = self.by_name_exact(name, 2, online_only=online_only)
+        else:
+            self._check_name(name, 1)
         if not u:
             ulist = online.find_part(name)
             if len(ulist) == 1:

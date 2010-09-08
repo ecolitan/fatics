@@ -38,16 +38,11 @@ class CommandParser(object):
     def _do_parse(self, s, t, conn):
         s = s.strip()
 
-        if conn.session.games:
-            if conn.session.games.current().parse_move(s, t, conn):
-                return block.BLK_GAME_MOVE
-
         if not utf8.checker.check_user_utf8(s):
             conn.write(_("Command ignored: invalid characters.\n"))
             # no exact code for this situation
             return block.BLK_ERROR_BADCOMMAND
 
-        update_idle = True
         # previously the prefix '$' was used to not expand aliases
         # and '$$' was used to not update the idle time.  But these
         # options should really be orthogonal, so I made '$$' alone
@@ -57,10 +52,20 @@ class CommandParser(object):
             s = s[2:].lstrip()
         else:
             conn.user.session.last_command_time = time.time()
+            if conn.user.idlenotified:
+                for u in conn.user.idlenotified:
+                    u.write_('Notification: %s has unidled.\n',
+                        (conn.user.name,))
+                    u.idlenotifiers.remove(conn.user)
+                conn.user.idlenotified.clear()
 
         if len(s) == 0:
             # ignore blank line
             return block.BLK_NULL
+
+        if conn.session.games:
+            if conn.session.games.current().parse_move(s, t, conn):
+                return block.BLK_GAME_MOVE
 
         if s[0] == '$':
             s = s[1:].lstrip()

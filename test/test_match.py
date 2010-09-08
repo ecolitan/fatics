@@ -202,7 +202,7 @@ class TestMatch(Test):
         t.write('withdraw\n')
 
         t.write('match 1 0 admin white\n')
-        self.expect('No user named "1"', t)
+        self.expect('"1" is not a valid handle', t)
 
         self.close(t)
         self.close(t2)

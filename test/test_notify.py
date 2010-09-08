@@ -40,11 +40,16 @@ class TestNotify(Test):
         self.expect('There is no player matching the name "testplayer"', t)
         t.write('-notify testplayer\n')
         self.expect('There is no player matching the name "testplayer"', t)
+        t.write('+not admin\n')
+        self.expect("notify yourself.", t)
         self.close(t)
 
     @with_player('TestPlayer', 'test')
     def test_notify_user(self):
         t = self.connect_as_admin()
+
+        t.write('=not\n')
+        self.expect('notify list: 0 names', t)
 
         t.write('+notify testplayer\n')
         self.expect("TestPlayer added to your notify list", t)
@@ -111,6 +116,67 @@ class TestNotify(Test):
         self.expect('TestPlayer removed from your notify list', t)
 
         self.close(t2)
+        self.close(t)
+
+class TestIdlenotify(Test):
+    def test_idlenotify_guest(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('+idlenot admin\n')
+        self.expect('admin added to your idlenotify list.', t)
+        t.write('=idle\n')
+        self.expect('-- idlenotify list: 1 name --', t)
+        self.expect('admin', t)
+        t.write('-idlenot admin\n')
+        self.expect('admin removed from your idlenotify list.', t)
+        t.write('+idlenot admin\n')
+        self.expect('admin added to your idlenotify list.', t)
+
+        self.expect_not('Notification: ', t)
+
+        t2.write('\n')
+        self.expect('Notification: admin has unidled.', t)
+
+        t.write('-idlenot admin\n')
+        self.expect('admin is not on your idlenotify list.', t)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_idlenotify_depart(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('+idlenot admin\n')
+        self.expect('admin added to your idlenotify list.', t)
+
+        t2.close()
+        self.expect('admin, whom you were idlenotifying, has departed.', t)
+
+        self.close(t)
+
+    def test_idlenotify_depart_2(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+
+        t.write('+idlenot admin\n')
+        self.expect('admin added to your idlenotify list.', t)
+
+        # should handle disonnect gracefully
+        t.close()
+        self.close(t2)
+
+    def test_bad_idlenotify(self):
+        t = self.connect_as('GuestEFGH', '')
+        t.write('+idlenot 33\n')
+        self.expect('"33" is not a valid handle.', t)
+        t.write('+idlenot admin\n')
+        self.expect('No user named "admin" is logged in', t)
+        t.write('+idlenot guestefgh\n')
+        self.expect("idlenotify yourself.", t)
+        t.write('-idlenotify testplayer\n')
+        self.expect('No user named "testplayer" is logged in', t)
         self.close(t)
 
 class TestSummon(Test):
