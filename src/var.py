@@ -229,6 +229,7 @@ class VarList(object):
         BoolVar("shout", True, N_("You will now hear shouts.\n"), N_("You will not hear shouts.\n")).persist().add_as_var()
         BoolVar("cshout", True, N_("You will now hear cshouts.\n"), N_("You will not hear cshouts.\n")).persist().add_as_var()
         BoolVar("tell", True, N_("You will now hear direct tells from unregistered users.\n"), N_("You will not hear direct tells from unregistered users.\n")).persist().add_as_var()
+        BoolVar("ctell", True, N_("You will now hear channel tells from unregistered users.\n"), N_("You will not hear channel tells from unregistered users.\n")).persist().add_as_var()
         BoolVar("open", True, N_("You are now open to receive match requests.\n"), N_("You are no longer open to receive match requests.\n")).persist().add_as_var()
         BoolVar("silence", False, N_("You will now play games in silence.\n"), N_("You will not play games in silence.\n")).persist().add_as_var()
         BoolVar("bell", True, N_("You will now hear beeps.\n"), N_("You will not hear beeps.\n")).persist().add_as_var()

@@ -1,4 +1,4 @@
-Defualts for guests:
+Defaults for guests:
 
 time=2       private=0     shout=0         pin=0           style=1  
 inc=12       jprivate=0    cshout=0        notifiedby=0    flip=0

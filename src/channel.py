@@ -35,9 +35,12 @@ class Channel(object):
 
     def tell(self, msg, user):
         msg = '%s(%s): %s\n' % (user.get_display_name(), self.id, msg)
+        is_guest = user.is_guest
         count = 0
         name = user.name
         for u in self.online:
+            if is_guest and not u.vars['ctell']:
+                continue
             if not name in u.censor:
                 u.write(msg)
                 count += 1

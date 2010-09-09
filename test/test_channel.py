@@ -126,4 +126,31 @@ class TestInchannel(Test):
 
         self.close(t)
 
+class TestCtellVar(Test):
+    def test_ctell_var(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+
+        t.write('set ctell 0\n')
+        self.expect('You will not hear channel tells from unregistered', t)
+        t.write('+ch 1\n')
+        self.expect("[1] added to your channel list", t)
+        t2.write('+ch 1\n')
+        self.expect("[1] added to your channel list", t2)
+
+        t2.write('tell 1 Can you see this?\n')
+        self.expect_not('Can you see', t)
+
+        t.write('set ctell 1\n')
+        self.expect('You will now hear channel tells from unregistered', t)
+
+        t2.write('tell 1 Can you see this?\n')
+        self.expect('Can you see', t)
+
+        t.write('-ch 1\n')
+        self.expect("[1] removed from your channel list", t)
+
+        self.close(t2)
+        self.close(t)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
