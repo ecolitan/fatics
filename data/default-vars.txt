@@ -1,0 +1,17 @@
+Defaults for new users:
+
+time=2       private=0     shout=1         pin=0           style=1  
+inc=12       jprivate=0    cshout=1        notifiedby=0    flip=0
+rated=1                    kibitz=1        availinfo=0     highlight=0
+open=1       automail=0    kiblevel=0      availmin=0      bell=1
+             pgn=0         tell=1          availmax=0      width=79 
+bugopen=0                  ctell=1         gin=0           height=24 
+             mailmess=0                    seek=1          ptime=0
+tourney=0    messreply=0   chanoff=0       showownseek=0   tzone=???
+provshow=0                 silence=0                       Lang=English
+autoflag=0   unobserve=1   echo=1          examine=0
+minmovetime=1              tolerance=1     noescape=0      notakeback=0
+
+Prompt: fics% 
+
+Formula: (blitz || standard) && !abuser

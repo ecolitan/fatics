@@ -23,7 +23,7 @@ CREATE TABLE `user` (
   `private` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'private games',
   `shout` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'see shouts',
   `pin` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'notify whenever someone logs on or off',
-  `style` SMALLINT(4) NOT NULL DEFAULT 1 COMMENT 'board style',
+  --`style` SMALLINT(4) NOT NULL DEFAULT 1 COMMENT 'board style',
   `inc` SMALLINT(4) NOT NULL DEFAULT 12 COMMENT 'default increment',
   `jprivate` SMALLINT(4) NOT NULL DEFAULT 0 COMMENT 'private journal',
   `cshout` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'see c-shouts',
@@ -47,7 +47,8 @@ CREATE TABLE `user` (
   `mailmess` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'email a copy of messages',
   `seek` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show seeks',
   `ptime` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'show time in prompt',
-  `tourney` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'currently in a tourney',
+  -- not persistent in original FICS
+  -- `tourney` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'currently in a tourney',
   `messreply` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'send email address in mailed messages',
   `chanoff` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'hide all channel tells',
   `showownseek` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'show own seeks',
@@ -56,8 +57,8 @@ CREATE TABLE `user` (
   `silence` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'hide shouts and tells while playing',
   `autoflag` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'automatically flag opp',
   `unobserve` TINYINT NOT NULL DEFAULT 0 COMMENT 'automatically unobserve games',
-  -- `echo`
-  -- `examine` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'automatically examine after a game',
+  `echo` BOOLEAN NOT NOT NULL DEFAULT 1 COMMENT 'receive a copy of own communications',
+  `examine` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'automatically examine after a game',
   `minmovetime` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'use minimum move time in games',
   -- `tolerance`
   `noescape` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'agree to forfeit on disconnect',

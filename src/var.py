@@ -174,7 +174,7 @@ class IntVar(Var):
         else:
             user.set_var(self, val)
         user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
-    
+
     def get_display_str(self, val):
         return '''%s=%d''' % (self.name, val)
 
@@ -183,14 +183,8 @@ class BoolVar(Var):
     def __init__(self, name, default, on_msg=None, off_msg=None):
         Var.__init__(self, name, default)
 
-        if on_msg is not None:
-            self.on_msg = on_msg
-        else:
-            self.on_msg = N_("%s set.") % name
-        if off_msg is not None:
-            self.off_msg = off_msg
-        else:
-            self.off_msg = N_("%s unset.") % name
+        self.on_msg = on_msg
+        self.off_msg = off_msg
 
     def set(self, user, val):
         if val is None:
@@ -213,9 +207,15 @@ class BoolVar(Var):
         else:
             user.set_var(self, val)
         if val:
-            user.write(_(self.on_msg) + '\n')
+            if self.on_msg is not None:
+                user.write(_(self.on_msg))
+            else:
+                user.write(_(("%s set.\n") % self.name))
         else:
-            user.write(_(self.off_msg) + '\n')
+            if self.off_msg is not None:
+                user.write(_(self.off_msg))
+            else:
+                user.write(_("%s unset.\n") % self.name)
 
     def get_display_str(self, val):
         return '''%s=%d''' % (self.name, int(val))
@@ -226,16 +226,24 @@ class VarList(object):
         self.init_ivars()
 
     def init_vars(self):
-        BoolVar("shout", True, N_("You will now hear shouts."), N_("You will not hear shouts.")).persist().add_as_var()
-        BoolVar("cshout", True, N_("You will now hear cshouts."), N_("You will not hear cshouts.")).persist().add_as_var()
-        BoolVar("tell", True, N_("You will now hear direct tells from unregistered users."), N_("You will not hear direct tells from unregistered users.")).persist().add_as_var()
-        BoolVar("open", True, N_("You are now open to receive match requests."), N_("You are no longer open to receive match requests.")).persist().add_as_var()
-        BoolVar("silence", False, N_("You will now play games in silence."), N_("You will not play games in silence.")).persist().add_as_var()
-        BoolVar("bell", True, N_("You will now hear beeps."), N_("You will not hear beeps.")).persist().add_as_var()
-        BoolVar("autoflag", True, N_("Auto-flagging enabled."), N_("Auto-flagging disabled.")).persist().add_as_var()
-        BoolVar("ptime", False, N_("Your prompt will now show the time."), N_("Your prompt will now not show the time.")).persist().add_as_var()
-        BoolVar("kibitz", True, N_("You will now hear kibitzes."), N_("You will not hear kibitzes.")).persist().add_as_var()
-        BoolVar("notifiedby", True, N_("You will now hear if people notify you, but you don't notify them."), N_("You will not hear if people notify you, but you don't notify them.")).persist().add_as_var()
+        BoolVar("shout", True, N_("You will now hear shouts.\n"), N_("You will not hear shouts.\n")).persist().add_as_var()
+        BoolVar("cshout", True, N_("You will now hear cshouts.\n"), N_("You will not hear cshouts.\n")).persist().add_as_var()
+        BoolVar("tell", True, N_("You will now hear direct tells from unregistered users.\n"), N_("You will not hear direct tells from unregistered users.\n")).persist().add_as_var()
+        BoolVar("open", True, N_("You are now open to receive match requests.\n"), N_("You are no longer open to receive match requests.\n")).persist().add_as_var()
+        BoolVar("silence", False, N_("You will now play games in silence.\n"), N_("You will not play games in silence.\n")).persist().add_as_var()
+        BoolVar("bell", True, N_("You will now hear beeps.\n"), N_("You will not hear beeps.\n")).persist().add_as_var()
+        BoolVar("autoflag", True, N_("Auto-flagging enabled.\n"), N_("Auto-flagging disabled.\n")).persist().add_as_var()
+        BoolVar("ptime", False, N_("Your prompt will now show the time.\n"), N_("Your prompt will now not show the time.\n")).persist().add_as_var()
+        BoolVar("kibitz", True, N_("You will now hear kibitzes.\n"), N_("You will not hear kibitzes.\n")).persist().add_as_var()
+        BoolVar("notifiedby", True, N_("You will now hear if people notify you, but you don't notify them.\n"), N_("You will not hear if people notify you, but you don't notify them.\n")).persist().add_as_var()
+        BoolVar("minmovetime", True, N_("You will request minimum move time when games start.\n"), N_("You will not request minimum move time when games start.\n")).persist().add_as_var()
+        BoolVar("noescape", True, N_("You will request noescape when games start..\n"), N_("You will not request noescape when games start.\n")).persist().add_as_var()
+        BoolVar("seek", True, N_("You will now see seek ads.\n"), N_("You will not see seek ads.\n")).persist().add_as_var()
+        BoolVar("echo", True, N_("You will not hear communications echoed.\n"), N_("You will now not hear communications echoed.\n")).persist().add_as_var()
+        BoolVar("examine", False, N_("You will now enter examine mode after a game.\n"), N_("You will now not enter examine mode after a game.\n")).persist().add_as_var()
+
+        # non-persistent
+        BoolVar("tourney", False, N_("Your tournament variable is now set.\n"), N_("Your tournament variable is no longer set.\n")).add_as_var()
 
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
@@ -331,7 +339,6 @@ pendinfo pin pinginfo premove
 seekca seekinfo seekremove showownseek showserver singleboard smartmove startpos suicide
 vthighlight
 wildcastle
-ms ?
 xml ?
 '''
 

@@ -373,31 +373,6 @@ class Quit(Command):
     def run(self, args, conn):
         conn.loseConnection('quit')
 
-@ics_command('rmatch', 'wwt', admin.Level.user)
-class Rmatch(Command):
-    def run(self, args, conn):
-        if not conn.user.has_title('TD'):
-            conn.write(_('Only TD programs are allowed to use this command\n'))
-            return
-        u1 = user.find.by_prefix_for_user(args[0], conn, online_only=True)
-        if not u1:
-            return
-        u2 = user.find.by_prefix_for_user(args[1], conn, online_only=True)
-        if not u2:
-            return
-        # ignore censor lists, noplay lists, and open var
-        if u1 == u2:
-            conn.write(_("A player cannot match himself or herself.\n"))
-            return
-        if len(u1.session.games) != 0:
-            conn.write(_("%s is playing a game.\n") % u1.name)
-            return
-        if len(u2.session.games) != 0:
-            conn.write(_("%s is playing a game.\n") % u2.name)
-            return
-        offer.Challenge(u1, u2, args[2])
-
-
 @ics_command('shout', 'S', admin.Level.user)
 class Shout(Command):
     @requires_registration
