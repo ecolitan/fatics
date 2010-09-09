@@ -109,10 +109,10 @@ class LangVar(StringVar):
     def set(self, user, val):
         if val not in lang.langs:
             raise BadVarError()
-        if self.is_ivar:
-            user.session.set_ivar(self, val)
-        else:
-            user.set_var(self, val)
+        assert(not self.is_ivar)
+        user.set_var(self, val)
+        # Start using the new language right away.
+        lang.langs[val].install(names=['ngettext'])
         user.write(_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val})
 
 class FormulaVar(Var):

@@ -99,7 +99,9 @@ class CommandParser(object):
             if len(matches) == 1:
                 cmd = matches[0]
             else:
-                conn.write(_("""Ambiguous command "%s". Matches: %s\n""") % (word, ' '.join([c.name for c in matches])))
+                conn.write(_("""Ambiguous command "%(cmd)s". Matches: %(matches)s\n""")
+                    % {'cmd': word, 'matches':
+                        ' '.join([c.name for c in matches])})
                 ret = block.BLK_ERROR_AMBIGUOUS
         if cmd:
             try:

@@ -32,7 +32,7 @@ class TestLang(Test):
         self.expect("1 Players Displayed.", t)
 
         self.close(t)
-    
+
     def test_lang_admin(self):
         t = self.connect_as_admin()
         t.write('set lang en\n')
@@ -52,5 +52,17 @@ class TestLang(Test):
 
         t.write('set lang en\n')
         self.close(t)
-        
+
+    def test_lang_upper(self):
+        t = self.connect_as_guest()
+        t.write('set lang upper\n')
+        self.expect('lang SET TO "upper".', t)
+        t.write('foo\n')
+        self.expect('foo: COMMAND NOT FOUND', t)
+        t.write('set lang en\n')
+        self.expect('lang set to "en".', t)
+        t.write('bar\n')
+        self.expect('bar: Command not found', t)
+        self.close(t)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -1,7 +1,17 @@
 #!/bin/sh
-xgettext --language=Python --output=locale/chessd.pot --from-code=utf-8 src/*.py
-for lang in compat es; do
+xgettext --language=Python --keyword=N_ --keyword=write_ --output=locale/chessd.pot --from-code=utf-8 src/*.py src/*/*.py
+
+# for testing:
+# %s/msgstr\(.*\(\_.".*"\)*\)/msgstr\U\1/g
+# %s/%S/%s/g
+# %s/%D/%d/g
+# %s/\\N/\\n/g
+# %s/%([A-Z]\+)S/\L\0/g
+for lang in upper; do
 	msginit --no-translator -i locale/chessd.pot -o locale/$lang.po
-	#msginit -i locale/chessd.pot -o locale/$lang.po
 done
+
+#for lang in compat es; do
+#	msginit -i locale/chessd.pot -o locale/$lang.po
+#done
 
