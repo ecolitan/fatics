@@ -311,9 +311,11 @@ def expression(rbp = 0):
     try:
         token = next()
     except StopIteration:
-        raise FormulaError('unexpected end of formula')
         # consider an empty formula to be 1
-        #return 1
+        if rbp == 0:
+            return 1
+        else:
+            raise FormulaError('unexpected end of formula')
     left = t.nud()
     while rbp < token.lbp:
         t = token
@@ -381,8 +383,7 @@ def check_formula(chal_, s, num=0):
     try:
         next = tokenize(s).next
     except StopIteration:
-        # no tokens, such as a comment only
-        return 1
+        raise FormulaError('got formula with no tokens')
     f_num = num
     token = next()
     return expression()

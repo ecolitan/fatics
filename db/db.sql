@@ -23,7 +23,7 @@ CREATE TABLE `user` (
   `private` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'private games',
   `shout` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'see shouts',
   `pin` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'notify whenever someone logs on or off',
-  --`style` SMALLINT(4) NOT NULL DEFAULT 1 COMMENT 'board style',
+  -- `style` SMALLINT(4) NOT NULL DEFAULT 1 COMMENT 'board style',
   `inc` SMALLINT(4) NOT NULL DEFAULT 12 COMMENT 'default increment',
   `jprivate` SMALLINT(4) NOT NULL DEFAULT 0 COMMENT 'private journal',
   `cshout` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'see c-shouts',
@@ -33,7 +33,7 @@ CREATE TABLE `user` (
   -- `availinfo`
   `highlight` SMALLINT(4) NOT NULL DEFAULT 0 COMMENT 'terminal highlight style',
   `open` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'open to match requests',
-  -- `automail` BOOLEAN NOT NULL DEFAULT 0,
+  `automail` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'email all games to player',
   -- `availmin` SMALLINT(4) NOT NULL DEFAULT 0,
   `bell` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'beep on board updates',
   -- `pgn` BOOLEAN NOT NULL DEFAULT 1,
@@ -57,7 +57,7 @@ CREATE TABLE `user` (
   `silence` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'hide shouts and tells while playing',
   `autoflag` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'automatically flag opp',
   `unobserve` TINYINT NOT NULL DEFAULT 0 COMMENT 'automatically unobserve games',
-  `echo` BOOLEAN NOT NOT NULL DEFAULT 1 COMMENT 'receive a copy of own communications',
+  `echo` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'receive a copy of own communications',
   `examine` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'automatically examine after a game',
   `minmovetime` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'use minimum move time in games',
   -- `tolerance`
@@ -67,7 +67,6 @@ CREATE TABLE `user` (
   -- other flags
   `simopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for simul',
   `lang` VARCHAR(6) NOT NULL DEFAULT 'en' COMMENT 'user language',
-  -- `is_online` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'logged in?',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

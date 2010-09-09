@@ -121,6 +121,7 @@ class FormulaVar(Var):
         name = 'formula' if num == 0 else 'f' + str(num)
         super(FormulaVar, self).__init__(name, None)
         self.num = num
+        self.display_in_vars = False
 
     def set(self, user, val):
         if val is None:

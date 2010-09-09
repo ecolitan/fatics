@@ -23,7 +23,8 @@ from command import *
 class Ping(Command):
     def run(self, args, conn):
         if args[0] is not None:
-            u2 = user.find.by_prefix_for_user(args[0], conn)
+            u2 = user.find.by_prefix_for_user(args[0], conn,
+                online_only=True)
         else:
             u2 = conn.user
 

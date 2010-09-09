@@ -32,6 +32,9 @@ class TestPing(Test):
         t.write('ping guest\n')
         self.expect('not using zipseal', t)
 
+        t.write('ping admin\n')
+        self.expect('No player named "admin" is online.', t)
+
         self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

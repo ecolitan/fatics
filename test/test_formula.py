@@ -46,6 +46,12 @@ class TestFormula(Test):
         self.expect('f1 unset.', t)
         self.close(t)
 
+    def test_formula_comment_only(self):
+        t = self.connect_as_guest()
+        t.write('set f1 # comment test\n')
+        self.expect('f1 set to "# comment test".', t)
+        self.close(t)
+
     def test_formula_guest(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_guest()

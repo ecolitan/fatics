@@ -83,6 +83,13 @@ class Variables(Command):
                     conn.write("%s\n" % v.get_display_str(val))
             conn.write("\n")
 
+            if u.vars['formula']:
+                conn.write('Formula: %s\n' % u.vars['formula'])
+            for i in range(1, 10):
+                fname = 'f' + str(i)
+                if u.vars[fname]:
+                    conn.write(' %s: %s\n' % (fname, u.vars[fname]))
+
 @ics_command('style', 'd', admin.Level.user)
 class Style(Command):
     def run(self, args, conn):
