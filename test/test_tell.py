@@ -24,7 +24,7 @@ class TellTest(Test):
         t = self.connect_as_admin()
         t.write('tell admin Hello there!\n')
         self.expect('admin(*) tells you: Hello there!', t, "tell self")
-        
+
         t.write('tell admin \t  space  test\t\n')
         self.expect('tells you: \t  space  test', t)
 
@@ -34,6 +34,23 @@ class TellTest(Test):
         self.close(t2)
 
         self.close(t)
+
+    def test_tell_block_guests(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+
+        t.write('set tell 0\n')
+        self.expect('You will not hear direct tells from unregistered users.', t)
+        t2.write('tell admin Hello there!\n')
+        self.expect('''Player "admin" isn't listening to unregistered users' tells.''', t2)
+
+        t.write('set tell 1\n')
+        self.expect('You will now hear direct tells from unregistered users.', t)
+        t2.write('tell admin test 2\n')
+        self.expect('tells you: test 2', t)
+
+        self.close(t)
+
 
     def test_bad_tell(self):
         t = self.connect_as_guest()
@@ -48,15 +65,15 @@ class TellTest(Test):
 
         self.close(t)
 
+    @with_player('auser', 'test')
     def test_ambiguous_tell(self):
-        self.adduser('aduser', 'test')
-        t = self.connect_as('aduser', 'test')
+        t = self.connect_as('auser', 'test')
         t2 = self.connect_as_guest()
 
         # not ambiguous when admin is offline
         t2.write('tell a blah blah\n')
         self.expect('tells you: blah blah', t)
-        self.expect('(told aduser)', t2)
+        self.expect('(told auser)', t2)
 
         t3 = self.connect_as_admin()
         t2.write('tell a blah blah\n')
@@ -69,7 +86,6 @@ class TellTest(Test):
         self.expect('No player named "a" is online', t2)
 
         self.close(t2)
-        self.deluser('aduser')
 
     def test_tell_disconnected(self):
         t = self.connect_as_admin()

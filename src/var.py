@@ -228,7 +228,7 @@ class VarList(object):
     def init_vars(self):
         BoolVar("shout", True, N_("You will now hear shouts."), N_("You will not hear shouts.")).persist().add_as_var()
         BoolVar("cshout", True, N_("You will now hear cshouts."), N_("You will not hear cshouts.")).persist().add_as_var()
-        BoolVar("tell", False, N_("You will now hear direct tells from unregistered users."), N_("You will not hear direct tells from unregistered users.")).persist().add_as_var()
+        BoolVar("tell", True, N_("You will now hear direct tells from unregistered users."), N_("You will not hear direct tells from unregistered users.")).persist().add_as_var()
         BoolVar("open", True, N_("You are now open to receive match requests."), N_("You are no longer open to receive match requests.")).persist().add_as_var()
         BoolVar("silence", False, N_("You will now play games in silence."), N_("You will not play games in silence.")).persist().add_as_var()
         BoolVar("bell", True, N_("You will now hear beeps."), N_("You will not hear beeps.")).persist().add_as_var()

@@ -61,6 +61,8 @@ class TellCommand(Command):
             if conn.user.name in u.censor and conn.user.admin_level <= \
                     admin.level.user:
                 conn.write(_("%s is censoring you.\n") % u.name)
+            elif conn.user.is_guest and not u.vars['tell']:
+                conn.write(_('''Player "%s" isn't listening to unregistered users' tells.\n''' % u.name))
             else:
                 u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
                 conn.write(_("(told %s)") % u.name + '\n')

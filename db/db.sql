@@ -28,7 +28,6 @@ CREATE TABLE `user` (
   `jprivate` SMALLINT(4) NOT NULL DEFAULT 0 COMMENT 'private journal',
   `cshout` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'see c-shouts',
   `notifiedby` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'notify when others are notified',
-  `flip` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'notify when others are notified',
   -- `rated` OBSOLETE
   `kibitz` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show kibitzes',
   -- `availinfo`
@@ -38,7 +37,7 @@ CREATE TABLE `user` (
   -- `availmin` SMALLINT(4) NOT NULL DEFAULT 0,
   `bell` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'beep on board updates',
   -- `pgn` BOOLEAN NOT NULL DEFAULT 1,
-  `tell` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'show tells from guests',
+  `tell` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show tells from guests',
   -- `availmax` SMALLINT(4) NOT NULL DEFAULT 0,
   `width` SMALLINT(4) NOT NULL DEFAULT 79 COMMENT 'terminal width in characters',
   `bugopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for bughouse',
