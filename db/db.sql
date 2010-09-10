@@ -23,7 +23,7 @@ CREATE TABLE `user` (
   `private` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'private games',
   `shout` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'see shouts',
   `pin` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'notify whenever someone logs on or off',
-  -- `style` SMALLINT(4) NOT NULL DEFAULT 1 COMMENT 'board style',
+  `style` SMALLINT(4) NOT NULL DEFAULT 1 COMMENT 'board style',
   `inc` SMALLINT(4) NOT NULL DEFAULT 12 COMMENT 'default increment',
   `jprivate` SMALLINT(4) NOT NULL DEFAULT 0 COMMENT 'private journal',
   `cshout` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'see c-shouts',

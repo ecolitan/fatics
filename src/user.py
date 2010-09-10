@@ -224,6 +224,13 @@ class BaseUser(object):
     def has_timeseal(self):
         return self.session.use_timeseal or self.session.use_zipseal
 
+    def in_silence(self):
+        return self.vars['silence'] and (self.session.games
+            or self.session.observed)
+
+    def hears_channels(self):
+        return not self.vars['chanoff'] and not self.in_silence()
+
 # a registered user
 class User(BaseUser):
     def __init__(self, u):
@@ -237,7 +244,8 @@ class User(BaseUser):
         self.admin_level = u['user_admin_level']
         self.is_guest = False
         self.channels = db.user_get_channels(self.id)
-        self.vars = db.user_get_vars(self.id)
+        self.vars = db.user_get_vars(self.id,
+            var.varlist.get_persistent_var_names())
 
         self.vars['formula'] = None
         for num in range(1, 10):

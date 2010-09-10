@@ -104,6 +104,31 @@ class TestChannel(Test):
 
         self.close(t)
 
+    def test_chanoff_var(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_guest()
+
+        t.write('+ch 2000\n')
+        self.expect('[2000] added to your channel list.', t)
+        t2.write('+ch 2000\n')
+        self.expect('[2000] added to your channel list.', t2)
+
+        t.write('t 2000 test 1\n')
+        self.expect('test 1', t2)
+
+        t2.write('set chanoff 1\n')
+        self.expect('You will not hear channel tells.', t2)
+        t.write('t 2000 test 2\n')
+        self.expect_not('test 2', t2)
+
+        t2.write('set chanoff 0\n')
+        self.expect('You will now hear channel tells.', t2)
+        t.write('t 2000 test 3\n')
+        self.expect('test 3', t2)
+
+        self.close(t)
+        self.close(t2)
+
 class TestInchannel(Test):
     def test_inchannel(self):
         t = self.connect_as_guest()

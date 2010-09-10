@@ -41,6 +41,8 @@ class Channel(object):
         for u in self.online:
             if is_guest and not u.vars['ctell']:
                 continue
+            if not u.hears_channels():
+                continue
             if not name in u.censor:
                 u.write(msg)
                 count += 1
@@ -78,7 +80,9 @@ class Channel(object):
             return "%d" % self.id
 
     def get_online(self):
-        return [u.get_display_name() for u in self.online]
+        return [(u.get_display_name() if u.hears_channels() else
+                '{%s}' % u.get_display_name())
+            for u in self.online]
 
 class ChannelList(object):
     all = {}

@@ -86,5 +86,13 @@ class Forward(Command):
         g = conn.user.session.games.current()
         g.forward(n, conn)
 
+@ics_command('unexamine', '')
+class Unexamine(Command):
+    def run(self, args, conn):
+        if not conn.user.session.games or conn.user.session.games.current().gtype != game.EXAMINED:
+            conn.write(_("You are not examining a game.\n"))
+            return
+        g = conn.user.session.games.current()
+        g.leave(conn.user)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -42,6 +42,7 @@ class Var(object):
         self.default = default
         self.db_store = lambda user_id, name, val: None
         self.is_persistent = False
+        self.is_formula_or_note = False
         # display in vars output
         self.display_in_vars = True
 
@@ -49,11 +50,11 @@ class Var(object):
         self.display_in_vars = False
         return self
 
-    def add_as_var(self): 
+    def add_as_var(self):
         vars[self.name] = self
         self.is_ivar = False
         return self
-    
+
     def add_as_ivar(self, number): 
         ivars[self.name] = self
         ivar_number[number] = self
@@ -122,6 +123,7 @@ class FormulaVar(Var):
         super(FormulaVar, self).__init__(name, None)
         self.num = num
         self.display_in_vars = False
+        self.is_formula_or_note = True
 
     def set(self, user, val):
         if val is None:
@@ -146,6 +148,7 @@ class NoteVar(Var):
     def __init__(self, name, default):
         Var.__init__(self, name, default)
         self.display_in_vars = False # don't display in "vars" output
+        self.is_formula_or_note = True
 
     def set(self, user, val):
         if val is not None and len(val) > self.max_len:
@@ -231,6 +234,8 @@ class VarList(object):
         BoolVar("cshout", True, N_("You will now hear cshouts.\n"), N_("You will not hear cshouts.\n")).persist().add_as_var()
         BoolVar("tell", True, N_("You will now hear direct tells from unregistered users.\n"), N_("You will not hear direct tells from unregistered users.\n")).persist().add_as_var()
         BoolVar("ctell", True, N_("You will now hear channel tells from unregistered users.\n"), N_("You will not hear channel tells from unregistered users.\n")).persist().add_as_var()
+        BoolVar("chanoff", False, N_("You will not hear channel tells.\n"), N_("You will now hear channel tells.\n")).persist().add_as_var()
+
         BoolVar("open", True, N_("You are now open to receive match requests.\n"), N_("You are no longer open to receive match requests.\n")).persist().add_as_var()
         BoolVar("silence", False, N_("You will now play games in silence.\n"), N_("You will not play games in silence.\n")).persist().add_as_var()
         BoolVar("bell", True, N_("You will now hear beeps.\n"), N_("You will not hear beeps.\n")).persist().add_as_var()
@@ -252,7 +257,7 @@ class VarList(object):
         IntVar("height", 24, min=5).persist().add_as_var()
         IntVar("width", 79, min=32).persist().add_as_var()
 
-        IntVar("style", 12, min=0, max=12).add_as_var()
+        IntVar("style", 12, min=0, max=12).persist().add_as_var()
         IntVar("kiblevel", 0, min=0, max=9999).add_as_var()
         StringVar("interface", None).add_as_var()
         PromptVar("prompt", config.prompt).add_as_var()
@@ -267,9 +272,12 @@ class VarList(object):
 
         self.default_vars = {}
         self.transient_vars = {}
+        self.persistent_vars = set()
         for var in vars.itervalues():
             if var.is_persistent:
                 self.default_vars[var.name] = var.default
+                if not var.is_formula_or_note:
+                    self.persistent_vars.add(var.name)
             else:
                 self.transient_vars[var.name] = var.default
 
@@ -313,6 +321,11 @@ class VarList(object):
         self.default_ivars = {}
         for ivar in ivars.itervalues():
             self.default_ivars[ivar.name] = ivar.default
+
+    def get_persistent_var_names(self):
+        """ For reading a user's vars from the database;
+        does not include formula variables. """
+        return copy.copy(self.persistent_vars)
 
     def get_default_vars(self):
         return copy.copy(self.default_vars)

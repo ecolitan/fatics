@@ -100,15 +100,16 @@ class ExaminedGame(Game):
             self.result('Game drawn because neither player has mating material', '1/2-1/2')
 
     def leave(self, user):
-        # user may be offline if he or she disconnected
         self.players.remove(user)
+        user.session.games.free('[examined]')
+        # user may be offline if he or she disconnected unexpectedly
         if user.is_online:
             user.write(N_('You are no longer examining game %d.\n') % self.number)
         for p in self.players + list(self.observers):
             p.write(N_('%s has stopped examining game %d.\n') % (user.name, self.number))
         if not self.players:
             for p in self.observers:
-                p.write(N_('Game %d (which you were observing) has no examiners.\n') % self.number)
+                p.write('Game %d (which you were observing) has no examiners.\n', (self.number,))
             self.free()
 
     def result(self, msg, result_code):

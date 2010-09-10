@@ -191,4 +191,88 @@ class SayTest(Test):
         self.close(t)
         self.close(t2)
 
+class SilenceVarTest(Test):
+    @with_player('TestPlayer', 'testpass')
+    def test_silence_var(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('set silence 1\n')
+        self.expect('You will now play games in silence.', t2)
+
+        t.write('f testplayer\n')
+        self.expect('TestPlayer is in silence mode.', t)
+
+        t.write('+ch 5\n')
+        self.expect('[5] added to your channel list.', t)
+        t2.write('+ch 5\n')
+        self.expect('[5] added to your channel list.', t2)
+
+        t.write('t 5 test 1\n')
+        self.expect('test 1', t2)
+
+        # playing a game
+        t.write('match testplayer white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        t.write('t 5 test 2\n')
+        self.expect_not('test 2', t2)
+        t.write('abort\n')
+        self.expect('Game aborted', t)
+        self.expect('Game aborted', t2)
+
+        # examining a game
+        t2.write('ex\n')
+        self.expect('examine (scratch) mode', t2)
+        t.write('t 5 test 3\n')
+        self.expect_not('test 3', t2)
+        t2.write('unex\n')
+        self.expect('You are no longer examining', t2)
+
+        # observing a game
+        t3 = self.connect_as('GuestABCD', '')
+        t.write('match guestabcd white 1 0\n')
+        self.expect('Challenge:', t3)
+        t3.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t3)
+        t2.write('o 1\n')
+        self.expect('now observing game 1', t2)
+        t.write('t 5 test 4\n')
+        self.expect_not('test 4', t2)
+        t.write('abort\n')
+        self.expect('Game aborted', t)
+        self.expect('Game aborted', t2)
+        self.expect('Game aborted', t3)
+        self.close(t3)
+
+        # shouts
+        t2.write('ex\n')
+        self.expect('examine (scratch) mode', t2)
+        t.write('shout test 5\n')
+        self.expect_not('test 5', t2)
+
+        # c-shouts
+        t.write('cshout test 6\n')
+        self.expect_not('test 6', t2)
+
+        # inchannel
+        t.write('in 5\n')
+        self.expect('{TestPlayer}', t)
+        t2.write('unex\n')
+        self.expect('You are no longer examining', t2)
+
+        t.write('t 5 test 7\n')
+        self.expect('test 7', t2)
+
+        t.write('-ch 5\n')
+        self.expect('[5] removed from your channel list.', t)
+        t2.write('-ch 5\n')
+        self.expect('[5] removed from your channel list.', t2)
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

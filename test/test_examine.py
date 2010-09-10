@@ -81,4 +81,18 @@ class TestExamine(Test):
 
         self.close(t)
 
+class TestUnexamine(Test):
+    def test_unexamine(self):
+        t = self.connect_as_guest()
+        t.write('ex\n')
+        t.write('unex\n')
+        self.expect('You are no longer examining game 1.', t)
+
+        t.write('unex\n')
+        self.expect('You are not examining a game.', t)
+        t.write('unex 1\n')
+        self.expect('Usage: ', t)
+
+        self.close(t)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

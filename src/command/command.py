@@ -148,24 +148,6 @@ class Allobservers(Command):
             for g in game.games.itervalues():
                 g.show_observers(conn)
 
-@ics_command('cshout', 'S', admin.Level.user)
-class Cshout(Command):
-    @requires_registration
-    def run(self, args, conn):
-        if not conn.user.vars['cshout']:
-            conn.write(_("(Did not c-shout because you are not listening to c-shouts)\n"))
-        else:
-            count = 0
-            name = conn.user.name
-            dname = conn.user.get_display_name()
-            for u in online.itervalues():
-                if u.vars['cshout']:
-                    if name not in u.censor:
-                        u.write(_("%s c-shouts: %s\n") %
-                            (dname, args[0]))
-                        count += 1
-            conn.write(ngettext("(c-shouted to %d player)\n", "(c-shouted to %d players)\n", count) % count)
-
 @ics_command('date', '', admin.Level.user)
 class Date(Command):
     def run(self, args, conn):
@@ -186,6 +168,8 @@ class Finger(Command):
 
             if u.is_online:
                 conn.write(_('On for: %s   Idle: %s\n') % (u.session.get_online_time(), u.session.get_idle_time()))
+                if u.vars['silence']:
+                    conn.write(_('%s is in silence mode.\n') % u.name)
 
                 if len(u.session.games) > 0:
                     g = u.session.games.current()
@@ -291,24 +275,6 @@ class History(Command):
         if u:
             history.show_for_user(u, conn)
 
-@ics_command('it', 'S', admin.Level.user)
-class It(Command):
-    @requires_registration
-    def run(self, args, conn):
-        if not conn.user.vars['shout']:
-            conn.write(_("(Did not it-shout because you are not listening to shouts)\n"))
-        else:
-            count = 0
-            name = conn.user.name
-            dname = conn.user.get_display_name()
-            for u in online.itervalues():
-                if u.vars['shout']:
-                    if name not in u.censor:
-                        u.write(_("--> %s %s\n") %
-                            (dname, args[0]))
-                        count += 1
-            conn.write(ngettext("(it-shouted to %d player)\n", "(it-shouted to %d players)\n", count) % count)
-
 @ics_command('match', 'wt', admin.Level.user)
 class Match(Command):
     def run(self, args, conn):
@@ -372,23 +338,6 @@ class Password(Command):
 class Quit(Command):
     def run(self, args, conn):
         conn.loseConnection('quit')
-
-@ics_command('shout', 'S', admin.Level.user)
-class Shout(Command):
-    @requires_registration
-    def run(self, args, conn):
-        if not conn.user.vars['shout']:
-            conn.write(_("(Did not shout because you are not listening to shouts)\n"))
-        else:
-            count = 0
-            name = conn.user.name
-            dname = conn.user.get_display_name()
-            for u in online.itervalues():
-                if u.vars['shout']:
-                    if name not in u.censor:
-                        u.write(_("%s shouts: %s\n") % (name, args[0]))
-                        count += 1
-            conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
 
 @ics_command('unalias', 'w', admin.Level.user)
 class Unalias(Command):
