@@ -59,7 +59,7 @@ known_titles = [
 
 """ transient or obsolete vars """
 ignored_vars = [
-    'style', 'rated', 'availinfo', 'availmin', 'availmax',
+    'rated', 'availinfo', 'availmin', 'availmax',
     'pgn', 'tourney', 'tolerance', 'kiblevel', 'flip'
 ]
 
@@ -238,8 +238,7 @@ class FBot(icsbot.IcsBot):
             if m:
                 # don't store these values, but we can check
                 # the user's interface for compatibility.
-                if m.group(1) == 'Interface':
-                    interface = m.group(2)
+                interface = m.group(1)
                 continue
 
             # parse variables
