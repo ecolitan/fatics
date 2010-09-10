@@ -9,6 +9,8 @@ syntax: glob
 *.po
 *.o
 *.a
+.git
+data/*.pgn
 _trial_temp
 
 timeseal/*seal
