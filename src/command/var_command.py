@@ -28,7 +28,7 @@ class Iset(Command):
             v.set(conn.user, val)
         except trie.NeedMore as e:
             assert(len(e.matches) >= 2)
-            conn.write(_('Ambiguous ivariable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))
+            conn.write(_('Ambiguous ivariable "%(ivname)s". Matches: %(matches)s\n') % {'ivname': name, 'matches': ' '.join([v.name for v in e.matches])})
         except KeyError:
             conn.write(_('No such ivariable "%s".\n') % name)
         except var.BadVarError:
@@ -44,7 +44,7 @@ class Set(Command):
             v.set(conn.user, val)
         except trie.NeedMore as e:
             assert(len(e.matches) >= 2)
-            conn.write(_('Ambiguous variable "%s". Matches: %s\n') % (name, ' '.join([v.name for v in e.matches])))
+            conn.write(_('Ambiguous variable "%(vname)s". Matches: %(matches)s\n') % {'vname': name, 'matches': ' '.join([v.name for v in e.matches])})
         except KeyError:
             conn.write(_('No such variable "%s".\n') % name)
         except var.BadVarError:

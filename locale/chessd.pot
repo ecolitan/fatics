@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: FatICS\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2010-09-09 03:50-0400\n"
+"POT-Creation-Date: 2010-09-10 20:18-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -35,12 +35,12 @@ msgstr ""
 msgid "Unknown (%d)"
 msgstr ""
 
-#: src/channel.py:58
+#: src/channel.py:63
 #, python-format
 msgid "[%s] is already on your channel list.\n"
 msgstr ""
 
-#: src/channel.py:65
+#: src/channel.py:70
 #, python-format
 msgid "[%s] is not on your channel list.\n"
 msgstr ""
@@ -104,22 +104,17 @@ msgstr ""
 msgid "Game %d: %s moves: %s\n"
 msgstr ""
 
-#: src/examine.py:106
+#: src/examine.py:107
 #, python-format
 msgid "You are no longer examining game %d.\n"
 msgstr ""
 
-#: src/examine.py:108
+#: src/examine.py:109
 #, python-format
 msgid "%s has stopped examining game %d.\n"
 msgstr ""
 
-#: src/examine.py:111
-#, python-format
-msgid "Game %d (which you were observing) has no examiners.\n"
-msgstr ""
-
-#: src/examine.py:116
+#: src/examine.py:117
 #, python-format
 msgid "Game %d: %s %s\n"
 msgstr ""
@@ -647,176 +642,230 @@ msgstr ""
 msgid "There is no history game %d for %s.\n"
 msgstr ""
 
-#: src/user.py:273
+#: src/user.py:281
 #, python-format
 msgid "**** %s is already logged in; closing the other connection. ****\n"
 msgstr ""
 
-#: src/user.py:275
+#: src/user.py:283
 #, python-format
 msgid ""
 "**** %s has arrived; you can't both be logged in. ****\n"
 "\n"
 msgstr ""
 
-#: src/user.py:294
+#: src/user.py:302
 #, python-format
 msgid "Present company includes: %s\n"
 msgstr ""
 
-#: src/user.py:514
+#: src/user.py:522
 #, python-format
 msgid "Names should be at least %d characters long.  Try again.\n"
 msgstr ""
 
-#: src/user.py:516
+#: src/user.py:524
 #, python-format
 msgid "Names should be at most %d characters long.  Try again.\n"
 msgstr ""
 
-#: src/user.py:518
+#: src/user.py:526
 msgid ""
 "Names should only consist of lower and upper case letters.  Try again.\n"
 msgstr ""
 
-#: src/user.py:564
+#: src/user.py:572
 #, python-format
 msgid "You need to specify at least %d characters of the name.\n"
 msgstr ""
 
-#: src/user.py:569
+#: src/user.py:577
 #, python-format
 msgid "No player named \"%s\" is online.\n"
 msgstr ""
 
-#: src/user.py:574 src/user.py:591
+#: src/user.py:582 src/user.py:599
 #, python-format
 msgid "There is no player matching the name \"%s\".\n"
 msgstr ""
 
-#: src/user.py:576 src/user.py:588
+#: src/user.py:584 src/user.py:596
 #, python-format
 msgid "\"%s\" is not a valid handle.\n"
 msgstr ""
 
-#: src/user.py:578
+#: src/user.py:586
 #, python-format
 msgid "Ambiguous name \"%s\". Matches: %s\n"
 msgstr ""
 
-#: src/var.py:88 src/var.py:102 src/var.py:126
+#: src/var.py:89 src/var.py:103 src/var.py:131 src/var.py:222
 #, python-format
 msgid "%s unset.\n"
 msgstr ""
 
-#: src/var.py:90 src/var.py:106 src/var.py:114 src/var.py:135
+#: src/var.py:91 src/var.py:107 src/var.py:117 src/var.py:140
 #, python-format
 msgid "%(name)s set to \"%(val)s\".\n"
 msgstr ""
 
-#: src/var.py:152
+#: src/var.py:158
 #, python-format
 msgid "Note %s unset.\n"
 msgstr ""
 
-#: src/var.py:154
+#: src/var.py:160
 #, python-format
 msgid "Note %(name)s set: %(val)s\n"
 msgstr ""
 
-#: src/var.py:174
+#: src/var.py:180
 #, python-format
 msgid "%(name)s set to %(val)s.\n"
 msgstr ""
 
-#: src/var.py:187
-#, python-format
-msgid "%s set."
-msgstr ""
-
-#: src/var.py:191
-#, python-format
-msgid "%s unset."
-msgstr ""
-
-#: src/var.py:227
-msgid "You will now hear shouts."
-msgstr ""
-
-#: src/var.py:227
-msgid "You will not hear shouts."
-msgstr ""
-
-#: src/var.py:228
-msgid "You will now hear cshouts."
-msgstr ""
-
-#: src/var.py:228
-msgid "You will not hear cshouts."
-msgstr ""
-
-#: src/var.py:229
-msgid "You will now hear direct tells from unregistered users."
-msgstr ""
-
-#: src/var.py:229
-msgid "You will not hear direct tells from unregistered users."
-msgstr ""
-
-#: src/var.py:230
-msgid "You are now open to receive match requests."
-msgstr ""
-
-#: src/var.py:230
-msgid "You are no longer open to receive match requests."
-msgstr ""
-
-#: src/var.py:231
-msgid "You will now play games in silence."
-msgstr ""
-
-#: src/var.py:231
-msgid "You will not play games in silence."
-msgstr ""
-
-#: src/var.py:232
-msgid "You will now hear beeps."
-msgstr ""
-
-#: src/var.py:232
-msgid "You will not hear beeps."
+#: src/var.py:233
+msgid "You will now hear shouts.\n"
 msgstr ""
 
 #: src/var.py:233
-msgid "Auto-flagging enabled."
-msgstr ""
-
-#: src/var.py:233
-msgid "Auto-flagging disabled."
+msgid "You will not hear shouts.\n"
 msgstr ""
 
 #: src/var.py:234
-msgid "Your prompt will now show the time."
+msgid "You will now hear cshouts.\n"
 msgstr ""
 
 #: src/var.py:234
-msgid "Your prompt will now not show the time."
+msgid "You will not hear cshouts.\n"
 msgstr ""
 
 #: src/var.py:235
-msgid "You will now hear kibitzes."
+msgid "You will now hear direct tells from unregistered users.\n"
 msgstr ""
 
 #: src/var.py:235
-msgid "You will not hear kibitzes."
+msgid "You will not hear direct tells from unregistered users.\n"
 msgstr ""
 
 #: src/var.py:236
-msgid "You will now hear if people notify you, but you don't notify them."
+msgid "You will now hear channel tells from unregistered users.\n"
 msgstr ""
 
 #: src/var.py:236
-msgid "You will not hear if people notify you, but you don't notify them."
+msgid "You will not hear channel tells from unregistered users.\n"
+msgstr ""
+
+#: src/var.py:237
+msgid "You will not hear channel tells.\n"
+msgstr ""
+
+#: src/var.py:237
+msgid "You will now hear channel tells.\n"
+msgstr ""
+
+#: src/var.py:239
+msgid "You are now open to receive match requests.\n"
+msgstr ""
+
+#: src/var.py:239
+msgid "You are no longer open to receive match requests.\n"
+msgstr ""
+
+#: src/var.py:240
+msgid "You will now play games in silence.\n"
+msgstr ""
+
+#: src/var.py:240
+msgid "You will not play games in silence.\n"
+msgstr ""
+
+#: src/var.py:241
+msgid "You will now hear beeps.\n"
+msgstr ""
+
+#: src/var.py:241
+msgid "You will not hear beeps.\n"
+msgstr ""
+
+#: src/var.py:242
+msgid "Auto-flagging enabled.\n"
+msgstr ""
+
+#: src/var.py:242
+msgid "Auto-flagging disabled.\n"
+msgstr ""
+
+#: src/var.py:243
+msgid "Your prompt will now show the time.\n"
+msgstr ""
+
+#: src/var.py:243
+msgid "Your prompt will now not show the time.\n"
+msgstr ""
+
+#: src/var.py:244
+msgid "You will now hear kibitzes.\n"
+msgstr ""
+
+#: src/var.py:244
+msgid "You will not hear kibitzes.\n"
+msgstr ""
+
+#: src/var.py:245
+msgid "You will now hear if people notify you, but you don't notify them.\n"
+msgstr ""
+
+#: src/var.py:245
+msgid "You will not hear if people notify you, but you don't notify them.\n"
+msgstr ""
+
+#: src/var.py:246
+msgid "You will request minimum move time when games start.\n"
+msgstr ""
+
+#: src/var.py:246
+msgid "You will not request minimum move time when games start.\n"
+msgstr ""
+
+#: src/var.py:247
+msgid "You will request noescape when games start..\n"
+msgstr ""
+
+#: src/var.py:247
+msgid "You will not request noescape when games start.\n"
+msgstr ""
+
+#: src/var.py:248
+msgid "You will now see seek ads.\n"
+msgstr ""
+
+#: src/var.py:248
+msgid "You will not see seek ads.\n"
+msgstr ""
+
+#: src/var.py:249
+msgid "You will not hear communications echoed.\n"
+msgstr ""
+
+#: src/var.py:249
+msgid "You will now not hear communications echoed.\n"
+msgstr ""
+
+#: src/var.py:250
+msgid "You will now enter examine mode after a game.\n"
+msgstr ""
+
+#: src/var.py:250
+msgid "You will now not enter examine mode after a game.\n"
+msgstr ""
+
+#: src/var.py:253
+msgid "Your tournament variable is now set.\n"
+msgstr ""
+
+#: src/var.py:253
+msgid "Your tournament variable is no longer set.\n"
 msgstr ""
 
 #: src/command/admin_command.py:116
@@ -865,7 +914,7 @@ msgstr ""
 msgid "%s -> %s\n"
 msgstr ""
 
-#: src/command/command.py:113 src/command/command.py:423
+#: src/command/command.py:113 src/command/command.py:347
 msgid "Alias names may not be more than 15 characters long.\n"
 msgstr ""
 
@@ -895,227 +944,176 @@ msgid "No one is observing game %d.\n"
 msgstr ""
 
 #: src/command/command.py:156
-msgid "(Did not c-shout because you are not listening to c-shouts)\n"
-msgstr ""
-
-#: src/command/command.py:164
-#, python-format
-msgid "%s c-shouts: %s\n"
-msgstr ""
-
-#: src/command/command.py:167
-#, python-format
-msgid "(c-shouted to %d player)\n"
-msgid_plural "(c-shouted to %d players)\n"
-msgstr[0] ""
-msgstr[1] ""
-
-#: src/command/command.py:174
 #, python-format
 msgid "Server time    - %s\n"
 msgstr ""
 
-#: src/command/command.py:175
+#: src/command/command.py:157
 #, python-format
 msgid "GMT            - %s\n"
 msgstr ""
 
-#: src/command/command.py:185
+#: src/command/command.py:167
 #, python-format
 msgid ""
 "Finger of %s:\n"
 "\n"
 msgstr ""
 
-#: src/command/command.py:188
+#: src/command/command.py:170
 #, python-format
 msgid "On for: %s   Idle: %s\n"
 msgstr ""
 
-#: src/command/command.py:193
+#: src/command/command.py:172
+#, python-format
+msgid "%s is in silence mode.\n"
+msgstr ""
+
+#: src/command/command.py:177
 #, python-format
 msgid "(playing game %d: %s vs. %s)\n"
 msgstr ""
 
-#: src/command/command.py:195
+#: src/command/command.py:179
 #, python-format
 msgid "(examining game %d)\n"
 msgstr ""
 
-#: src/command/command.py:200
+#: src/command/command.py:184
 #, python-format
 msgid "%s has never connected.\n"
 msgstr ""
 
-#: src/command/command.py:202
+#: src/command/command.py:186
 #, python-format
 msgid "Last disconnected: %s\n"
 msgstr ""
 
-#: src/command/command.py:221
+#: src/command/command.py:205
 msgid "Timeseal:    On\n"
 msgstr ""
 
-#: src/command/command.py:223
+#: src/command/command.py:207
 msgid "Zipseal:     On\n"
 msgstr ""
 
-#: src/command/command.py:225
+#: src/command/command.py:209
 msgid "Zipseal:     Off\n"
 msgstr ""
 
-#: src/command/command.py:238 src/command/command.py:239
+#: src/command/command.py:222 src/command/command.py:223
 #, python-format
 msgid "%2d: %s\n"
 msgstr ""
 
-#: src/command/command.py:247 src/command/game_command.py:29
+#: src/command/command.py:231 src/command/game_command.py:29
 #: src/command/game_command.py:45 src/command/game_command.py:59
 msgid "You are not playing a game.\n"
 msgstr ""
 
-#: src/command/command.py:251
+#: src/command/command.py:235
 msgid "Your opponent is not out of time.\n"
 msgstr ""
 
-#: src/command/command.py:262
+#: src/command/command.py:246
 msgid "There are no games in progress.\n"
 msgstr ""
 
-#: src/command/command.py:269
+#: src/command/command.py:253
 #, python-format
 msgid "  %(count)d game displayed (of %(total)3d in progress).\n"
 msgid_plural "  %(count)d games displayed (of %(total)d in progress).\n"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/command/command.py:299
-msgid "(Did not it-shout because you are not listening to shouts)\n"
-msgstr ""
-
-#: src/command/command.py:307
-#, python-format
-msgid "--> %s %s\n"
-msgstr ""
-
-#: src/command/command.py:310
-#, python-format
-msgid "(it-shouted to %d player)\n"
-msgid_plural "(it-shouted to %d players)\n"
-msgstr[0] ""
-msgstr[1] ""
-
-#: src/command/command.py:316
+#: src/command/command.py:282
 msgid "You can't challenge while you are playing a game.\n"
 msgstr ""
 
-#: src/command/command.py:322
+#: src/command/command.py:288
 msgid "You can't match yourself.\n"
 msgstr ""
 
-#: src/command/command.py:326 src/command/notify_command.py:32
+#: src/command/command.py:292 src/command/notify_command.py:32
 #: src/command/tell_command.py:63
 #, python-format
 msgid "%s is censoring you.\n"
 msgstr ""
 
-#: src/command/command.py:329
+#: src/command/command.py:295
 #, python-format
 msgid "You are on %s's noplay list.\n"
 msgstr ""
 
-#: src/command/command.py:332
+#: src/command/command.py:298
 #, python-format
 msgid "%s is not open to match requests.\n"
 msgstr ""
 
-#: src/command/command.py:335 src/command/command.py:393
-#: src/command/command.py:396
+#: src/command/command.py:301 src/command/td_command.py:39
+#: src/command/td_command.py:42
 #, python-format
 msgid "%s is playing a game.\n"
 msgstr ""
 
-#: src/command/command.py:350
+#: src/command/command.py:316
 #, python-format
 msgid "You are already observing game %d.\n"
 msgstr ""
 
-#: src/command/command.py:352
+#: src/command/command.py:318
 msgid "You cannot observe yourself.\n"
 msgstr ""
 
-#: src/command/command.py:362
+#: src/command/command.py:328
 msgid "Setting a password is only for registered players.\n"
 msgstr ""
 
-#: src/command/command.py:366
+#: src/command/command.py:332
 msgid "Incorrect password; password not changed!\n"
 msgstr ""
 
-#: src/command/command.py:369
+#: src/command/command.py:335
 #, python-format
 msgid "Password changed to %s.\n"
 msgstr ""
 
-#: src/command/command.py:380 src/command/tell_command.py:90
-msgid "Only TD programs are allowed to use this command\n"
-msgstr ""
-
-#: src/command/command.py:390
-msgid "A player cannot match himself or herself.\n"
-msgstr ""
-
-#: src/command/command.py:406
-msgid "(Did not shout because you are not listening to shouts)\n"
-msgstr ""
-
-#: src/command/command.py:414
-#, python-format
-msgid "%s shouts: %s\n"
-msgstr ""
-
-#: src/command/command.py:416
-#, python-format
-msgid "(shouted to %d player)\n"
-msgid_plural "(shouted to %d players)\n"
-msgstr[0] ""
-msgstr[1] ""
-
-#: src/command/command.py:427
+#: src/command/command.py:351
 #, python-format
 msgid "You have no alias \"%s\".\n"
 msgstr ""
 
-#: src/command/command.py:430
+#: src/command/command.py:354
 #, python-format
 msgid "Alias \"%s\" unset.\n"
 msgstr ""
 
-#: src/command/command.py:441
+#: src/command/command.py:365
 #, python-format
 msgid "You are not observing game %d.\n"
 msgstr ""
 
-#: src/command/command.py:445
+#: src/command/command.py:369
 msgid "You are not observing any games.\n"
 msgstr ""
 
-#: src/command/command.py:456
+#: src/command/command.py:380
 #, python-format
 msgid "Server location: %s   Server version : %s\n"
 msgstr ""
 
-#: src/command/command.py:457
+#: src/command/command.py:381
 #, python-format
 msgid "The server has been up since %s.\n"
 msgstr ""
 
-#: src/command/command.py:458
+#: src/command/command.py:382
 #, python-format
 msgid "Up for: %s\n"
 msgstr ""
 
-#: src/command/command.py:469
+#: src/command/command.py:393
 #, python-format
 msgid ""
 "%d player displayed.\n"
@@ -1139,6 +1137,7 @@ msgid "Starting a game in examine (scratch) mode.\n"
 msgstr ""
 
 #: src/command/examine_command.py:74 src/command/examine_command.py:84
+#: src/command/examine_command.py:93
 msgid "You are not examining a game.\n"
 msgstr ""
 
@@ -1378,23 +1377,90 @@ msgid ""
 "\"withdraw n\" to choose one.\n"
 msgstr ""
 
-#: src/command/ping_command.py:33
+#: src/command/ping_command.py:34
 #, python-format
 msgid "Ping time not available; %s is not using zipseal.\n"
 msgstr ""
 
-#: src/command/ping_command.py:36
+#: src/command/ping_command.py:37
 msgid "Ping time not available; please wait.\n"
 msgstr ""
 
-#: src/command/ping_command.py:38
+#: src/command/ping_command.py:39
 #, python-format
 msgid "Ping time for %s, based on %d samples:\n"
 msgstr ""
 
-#: src/command/ping_command.py:41
+#: src/command/ping_command.py:42
 #, python-format
 msgid "Average: %.3fms\n"
+msgstr ""
+
+#: src/command/shout_command.py:27
+msgid "(Did not shout because you are not listening to shouts)\n"
+msgstr ""
+
+#: src/command/shout_command.py:35
+#, python-format
+msgid "%s shouts: %s\n"
+msgstr ""
+
+#: src/command/shout_command.py:37
+#, python-format
+msgid "(shouted to %d player)\n"
+msgid_plural "(shouted to %d players)\n"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/command/shout_command.py:44
+msgid "(Did not it-shout because you are not listening to shouts)\n"
+msgstr ""
+
+#: src/command/shout_command.py:52
+#, python-format
+msgid "--> %s %s\n"
+msgstr ""
+
+#: src/command/shout_command.py:55
+#, python-format
+msgid "(it-shouted to %d player)\n"
+msgid_plural "(it-shouted to %d players)\n"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/command/shout_command.py:62
+msgid "(Did not c-shout because you are not listening to c-shouts)\n"
+msgstr ""
+
+#: src/command/shout_command.py:70
+#, python-format
+msgid "%s c-shouts: %s\n"
+msgstr ""
+
+#: src/command/shout_command.py:72
+#, python-format
+msgid "(c-shouted to %d player)\n"
+msgid_plural "(c-shouted to %d players)\n"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/command/td_command.py:26 src/command/td_command.py:51
+#: src/command/tell_command.py:90
+msgid "Only TD programs are allowed to use this command\n"
+msgstr ""
+
+#: src/command/td_command.py:36
+msgid "A player cannot match himself or herself.\n"
+msgstr ""
+
+#: src/command/td_command.py:63
+#, python-format
+msgid "%s has set your tourney variable to ON.\n"
+msgstr ""
+
+#: src/command/td_command.py:66
+#, python-format
+msgid "%s has set your tourney variable to OFF.\n"
 msgstr ""
 
 #: src/command/tell_command.py:31
@@ -1454,7 +1520,7 @@ msgstr ""
 
 #: src/command/var_command.py:31
 #, python-format
-msgid "Ambiguous ivariable \"%s\". Matches: %s\n"
+msgid "Ambiguous ivariable \"%(ivname)s\". Matches: %(matches)s\n"
 msgstr ""
 
 #: src/command/var_command.py:33
@@ -1467,29 +1533,29 @@ msgstr ""
 msgid "Bad value given for ivariable \"%s\".\n"
 msgstr ""
 
-#: src/command/var_command.py:48
+#: src/command/var_command.py:47
 #, python-format
-msgid "Ambiguous variable \"%s\". Matches: %s\n"
+msgid "Ambiguous variable \"%(vname)s\". Matches: %(matches)s\n"
 msgstr ""
 
-#: src/command/var_command.py:50
+#: src/command/var_command.py:49
 #, python-format
 msgid "No such variable \"%s\".\n"
 msgstr ""
 
-#: src/command/var_command.py:52
+#: src/command/var_command.py:51
 #, python-format
 msgid "Bad value given for variable \"%s\".\n"
 msgstr ""
 
-#: src/command/var_command.py:64
+#: src/command/var_command.py:63
 #, python-format
 msgid ""
 "Interface variable settings of %s:\n"
 "\n"
 msgstr ""
 
-#: src/command/var_command.py:80
+#: src/command/var_command.py:79
 #, python-format
 msgid ""
 "Variable settings of %s:\n"

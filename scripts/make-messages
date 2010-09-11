@@ -1,5 +1,5 @@
 #!/bin/sh
-xgettext --language=Python --keyword=N_ --keyword=write_ --output=locale/chessd.pot --from-code=utf-8 src/*.py src/*/*.py
+xgettext --language=Python --keyword=N_ --keyword=write_ --output=locale/chessd.pot --from-code=utf-8 --package-name=FatICS src/*.py src/*/*.py
 
 # for testing:
 # %s/msgstr\(.*\(\_.".*"\)*\)/msgstr\U\1/g

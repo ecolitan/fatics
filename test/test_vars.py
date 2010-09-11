@@ -102,7 +102,7 @@ class TestVars(Test):
         self.expect('Finger of Guest', t)
         self.expect('foobar% ', t)
         self.close(t)
-    
+
     def test_transient_var_user(self):
         t = self.connect_as_admin()
         t.write('set interface Thief 1.23 Midget edition\n')
@@ -118,6 +118,9 @@ class TestIvars(Test):
 
         t.write("iset smartmove 0\n")
         self.expect("smartmove unset", t)
+
+        t.write("iset se 1\n")
+        self.expect('Ambiguous ivariable "se". Matches: ', t)
 
         self.close(t)
 
