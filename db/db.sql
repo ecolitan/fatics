@@ -67,6 +67,7 @@ CREATE TABLE `user` (
   -- other flags
   `simopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for simul',
   `lang` VARCHAR(6) NOT NULL DEFAULT 'en' COMMENT 'user language',
+  `prompt` VARCHAR(16) NOT NULL DEFAULT 'fics% ' COMMENT 'command prompt',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

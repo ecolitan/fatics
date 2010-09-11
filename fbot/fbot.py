@@ -29,8 +29,8 @@ import icsbot
 
 username = 'fbot'
 password = ''
-host = 'localhost'
-#host = 'freechess.org'
+#host = 'localhost'
+host = 'freechess.org'
 port = 5000
 db_host = 'localhost'
 db_db = 'chess'
@@ -213,7 +213,6 @@ class FBot(icsbot.IcsBot):
     def copy_vars(self, *args, **kwargs):
         (data, usr, tags, passwd, user_id) = args
         #data = example_vars
-        print "copy_vars: %r" % data
         vars = {}
         formula = {}
         interface = None
@@ -233,6 +232,7 @@ class FBot(icsbot.IcsBot):
                 continue
             m = self.prompt_re.match(line)
             if m:
+                vars['prompt'] = m.group(1)
                 continue
             m = self.interface_re.match(line)
             if m:
