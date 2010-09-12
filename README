@@ -20,9 +20,9 @@ System requirements
 Timeseal and zipseal
 ====================
 The timeseal and zipseal programs can be compiled by changing to the
-timeseal/ directory typing "make" (you'll need gcc).  That should build both
-the client programs (named openseal and zipseal) and the decoders that the
-server needs (openseal_decoder, zipseal_decoder, and zipseal_encoder).
+timeseal/ directory and typing "make" (you'll need gcc).  That should build
+both the client programs (named openseal and zipseal) and the decoders that
+the server needs (openseal_decoder, zipseal_decoder, and zipseal_encoder).
 
 The source code for Win32 version of zipseal is in timeseal/win32/, but it
 doesn't have a proper build instructions, because I don't have Windows.

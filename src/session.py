@@ -35,8 +35,9 @@ class Session(object):
         self.last_tell_ch = None
         self.last_opp = None
         self.use_timeseal = False
-        self.ping_sent = None
+        self.ping_sent = []
         self.ping_time = []
+        self.move_ping_time = None
         self.use_zipseal = False
         self.check_for_timeseal = True
         self.offers_sent = []
@@ -103,22 +104,25 @@ class Session(object):
     def ping(self, for_move=False):
         # don't send another ping if one is already pending
         assert(self.use_timeseal or self.use_zipseal)
-        if not self.ping_sent:
-            self.ping_sent = time.time()
+        # Always send a ping with a move in a game being played.
+        # Otherwise, send a ping if one is not alredy pending.
+        if for_move or not self.ping_sent:
             if self.use_zipseal:
                 self.conn.write(timeseal.ZIPSEAL_PING)
             else:
                 self.conn.write(timeseal.TIMESEAL_1_PING)
+            self.ping_sent.append((time.time(), for_move))
 
     def pong(self, t):
-        if not self.ping_sent:
-            self.conn.write('protocol error: got reply without ping')
-            self.conn.loseConnection('protocol error: got reply without ping')
-        else:
-            reply_time = time.time() - self.ping_sent
-            self.ping_sent = None
-            if len(self.ping_time) > 4:
-                self.ping_time.pop(0)
-            self.ping_time.append(reply_time)
+        assert(self.ping_sent)
+        sent_time, for_move = self.ping_sent.pop(0)
+        reply_time = time.time() - sent_time
+
+        if len(self.ping_time) > 9:
+            self.ping_time.pop(0)
+        self.ping_time.append(reply_time)
+
+        if for_move:
+            self.move_ping_time = t
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

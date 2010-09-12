@@ -354,7 +354,7 @@ class PlayedGame(Game):
             moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
                 if conn.user.has_timeseal():
-                    assert(conn.session.move_ping_time != None)
+                    assert(conn.session.move_ping_time is not None)
                     #print("t %d, orig %d" % (t, conn.session.ping_reply_time))
                     elapsed = (t - conn.session.move_ping_time) / 1000.0
                     time = self.clock.update(moved_side, elapsed)
