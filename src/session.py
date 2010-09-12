@@ -105,7 +105,10 @@ class Session(object):
         assert(self.use_timeseal or self.use_zipseal)
         if not self.ping_sent:
             self.ping_sent = time.time()
-            self.conn.write(timeseal.PING)
+            if self.use_zipseal:
+                self.conn.write(timeseal.ZIPSEAL_PING)
+            else:
+                self.conn.write(timeseal.TIMESEAL_1_PING)
 
     def pong(self, t):
         if not self.ping_sent:

@@ -35,6 +35,10 @@
 
 //char hello[]="zipseal|zipseal|Running on an operating system|";
 
+/*
+ * Despite the name (left over from openseal), this doesn't do any
+ * encryption; rather, it adds a timestamp to the given message.
+ */
 static int crypt(char *s,int l)
 {
         struct timeval tv;
@@ -85,7 +89,7 @@ void sendtofics(int fd, char *buff, int *rd)
                         char ffub[BSIZE+20];
                         int k;
                         memcpy(ffub,buff,c);
-                        k=crypt(ffub,c);
+                        k = crypt(ffub,c);
                         mywrite(fd,ffub,k);
                         for(c++,k=0;c<*rd;c++,k++)
                                 buff[k]=buff[c];
@@ -96,28 +100,33 @@ void sendtofics(int fd, char *buff, int *rd)
 
 void getfromfics(int fd, char *buff, int *rd)
 {
-        int n, m;
-        while (*rd > 0) {
-                if(!memcmp(buff,"[G]",*rd<3?*rd:3)) {
-                        if(*rd<3) {
-                                break;
-                        }
-                        else {
+        int n, m, got_g = 0;
+        while(*rd > 0) {
+                for(n = 0; n < *rd && buff[n] != '\r'; n++) {
+                        if (buff[n] == '\0' && n >= 3
+                                && !memcmp(buff + n - 3, "[G]", 3))
+                        {
                                 char reply[20]="\x2""9";
+
+                                for(n++; n < *rd; n++)
+                                        buff[n-4] = buff[n];
+                                *rd -= 4;
+
                                 n = crypt(reply,2);
                                 mywrite(fd, reply, n);
-                                for(n = 3; n < *rd; n++)
-                                        buff[n-3] = buff[n];
-                                *rd -= 3;
-                                continue;
+
+                                got_g = 1;
+                                break;
                         }
                 }
-                for(n=0;n<*rd && buff[n]!='\n';n++);
-                //for(n=0;n<*rd && buff[n]!='\r';n++);
+                if (got_g) {
+                        got_g = 0;
+                        continue;
+                }
                 if(n<*rd) n++;
                 mywrite(1, buff, n);
-                for(m = n; m < *rd; m++) {
-                        buff[m - n] = buff[m];
+                for (m=n; m < *rd; m++) {
+                        buff[m -n ] = buff[m];
                 }
                 *rd -= n;
         }

@@ -19,8 +19,9 @@
 import re
 import subprocess
 
-PING = '[G]'
-REPLY = '\x02\x39' # also known as "\x2""9" or "9"
+TIMESEAL_1_PING = '[G]'
+ZIPSEAL_PING = '[G]\x00'
+REPLY = '\x02\x39' # also known as "\x29" or "9"
 
 class TimesealError(Exception):
     pass

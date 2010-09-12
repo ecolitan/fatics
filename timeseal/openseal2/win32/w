@@ -1,1 +1,0 @@
-wineconsole --backend=curses openseal2.exe localhost 5001

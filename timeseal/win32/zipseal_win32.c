@@ -113,7 +113,7 @@ int makeconn(char *hostname, unsigned short port)
         return sockfd;
 }
 
-void mywrite(int fd,char *buff,int n)
+void mysend(int fd,char *buff,int n)
 {
         int k, j;
         k = send(fd, buff, n, 0);
@@ -132,7 +132,7 @@ void sendtofics(int fd, char *buff, int *rd)
                         int k;
                         memcpy(ffub,buff,c);
                         k=crypt(ffub,c);
-                        mywrite(fd,ffub,k);
+                        mysend(fd,ffub,k);
                         for(c++,k=0;c<*rd;c++,k++)
                                 buff[k]=buff[c];
                         *rd=k;
@@ -142,31 +142,37 @@ void sendtofics(int fd, char *buff, int *rd)
 
 void getfromfics(int fd, char *buff, int *rd)
 {
-        int n, m;
-        while (*rd > 0) {
-                if(!memcmp(buff,"[G]",*rd<3?*rd:3)) {
-                        if(*rd<3) {
+        int n, m, got_g = 0;
+        while(*rd > 0) {
+                for(n=0; n<*rd && buff[n]!='\r'; n++) {
+                        if (buff[n] == '\0' && n >= 3
+                                && !strncmp(buff + n - 3, "[G]",3))
+                        {
+                                char reply[20]="\x2""9";
+
+                                for(n++; n < *rd; n++) {
+                                        buff[n-4] = buff[n];
+                                }
+                                *rd -= 4;
+
+                                n = crypt(reply,2);
+                                mysend(fd, reply, n);
+
+                                got_g = 1;
                                 break;
                         }
-                        else {
-                                char reply[20]="\x2""9";
-                                n = crypt(reply,2);
-                                mywrite(fd, reply, n);
-                                for(n = 3; n < *rd; n++)
-                                        buff[n-3] = buff[n];
-                                *rd -= 3;
-                                continue;
-                        }
                 }
-                for(n=0;n<*rd && buff[n]!='\n';n++);
-                //for(n=0;n<*rd && buff[n]!='\r';n++);
+                if (got_g) {
+                        got_g = 0;
+                        continue;
+                }
                 if(n<*rd) n++;
                 if (write(1, buff, n) != n) {
-                     printf("error writing to stdout (%d)\n", WSAGetLastError());
-                     exit(1);
-
+                        printf("error writing to stdout (%d)\n",
+                                WSAGetLastError());
+                        exit(1);
                 }
-                for(m = n; m < *rd; m++) {
+                for (m = n; m < *rd; m++) {
                         buff[m - n] = buff[m];
                 }
                 *rd -= n;
