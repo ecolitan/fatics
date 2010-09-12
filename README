@@ -35,7 +35,7 @@ using the schema in db/db.sql.  I typically do this by by running
 "mysql chess" from the top of the source directory, and then
 typing "source db/db.sql" at the mysql> prompt.
 
-If there are no errers, you're ready to try to run the server.  The
+If there are no errors, you're ready to try to run the server.  The
 command I use is (again from the top of the FatICS source tree):
 
   twistd --pidfile chessd.pid -r epoll -oy src/chessd.tac
@@ -46,22 +46,22 @@ console (useful for testing and debugging):
 
   twistd --pidfile chess.pid -r epoll -noy src/chessd.tac
 
-If all goes according to plan, the server will be listening on ports 5000
+If all goes according to plan, the server will be listening on port 5000
 (and port 5001 for zipseal) and ready for you to log in.  By default the
 schema creates one player named "admin" with the password "admin";
-obviously it's a good idea to log in to the server and change the
-password (using the "password" command) if you are testing on a machine
-with ports open to the Internet.
+obviously it's a good idea to log in and change the password (using the
+"password" command) if you are testing on a machine with ports open
+to the Internet.
 
 Running the tests
 =================
-The test suite is run with the command
+The server and admin password for the tests can be changed by editing
+test/test.py.  To run the test suite, use the command
 
   trial test
 
 from the top-level directory.  All the tests pass for me.  I can pretty much
-guarantee that some will fail on any system other than my own, but there you
-go.
+guarantee that right now some will fail on any system other than my own, but
+there you go.
 
 -- Wil
-
