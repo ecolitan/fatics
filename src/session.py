@@ -100,7 +100,7 @@ class Session(object):
             if v.name in self.ivars:
                 del self.ivars[v.name]
 
-    def ping(self):
+    def ping(self, for_move=False):
         # don't send another ping if one is already pending
         assert(self.use_timeseal or self.use_zipseal)
         if not self.ping_sent:

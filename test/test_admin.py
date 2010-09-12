@@ -43,8 +43,8 @@ class CommandTest(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('testplayer', 'passwd')
     def test_annunreg(self):
-        self.adduser('testplayer', 'passwd')
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
         t3 = self.connect_as_guest()
@@ -59,7 +59,6 @@ class CommandTest(Test):
         self.close(t2)
         self.close(t3)
         self.close(t4)
-        self.deluser('testplayer')
 
     def test_nuke(self):
         t = self.connect_as_admin()

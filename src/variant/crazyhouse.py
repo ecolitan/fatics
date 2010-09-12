@@ -387,7 +387,10 @@ class Position(object):
         self.promoted = array('b', 0x80 * [0])
         self.castle_flags = 0
         self.king_pos = [None, None]
-        self.holding = {pc: 0 for pc in 'PNBRQpnbrq'}
+        # self.holding = {pc: 0 for pc in 'PNBRQpnbrq'} # Python 2.7-ism
+        self.holding = {}
+        for pc in 'PNBRQpnbrq':
+            self.holding[pc] = 0 # works with Python 2.6
         self.history = PositionHistory()
         self.set_pos(fen)
         self.is_draw_nomaterial = False # never happens in zh

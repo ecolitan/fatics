@@ -59,13 +59,37 @@ class TestExamine(Test):
 
         self.close(t)
 
+    def test_examine_moves(self):
+        t = self.connect_as('GuestABCD', '')
+
+        t.write('iset ms 1\n')
+        t.write('ex\n')
+        self.expect('Starting a game in examine (scratch) mode.', t)
+        t.write('e4\n')
+        t.write('e5\n')
+        t.write('f4\n')
+        t.write('moves\n')
+
+        # original FICS would send "GuestABCD (UNR) vs. GuestABCD (UNR)" here
+        self.expect('Movelist for game 1:\r\n\r\nGuestABCD (++++) vs. GuestABCD (++++) --- ', t)
+        self.expect('Unrated untimed match, initial time: 0 minutes, increment: 0 seconds.', t)
+        self.expect('Move  GuestABCD               GuestABCD', t)
+        self.expect('----  ---------------------   ---------------------', t)
+        self.expect('  1.  e4      (0:00.000)      e5      (0:00.000)', t)
+        self.expect('  2.  f4      (0:00.000)', t)
+        self.expect('      {Still in progress} *', t)
+
+        self.close(t)
+
     def test_examine_checkmate(self):
         moves = ['e4', 'f5', 'h4', 'g5', 'Qh5#']
         self._assert_game_is_legal(moves, 'Game 1: Black checkmated 1-0')
 
     def test_examine_stalemate(self):
-        # by Sam Loyd
-        moves = ['e3', 'a5', 'Qh5', 'Ra6', 'Qxa5', 'h5', 'Qxc7', 'Rah6', 'h4', 'f6', 'Qxd7+', 'Kf7', 'Qxb7', 'Qd3', 'Qxb8', 'Qh7', 'Qxc8', 'Kg6', 'Qe6']
+        # game by Sam Loyd
+        moves = ['e3', 'a5', 'Qh5', 'Ra6', 'Qxa5', 'h5', 'Qxc7', 'Rah6',
+            'h4', 'f6', 'Qxd7+', 'Kf7', 'Qxb7', 'Qd3', 'Qxb8', 'Qh7',
+            'Qxc8', 'Kg6', 'Qe6']
         self._assert_game_is_legal(moves, 'Game 1: Game drawn by stalemate 1/2-1/2')
 
     def _assert_game_is_legal(self, moves, result=None):

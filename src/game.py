@@ -83,7 +83,7 @@ class Game(object):
         for p in self.players:
             p.send_board(self)
             if p.has_timeseal():
-                p.session.ping()
+                p.session.ping(for_move=True)
         for u in self.observers:
             u.send_board(self)
 
@@ -190,15 +190,33 @@ class Game(object):
         # don't translate since clients parse these messages
         conn.write("\nMovelist for game %d:\n\n" % self.number)
 
-        conn.write("%s (%s) vs. %s (%s) --- %s\n" % (self.white.name,
-            self.white_rating, self.black.name, self.black_rating,
-            time.strftime("%a %b %e, %H:%M %Z %Y",
-                time.localtime(self.start_time))))
+        time_str = time.strftime("%a %b %e, %H:%M %Z %Y",
+            time.localtime(self.start_time))
+
+        # Original FICS prints (UNR) for unrated players here; in other
+        # places it usually uses (++++) or (----) instead.  This looks like
+        # gratuitous inconsistency to me, so let's see if we can get
+        # away with using the same notation everywhere.
+        if self.gtype == PLAYED:
+            white_name = self.white.name
+            black_name = self.black.name
+            white_rating = self.white_rating
+            black_rating = self.black_rating
+            white_time = self.white_time
+        else:
+            assert(self.gtype == EXAMINED)
+            white_name = self.players[0].name
+            black_name = white_name
+            white_rating = self.players[0].get_rating(self.speed_variant)
+            black_rating = white_rating
+
+        conn.write("%s (%s) vs. %s (%s) --- %s\n" % (white_name,
+            white_rating, black_name, black_rating, time_str))
+
         conn.write("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
             (self.rated_str.capitalize(), self.speed_variant,
                 self.white_time, self.inc))
-        assert(len(self.black.name) <= 23)
-        conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (self.white.name, self.black.name))
+        conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (white_name, black_name))
         i = self.variant.pos.start_ply & ~1
         while i < self.variant.pos.ply:
             if i < self.variant.pos.start_ply:
@@ -336,9 +354,9 @@ class PlayedGame(Game):
             moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
                 if conn.user.has_timeseal():
-                    assert(conn.session.ping_reply_time != None)
+                    assert(conn.session.move_ping_time != None)
                     #print("t %d, orig %d" % (t, conn.session.ping_reply_time))
-                    elapsed = (t - conn.session.ping_reply_time) / 1000.0
+                    elapsed = (t - conn.session.move_ping_time) / 1000.0
                     time = self.clock.update(moved_side, elapsed)
                 else:
                     time = self.clock.update(moved_side)

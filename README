@@ -19,9 +19,11 @@ System requirements
 
 Running the server
 ==================
-First you'll need to create the MySQL database.  The server uses
-localhost as the server and the username "chess" by default; these
-can be changed by editing src/config.py.  The server looks in
+First you'll need to create a MySQL database and user.  I assume you
+know how to do this.
+
+The server uses localhost as the server and the username "chess" by default;
+these can be changed by editing src/config.py.  The server looks in
 ~/.my.cnf for the password to use; for example:
 
 # start .my.cnf
@@ -30,37 +32,41 @@ user = chess
 password = your_password_here
 # end .my.cnf
 
-Once a MySQL user is set up, you can create the tables FatICS needs
-using the schema in db/db.sql.  I typically do this by by running
-"mysql chess" from the top of the source directory, and then
-typing "source db/db.sql" at the mysql> prompt.
+Next, you can create the tables FatICS needs using the schema in db/db.sql.
+ I typically do this by by running "mysql chess" from the top of the source
+directory, and then typing "source db/db.sql" at the mysql> prompt.
 
-If there are no errors, you're ready to try to run the server.  The
-command I use is (again from the top of the FatICS source tree):
 
-  twistd --pidfile chessd.pid -r epoll -oy src/chessd.tac
+You can import the ECO codes into the database now using
+"./scripts/import-eco.py".  This isn't required to run the server, but
+if you don't, the "eco" command will report all openings as unknown, and
+some tests will fail.
 
-This will start the server as a daemon and dump all server messages to
-twistd.log.  To the server in the foreground and print messages on the
-console (useful for testing and debugging):
 
-  twistd --pidfile chess.pid -r epoll -noy src/chessd.tac
+If there are no errors, you're ready to try to run the server.
+From the top of the FatICS source tree, you can use one of the
+following commands:
 
-If all goes according to plan, the server will be listening on port 5000
-(and port 5001 for zipseal) and ready for you to log in.  By default the
+  "./chessd run"     -- run in the foreground; log to the console
+  "./chessd start"   -- run as a daemon; log to twistd.log
+  "./chessd profile" -- run in profiling mode
+
+After the server is started, you can use these commands:
+
+  "./chessd test"    -- run the test suite
+  "./chessd stop"    -- shut down the server
+
+If all goes according to plan, when you start the server it will be ready
+for you to log in on port 5000 (port 5001 for zipseal).  By default the
 schema creates one player named "admin" with the password "admin";
 obviously it's a good idea to log in and change the password (using the
-"password" command) if you are testing on a machine with ports open
-to the Internet.
+"password" command) if you are testing on a machine with ports open to
+the Internet.
 
 Running the tests
 =================
 The server and admin password for the tests can be changed by editing
-test/test.py.  To run the test suite, use the command
-
-  trial test
-
-from the top-level directory.  All the tests pass for me.  I can pretty much
+test/test.py.  All the tests pass for me.  I can pretty much
 guarantee that right now some will fail on any system other than my own, but
 there you go.
 

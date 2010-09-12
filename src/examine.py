@@ -17,6 +17,8 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import time
+
 import speed_variant
 from game import Game
 from game_constants import *
@@ -30,7 +32,9 @@ class ExaminedGame(Game):
         self.black_time = 0
         self.inc = 0
         self.players = [user]
+        self.rated_str = 'unrated'
         user.session.games.add(self, '[examined]')
+        self.start_time = time.time()
         self.speed_variant = speed_variant.from_names('untimed', 'chess')
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
@@ -43,9 +47,6 @@ class ExaminedGame(Game):
             self.white_name = hist_game['white_name']
             self.black_name = hist_game['black_name']
         self.send_boards()
-
-    #def parse_move(self, s, t, conn):
-    #    ret = super(ExaminedGame, self).parse_move(self, s, t, conn)
 
     def forward(self, n, conn):
         assert(self.variant.pos.ply <= len(self.moves))

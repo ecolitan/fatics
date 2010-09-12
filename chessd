@@ -1,0 +1,30 @@
+#!/bin/sh
+
+cd `dirname $0`
+
+case "$1" in
+  start)
+    echo "Starting chessd...."
+    rm -f twistd.log; twistd --pidfile chessd.pid -r epoll -oy src/chessd.tac
+    ;;
+  run)
+    echo "Running chessd in the foreground...."
+    twistd --pidfile chessd.pid -r epoll -noy src/chessd.tac
+    ;;
+  test)
+    echo "Running test suite...."
+    trial -e test/
+    ;;
+  profile)
+    echo "Running chessd in profile mode...."
+    twistd --profile profile-chessd.data --savestats --profiler cProfile -r epoll -noy src/chessd.tac
+    ;;
+  stop)
+    echo "Stopping chessd...."
+    kill `cat chessd.pid`
+    ;;
+  *)
+    echo "Usage: $0 (start|run|test|profile|stop)"
+    ;;
+esac
+

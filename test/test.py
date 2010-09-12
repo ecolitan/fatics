@@ -23,6 +23,7 @@ import os
 from twisted.trial import unittest
 
 host = '127.0.0.1'
+#host = 'sheila'
 port = '5000'
 admin_passwd = 'admin'
 
@@ -96,15 +97,16 @@ class Test(unittest.TestCase):
         t.write('quit\n')
         t.read_until('Thank you for using')
         t.close()
+        t.read_all()
 
     def adduser(self, name, passwd, lists=None):
         t = self.connect_as_admin()
         t.write('addplayer %s fakeemail@example.com Test Player\n' % name)
+        self.expect('Added: ', t)
         t.write('asetpass %s %s\n' % (name, passwd))
         if lists:
             for lname in lists:
                 t.write('addlist %s %s\n' % (lname, name))
-        self.expect('Added: ', t)
         self.close(t)
 
     def deluser(self, name):
