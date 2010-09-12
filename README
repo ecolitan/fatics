@@ -7,3 +7,61 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
+
+System requirements
+===================
+* Linux (it might work on other OSes, but I haven't tried)
+* Python 2.6 or 2.7
+* Twisted 8.2 or later
+* MySQL 5.0 or later
+* The MySQLdb Python module
+* The python-bcrypt module
+
+Running the server
+==================
+First you'll need to create the MySQL database.  The server uses
+localhost as the server and the username "chess" by default; these
+can be changed by editing src/config.py.  The server looks in
+~/.my.cnf for the password to use; for example:
+
+# start .my.cnf
+[client]
+user = chess
+password = your_password_here
+# end .my.cnf
+
+Once a MySQL user is set up, you can create the tables FatICS needs
+using the schema in db/db.sql.  I typically do this by by running
+"mysql chess" from the top of the source directory, and then
+typing "source db/db.sql" at the mysql> prompt.
+
+If there are no errers, you're ready to try to run the server.  The
+command I use is (again from the top of the FatICS source tree):
+
+  twistd --pidfile chessd.pid -r epoll -oy src/chessd.tac
+
+This will start the server as a daemon and dump all server messages to
+twistd.log.  To the server in the foreground and print messages on the
+console (useful for testing and debugging):
+
+  twistd --pidfile chess.pid -r epoll -noy src/chessd.tac
+
+If all goes according to plan, the server will be listening on ports 5000
+(and port 5001 for zipseal) and ready for you to log in.  By default the
+schema creates one player named "admin" with the password "admin";
+obviously it's a good idea to log in to the server and change the
+password (using the "password" command) if you are testing on a machine
+with ports open to the Internet.
+
+Running the tests
+=================
+The test suite is run with the command
+
+  trial test
+
+from the top-level directory.  All the tests pass for me.  I can pretty much
+guarantee that some will fail on any system other than my own, but there you
+go.
+
+-- Wil
+
