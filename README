@@ -11,6 +11,7 @@ License, or (at your option) any later version.
 System requirements
 ===================
 * Linux (it might work on other OSes, but I haven't tried)
+* GCC and make for compiling timeseal (any recent version shold work)
 * Python 2.6 or 2.7
 * Twisted 8.2 or later
 * MySQL 5.0 or later
@@ -20,8 +21,8 @@ System requirements
 Timeseal and zipseal
 ====================
 The timeseal and zipseal programs can be compiled by changing to the
-timeseal/ directory and typing "make" (you'll need gcc).  That should build
-both the client programs (named openseal and zipseal) and the decoders that
+timeseal/ directory and typing "make".  That should build both the client
+programs (named openseal and zipseal) and the decoders that
 the server needs (openseal_decoder, zipseal_decoder, and zipseal_encoder).
 
 The source code for Win32 version of zipseal is in timeseal/win32/, but it
@@ -45,7 +46,7 @@ password = your_password_here
 # end .my.cnf
 
 Next, you can create the tables FatICS needs using the schema in db/db.sql.
- I typically do this by by running "mysql chess" from the top of the source
+I typically do this by by running "mysql chess" from the top of the source
 directory, and then typing "source db/db.sql" at the mysql> prompt.
 
 

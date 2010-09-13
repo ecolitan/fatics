@@ -81,8 +81,6 @@ class TestLang(Test):
         t.write('clearmess *\n')
         self.expect('Cleared 1 message.', t)
 
-        print 'done'
-
         self.close(t)
         self.close(t2)
 
