@@ -94,6 +94,9 @@ class BaseUser(object):
         self.session.conn.write(lang.langs[self.vars['lang']].gettext(s) %
             args)
 
+    def translate(self, s, args={}):
+        return lang.langs[self.vars['lang']].gettext(s) % args
+
     def send_prompt(self):
         assert(self.is_online)
         if self.session.ivars['defprompt']:
@@ -451,28 +454,6 @@ class User(BaseUser):
                 row['rd'], row['volatility'], row['ltime'],
                 row['win'], row['loss'], row['draw'], row['best'],
                 row['when_best'])
-
-    def get_messages_all(self):
-        msgs = db.get_messages_all(self.id)
-        return msgs
-    def get_messages_range(self, start, end):
-        return db.get_messages_range(self.id, start, end)
-    def get_messages_from(self, sender):
-        return db.get_messages_from_to(sender.id, self.id)
-    def send_message(self, to, txt):
-        return db.send_message(self.id, to.id, txt)
-    def forward_message(self, to, message_id):
-        return db.forward_message(self.id, to.id, message_id)
-    def clear_messages_all(self):
-        return db.clear_messages_all(self.id)
-    def clear_messages_range(self, start, end):
-        msgs = db.get_messages_range(self.id, start, end)
-        if msgs is None:
-            return None
-        ids = [str(msg['message_id']) for msg in msgs]
-        return db.clear_messages_list(ids)
-    def clear_messages_from(self, sender, conn):
-        return db.clear_messages_from_to(sender.id, self.id)
 
 class GuestUser(BaseUser):
     def __init__(self, name):

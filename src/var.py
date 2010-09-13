@@ -248,6 +248,7 @@ class VarList(object):
         BoolVar("seek", True, N_("You will now see seek ads.\n"), N_("You will not see seek ads.\n")).persist().add_as_var()
         BoolVar("echo", True, N_("You will not hear communications echoed.\n"), N_("You will now not hear communications echoed.\n")).persist().add_as_var()
         BoolVar("examine", False, N_("You will now enter examine mode after a game.\n"), N_("You will now not enter examine mode after a game.\n")).persist().add_as_var()
+        BoolVar("mailmess", False, N_("Your messages will be mailed to you.\n"), N_("Your messages will not be mailed to you.\n")).persist().add_as_var()
 
         # non-persistent
         BoolVar("tourney", False, N_("Your tournament variable is now set.\n"), N_("Your tournament variable is no longer set.\n")).add_as_var()

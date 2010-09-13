@@ -74,6 +74,10 @@ class TestVars(Test):
         self.expect("You will not hear shouts", t)
         t.write("set shout 1\n")
         self.expect("You will now hear shouts", t)
+        t.write("set mailmess 1\n")
+        self.expect("Your messages will be mailed to you.", t)
+        t.write("set mailmess 0\n")
+        self.expect("Your messages will not be mailed to you.", t)
 
         t.write("set open 0\n")
         self.expect("no longer open to receive match requests", t)
@@ -84,20 +88,20 @@ class TestVars(Test):
 
         t.write("set style -1\n")
         self.expect('Bad value given for variable "style"', t)
-        
+
         t.write("set lang Klingon\n")
         self.expect('Bad value given for variable "lang"', t)
-        
+
         t.write("set style 100\n")
         self.expect('Bad value given for variable "style"', t)
 
         self.close(t)
-    
+
     def test_prompt(self):
         t = self.connect_as_guest()
         t.write('set prompt foobar%\n')
         self.expect('prompt set to "foobar% ".', t)
-        
+
         t.write('fi\n')
         self.expect('Finger of Guest', t)
         self.expect('foobar% ', t)

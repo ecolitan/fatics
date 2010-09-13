@@ -65,4 +65,25 @@ class TestLang(Test):
         self.expect('bar: Command not found', t)
         self.close(t)
 
+    @with_player('testplayer', 'testpass')
+    def test_lang_upper_message(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('set lang upper\n')
+        self.expect('lang SET TO "upper".', t2)
+
+        t2.write('mess admin test 123\n')
+        self.expect('THE FOLLOWING MESSAGE WAS SENT TO admin:', t2)
+        self.expect_re('testplayer AT .*: test 123', t2)
+        self.expect('The following message was received:', t)
+        self.expect_re('testplayer at .*: test 123', t)
+        t.write('clearmess *\n')
+        self.expect('Cleared 1 message.', t)
+
+        print 'done'
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

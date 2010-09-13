@@ -147,7 +147,10 @@ def with_player(pname, ppass, ptitles=None):
             try:
                 f(self)
             finally:
-                self.deluser(pname)
+                try:
+                    self.deluser(pname)
+                except:
+                    pass
         new_f.__name__ = f.__name__
         new_f.__dict__.update(f.__dict__)
         return new_f

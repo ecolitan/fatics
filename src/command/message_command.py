@@ -20,6 +20,7 @@
 import re
 
 import user
+import email
 from command import *
 from db import db
 
@@ -27,12 +28,16 @@ from db import db
 # user names
 #MAX_LEN = 950
 
-class DisplayMessage(object):
-    def _display_msg(self, msg, u):
+class FormatMessage(object):
+    def _format_msg(self, msg, u):
         if msg['forwarder_name']:
-            u.write_('%s forwarded: %s at %s: %s\n', (msg['forwarder_name'], msg['sender_name'], msg['when_sent'], msg['txt']))
+            txt = u.translate('%s forwarded: %s at %s: %s\n', (msg['forwarder_name'], msg['sender_name'], msg['when_sent'], msg['txt']))
         else:
-            u.write_('%s at %s: %s\n', (msg['sender_name'], msg['when_sent'], msg['txt']))
+            txt = u.translate('%s at %s: %s\n', (msg['sender_name'], msg['when_sent'], msg['txt']))
+        return txt
+
+    def _write_msg(self, msg, u):
+        u.write(self._format_msg(msg, u))
 
 @ics_command('clearmessages', 'n')
 class Clearmessages(Command):
@@ -44,10 +49,16 @@ class Clearmessages(Command):
             return
 
         if args[0] == '*':
-            count = conn.user.clear_messages_all()
+            count = db.clear_messages_all(conn.user.id)
         elif type(args[0]) == type(1):
             i = int(args[0])
-            count = conn.user.clear_messages_range(i, i)
+            msgs = db.get_messages_range(conn.user.id, i, i)
+            if msgs:
+                ids = [str(msg['message_id']) for msg in msgs]
+                count = db.clear_messages_list(ids)
+            else:
+                conn.write(_('There is no such message.\n'))
+                return
         else:
             m = self.range_re.match(args[0])
             if m:
@@ -56,58 +67,66 @@ class Clearmessages(Command):
                 if start < 1 or start > end or end > 9999:
                     conn.write(_('Invalid message range.\n'))
                     return
-                count = conn.user.clear_messages_range(start, end)
-                if count is None:
-                    conn.write(_('You have no messages in that range.\n'))
-                    return
+                msgs = db.get_messages_range(conn.user.id, start, end)
+                if msgs:
+                    ids = [str(msg['message_id']) for msg in msgs]
+                    count = db.clear_messages_list(ids)
+                else:
+                    count = 0
             else:
                 sender = user.find.by_prefix_for_user(args[0], conn)
                 if not sender:
                     return
-                count = conn.user.clear_messages_from(sender)
+                count = db.clear_messages_from_to(sender.id, conn.user.id)
 
         conn.write(ngettext('Cleared %d message.\n', 'Cleared %d messages.\n', count) % count)
 
 @ics_command('fmessage', 'wd')
-class Fmessage(Command, DisplayMessage):
+class Fmessage(Command, FormatMessage):
     @requires_registration
     def run(self, args, conn):
         u2 = user.find.by_prefix_for_user(args[0], conn)
         if u2:
-            msgs = conn.user.get_messages_range(args[1], args[1])
+            msgs = db.get_messages_range(conn.user.id, args[1], args[1])
             if msgs:
                 msg = msgs[0]
-                message_id = msgs[0]['message_id']
+                message_id = msg['message_id']
                 msg['forwarder_name'] = conn.user.name
-                conn.user.forward_message(u2, message_id)
+                db.forward_message(conn.user.id, u2.id, message_id)
+                msg_str_u2 = self._format_msg(msg, u2) # localized for receiver
+
+                if u2.vars['mailmess']:
+                    email.send_mail(conn.user, u2, msg_str_u2)
+                    conn.write(_('The following message was forwarded and emailed to %s:\n') % u2.name)
+                else:
+                    conn.write(_('The following message was forwarded to %s:\n') % u2.name)
                 if u2.is_online:
                     u2.write_('The following message was received:\n')
-                    self._display_msg(msg, u2)
-                conn.write(_('The following message was forwarded to %s:\n') % u2.name)
-                self._display_msg(msg, conn.user)
+                    u2.write(msg_str_u2)
+                self._write_msg(msg, conn.user)
             else:
                 conn.write(_('There is no such message.\n'))
 
 @ics_command('messages', 'nT')
-class Messages(Command, DisplayMessage):
+class Messages(Command, FormatMessage):
     range_re = re.compile('(\d+)-(\d+)')
     @requires_registration
     def run(self, args, conn):
         if args[0] is None:
             # display all messages
-            msgs = conn.user.get_messages_all()
+            msgs = db.get_messages_all(conn.user.id)
             if not msgs:
                 conn.write(_('You have no messages.\n'))
             else:
                 conn.write(_('Messages:\n'))
                 for msg in msgs:
                     conn.write(_('%d. ') % (msg['num']))
-                    self._display_msg(msg, conn.user)
+                    self._write_msg(msg, conn.user)
         elif args[1] is None:
             # display some messages
             if type(args[0]) == type(1):
                 i = int(args[0])
-                msgs = conn.user.get_messages_range(i, i)
+                msgs = db.get_messages_range(conn.user.id, i, i)
                 if not msgs:
                     conn.write(_('There is no such message.\n'))
                     return
@@ -119,44 +138,53 @@ class Messages(Command, DisplayMessage):
                     if start < 1 or start > end or end > 9999:
                         conn.write(_('Invalid message range.\n'))
                         return
-                    msgs = conn.user.get_messages_range(start, end)
+                    msgs = db.get_messages_range(conn.user.id, start, end)
                 else:
                     u2 = user.find.by_prefix_for_user(args[0], conn)
                     if not u2:
                         return
-                    msgs = u2.get_messages_from(conn.user)
+                    msgs = db.get_messages_from_to(conn.user.id, u2.id)
                     if not msgs:
                         conn.write(_('You have no messages to %s.\n') % u2.name)
                     else:
                         conn.write(_('Messages to %s:\n') % u2.name)
                         for msg in msgs:
-                            self._display_msg(msg, conn.user)
+                            self._write_msg(msg, conn.user)
                     conn.write('\n')
 
-                    msgs = conn.user.get_messages_from(u2)
+                    msgs = db.get_messages_from_to(u2.id, conn.user.id)
                     if not msgs:
                         conn.write(_('You have no messages from %s.\n') % u2.name)
                     else:
                         conn.write(_('Messages from %s:\n') % u2.name)
                         for msg in msgs:
-                            self._display_msg(msg, conn.user)
+                            self._write_msg(msg, conn.user)
             for msg in msgs:
                 conn.write(_('%d. ') % (msg['num']))
-                self._display_msg(msg, conn.user)
+                self._write_msg(msg, conn.user)
         else:
-            # send a message
+            """ Send a message.  Note that the message may be localized
+            differently for the sender and receiver. """
             to = user.find.by_prefix_for_user(args[0], conn)
             if to:
                 if to.is_guest:
                     conn.write(_('Only registered players can have messages.\n'))
                     return
-                message_id = conn.user.send_message(to, args[1])
+                message_id = db.send_message(conn.user.id, to.id, args[1])
                 msg = db.get_message_id(message_id)
-                conn.write(_('The following message was sent to %s:\n') %
-                    to.name)
-                self._display_msg(msg, conn.user)
+                msg_str_to = self._format_msg(msg, to) # localized for receiver
+
+                if to.vars['mailmess']:
+                    email.send_mail(conn.user, to, msg_str_to)
+                    conn.write(_('The following message was sent and emailed to %s:\n') %
+                        to.name)
+                else:
+                    conn.write(_('The following message was sent to %s:\n') %
+                        to.name)
+                self._write_msg(msg, conn.user)
+
                 if to.is_online:
                     to.write_('The following message was received:\n')
-                    self._display_msg(msg, to)
+                    to.write(msg_str_to)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

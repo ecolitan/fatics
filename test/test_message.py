@@ -124,6 +124,8 @@ class TestMessage(Test):
         self.expect('message #4', t)
 
         t2 = self.connect_as('testplayer', 'testpass')
+        t2.write('clearmess 5\n')
+        self.expect('There is no such message.', t2)
         t2.write('clearmess 3\n')
         self.expect('Cleared 1 message.', t2)
         t2.write('mess\n')
@@ -131,7 +133,7 @@ class TestMessage(Test):
         self.expect('message #2', t2)
         self.expect_not('message #3', t2)
 
-        t2.write('clearmess 1-3\n')
+        t2.write('clearmess 1-9999\n')
         self.expect('Cleared 3 messages.', t2)
 
         t2.write('clearmess 1-9999\n')
@@ -139,6 +141,15 @@ class TestMessage(Test):
 
         t2.write('clearmess\n')
         self.expect('Use "clearmessages *"', t2)
+
+        # clear messages from a user
+        t.write('mess testplayer message #1a\n')
+        t.write('mess testplayer message #2a\n')
+        t.write('mess testplayer message #3a\n')
+        t.write('mess testplayer message #4a\n')
+        self.expect('message #4a', t2)
+        t2.write('clearmess admi\n')
+        self.expect('Cleared 4 messages.', t2)
 
         self.close(t)
         self.close(t2)
