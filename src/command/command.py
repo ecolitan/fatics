@@ -275,35 +275,6 @@ class History(Command):
         if u:
             history.show_for_user(u, conn)
 
-@ics_command('match', 'wt', admin.Level.user)
-class Match(Command):
-    def run(self, args, conn):
-        if len(conn.user.session.games) != 0:
-            conn.write(_("You can't challenge while you are playing a game.\n"))
-            return
-        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
-        if not u:
-            return
-        if u == conn.user:
-            conn.write(_("You can't match yourself.\n"))
-            return
-
-        if conn.user.name in u.censor:
-            conn.write(_("%s is censoring you.\n") % u.name)
-            return
-        if conn.user.name in u.noplay:
-            conn.write(_("You are on %s's noplay list.\n") % u.name)
-            return
-        if not u.vars['open']:
-            conn.write(_("%s is not open to match requests.\n") % u.name)
-            return
-        if len(u.session.games) != 0:
-            conn.write(_("%s is playing a game.\n") % u.name)
-
-        if not conn.user.vars['open']:
-            var.vars['open'].set(conn.user, '1')
-        offer.Challenge(conn.user, u, args[1])
-
 @ics_command('observe', 'i', admin.Level.user)
 class Observe(Command):
     def run(self, args, conn):

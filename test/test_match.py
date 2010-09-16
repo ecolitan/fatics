@@ -211,30 +211,63 @@ class TestRmatch(Test):
     @with_player('testplayer', 'testplayer')
     @with_player('tdplayer', 'tdplayer', ['td'])
     def test_rmatch(self):
-        #self.adduser('tdplayer', 'tdplayer', ['td'])
-        try:
-            t = self.connect_as('testplayer', 'testplayer')
-            t2 = self.connect_as_admin()
-            t3 = self.connect_as('tdplayer', 'tdplayer')
+        t = self.connect_as('testplayer', 'testplayer')
+        t2 = self.connect_as_admin()
+        t3 = self.connect_as('tdplayer', 'tdplayer')
 
-            t.write('rmatch testplayer admin 3 0\n')
-            self.expect('Only TD programs', t)
+        t.write('rmatch testplayer admin 3 0\n')
+        self.expect('Only TD programs', t)
 
-            t3.write('rmatch testplayer admin 3 0 white r\n')
-            self.expect('Issuing: testplayer (----) [white] admin (----) rated blitz 3 0', t)
-            self.expect('Challenge: testplayer (----) [white] admin (----) rated blitz 3 0', t2)
+        t3.write('rmatch testplayer admin 3 0 white r\n')
+        self.expect('Issuing: testplayer (----) [white] admin (----) rated blitz 3 0', t)
+        self.expect('Challenge: testplayer (----) [white] admin (----) rated blitz 3 0', t2)
 
-            t2.write('a\n')
-            self.expect('Creating:', t)
-            self.expect('Creating:', t2)
-            t.write('abort\n')
+        t2.write('a\n')
+        self.expect('Creating:', t)
+        self.expect('Creating:', t2)
+        t.write('abort\n')
 
-            self.close(t)
-            self.close(t2)
-            self.close(t3)
-        finally:
-            #self.deluser('tdplayer\n')
-            #self.deluser('testplayer\n')
-            pass
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+class TestRematch(Test):
+    def test_rematch(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+
+        t.write('match guestabcd 1 0 unrated white\n')
+        self.expect('Challenge: ', t2)
+        t2.write('a\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('res\n')
+        self.expect('admin resigns} 0-1', t)
+        self.expect('admin resigns} 0-1', t2)
+
+        t.write('rematch\n')
+        self.expect('Challenge: admin (----) GuestABCD (++++) unrated lightning 1 0', t2)
+        t2.write('a\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        t.write('res\n')
+        self.expect('admin resigns} 1-0', t)
+        self.expect('admin resigns} 1-0', t2)
+
+        t2.write('rem\n')
+        self.expect('Challenge: GuestABCD (++++) admin (----) unrated lightning 1 0', t)
+        t.write('a\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        t.write('res\n')
+        self.expect('admin resigns} 0-1', t)
+        self.expect('admin resigns} 0-1', t2)
+
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

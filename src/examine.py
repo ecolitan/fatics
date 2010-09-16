@@ -57,7 +57,9 @@ class ExaminedGame(Game):
             conn.write(_("You're at the end of the game.\n"))
             return
         for p in self.players + list(self.observers):
-            p.write(N_('Game %d: %s goes forward %d move(s)\n') % (self.number, conn.user.name, n)) # XXX ngettext
+            p.nwrite_('Game %d: %s goes forward %d move.\n',
+                'Game %d: %s goes forward %d moves.\n', n,
+                (self.number, conn.user.name, n))
         for i in range(0, n):
             mv = self.variant.pos.move_from_san(self.moves[self.variant.pos.ply])
             mv.time = 0.0
@@ -115,7 +117,9 @@ class ExaminedGame(Game):
             conn.write(_("You're at the beginning of the game.\n"))
             return
         for p in self.players + list(self.observers):
-            p.write(N_('Game %d: %s goes backward %d move(s)\n') % (self.number, conn.user.name, n)) # XXX ngettext
+            p.nwrite_('Game %d: %s backs up %d move\n',
+                'Game %d: %s backs up %d moves\n', n,
+                (self.number, conn.user.name, n))
         self.variant.undo_move()
         self.send_boards()
 

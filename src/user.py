@@ -94,6 +94,11 @@ class BaseUser(object):
         self.session.conn.write(lang.langs[self.vars['lang']].gettext(s) %
             args)
 
+    def nwrite_(self, s1, s2, n, args={}):
+        connection.written_users.add(self)
+        self.session.conn.write(
+            lang.langs[self.vars['lang']].ngettext(s1, s2, n) % args)
+
     def translate(self, s, args={}):
         return lang.langs[self.vars['lang']].gettext(s) % args
 

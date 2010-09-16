@@ -22,6 +22,7 @@ speed_ids = {}
 variant_ids = {}
 speed_names = {}
 variant_names = {}
+variant_abbrevs = {}
 
 class IllegalMoveError(Exception):
     def __init__(self, reason):
@@ -48,6 +49,7 @@ class Variant(object):
         self.abbrev = abbrev
         variant_ids[id] = self
         variant_names[name] = self
+        variant_abbrevs[abbrev] = self
 
     def __eq__(self, other):
         return self.id == other.id

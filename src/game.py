@@ -340,7 +340,34 @@ class PlayedGame(Game):
         self.send_boards()
 
     def _pick_color(self, a, b):
-        return random.choice([WHITE, BLACK])
+        """ Choose the color allocation for two players by comparing the
+        colors of games in their history.  Returns the color for player a.
+        """
+        ahist = a.get_history()
+        bhist = b.get_history()
+        for i in range(1, 12):
+            if i > len(ahist):
+                if i > len(bhist):
+                    # end of history for both players; choose randomly
+                    return random.choice([WHITE, BLACK])
+                # end of a's history; give b the opposite of this entry
+                return self._color_from_char(bhist[-i]['color_char'])
+            elif i > len(bhist):
+                # end of b's history; give a the opposite of this entry
+                return opp(self._color_from_char(ahist[-i]['color_char']))
+
+            if ahist[-i]['color_char'] != bhist[-i]['color_char']:
+                # players had opposite colors, so swap them for this game
+                return self._color_from_char(bhist[-i]['color_char'])
+
+            # otherwise players had like colors, so continue searching
+
+        # unreached
+        assert(False)
+
+    def _color_from_char(self, char):
+        assert(char in ['W', 'B'])
+        return WHITE if char == 'W' else BLACK
 
     def next_move(self, mv, t, conn):
         # decline all offers to the player who just moved
