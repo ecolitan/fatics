@@ -42,10 +42,13 @@ class ExaminedGame(Game):
             self.moves = []
             self.white_name = 'White'
             self.black_name = 'Black'
+            self.result_code = None
         else:
             self.moves = hist_game['movetext'].split(' ')
             self.white_name = hist_game['white_name']
             self.black_name = hist_game['black_name']
+            self.result_code = hist_game['result']
+            self.result_reason = hist_game['result_reason']
         self.send_boards()
 
     def forward(self, n, conn):
@@ -55,10 +58,56 @@ class ExaminedGame(Game):
             return
         for p in self.players + list(self.observers):
             p.write(N_('Game %d: %s goes forward %d move(s)\n') % (self.number, conn.user.name, n)) # XXX ngettext
-        mv = self.variant.pos.move_from_san(self.moves[self.variant.pos.ply])
-        mv.time = 0.0
-        self.variant.do_move(mv)
+        for i in range(0, n):
+            mv = self.variant.pos.move_from_san(self.moves[self.variant.pos.ply])
+            mv.time = 0.0
+            self.variant.do_move(mv)
+            if self.variant.pos.ply >= len(self.moves):
+                # end of the game
+                break
         self.send_boards()
+        #self._check_result()
+        # Trust the stored result, rather than using mates we detected,
+        # ourselves, since we can't compute things like resignation and
+        # agreed draws.
+        if self.variant.pos.ply >= len(self.moves):
+            assert(self.result_code)
+            self.result(self._result_msg(self.result_reason, self.result_code),
+                self.result_code)
+
+    def _result_msg(self, reason, result_code):
+        """ Convert an abbreviation for a result (like "Res") to a reason
+        ("White resigns") """
+        msg = None
+        if result_code == '1-0':
+            if reason == 'Res':
+                msg = '%s resigns' % self.black_name
+            elif reason == 'Mat':
+                msg = '%s checkmated' % self.black_name
+            elif reason == 'Dis':
+                msg = '%s forfeits by disconnection' % self.black_name
+        elif result_code == '0-1':
+            if reason == 'Res':
+                msg = '%s resigns' % self.white_name
+            elif reason == 'Mat':
+                msg = '%s checkmated' % self.white_name
+            elif reason == 'Dis':
+                msg = '%s forfeits by disconnection' % self.white_name
+        elif result_code == '1/2-1/2':
+            if reason == 'Agr':
+                msg = 'Game drawn by agreement'
+            elif reason == 'Sta':
+                msg = 'Game drawn by stalemate'
+            elif reason == 'Rep':
+                msg = 'Game drawn by repetition'
+        elif result_code == 'Adj':
+            # TODO
+            pass
+
+        if not msg:
+            raise RuntimeError('unable to get result message (%s//%s)' %
+                (reason, result_code))
+        return msg
 
     def backward(self, n, conn):
         assert(self.variant.pos.ply >= 0)
@@ -90,15 +139,7 @@ class ExaminedGame(Game):
         super(ExaminedGame, self).next_move(mv, t, conn)
         for p in self.players + list(self.observers):
             p.write(N_('Game %d: %s moves: %s\n') % (self.number, conn.user.name, mv.to_san()))
-        if self.variant.pos.is_checkmate:
-            if self.variant.get_turn() == WHITE:
-                self.result('White checkmated', '0-1')
-            else:
-                self.result('Black checkmated', '1-0')
-        elif self.variant.pos.is_stalemate:
-            self.result('Game drawn by stalemate', '1/2-1/2')
-        elif self.variant.pos.is_draw_nomaterial:
-            self.result('Game drawn because neither player has mating material', '1/2-1/2')
+        self._check_result()
 
     def leave(self, user):
         self.players.remove(user)

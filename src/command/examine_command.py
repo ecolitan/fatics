@@ -50,21 +50,22 @@ class Examine(Command):
 
         try:
             num = int(args[1])
-            if num < 0:
-                conn.write('TODO: EXAMINE PREVIOUS GAME\n')
-            else:
-                # history game
-                h = u.get_history_game(num, conn)
+            # history game
+            h = u.get_history_game(num, conn)
+            if h:
                 examine.ExaminedGame(conn.user, h)
             return
         except ValueError:
-            pass
+            m = re.match(r'%(\d\d?)', args[1])
+            if m:
+                num = int(m.group(1))
+                conn.write('TODO: EXAMINE JOURNAL GAME\n')
+                return
 
-        m = re.match(r'%(\d\d?)', args[1])
-        if m:
-            num = int(m.group(1))
-            conn.write('TODO: EXAMINE JOURNAL GAME\n')
-            return
+            u2 = user.find.by_prefix_for_user(args[1], conn, min_len=2)
+            if not u2:
+                return
+            conn.write('TODO: EXAMINE ADJOURNED GAME\n')
 
 @ics_command('backward', 'p', admin.Level.user)
 class Backward(Command):

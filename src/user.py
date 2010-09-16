@@ -194,18 +194,20 @@ class BaseUser(object):
 
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
-            result_reason, when_ended):
+            result_reason, when_ended, movetext):
         assert(self._history is not None)
         if len(self._history) == 0:
-            num = 1
+            num = 0
         else:
             num = (self._history[-1]['num'] + 1) % 100
-            self._history = self._history[1:]
+            if len(self._history) == 10:
+                self._history = self._history[1:]
         entry = {'game_id': game_id, 'num': num, 'result_char': result_char,
             'user_rating': user_rating, 'color_char': color_char,
             'opp_name': opp_name, 'opp_rating': opp_rating, 'eco': eco,
             'flags' : flags, 'time': initial_time, 'inc' : inc,
-            'result_reason': result_reason, 'when_ended': when_ended
+            'result_reason': result_reason, 'when_ended': when_ended,
+            'movetext': movetext
         }
         self._history.append(entry)
         return entry
@@ -214,14 +216,54 @@ class BaseUser(object):
         self._history = []
 
     def get_history_game(self, num, conn):
+        hist = self.get_history()
+        if not hist:
+            conn.write(_('%s has no history games.\n') % self.name)
+        h = None
         if num < 0:
             if num < -10:
                 conn.write(_('There are 10 entries maximum in history.\n'))
-            h = db.get_history_game_relative(self.id, num)
-            return
-        h = db.get_history_game(self.id, num)
-        if not h:
-            conn.write(_('There is no history game %d for %s.\n') % (num, self.name))
+                return
+            try:
+                h = hist[num]
+            except IndexError:
+                pass
+        else:
+            matches = [h for h in hist if h['num'] == num]
+            assert(len(matches) in [0, 1])
+            h = matches[0] if matches else None
+
+        if h:
+            assert(h['color_char'] in ['W', 'B'])
+            if h['color_char'] == 'W':
+                h['white_name'] = self.name
+                h['black_name'] = h['opp_name']
+                if h['result_char'] == '+':
+                    h['result'] = '1-0'
+                elif h['result_char'] == '-':
+                    h['result'] = '0-1'
+                elif h['result_char'] == '=':
+                    h['result'] = '1/2-1/2'
+                elif h['result_char'] == '*':
+                    h['result'] = '*'
+                else:
+                    raise RuntimeError('unknown result char %s' % result_char)
+            else:
+                h['white_name'] = h['opp_name']
+                h['black_name'] = self.name
+                if h['result_char'] == '+':
+                    h['result'] = '0-1'
+                elif h['result_char'] == '-':
+                    h['result'] = '1-0'
+                elif h['result_char'] == '=':
+                    h['result'] = '1/2-1/2'
+                elif h['result_char'] == '*':
+                    h['result'] = '*'
+                else:
+                    raise RuntimeError('unknown result char %s' % result_char)
+        else:
+            conn.write(_('There is no history game %(num)d for %(name)s.\n') % {'num': num, 'name': self.name})
+
         return h
 
     def has_timeseal(self):
@@ -382,7 +424,7 @@ class User(BaseUser):
         BaseUser.remove_notification(self, user)
         if not user.is_guest:
             db.user_del_notification(self.id, user.id)
-    
+
     def add_censor(self, user):
         BaseUser.add_censor(self, user)
         if not user.is_guest:
@@ -415,11 +457,19 @@ class User(BaseUser):
 
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
-            result_reason, when_ended):
+            result_reason, when_ended, movetext):
         entry = BaseUser.save_history(self, game_id, result_char, user_rating,
             color_char, opp_name, opp_rating, eco, flags, initial_time, inc,
-            result_reason, when_ended)
+            result_reason, when_ended, movetext)
         db.user_add_history(entry, self.id)
+
+    """def _get_history_game(self, num, conn):
+        if num < 0:
+            h = db.get_history_game_relative(self.id, num)
+        else:
+            h = db.get_history_game(self.id, num)
+        return h"""
+
 
     def clear_history(self):
         BaseUser.clear_history(self)

@@ -48,13 +48,14 @@ class History(object):
 
         white_rating = str(game.white_rating)
         black_rating = str(game.black_rating)
+        movetext = game.get_movetext()
 
         (i, eco, longeco) = game.get_eco()
         game_id = db.game_add(game.white.name, white_rating, game.black.name,
             black_rating, eco, game.speed_variant.variant.id,
             game.speed_variant.speed.id, game.white_time, game.inc,
             game.rated, result_code, result_reason, game.get_ply_count(),
-            game.get_movetext(), game.when_started, game.when_ended)
+            movetext, game.when_started, game.when_ended)
 
         flags = '%s%s' % (game.speed_variant.speed.abbrev,
             game.speed_variant.variant.abbrev)
@@ -74,11 +75,11 @@ class History(object):
         game.white.save_history(game_id, white_result_char,
             white_rating, 'W', game.black.name, black_rating,
             eco[0:3], flags, game.white_time, game.inc, result_reason,
-            game.when_ended)
+            game.when_ended, movetext)
         game.black.save_history(game_id, black_result_char,
             black_rating, 'B', game.white.name, white_rating,
             eco[0:3], flags, game.white_time, game.inc, result_reason,
-            game.when_ended)
+            game.when_ended, movetext)
         return game_id
 
 def show_for_user(user, conn):
@@ -87,7 +88,6 @@ def show_for_user(user, conn):
         conn.write(_('%s has no history games.\n') % user.name)
         return
         
-
     conn.write(_('History for %s:\n') % user.name)
     conn.write(_('                  Opponent      Type         ECO End Date\n'))
     for entry in hist:

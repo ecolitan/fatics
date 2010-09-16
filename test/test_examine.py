@@ -21,7 +21,7 @@ from test import *
 import time
 
 class TestExamine(Test):
-    def test_examine(self):
+    def test_examine_scratch(self):
         t = self.connect_as('GuestPQLQ', '')
 
         t.write('forward\n')
@@ -56,6 +56,90 @@ class TestExamine(Test):
 
         t.write('forward\n')
         self.expect("You're at the end of the game.", t)
+
+        self.close(t)
+
+    @with_player('testplayer', 'testpass')
+    def test_examine_history(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
+        t.write('ex testplayer -1\n')
+        self.expect('testplayer has no history games.', t)
+
+        t.write('match testplayer 2 12 white zh u\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        moves = ['e4', 'f5', 'h4', 'g5', 'Qh5#']
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm
+
+        self.expect('testplayer checkmated} 1-0', t)
+        self.expect('testplayer checkmated} 1-0', t2)
+
+        t.write('ex admin 99\n')
+        self.expect('There is no history game 99 for admin.', t)
+
+        # negative game number
+        t.write('ex admin -1\n')
+        self.expect('<12> ', t)
+        t.write('forward 9999\n')
+        self.expect('testplayer checkmated 1-0', t)
+        t.write('unex\n')
+        self.expect('You are no longer examining game 1.', t)
+
+        t.write('match testplayer 2 12 white u\n')
+        self.expect('Challenge: ', t2)
+        t2.write('a\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        t2.write('resign\n')
+        self.expect('testplayer resigns} 1-0', t)
+        self.expect('testplayer resigns} 1-0', t2)
+
+        t.write('match testplayer 2 12 white u\n')
+        self.expect('Challenge: ', t2)
+        t2.write('a\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        t.write('e4\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        t.write('resign\n')
+        self.expect('admin resigns} 0-1', t)
+        self.expect('admin resigns} 0-1', t2)
+
+        # non-negative game number
+        t.write('ex admin 0\n')
+        self.expect('<12> ', t)
+        t.write('forward 9999\n')
+        self.expect('testplayer checkmated 1-0', t)
+        t.write('unex\n')
+        self.expect('You are no longer examining game 1.', t)
+
+        t.write('ex admin 2\n')
+        self.expect('<12> ', t)
+        t.write('forward 1\n')
+        self.expect('admin resigns 0-1', t)
+        t.write('unex\n')
+        self.expect('You are no longer examining game 1.', t)
+
+        t.write('aclearhist admin\n')
+        t.write('aclearhist testplayer\n')
 
         self.close(t)
 

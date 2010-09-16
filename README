@@ -11,7 +11,7 @@ License, or (at your option) any later version.
 System requirements
 ===================
 * Linux (it might work on other OSes, but I haven't tried)
-* GCC and make for compiling timeseal (any recent version shold work)
+* GCC and make for compiling timeseal (any recent version should work)
 * Python 2.6 or 2.7
 * Twisted 8.2 or later
 * MySQL 5.0 or later
@@ -76,11 +76,6 @@ obviously it's a good idea to log in and change the password (using the
 "password" command) if you are testing on a machine with ports open to
 the Internet.
 
-Running the tests
-=================
-The server and admin password for the tests can be changed by editing
-test/test.py.  All the tests pass for me.  I can pretty much
-guarantee that right now some will fail on any system other than my own, but
-there you go.
+For information about running the tests, see README.tests
 
 -- Wil

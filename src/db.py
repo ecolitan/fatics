@@ -352,19 +352,43 @@ class DB(object):
         cursor.close()
         return game_id
 
+    '''def user_get_history_count(self, user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT COUNT(*) FROM history
+            WHERE user_id=%s""" % (user_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0]'''
+
     def user_get_history(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT game_id, num, result_char, user_rating, color_char, opp_name, opp_rating, eco, flags, time, inc, result_reason, when_ended FROM history WHERE user_id=%s""", user_id)
+        cursor.execute("""SELECT game_id, num, result_char, user_rating,
+                color_char, opp_name, opp_rating, h.eco, flags, h.time,
+                h.inc, h.result_reason, h.when_ended, movetext
+            FROM history AS h LEFT JOIN game USING(game_id)
+            WHERE user_id=%s
+            ORDER BY when_ended ASC
+            LIMIT 10""", user_id)
         rows = cursor.fetchall()
         cursor.close()
         return rows
 
-    def get_history_game(self, user_id, num):
+    '''def get_history_game(self, user_id, num):
+        assert(0 <= num <= 99)
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT white_name,white_rating,black_name,black_rating,game.eco,variant_id,speed_id,game.time,game.inc,rated,result,game.result_reason,ply_count,movetext,game.when_ended FROM game LEFT JOIN history USING (game_id) where user_id=%s AND num=%s""", (user_id, num))
         row = cursor.fetchone()
         cursor.close()
-        return row
+        return row'''
+
+    '''def get_history_game_relative(self, user_id, num):
+        assert(-10 <= num <= -1)
+        cursor = self.db.cursor(cursors.DictCursor)
+        offset = -1 - num
+        cursor.execute("""SELECT white_name,white_rating,black_name,black_rating,game.eco,variant_id,speed_id,game.time,game.inc,rated,result,game.result_reason,ply_count,movetext,game.when_ended FROM game LEFT JOIN history USING (game_id) where user_id=%s ORDER BY game.when_ended DESC LIMIT %s,1""", (user_id, offset))
+        row = cursor.fetchone()
+        cursor.close()
+        return row'''
 
     def user_add_history(self, entry, user_id):
         cursor = self.db.cursor()

@@ -85,6 +85,10 @@ class TestEco(Test):
         self.expect('LONG[  6]: Blackmar-Diemer: Grosshans Defence', t3)
         self.close(t3)
 
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.expect('aborted by agreement', t)
+
         self.close(t)
         self.close(t2)
 
@@ -141,6 +145,13 @@ class TestEco(Test):
         self.expect(' NIC[  1]: VO.17', t)
         self.expect('LONG[  2]: Scandinavian (Centre Counter)', t)
 
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.expect('aborted by agreement', t2)
+
+        self.close(t)
+        self.close(t2)
+
     def test_eco_utf8(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
@@ -169,6 +180,11 @@ class TestEco(Test):
         self.expect(' ECO[  7]: C15h', t)
         self.expect(' NIC[  6]: FR.08', t)
         self.expect('LONG[  7]: French: Winawer, Müller-Zhuravlev Gambit', t)
+
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.expect('aborted by agreement', t2)
+
         self.close(t)
         self.close(t2)
 

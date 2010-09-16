@@ -47,17 +47,32 @@ class TestHistory(Test):
         self.expect('GuestABCD resigns', t)
         self.expect('GuestABCD resigns', t2)
 
+        t.write('match GuestEFGH 15 5 black u\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        t.write('draw\n')
+        t2.write('draw\n')
+        self.expect('1/2-1/2', t)
+        self.expect('1/2-1/2', t2)
+
+
         t.write('history\n')
+        today = datetime.utcnow().date()
         self.expect('History for GuestABCD:\r\n                  Opponent      Type         ECO End Date', t)
-        self.expect(' 1: - ++++ W ++++ GuestEFGH     [bnu  2  12] B20 Res %s' % datetime.utcnow().date(), t)
+        self.expect(' 0: - ++++ W ++++ GuestEFGH     [bnu  2  12] B20 Res %s' % today, t)
+        self.expect(' 1: = ++++ B ++++ GuestEFGH     [snu 15   5] A00 Agr %s' % today, t)
 
         t2.write('hi\n')
         self.expect('History for GuestEFGH:\r\n                  Opponent      Type         ECO End Date', t2)
-        self.expect(' 1: + ++++ B ++++ GuestABCD     [bnu  2  12] B20 Res ', t2)
+        self.expect(' 0: + ++++ B ++++ GuestABCD     [bnu  2  12] B20 Res ', t2)
+        self.expect(' 1: = ++++ W ++++ GuestABCD     [snu 15   5] A00 Agr %s' % today, t2)
 
         t.write('hi GuestEFGH\n')
         self.expect('History for GuestEFGH:\r\n                  Opponent      Type         ECO End Date', t)
-        self.expect(' 1: + ++++ B ++++ GuestABCD     [bnu  2  12] B20 Res ', t)
+        self.expect(' 0: + ++++ B ++++ GuestABCD     [bnu  2  12] B20 Res ', t)
+        self.expect(' 1: = ++++ W ++++ GuestABCD     [snu 15   5] A00 Agr %s' % today, t)
 
         self.close(t)
         self.close(t2)
@@ -66,11 +81,11 @@ class TestHistoryUser(Test):
     def test_history_user(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('GuestABCD', '')
-       
+
         t.write('aclearhist admin\n')
         t.write('history\n')
         self.expect('admin has no history games', t)
-        
+
         t.write('match GuestABCD 15 0 black u\n')
         self.expect('Challenge:', t2)
         t2.write('a\n')
@@ -89,13 +104,17 @@ class TestHistoryUser(Test):
 
         t2.write('history admin\n')
         self.expect('History for admin:\r\n                  Opponent      Type         ECO End Date', t2)
-        self.expect(' 1: - ---- B ++++ GuestABCD     [snu 15   0] A10 Res ', t2)
+        self.expect(' 0: - ---- B ++++ GuestABCD     [snu 15   0] A10 Res ', t2)
         self.close(t2)
 
         t = self.connect_as_admin()
         t.write('history\n')
         self.expect('History for admin:\r\n                  Opponent      Type         ECO End Date', t)
-        self.expect(' 1: - ---- B ++++ GuestABCD     [snu 15   0] A10 Res ', t)
+        self.expect(' 0: - ---- B ++++ GuestABCD     [snu 15   0] A10 Res ', t)
+
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
+
         self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
