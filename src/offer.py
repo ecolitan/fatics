@@ -165,7 +165,7 @@ class Draw(Offer):
 #    pass
 
 class Challenge(Offer):
-    """represents a match offer from one player to another"""
+    """ represents a match offer from one player to another """
     def __init__(self, a, b, opts):
         """a is the player issuing the offer; b receives the request"""
         Offer.__init__(self, "match offer")
@@ -181,6 +181,7 @@ class Challenge(Offer):
         self.rated = None
         # the side requested by a, if any
         self.side = None
+        self.idn = None
 
         if opts is not None:
             self._parse_opts(opts)
@@ -206,6 +207,11 @@ class Challenge(Offer):
         if self.variant_name is None:
             # chess is the default, of course
             self.variant_name = 'chess'
+
+        if self.idn is not None and self.variant_name != 'chess960':
+            # idns can only be used for chess960
+            a.write_('Only registered players can play rated games.\n')
+            raise command_parser.BadCommandError
 
         rated_str = "rated" if self.rated else "unrated"
 
@@ -337,6 +343,7 @@ class Challenge(Offer):
         self.variant_name = val
 
     _wild_re = re.compile('w(\d+)')
+    _idn_re = re.compile('idn=(\d+)')
     def _parse_opts(self, opts):
         opts = opts.lower()
         args = re.split(r'\s+', opts)
@@ -378,9 +385,17 @@ class Challenge(Offer):
                 m = re.match(self._wild_re, w)
                 if m:
                     self._set_variant_name(m.group(1))
-                else:
-                    #print('got unknown keyword %s' % w)
-                    raise command_parser.BadCommandError()
+                    continue
+
+                m = re.match(self._idn_re, w)
+                if m:
+                    self.idn = int(m.group(1))
+                    continue
+
+                #print('got unknown keyword %s' % w)
+                raise command_parser.BadCommandError()
+
+
 
         if len(times) > 2:
             # time odds not supported

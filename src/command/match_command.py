@@ -71,7 +71,7 @@ class Rematch(Command, MatchMixin):
         h = hist[-1]
         opp = online.find_exact(h['opp_name'])
         if not opp:
-            conn.write(_('Your previous opponent, %s, is no longer online.\n') % h['opp_name'])
+            conn.write(_('Your last opponent, %s, is not logged in.\n') % h['opp_name'])
             return
         if not self._check_opp(conn, opp):
             return

@@ -18,12 +18,14 @@
 
 import chess
 import crazyhouse
+import chess960
 
 class VariantFactory(object):
     def __init__(self):
         self.variants = {
             'chess': chess.Chess,
-            'crazyhouse': crazyhouse.Crazyhouse
+            'crazyhouse': crazyhouse.Crazyhouse,
+            'chess960': chess960.Chess960
         }
 
     def get(self, name, game):

@@ -287,6 +287,7 @@ class PlayedGame(Game):
         self.white_time = chal.time
         self.black_time = chal.time
         self.inc = chal.inc
+        self.idn = chal.idn
 
         self.white.session.is_white = True
         self.black.session.is_white = False

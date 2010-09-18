@@ -18,6 +18,7 @@
 
 """
 Copyright (c) 2009 Ryan Kirkman
+Modified by Wil Mahan
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

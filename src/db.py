@@ -352,14 +352,6 @@ class DB(object):
         cursor.close()
         return game_id
 
-    '''def user_get_history_count(self, user_id):
-        cursor = self.db.cursor()
-        cursor.execute("""SELECT COUNT(*) FROM history
-            WHERE user_id=%s""" % (user_id,))
-        row = cursor.fetchone()
-        cursor.close()
-        return row[0]'''
-
     def user_get_history(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT game_id, num, result_char, user_rating,
@@ -393,7 +385,7 @@ class DB(object):
     def user_add_history(self, entry, user_id):
         cursor = self.db.cursor()
         entry.update({'user_id': user_id})
-        cursor.execute("""DELETE FROM history WHERE user_id=%s AND num=%s""" % (user_id, entry['num']))
+        cursor.execute("""DELETE FROM history WHERE user_id=%s AND num=%s""", (user_id, entry['num']))
         cursor.execute("""INSERT INTO history SET user_id=%(user_id)s,game_id=%(game_id)s, num=%(num)s, result_char=%(result_char)s, user_rating=%(user_rating)s, color_char=%(color_char)s, opp_name=%(opp_name)s, opp_rating=%(opp_rating)s, eco=%(eco)s, flags=%(flags)s, time=%(time)s, inc=%(inc)s, result_reason=%(result_reason)s, when_ended=%(when_ended)s""", entry)
         cursor.close()
 
@@ -560,6 +552,28 @@ class DB(object):
         ret = cursor.rowcount
         cursor.close()
         return ret
+
+    # chess960
+    def fen_from_idn(self, idn):
+        assert(0 <= idn <= 959)
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT fen FROM chess960_pos
+            WHERE idn=%s""", (idn,))
+        row = cursor.fetchone()
+        assert(row)
+        cursor.close()
+        return row[0]
+
+    def idn_from_fen(self, fen):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT idn FROM chess960_pos
+            WHERE fen=%s""", (fen,))
+        row = cursor.fetchone()
+        cursor.close()
+        if row:
+            return row[0]
+        else:
+            return None
 
 db = DB()
 

@@ -268,6 +268,10 @@ class TestRematch(Test):
         self.expect('History of admin cleared.', t)
 
         self.close(t)
+
+        t2.write('rematch\n')
+        self.expect('Your last opponent, admin, is not logged in.', t2)
+
         self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

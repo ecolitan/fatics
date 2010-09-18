@@ -77,10 +77,12 @@ class TestHistory(Test):
         self.close(t)
         self.close(t2)
 
-class TestHistoryUser(Test):
     def test_history_user(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('GuestABCD', '')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
 
         t.write('aclearhist admin\n')
         t.write('history\n')
@@ -116,5 +118,55 @@ class TestHistoryUser(Test):
         self.expect('History of admin cleared.', t)
 
         self.close(t)
+
+    def test_alternating_colors(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t2.write('match GuestABCD 3 1 chess black u\n')
+        self.expect('Challenge:', t)
+        t.write('a\n')
+        self.expect('Creating:', t)
+        self.expect('Creating:', t2)
+        t.write('resign\n')
+        self.expect('GuestABCD resigns', t)
+        self.expect('GuestABCD resigns', t2)
+
+        for i in range(1, 11):
+            t2.write('rematch\n')
+            self.expect('Challenge:', t)
+            t.write('a\n')
+            self.expect('Creating:', t)
+            self.expect('Creating:', t2)
+            t.write('resign\n')
+            self.expect('GuestABCD resigns', t)
+            self.expect('GuestABCD resigns', t2)
+
+        t.write('hi\n')
+        self.expect(' 1: - ++++ B ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 2: - ++++ W ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 3: - ++++ B ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 4: - ++++ W ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 5: - ++++ B ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 6: - ++++ W ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 7: - ++++ B ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 8: - ++++ W ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect(' 9: - ++++ B ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+        self.expect('10: - ++++ W ++++ GuestEFGH     [bnu  3   1] A00 Res ', t)
+
+        t.write('hi GuestEFGH\n')
+        self.expect(' 1: + ++++ W ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 2: + ++++ B ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 3: + ++++ W ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 4: + ++++ B ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 5: + ++++ W ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 6: + ++++ B ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 7: + ++++ W ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 8: + ++++ B ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect(' 9: + ++++ W ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+        self.expect('10: + ++++ B ++++ GuestABCD     [bnu  3   1] A00 Res ', t)
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

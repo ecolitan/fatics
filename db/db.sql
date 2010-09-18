@@ -304,6 +304,13 @@ CREATE TABLE `message` (
   PRIMARY KEY(`message_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `chess960_pos`;
+CREATE TABLE `chess960_pos` (
+  `idn` INT(4) NOT NULL,
+  `fen` VARCHAR(88) NOT NULL,
+  PRIMARY KEY(`idn`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 -- data
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
@@ -349,5 +356,8 @@ UNLOCK TABLES;
 LOCK TABLES `variant` WRITE;
 INSERT INTO `variant` VALUES (NULL,'chess','n');
 INSERT INTO `variant` VALUES (NULL,'crazyhouse','z');
+INSERT INTO `variant` VALUES (NULL,'chess960','9');
 UNLOCK TABLES;
+
+SOURCE db/chess960.sql
 

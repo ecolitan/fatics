@@ -16,16 +16,17 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-"""This implements routines for normal chess.  (I avoid the term
-standard since that is used to describe the game speed on FICS.)
-Maybe normal chess technically not a variant, but organizationally
-I didn't want to privilege it over variants, so it is here."""
+""" Chess960, known as fr or fischerandom on original FICS.
+http://www.dwheeler.com/essays/Fischer_Random_Chess.html
+
+"""
 
 import re
 import copy
 import random
 from array import array
 
+from db import db
 from game_constants import *
 from timer import timer
 from speed_variant import IllegalMoveError
@@ -65,18 +66,16 @@ piece_material = {
 }
 
 def to_castle_flags(w_oo, w_ooo, b_oo, b_ooo):
+    '''# XXX the castling flags should ideally take into account the
+    # rook files?
+    w_oo = int(bool(w_oo))
+    b_oo = int(bool(b_oo))
+    w_ooo = int(bool(w_ooo))
+    b_ooo = int(bool(b_ooo))'''
     return (w_oo << 3) + (w_ooo << 2) + (b_oo << 1) + b_ooo
 
 def check_castle_flags(mask, wtm, is_oo):
     return bool(mask & (1 << (2 * int(wtm) + int(is_oo))))
-
-castle_mask = array('i', [0xf for i in range(0x80)])
-castle_mask[A8] = to_castle_flags(True, True, True, False)
-castle_mask[E8] = to_castle_flags(True, True, False, False)
-castle_mask[H8] = to_castle_flags(True, True, False, True)
-castle_mask[A1] = to_castle_flags(True, False, True, True)
-castle_mask[E1] = to_castle_flags(False, False, True, True)
-castle_mask[H1] = to_castle_flags(False, True, True, True)
 
 def rank(sq):
     return sq // 0x10
@@ -146,7 +145,7 @@ class Move(object):
         self.prom = prom
         self.is_oo = is_oo
         self.is_ooo = is_ooo
-        self.capture = pos.board[to]
+        self.capture = '-' if is_oo or is_ooo else pos.board[to]
         self.is_capture = self.capture != '-'
         self.is_ep = is_ep
         self.new_ep = new_ep
@@ -176,11 +175,13 @@ class Move(object):
         if self.pc == '-' or piece_is_white(self.pc) != self.pos.wtm:
             raise IllegalMoveError('can only move own pieces')
 
-        if self.is_capture and piece_is_white(self.capture) == self.pos.wtm:
-            raise IllegalMoveError('cannot capture own piece')
-
         if self.is_oo or self.is_ooo:
             return
+
+        if (self.is_capture and piece_is_white(self.capture) == self.pos.wtm
+                and not self.is_oo and not self.is_ooo):
+            raise IllegalMoveError('cannot capture own piece')
+
 
         diff = self.to - self.fr
         if self.pc == 'p':
@@ -235,23 +236,65 @@ class Move(object):
         tests are grouped together because they are common
         to all move formats."""
         if self.is_oo:
-            if (self.pos.in_check
-                    or not check_castle_flags(self.pos.castle_flags,
-                        self.pos.wtm, True)
-                    or self.pos.board[self.fr + 1] != '-'
-                    or self.pos.under_attack(self.fr + 1, not self.pos.wtm)
-                    or self.pos.under_attack(self.to, not self.pos.wtm)):
+            pos = self.pos
+            if (pos.in_check
+                    or not check_castle_flags(pos.castle_flags,
+                    pos.wtm, True)):
                 raise IllegalMoveError('illegal castling')
+
+            # unimpeded
+            assert(self.fr == pos.king_pos[pos.wtm])
+            rsq = (pos.hside_rook_file if pos.wtm else
+                0x70 + pos.hside_rook_file)
+            if pos.wtm:
+                rsq = pos.hside_rook_file
+                assert(pos.board[rsq] == 'R')
+            else:
+                rsq = 0x70 + pos.hside_rook_file
+                assert(pos.board[rsq] == 'r')
+            sqs = [self.fr, self.to, rsq]
+            for sq in range(min(sqs), max(sqs) + 1):
+                if sq != rsq and sq != self.fr and pos.board[sq] != '-':
+                    raise IllegalMoveError('castling blocked')
+
+            # unattacked
+            assert(rank(self.fr) == rank(self.to))
+            dir = 1 if self.fr < self.to else -1
+            for sq in range(self.fr + dir, self.to + dir, dir):
+                if pos.under_attack(sq, not pos.wtm):
+                    raise IllegalMoveError('castling through check')
+
             return
 
         if self.is_ooo:
-            if (self.pos.in_check
-                    or not check_castle_flags(self.pos.castle_flags,
-                        self.pos.wtm, False)
-                    or self.pos.board[self.fr - 1] != '-'
-                    or self.pos.under_attack(self.fr - 1, not self.pos.wtm)
-                    or self.pos.under_attack(self.to, not self.pos.wtm)):
+            pos = self.pos
+            if (pos.in_check
+                    or not check_castle_flags(pos.castle_flags,
+                        pos.wtm, False)):
                 raise IllegalMoveError('illegal castling')
+
+            # unimpeded
+            assert(self.fr == pos.king_pos[pos.wtm])
+            rsq = (pos.aside_rook_file if pos.wtm else
+                0x70 + pos.aside_rook_file)
+            if pos.wtm:
+                rsq = pos.aside_rook_file
+                assert(pos.board[rsq] == 'R')
+            else:
+                rsq = 0x70 + pos.aside_rook_file
+                assert(pos.board[rsq] == 'r')
+            sqs = [self.fr, self.to, rsq]
+            for sq in range(min(sqs), max(sqs) + 1):
+                if sq != rsq and sq != self.fr and pos.board[sq] != '-':
+                    raise IllegalMoveError('castling blocked')
+
+            # unattacked
+            assert(rank(self.fr) == rank(self.to))
+            dir = 1 if self.fr < self.to else -1
+            for sq in range(self.fr + dir, self.to + dir, dir):
+                if pos.under_attack(sq, not pos.wtm):
+                    raise IllegalMoveError('castling through check')
+
             return
 
         self.pos.make_move(self)
@@ -290,6 +333,8 @@ class Move(object):
             assert(not self.is_ep)
             san = self.pc.upper()
             ambigs = self.pos.get_from_sqs(self.pc, self.to)
+            if not (len(ambigs) >= 1):
+                print 'move not ambig with itself: %s%s' % (sq_to_str(self.fr), sq_to_str(self.to))
             assert(len(ambigs) >= 1)
             if len(ambigs) > 1:
                 r = rank(self.fr)
@@ -369,6 +414,18 @@ class Position(object):
         self.history = PositionHistory()
         self.set_pos(fen)
 
+    def _set_aside_rook_file(self, v):
+        if self.aside_rook_file is None:
+            self.aside_rook_file = v
+        else:
+            assert(self.aside_rook_file == v)
+
+    def _set_hside_rook_file(self, v):
+        if self.hside_rook_file is None:
+            self.hside_rook_file = v
+        else:
+            assert(self.hside_rook_file == v)
+
     set_pos_re = re.compile(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''')
     def set_pos(self, fen, detect_check=True):
         """Set the position from Forsyth-Fdwards notation.  The format
@@ -386,6 +443,10 @@ class Position(object):
             ranks.reverse()
             self.hash = 0
             self.material = [0, 0]
+            # indexed by wtm (0=Black, 1=White), oo (0=O-O-O, 1=O-O)
+            #rook_pos = [[None, None], [None, None]]
+            self.aside_rook_file = None
+            self.hside_rook_file = None
             for (r, rank_str) in enumerate(ranks):
                 sq = 0x10 * r
                 for c in rank_str:
@@ -412,6 +473,7 @@ class Position(object):
                             if rank(sq) in [0, 7]:
                                 # pawn on 1st or 8th rank
                                 raise BadFenError()
+
                         sq += 1
                 if sq & 0xf != 8:
                     # wrong row length
@@ -425,37 +487,101 @@ class Position(object):
             if self.wtm:
                 self.hash ^= zobrist.side_hash
 
+            self.castle_mask = array('i', [0xf for i in range(0x80)])
             if castle_flags == '-':
                 self.castle_flags = 0
             else:
                 (w_oo, w_ooo, b_oo, b_ooo) = (False, False, False, False)
                 for c in castle_flags:
                     if c == 'K':
-                        if self.board[E1] != 'K' or self.board[H1] != 'R':
-                            raise BadFenError()
                         if w_oo:
                             raise BadFenError()
+                        for sq in range(H1, self.king_pos[1], -1):
+                            if self.board[sq] == 'R':
+                                self._set_hside_rook_file(file(sq))
+                                break
+                        assert(self.hside_rook_file is not None)
                         w_oo = True
                     elif c == 'Q':
-                        if self.board[E1] != 'K' or self.board[A1] != 'R':
-                            raise BadFenError()
                         if w_ooo:
                             raise BadFenError()
+                        for sq in range(A1, self.king_pos[1]):
+                            if self.board[sq] == 'R':
+                                self._set_aside_rook_file(file(sq))
+                                break
+                        assert(self.aside_rook_file is not None)
                         w_ooo = True
                     elif c == 'k':
-                        if self.board[E8] != 'k' or self.board[H8] != 'r':
-                            raise BadFenError()
                         if b_oo:
                             raise BadFenError()
+                        for sq in range(H8, self.king_pos[0], -1):
+                            if self.board[sq] == 'r':
+                                self._set_hside_rook_file(file(sq))
+                                break
+                        assert(self.hside_rook_file is not None)
                         b_oo = True
                     elif c == 'q':
-                        if self.board[E8] != 'k' or self.board[A8] != 'r':
-                            raise BadFenError()
                         if b_ooo:
                             raise BadFenError()
+                        for sq in range(A8, self.king_pos[1]):
+                            if self.board[sq] == 'r':
+                                self._set_aside_rook_file(file(sq))
+                                break
+                        assert(self.aside_rook_file is not None)
                         b_ooo = True
+                    else:
+                        # X-FEN castling disambiguation
+                        f = 'abcdfegh'.find(c)
+                        if f >= 0:
+                            # black castling with inner rook
+                            sq = 0x70 + f
+                            assert(self.board[sq] == 'r')
+                            if sq < self.king_pos[0]:
+                                self.set_aside_rook_file(f)
+                                b_ooo = True
+                            else:
+                                self.set_hside_rook_file(f)
+                                b_oo = True
+                        else:
+                            sq = 'ABCDEFGH'.find(c)
+                            assert(sq >= 0)
+                            assert(self.board[sq] == 'R')
+                            if sq < self.king_pos[1]:
+                                self.set_aside_rook_file(f)
+                                w_ooo = True
+                            else:
+                                self.set_hside_rook_file(f)
+                                w_oo = True
+
                 self.castle_flags = to_castle_flags(w_oo, w_ooo,
                     b_oo, b_ooo)
+
+                self.castle_mask[self.king_pos[0]] = to_castle_flags(
+                    True, True, False, False)
+                self.castle_mask[self.king_pos[1]] = to_castle_flags(
+                    False, False, True, True)
+
+                if w_oo:
+                    assert(rank(self.king_pos[1]) == 0)
+                    assert(file(self.king_pos[1]) < self.hside_rook_file)
+                    self.castle_mask[self.hside_rook_file] = (
+                        to_castle_flags(False, True, True, True))
+                if w_ooo:
+                    assert(rank(self.king_pos[1]) == 0)
+                    assert(self.aside_rook_file < file(self.king_pos[1]))
+                    self.castle_mask[self.aside_rook_file] = (
+                        to_castle_flags(True, False, True, True))
+                if b_oo:
+                    assert(rank(self.king_pos[0]) == 7)
+                    assert(file(self.king_pos[0]) < self.hside_rook_file)
+                    self.castle_mask[0x70 + self.hside_rook_file] = (
+                        to_castle_flags(True, True, False, True))
+                if b_ooo:
+                    assert(rank(self.king_pos[0]) == 7)
+                    assert(self.aside_rook_file < file(self.king_pos[0]))
+                    self.castle_mask[0x70 + self.aside_rook_file] = (
+                        to_castle_flags(True, True, True, False))
+
             self.hash ^= zobrist.castle_hash(self.castle_flags)
 
             self.fifty_count = int(fifty_count, 10)
@@ -466,10 +592,6 @@ class Position(object):
                 self.ep = None
             else:
                 # only set ep if there is a legal capture
-                # XXX: this is even stricter than X-FEN; maybe
-                # we should not check for true legality, but only
-                # whether there is an enemy pawn on an adjacent
-                # square?
                 self.ep = 'abcdefgh'.index(ep[0]) + \
                     0x10 * '1234567'.index(ep[1])
                 if rank(self.ep) not in (2, 5):
@@ -482,7 +604,7 @@ class Position(object):
                     self.ep = None
                     self.hash ^= zobrist.ep_hash(self.ep)
 
-            #assert(self.hash == self._compute_hash())
+            assert(self.hash == self._compute_hash())
             self.history.set_hash(self.ply, self.hash)
 
             if detect_check:
@@ -508,6 +630,8 @@ class Position(object):
 
     def make_move(self, mv):
         """make the move"""
+        self._check_material()
+        assert(self.hash == self._compute_hash())
         self.ply += 1
 
         mv.undo = Undo()
@@ -522,12 +646,16 @@ class Position(object):
             # clear old en passant hash
             self.hash ^= zobrist.ep_hash(self.ep)
             self.ep = None
-        self.board[mv.fr] = '-'
         if not mv.prom:
-            self.board[mv.to] = mv.pc
-            self.hash ^= zobrist.piece_hash(mv.fr, mv.pc) ^ \
-                zobrist.piece_hash(mv.to, mv.pc)
+            # move the piece, unless this is castling and the king
+            # does not move
+            if mv.fr != mv.to:
+                self.board[mv.to] = mv.pc
+                self.hash ^= zobrist.piece_hash(mv.fr, mv.pc) ^ \
+                    zobrist.piece_hash(mv.to, mv.pc)
+                self.board[mv.fr] = '-'
         else:
+            self.board[mv.fr] = '-'
             self.board[mv.to] = mv.prom
             self.hash ^= zobrist.piece_hash(mv.fr, mv.pc) ^\
                 zobrist.piece_hash(mv.to, mv.prom)
@@ -559,49 +687,57 @@ class Position(object):
                 assert(self.board[mv.to + 0x10] == 'P')
                 self.hash ^= zobrist.piece_hash(mv.to + 0x10, 'P')
                 self.board[mv.to + 0x10] = '-'
-        elif mv.is_oo:
-            # move the rook
+        elif mv.is_oo and self.hside_rook_file != 5:
+            # move the rook, if it moves
             if self.wtm:
-                assert(self.board[H1] == 'R')
+                # clear the rook square, unless we just overwrote
+                # it with the king
+                if self.hside_rook_file != mv.to:
+                    assert(self.board[self.hside_rook_file] == 'R')
+                    self.board[self.hside_rook_file] = '-'
                 self.board[F1] = 'R'
-                self.board[H1] = '-'
                 self.hash ^= zobrist.piece_hash(F1, 'R') ^ \
-                    zobrist.piece_hash(H1, 'R')
+                    zobrist.piece_hash(self.hside_rook_file, 'R')
             else:
-                assert(self.board[H8] == 'r')
+                if 0x70 + self.hside_rook_file != mv.to:
+                    assert(self.board[0x70 + self.hside_rook_file] == 'r')
+                    self.board[0x70 + self.hside_rook_file] = '-'
                 self.board[F8] = 'r'
-                self.board[H8] = '-'
                 self.hash ^= zobrist.piece_hash(F8, 'r') ^ \
-                    zobrist.piece_hash(H8, 'r')
-        elif mv.is_ooo:
-            # move the rook
+                    zobrist.piece_hash(0x70 + self.hside_rook_file, 'r')
+        elif mv.is_ooo and self.aside_rook_file != 3:
+            # move the rook, if it moves
             if self.wtm:
-                assert(self.board[A1] == 'R')
+                if self.aside_rook_file != mv.to:
+                    assert(self.board[self.aside_rook_file] == 'R')
+                    self.board[self.aside_rook_file] = '-'
                 self.board[D1] = 'R'
-                self.board[A1] = '-'
                 self.hash ^= zobrist.piece_hash(D1, 'R') ^ \
-                    zobrist.piece_hash(A1, 'R')
+                    zobrist.piece_hash(self.aside_rook_file, 'R')
             else:
-                assert(self.board[A8] == 'r')
+                if 0x70 + self.aside_rook_file != mv.to:
+                    assert(self.board[0x70 + self.aside_rook_file] == 'r')
+                    self.board[0x70 + self.aside_rook_file] = '-'
                 self.board[D8] = 'r'
-                self.board[A8] = '-'
-                self.hash ^= zobrist.piece_hash(A8, 'r') ^ \
-                    zobrist.piece_hash(D8, 'r')
+                self.hash ^= zobrist.piece_hash(0x70 + self.aside_rook_file,
+                    'r') ^ zobrist.piece_hash(D8, 'r')
 
-        self.castle_flags &= castle_mask[mv.fr] & castle_mask[mv.to]
+        self.castle_flags &= self.castle_mask[mv.fr] & self.castle_mask[mv.to]
         if self.castle_flags != mv.undo.castle_flags:
             self.hash ^= zobrist.castle_hash(self.castle_flags) ^ \
                 zobrist.castle_hash(mv.undo.castle_flags)
         self.wtm = not self.wtm
         self.hash ^= zobrist.side_hash
-        #self._check_material()
+        self._check_material()
 
         if mv.new_ep and self._is_legal_ep(mv.new_ep):
             self.ep = mv.new_ep
             self.hash ^= zobrist.ep_hash(self.ep)
 
         self.history.set_move(self.ply - 1 , mv)
-        #assert(self.hash == self._compute_hash())
+        #if (self.hash != self._compute_hash()):
+        #    print 'isoo %d, isooo %d, wtm %d, iscap %d, hrf %d, fr %d, to %d, cf %x, oldcf %x, ep %s' % (mv.is_oo, mv.is_ooo, not self.wtm, mv.is_capture, self.hside_rook_file, mv.fr, mv.to, self.castle_flags, mv.undo.castle_flags, self.ep, )
+        assert(self.hash == self._compute_hash())
         self.history.set_hash(self.ply, self.hash)
 
     def _is_legal_ep(self, ep):
@@ -642,6 +778,7 @@ class Position(object):
 
     def undo_move(self, mv):
         """undo the move"""
+        self._check_material()
         self.wtm = not self.wtm
         self.ply -= 1
         self.ep = mv.undo.ep
@@ -668,23 +805,27 @@ class Position(object):
         elif mv.is_oo:
             if self.wtm:
                 assert(self.board[F1] == 'R')
-                self.board[H1] = 'R'
-                self.board[F1] = '-'
+                self.board[self.hside_rook_file] = 'R'
+                if mv.fr != F1:
+                    self.board[F1] = '-'
             else:
                 assert(self.board[F8] == 'r')
-                self.board[H8] = 'r'
-                self.board[F8] = '-'
+                self.board[0x70 + self.hside_rook_file] = 'r'
+                if mv.fr != F8:
+                    self.board[F8] = '-'
         elif mv.is_ooo:
             if self.wtm:
                 assert(self.board[D1] == 'R')
-                self.board[A1] = 'R'
-                self.board[D1] = '-'
+                self.board[self.aside_rook_file] = 'R'
+                if mv.fr != D1:
+                    self.board[D1] = '-'
             else:
                 assert(self.board[D8] == 'r')
-                self.board[A8] = 'r'
-                self.board[D8] = '-'
-        #self._check_material()
-        #assert(self.hash == self._compute_hash())
+                self.board[0x70 + self.aside_rook_file] = 'r'
+                if mv.fr != D8:
+                    self.board[D8] = '-'
+        self._check_material()
+        assert(self.hash == self._compute_hash())
 
     def _check_material(self):
         bmat = sum([piece_material[pc.lower()]
@@ -859,7 +1000,10 @@ class Position(object):
         prom = m.group(3)
         if prom == None:
             mv = Move(self, fr, to)
-            if mv.pc == 'K' and fr == E1:
+            # don't allow king moves to represent castling for
+            # chess960
+            # TODO? allow it if unambiguous (not sure if it's necessary)
+            """if mv.pc == 'K' and fr == E1:
                 if to == G1:
                     mv.is_oo = True
                 elif to == C1:
@@ -868,7 +1012,7 @@ class Position(object):
                 if to == G8:
                     mv.is_oo = True
                 elif to == C8:
-                    mv.is_ooo = True
+                    mv.is_ooo = True"""
         else:
             if self.wtm:
                 assert(prom == prom.upper())
@@ -1014,12 +1158,14 @@ class Position(object):
 
             mv = Move(self, froms[0], to)
 
-        '''if mv:
+        # begin consistency check
+        if mv:
             try:
                 mv.check_pseudo_legal()
             except IllegalMoveError:
                 raise RuntimeError('san inconsistency')
-            mv.check_legal()'''
+            mv.check_legal()
+        # end consistency check
 
         return mv
 
@@ -1028,15 +1174,15 @@ class Position(object):
         s = self.decorator_re.sub('', s)
         if not mv and s in ['O-O', 'OO', 'o-o']:
             if self.wtm:
-                mv = Move(self, E1, G1, is_oo=True)
+                mv = Move(self, self.king_pos[1], G1, is_oo=True)
             else:
-                mv = Move(self, E8, G8, is_oo=True)
+                mv = Move(self, self.king_pos[0], G8, is_oo=True)
 
         if not mv and s in ['O-O-O', 'OOO', 'o-o-o']:
             if self.wtm:
-                mv = Move(self, E1, C1, is_ooo=True)
+                mv = Move(self, self.king_pos[1], C1, is_ooo=True)
             else:
-                mv = Move(self, E8, C8, is_ooo=True)
+                mv = Move(self, self.king_pos[0], C8, is_ooo=True)
 
         if mv:
             mv.check_pseudo_legal()
@@ -1070,7 +1216,7 @@ class Position(object):
         return self.fifty_count >= 100
 
     def is_draw_repetition(self, side):
-        #assert(self.hash == self._compute_hash())
+        assert(self.hash == self._compute_hash())
         """check for draw by repetition"""
 
         # Note that the most recent possible identical position is
@@ -1124,7 +1270,7 @@ class Position(object):
                 i -= 2
 
         return False
-    
+
     def to_xfen(self):
         p = []
         for r in range(7, -1, -1):
@@ -1171,12 +1317,16 @@ class Position(object):
         full_moves = self.ply // 2 + 1
         return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
 
-class Chess(object):
-    """normal chess"""
+class Chess960(object):
     def __init__(self, game):
         self.game = game
-        self.pos = copy.deepcopy(initial_pos)
-        self.name = 'chess'
+        idn = game.idn
+        if idn is None:
+            # pick a sandom position
+            idn = random.randint(0, 959)
+        self.pos = Position(db.fen_from_idn(idn))
+        self.idn = idn
+        self.name = 'chess960'
 
     def parse_move(self, s, t, conn):
         """Try to parse a move and execute it.  If it looks like a move but
@@ -1198,7 +1348,7 @@ class Chess(object):
             if not mv:
                 mv = self.pos.move_from_san(s)
         except IllegalMoveError as e:
-            #print e.reason
+            print e.reason
             raise
 
         return mv
@@ -1304,7 +1454,5 @@ def init_direction_table():
                         direction_table[cur_sq - sq + 0x7f] = d
                     cur_sq += d
 init_direction_table()
-
-initial_pos = Position('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
