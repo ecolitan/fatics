@@ -66,12 +66,6 @@ piece_material = {
 }
 
 def to_castle_flags(w_oo, w_ooo, b_oo, b_ooo):
-    '''# XXX the castling flags should ideally take into account the
-    # rook files?
-    w_oo = int(bool(w_oo))
-    b_oo = int(bool(b_oo))
-    w_ooo = int(bool(w_ooo))
-    b_ooo = int(bool(b_ooo))'''
     return (w_oo << 3) + (w_ooo << 2) + (b_oo << 1) + b_ooo
 
 def check_castle_flags(mask, wtm, is_oo):
@@ -443,8 +437,6 @@ class Position(object):
             ranks.reverse()
             self.hash = 0
             self.material = [0, 0]
-            # indexed by wtm (0=Black, 1=White), oo (0=O-O-O, 1=O-O)
-            #rook_pos = [[None, None], [None, None]]
             self.aside_rook_file = None
             self.hside_rook_file = None
             for (r, rank_str) in enumerate(ranks):

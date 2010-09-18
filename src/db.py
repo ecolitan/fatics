@@ -365,23 +365,6 @@ class DB(object):
         cursor.close()
         return rows
 
-    '''def get_history_game(self, user_id, num):
-        assert(0 <= num <= 99)
-        cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT white_name,white_rating,black_name,black_rating,game.eco,variant_id,speed_id,game.time,game.inc,rated,result,game.result_reason,ply_count,movetext,game.when_ended FROM game LEFT JOIN history USING (game_id) where user_id=%s AND num=%s""", (user_id, num))
-        row = cursor.fetchone()
-        cursor.close()
-        return row'''
-
-    '''def get_history_game_relative(self, user_id, num):
-        assert(-10 <= num <= -1)
-        cursor = self.db.cursor(cursors.DictCursor)
-        offset = -1 - num
-        cursor.execute("""SELECT white_name,white_rating,black_name,black_rating,game.eco,variant_id,speed_id,game.time,game.inc,rated,result,game.result_reason,ply_count,movetext,game.when_ended FROM game LEFT JOIN history USING (game_id) where user_id=%s ORDER BY game.when_ended DESC LIMIT %s,1""", (user_id, offset))
-        row = cursor.fetchone()
-        cursor.close()
-        return row'''
-
     def user_add_history(self, entry, user_id):
         cursor = self.db.cursor()
         entry.update({'user_id': user_id})

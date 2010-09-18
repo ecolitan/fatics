@@ -210,8 +210,8 @@ class Challenge(Offer):
 
         if self.idn is not None and self.variant_name != 'chess960':
             # idns can only be used for chess960
-            a.write_('Only registered players can play rated games.\n')
-            raise command_parser.BadCommandError
+            a.write_('You may only specify an idn for chess960 games.\n')
+            return
 
         rated_str = "rated" if self.rated else "unrated"
 
@@ -235,6 +235,8 @@ class Challenge(Offer):
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
         challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, time_str)
 
+        if self.idn is not None:
+            challenge_str = '%s idn=%d' % (challenge_str, self.idn)
 
         #if self.board is not None:
         #    challenge_str = 'Loaded from a board'
