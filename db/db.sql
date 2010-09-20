@@ -311,6 +311,14 @@ CREATE TABLE `chess960_pos` (
   PRIMARY KEY(`idn`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+-- for chess960
+DROP TABLE IF EXISTS `game_idn`;
+CREATE TABLE `game_idn` (
+  `game_id` int(8) NOT NULL,
+  `idn` INT(4) NOT NULL,
+  UNIQUE KEY(`game_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 -- data
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'

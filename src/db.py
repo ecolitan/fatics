@@ -356,8 +356,9 @@ class DB(object):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT game_id, num, result_char, user_rating,
                 color_char, opp_name, opp_rating, h.eco, flags, h.time,
-                h.inc, h.result_reason, h.when_ended, movetext
+                h.inc, h.result_reason, h.when_ended, movetext, idn
             FROM history AS h LEFT JOIN game USING(game_id)
+                LEFT JOIN game_idn USING (game_id)
             WHERE user_id=%s
             ORDER BY when_ended ASC
             LIMIT 10""", user_id)
@@ -557,6 +558,12 @@ class DB(object):
             return row[0]
         else:
             return None
+
+    def game_add_idn(self, game_id, idn):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO game_idn VALUES(%s,%s)""",
+            (game_id, idn))
+        cursor.close()
 
 db = DB()
 

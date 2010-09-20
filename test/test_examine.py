@@ -57,6 +57,9 @@ class TestExamine(Test):
         t.write('forward\n')
         self.expect("You're at the end of the game.", t)
 
+        t.write('backward\n')
+        self.expect('GuestPQLQ backs up 1 move.', t)
+
         self.close(t)
 
     @with_player('testplayer', 'testpass')

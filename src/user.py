@@ -199,7 +199,7 @@ class BaseUser(object):
 
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
-            result_reason, when_ended, movetext):
+            result_reason, when_ended, movetext, idn):
         assert(self._history is not None)
         if len(self._history) == 0:
             num = 0
@@ -212,7 +212,7 @@ class BaseUser(object):
             'opp_name': opp_name, 'opp_rating': opp_rating, 'eco': eco,
             'flags' : flags, 'time': initial_time, 'inc' : inc,
             'result_reason': result_reason, 'when_ended': when_ended,
-            'movetext': movetext
+            'movetext': movetext, 'idn': idn
         }
         self._history.append(entry)
         return entry
@@ -462,19 +462,11 @@ class User(BaseUser):
 
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
-            result_reason, when_ended, movetext):
+            result_reason, when_ended, movetext, idn):
         entry = BaseUser.save_history(self, game_id, result_char, user_rating,
             color_char, opp_name, opp_rating, eco, flags, initial_time, inc,
-            result_reason, when_ended, movetext)
+            result_reason, when_ended, movetext, idn)
         db.user_add_history(entry, self.id)
-
-    """def _get_history_game(self, num, conn):
-        if num < 0:
-            h = db.get_history_game_relative(self.id, num)
-        else:
-            h = db.get_history_game(self.id, num)
-        return h"""
-
 
     def clear_history(self):
         BaseUser.clear_history(self)

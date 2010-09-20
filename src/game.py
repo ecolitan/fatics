@@ -287,7 +287,13 @@ class PlayedGame(Game):
         self.white_time = chal.time
         self.black_time = chal.time
         self.inc = chal.inc
-        self.idn = chal.idn
+        if chal.idn is not None:
+            self.idn = chal.idn
+        elif chal.idn == -1:
+            # special value for "always random"
+            self.idn = random.randint(0, 959)
+        else:
+            self.idn = self._pick_idn(chal.a, chal.b)
 
         self.white.session.is_white = True
         self.black.session.is_white = False
@@ -365,6 +371,31 @@ class PlayedGame(Game):
 
         # unreached
         assert(False)
+
+    def _pick_idn(self, a, b):
+        """ Choose an idn for a chess960 game, either by repeating the
+        previous idn if this is a rematch or choosing randomly. """
+        ahist = a.get_history()
+        bhist = b.get_history()
+        idn = None
+        if ahist and bhist:
+            if (ahist[-1]['opp_name'] == b.name and
+                    bhist[-1]['opp_name'] == a.name):
+                # this is a rematch
+                assert(ahist[-1]['idn'] == bhist[-1]['idn'])
+                if ahist[-1]['idn'] is not None:
+                    # try to use the same initial setup for the rematch,
+                    # unless we have already done so (don't use the same
+                    # position 3 times in a row)
+                    if (len(ahist) < 2 or len(bhist) < 2 or not
+                            (ahist[-2]['opp_name'] == b.name and
+                            bhist[-2]['opp_name'] == a.name and
+                            ahist[-2]['idn'] == ahist[-1]['idn'])):
+                        idn = ahist[-1]['idn']
+        if idn is None:
+            # pick a random position
+            idn = random.randint(0, 959)
+        return idn
 
     def _color_from_char(self, char):
         assert(char in ['W', 'B'])

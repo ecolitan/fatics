@@ -1312,12 +1312,8 @@ class Position(object):
 class Chess960(object):
     def __init__(self, game):
         self.game = game
-        idn = game.idn
-        if idn is None:
-            # pick a sandom position
-            idn = random.randint(0, 959)
-        self.pos = Position(db.fen_from_idn(idn))
-        self.idn = idn
+        self.idn = game.idn
+        self.pos = Position(db.fen_from_idn(self.idn))
         self.name = 'chess960'
 
     def parse_move(self, s, t, conn):

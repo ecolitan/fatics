@@ -35,15 +35,22 @@ class ExaminedGame(Game):
         self.rated_str = 'unrated'
         user.session.games.add(self, '[examined]')
         self.start_time = time.time()
-        self.speed_variant = speed_variant.from_names('untimed', 'chess')
-        self.variant = variant_factory.get(self.speed_variant.variant.name,
-            self)
         if hist_game is None:
+            self.speed_variant = speed_variant.from_names('untimed', 'chess')
+            self.variant = variant_factory.get(self.speed_variant.variant.name,
+                self)
             self.moves = []
             self.white_name = 'White'
             self.black_name = 'Black'
             self.result_code = None
         else:
+            self.idn = hist_game['idn']
+            variant_name = speed_variant.variant_abbrevs[hist_game['flags'][1]].name
+            # XXX use the speed from history
+            self.speed_variant = speed_variant.from_names('untimed',
+                variant_name)
+            self.variant = variant_factory.get(self.speed_variant.variant.name,
+                self)
             self.moves = hist_game['movetext'].split(' ')
             self.white_name = hist_game['white_name']
             self.black_name = hist_game['black_name']
@@ -117,8 +124,8 @@ class ExaminedGame(Game):
             conn.write(_("You're at the beginning of the game.\n"))
             return
         for p in self.players + list(self.observers):
-            p.nwrite_('Game %d: %s backs up %d move\n',
-                'Game %d: %s backs up %d moves\n', n,
+            p.nwrite_('Game %d: %s backs up %d move.\n',
+                'Game %d: %s backs up %d moves.\n', n,
                 (self.number, conn.user.name, n))
         self.variant.undo_move()
         self.send_boards()

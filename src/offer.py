@@ -392,6 +392,8 @@ class Challenge(Offer):
                 m = re.match(self._idn_re, w)
                 if m:
                     self.idn = int(m.group(1))
+                    if self.idn < -1 or self.idn > 959:
+                        raise command_parser.BadCommandError
                     continue
 
                 #print('got unknown keyword %s' % w)

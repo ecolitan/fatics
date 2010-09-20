@@ -24,13 +24,18 @@ import online
 from game_constants import *
 from config import config
 
-class Clock(object):
-    pass
 
 running_clocks = []
+clock_names = set()
+
+class Clock(object):
+    def __init__(self):
+        clock_names.add(self.name)
 
 class FischerClock(Clock):
     def __init__(self, white_start, black_start, inc):
+        self.name = 'fischer'
+        super(FischerClock, self).__init__()
         self.is_ticking = False
         self._white_time = white_start
         self._black_time = black_start

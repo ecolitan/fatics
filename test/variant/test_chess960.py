@@ -24,6 +24,16 @@ from pgn import Pgn
 from db import db
 
 class TestChess960(Test):
+    def test_bad_idn(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0 fr idn=960\n')
+        self.expect('Usage:', t)
+
+        self.close(t)
+        self.close(t2)
+
     def test_checkmate(self):
         moves = ['b4', 'b6', 'Bb2', 'Bb7', 'Bxg7', 'Bxg2', 'Bxh8',
             'Bxh1', 'Qg7#' ]
@@ -43,7 +53,73 @@ class TestChess960(Test):
 
         self._assert_game_is_legal(moves, 734, 'drawn by stalemate} 1/2-1/2')
 
-    def _assert_game_is_legal(self, moves, idn, result=None):
+    def test_examine(self):
+        moves = ['b4', 'b6', 'Bb2', 'Bb7', 'Bxg7', 'Bxg2', 'Bxh8',
+            'Bxh1', 'Qg7#' ]
+        self._assert_game_is_legal(moves, 100, 'admin checkmated} 1-0',
+            clear_hist=False)
+
+        t = self.connect_as_admin()
+        t.write('exl\n')
+        self.expect('<12> qbbnrnkr pppppppp -------- -------- -------- -------- PPPPPPPP QBBNRNKR W -1 1 1 1 1 0 1 admin admin 2 0 0 39 39 0 0 1 none (0:00) none 0 0 0', t)
+        t.write('forward 9999\n')
+        self.expect('admin goes forward 9999', t)
+        self.expect('admin checkmated 1-0', t)
+        t.write('back\n')
+        self.expect('admin backs up 1 move.', t)
+        t.write('Qg7\n')
+        self.expect('admin checkmated 1-0', t)
+
+        t.write('unex\n')
+        self.expect('You are no longer examining', t)
+
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
+
+        self.close(t)
+
+    def test_rematch_same_idn(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
+        t.write('match admin white 1 0 fr idn=404\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('<12> rbbqnnkr pppppppp -------- -------- -------- -------- PPPPPPPP RBBQNNKR W -1 1 1 1 1 0 1 GuestABCD admin 1 1 0 39 39 60 60 1 none (0:00) none 0 0 0', t)
+        self.expect('<12> rbbqnnkr pppppppp -------- -------- -------- -------- PPPPPPPP RBBQNNKR W -1 1 1 1 1 0 1 GuestABCD admin -1 1 0 39 39 60 60 1 none (0:00) none 1 0 0', t2)
+        t.write('res\n')
+        self.expect('GuestABCD resigns} 0-1', t)
+        self.expect('GuestABCD resigns} 0-1', t2)
+
+        t.write('rem\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('<12> rbbqnnkr pppppppp -------- -------- -------- -------- PPPPPPPP RBBQNNKR W -1 1 1 1 1 0 1 admin GuestABCD -1 1 0 39 39 60 60 1 none (0:00) none 1 0 0', t)
+        self.expect('<12> rbbqnnkr pppppppp -------- -------- -------- -------- PPPPPPPP RBBQNNKR W -1 1 1 1 1 0 1 admin GuestABCD 1 1 0 39 39 60 60 1 none (0:00) none 0 0 0', t2)
+        t.write('res\n')
+        self.expect('GuestABCD resigns} 1-0', t)
+        self.expect('GuestABCD resigns} 1-0', t2)
+
+        # this test is expected to fail 1 out of every 960 runs :)
+        """
+        t.write('rem\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect_not('<12> rbbqnnkr ', t)
+        t.write('abort\n')
+        self.expect('aborted on move 1', t)
+        self.expect('aborted on move 1', t2)
+        """
+
+        t2.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def _assert_game_is_legal(self, moves, idn, result=None, clear_hist=True):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
@@ -70,6 +146,9 @@ class TestChess960(Test):
                 t2.write('draw\n')
             self.expect(result, t)
             self.expect(result, t2)
+            if clear_hist:
+                t2.write('aclearhist admin\n')
+                self.expect('History of admin cleared.', t2)
         else:
             t.write('abort\n')
             t2.write('abort\n')
