@@ -17,13 +17,21 @@
 #
 
 import sys
-from test import connect
+from test import connect, admin_passwd
 
 def check_server():
     t = connect()
     if not t:
         print 'ERROR: Unable to connect.  A running server is required to do the tests.\r\n'
         sys.exit(1)
+
+    # remove players possibly left over from an old run
+    remove_list = ['testplayer', 'testtwo', 'admintwo']
+    t.write('admin\n')
+    t.write('%s\n' % admin_passwd)
+    for r in remove_list:
+        t.write('remplayer %s\n' % r)
+    t.write('aclearhist admin\n')
     t.close()
 
 check_server()
