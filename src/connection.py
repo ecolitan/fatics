@@ -88,10 +88,11 @@ class Connection(basic.LineReceiver):
             assert(t != 0)
         else:
             t = None
+        self.session.timeseal_last_timestamp = t
         if self.state:
-            getattr(self, "lineReceived_" + self.state)(line, t)
+            getattr(self, "lineReceived_" + self.state)(line)
 
-    def lineReceived_login(self, line, t):
+    def lineReceived_login(self, line):
         self.timeout_check.cancel()
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
         self.session.login_last_command = time.time()
@@ -105,12 +106,8 @@ class Connection(basic.LineReceiver):
                 elif dec[0:10] == 'TIMESEAL2|':
                     self.session.use_timeseal = True
                     return
-            '''(t, dec) = timeseal.decode_zipseal(line)
-            if t != 0:
-                if dec[0:8] == 'zipseal|':
-                    self.write('ZIPSEAL\n')
-                    self.session.use_zipseal = True
-                    return'''
+                # we don't detect zipseal here, because we use
+                # the port number to detect it
             # no timeseal; continue
 
         m = self.ivar_pat.match(line)
@@ -126,7 +123,7 @@ class Connection(basic.LineReceiver):
             self.transport.wont(telnet.ECHO)
             self.write("login: ")
 
-    def lineReceived_passwd(self, line, t):
+    def lineReceived_passwd(self, line):
         self.timeout_check.cancel()
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
         self.session.login_last_command = time.time()
@@ -153,16 +150,16 @@ class Connection(basic.LineReceiver):
         self.user.send_prompt()
         self.state = 'prompt'
 
-    def lineReceived_prompt(self, line, t):
+    def lineReceived_prompt(self, line):
         if line == TIMESEAL_REPLY:
-            self.session.pong(t)
+            self.session.pong(self.session.timeseal_last_timestamp)
             return
 
         lang.langs[self.user.vars['lang']].install(names=['ngettext'])
         written_users.clear()
         written_users.add(self.user)
         try:
-            command_parser.parser.parse(line, t, self)
+            command_parser.parser.parse(line, self)
         finally:
             for u in written_users:
                 if u.is_online:
@@ -187,7 +184,7 @@ class Connection(basic.LineReceiver):
             self.user.log_off()
         self.transport.loseConnection()
         if reason == 'quit':
-            timeseal.print_stats()
+            #timeseal.print_stats()
             self.write(config.logout_msg)
 
     def connectionLost(self, reason):

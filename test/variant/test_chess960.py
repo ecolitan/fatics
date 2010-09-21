@@ -159,7 +159,7 @@ class TestChess960(Test):
 
 class TestPgn(Test):
     def test_pgn(self):
-        self._skip('slow test')
+        #self._skip('slow test')
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as('GuestEFGH', '')
 

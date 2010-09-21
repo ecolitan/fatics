@@ -1327,10 +1327,10 @@ class Crazyhouse(object):
         self.pos = copy.deepcopy(initial_pos)
         self.name = 'crazyhouse'
 
-    def parse_move(self, s, t, conn):
-        """Try to parse a move and execute it.  If it looks like a move but
-        is erroneous or illegal, raise an exception.  Return True if
-        the move was handled, or False if it does not look like a move
+    def parse_move(self, s, conn):
+        """Try to parse a move.  If it looks like a move but
+        is erroneous or illegal, raise an exception.  Return the move if
+        parsing was sucessful, or False if it does not look like a move
         and should be processed further."""
 
         mv = None

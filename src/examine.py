@@ -141,13 +141,13 @@ class ExaminedGame(Game):
         elif self.variant.pos.is_draw_nomaterial:
             self.result('Game drawn because neither player has mating material', '1/2-1/2')
 
-    def next_move(self, mv, t, conn):
+    def next_move(self, mv, conn):
         self.moves = self.moves[0:self.variant.pos.ply]
         self.moves.append(mv.to_san())
         #self.variant.pos.get_last_move().time = 0.0
         assert(self.variant.pos.get_last_move() == mv)
         mv.time = 0.0
-        super(ExaminedGame, self).next_move(mv, t, conn)
+        super(ExaminedGame, self).next_move(mv, conn)
         for p in self.players + list(self.observers):
             p.write(N_('Game %d: %s moves: %s\n') % (self.number, conn.user.name, mv.to_san()))
         self._check_result()

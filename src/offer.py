@@ -22,6 +22,8 @@ import speed_variant
 import command_parser
 import game
 import formula
+import clock
+
 from game_constants import *
 
 shortcuts = {
@@ -174,6 +176,7 @@ class Challenge(Offer):
         self.b = b
 
         self.variant_name = None
+        self.clock_name = None
 
         self.time = a.vars['time']
         self.inc = a.vars['inc']
@@ -207,6 +210,9 @@ class Challenge(Offer):
         if self.variant_name is None:
             # chess is the default, of course
             self.variant_name = 'chess'
+
+        if self.clock_name is None:
+            self.clock_name = 'fischer'
 
         if self.idn is not None and self.variant_name != 'chess960':
             # idns can only be used for chess960
@@ -344,6 +350,12 @@ class Challenge(Offer):
             raise command_parser.BadCommandError()
         self.variant_name = val
 
+    def _set_clock_name(self, val):
+        if self.clock_name is not None:
+            # conflicting clock types
+            raise command_parser.BadCommandError()
+        self.clock_name = val
+
     _wild_re = re.compile('w(\d+)')
     _idn_re = re.compile('idn=(\d+)')
     def _parse_opts(self, opts):
@@ -380,6 +392,9 @@ class Challenge(Offer):
 
             elif w in speed_variant.variant_names:
                 self._set_variant_name(w)
+
+            elif w in clock.clock_names:
+                self._set_clock_name(w)
 
             elif w == 'wild':
                 do_wild = True

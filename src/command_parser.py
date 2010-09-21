@@ -35,7 +35,7 @@ import block
 
 class CommandParser(object):
     command_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
-    def _do_parse(self, s, t, conn):
+    def _do_parse(self, s, conn):
         s = s.strip()
 
         if not utf8.checker.check_user_utf8(s):
@@ -64,7 +64,7 @@ class CommandParser(object):
             return block.BLK_NULL
 
         if conn.session.games:
-            if conn.session.games.current().parse_move(s, t, conn):
+            if conn.session.games.current().parse_move(s, conn):
                 return block.BLK_GAME_MOVE
 
         if s[0] == '$':
@@ -113,13 +113,13 @@ class CommandParser(object):
 
         return ret
 
-    def parse(self, s, t, conn):
+    def parse(self, s, conn):
         if not conn.session.ivars['block']:
-            self._do_parse(s, t, conn)
+            self._do_parse(s, conn)
         else:
             (identifier, s) = block.block.start_block(s, conn)
             if identifier is not None:
-                code = self._do_parse(s, t, conn)
+                code = self._do_parse(s, conn)
                 block.block.end_block(identifier, code, conn)
 
     def parse_args(self, s, param_str):

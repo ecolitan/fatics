@@ -168,7 +168,8 @@ class Pose(Command):
             else:
                 conn.write(A_('Command issued as %s.\n') % u2.name)
                 u2.write_('%s has issued the following command on your behalf: %s\n', (conn.user.name, args[1]))
-                command_parser.parser.parse(args[1], 0.0, u2.session.conn)
+                # XXX set u2.session.timeseal_last_timestamp?
+                command_parser.parser.parse(args[1], u2.session.conn)
 
 @ics_command('remplayer', 'w', admin.Level.admin)
 class Remplayer(Command):

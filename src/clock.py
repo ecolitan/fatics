@@ -26,11 +26,10 @@ from config import config
 
 
 running_clocks = []
-clock_names = set()
+clock_names = {}
 
 class Clock(object):
-    def __init__(self):
-        clock_names.add(self.name)
+    pass
 
 class FischerClock(Clock):
     def __init__(self, white_start, black_start, inc):
@@ -70,7 +69,7 @@ class FischerClock(Clock):
         if self.is_ticking and self._side_ticking == WHITE:
             ret -= time.time() - self.started_time
         return ret
-    
+
     def get_black_time(self):
         ret = self._black_time
         if self.is_ticking and self._side_ticking == BLACK:
@@ -108,5 +107,8 @@ class FischerClock(Clock):
 
     def stop(self):
         self.is_ticking = False
+clock_names['fischer'] = FischerClock
+
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

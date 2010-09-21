@@ -93,7 +93,7 @@ class Game(object):
     def __hash__(self):
         return self.number
 
-    def next_move(self, mv, t, conn):
+    def next_move(self, mv, conn):
         self.send_boards()
 
     def get_user_side(self, user):
@@ -245,9 +245,9 @@ class Game(object):
                 (self.number, self.white.name, self.black.name,
                 ' '.join(olist), len(olist)))
 
-    def parse_move(self, s, t, conn):
+    def parse_move(self, s, conn):
         try:
-            mv = self.variant.parse_move(s, t, conn)
+            mv = self.variant.parse_move(s, conn)
             parsed = mv is not None
             illegal = False
         except speed_variant.IllegalMoveError:
@@ -261,7 +261,7 @@ class Game(object):
                 conn.write(_('Illegal move (%s)\n') % s)
             else:
                 self.variant.do_move(mv)
-                self.next_move(mv, t, conn)
+                self.next_move(mv, conn)
         return parsed
 
 class PlayedGame(Game):
@@ -307,8 +307,8 @@ class PlayedGame(Game):
         self.start_time = time.time()
         self.is_active = True
 
-        self.clock = clock.FischerClock(self.white_time * 60.0,
-            self.black_time * 60.0, self.inc)
+        self.clock = clock.clock_names[chal.clock_name](
+            self.white_time * 60.0, self.black_time * 60.0, self.inc)
         self.when_started = datetime.datetime.utcnow()
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
@@ -401,7 +401,7 @@ class PlayedGame(Game):
         assert(char in ['W', 'B'])
         return WHITE if char == 'W' else BLACK
 
-    def next_move(self, mv, t, conn):
+    def next_move(self, mv, conn):
         # decline all offers to the player who just moved
         u = self.get_user_to_move()
         offers = [o for o in self.pending_offers if o.a == u]
@@ -414,8 +414,7 @@ class PlayedGame(Game):
             if self.clock.is_ticking:
                 if conn.user.has_timeseal():
                     assert(conn.session.move_ping_time is not None)
-                    #print("t %d, orig %d" % (t, conn.session.ping_reply_time))
-                    elapsed = (t - conn.session.move_ping_time) / 1000.0
+                    elapsed = (conn.session.timeseal_last_timestamp - conn.session.move_ping_time) / 1000.0
                     time = self.clock.update(moved_side, elapsed)
                 else:
                     time = self.clock.update(moved_side)
@@ -426,11 +425,10 @@ class PlayedGame(Game):
                     self.clock.add_increment(moved_side)
                 self.clock.start(self.variant.get_turn())
 
-        #self.variant.pos.get_last_move().time = time
         assert(mv == self.variant.pos.get_last_move())
         mv.time = time
 
-        super(PlayedGame, self).next_move(mv, t, conn)
+        super(PlayedGame, self).next_move(mv, conn)
 
         if self.variant.pos.is_checkmate:
             if self.variant.get_turn() == WHITE:
