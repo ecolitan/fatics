@@ -42,6 +42,26 @@ class Clock(object):
     def stop(self):
         self.is_ticking = False
 
+    def got_move(self, side, ply, elapsed=None):
+        """ Stop the clock, and record the time remaining for the player
+        whose clock was ticking.  Returns the time taken for the move.
+        If elapsed is supplied, it is used as the time taken instead
+        of the wall-clock time (this is used for timeseal). """
+        assert(self.is_ticking)
+        assert(self._side_ticking == side)
+
+        self.stop()
+        if elapsed is None:
+            # no timeseal, so use our own timer
+            elapsed = time.time() - self.started_time
+
+        if side == WHITE:
+            self._white_time -= elapsed
+        else:
+            self._black_time -= elapsed
+
+        return elapsed
+
     def get_white_time(self):
         ret = self._white_time
         if self.is_ticking and self._side_ticking == WHITE:
@@ -84,24 +104,6 @@ class FischerClock(Clock):
         self._black_time = black_start
         self.inc = inc
 
-    def got_move(self, side, ply, elapsed=None):
-        """ Stop the clock, and record the time remaining for the player
-        whose clock was ticking.  Returns the time taken for the move.
-        If elapsed is supplied, it is used as the time taken instead
-        of the wall-clock time (this is used for timeseal). """
-        assert(self.is_ticking)
-        assert(self._side_ticking == side)
-
-        self.stop()
-        if elapsed is None:
-            # no timeseal, so use our own timer
-            elapsed = time.time() - self.started_time
-        if side == WHITE:
-            self._white_time -= elapsed
-        else:
-            self._black_time -= elapsed
-        return elapsed
-
     def add_increment(self, side):
         if side == WHITE:
             self._white_time += self.inc
@@ -119,21 +121,7 @@ class BronsteinClock(Clock):
         self.last_elapsed = None
 
     def got_move(self, side, ply, elapsed=None):
-        """ Stop the clock, and record the time remaining for the player
-        whose clock was ticking.  Returns the time taken for the move.
-        If elapsed is supplied, it is used as the time taken instead
-        of the wall-clock time (this is used for timeseal). """
-        assert(self.is_ticking)
-        assert(self._side_ticking == side)
-
-        self.stop()
-        if elapsed is None:
-            # no timeseal, so use our own timer
-            elapsed = time.time() - self.started_time
-        if side == WHITE:
-            self._white_time -= elapsed
-        else:
-            self._black_time -= elapsed
+        elapsed = super(BronsteinClock, self).got_move(side, ply, elapsed)
         self.last_elapsed = elapsed
         return elapsed
 
@@ -146,5 +134,27 @@ class BronsteinClock(Clock):
         else:
             self._black_time += inc
 clock_names['bronstein'] = BronsteinClock
+
+class HourglassClock(Clock):
+    def __init__(self, white_start, black_start, inc):
+        super(HourglassClock, self).__init__()
+        self._white_time = white_start
+        self._black_time = black_start
+        assert(not inc)
+
+    def got_move(self, side, ply, elapsed=None):
+        elapsed = super(HourglassClock, self).got_move(side, ply, elapsed)
+
+        # add the time to the opp of the player who moved
+        if side == WHITE:
+            self._black_time += elapsed
+        else:
+            self._white_time += elapsed
+
+        return elapsed
+
+    def add_increment(self, side):
+        pass
+clock_names['hourglass'] = HourglassClock
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

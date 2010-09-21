@@ -20,7 +20,7 @@ from test import *
 
 import time
 
-class TestClock(Test):
+class TestFischer(Test):
     @with_player('testplayer', 'testpass')
     def test_fischer(self):
         t = self.connect_as_admin()
@@ -52,7 +52,15 @@ class TestClock(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
+class TestBronstein(Test):
+    def test_bad_bronstein(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+        t2.write('match admin 3 0 bronstein\n')
+        self.expect('Games using a Bronstein clock must have an increment.', t2)
+        self.close(t)
+        self.close(t2)
+
     def test_bronstein(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
@@ -87,5 +95,45 @@ class TestClock(Test):
 
         self.close(t)
         self.close(t2)
+
+class TestHourglass(Test):
+    def test_bad_hourglass(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+        t2.write('match admin 1 1 hourglass\n')
+        self.expect('Games using an hourglass clock may not have an increment.', t2)
+        self.close(t)
+        self.close(t2)
+
+    def test_hourglass(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t.write('set style 12\n')
+        self.expect('style set', t)
+
+        t2.write('match admin 1 0 chess hourglass white\n')
+        self.expect('Challenge:', t)
+        t.write('a\n')
+
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60 60 1 none (0:00) none 1 0 0\r\n', t)
+
+        t2.write('d4\n')
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 60 60 1 P/d2-d4 (0:00) d4 1 0 0\r\n', t)
+
+        t.write('d5\n')
+        self.expect('\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60 60 2 P/d7-d5 (0:00) d5 1 1 0\r\n', t)
+
+        # 2-second move time should subtract from moving player and add to opp
+        time.sleep(2.0)
+        t2.write('c4\n')
+        self.expect('\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- --PP---- -------- PP--PPPP RNBQKBNR B -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 58 62 2 P/c2-c4 (0:02) c4 1 1 0\r\n', t)
+
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.expect('aborted by agreement', t)
+
+        self.close(t)
+        self.close(t2)
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

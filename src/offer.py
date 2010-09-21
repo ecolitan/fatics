@@ -201,6 +201,13 @@ class Challenge(Offer):
             #raise InvalidOfferError()
             return
 
+        if self.clock_name == 'bronstein' and not self.inc:
+            a.write_('Games using a Bronstein clock must have an increment.\n')
+            return
+        if self.clock_name == 'hourglass' and self.inc:
+            a.write_('Games using an hourglass clock may not have an increment.\n')
+            return
+
         #a.write('%(aname) (%(arat))%(acol) %(bname) %(brat) %(rat) %(variant)')
         if self.side is not None:
             side_str = " [%s]" % game.side_to_str(self.side)
