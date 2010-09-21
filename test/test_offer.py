@@ -102,6 +102,12 @@ class TestAbort(Test):
         self.expect('Declining the abort offer from GuestABCD', t2)
         self.expect('admin declines your abort offer', t)
 
+        t.write('resign\n')
+        self.expect('GuestABCD resigns} 0-1', t)
+        self.expect('GuestABCD resigns} 0-1', t2)
+
+        t2.write('aclearhist admin\n')
+
         self.close(t)
         self.close(t2)
 

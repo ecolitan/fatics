@@ -68,6 +68,8 @@ class TestExamine(Test):
         t2 = self.connect_as('testplayer', 'testpass')
         t.write('set style 12\n')
         t2.write('set style 12\n')
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
 
         t.write('ex testplayer -1\n')
         self.expect('testplayer has no history games.', t)
@@ -142,7 +144,9 @@ class TestExamine(Test):
         self.expect('You are no longer examining game 1.', t)
 
         t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
         t.write('aclearhist testplayer\n')
+        self.expect('History of testplayer cleared.', t)
 
         self.close(t)
 

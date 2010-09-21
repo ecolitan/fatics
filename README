@@ -17,6 +17,7 @@ System requirements
 * MySQL 5.0 or later
 * The MySQLdb Python module
 * The python-bcrypt module
+* (optional) The pexpect module, for timeseal/zipseal tests
 
 Timeseal and zipseal
 ====================

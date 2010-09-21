@@ -24,8 +24,8 @@ import re
 
 from twisted.trial import unittest
 
-#host = '127.0.0.1'
-host = 'sheila'
+host = '127.0.0.1'
+#host = 'sheila'
 port = '5000'
 admin_passwd = 'admin'
 

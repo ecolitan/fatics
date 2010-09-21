@@ -261,6 +261,9 @@ class TestGame(Test):
         self.expect('{Game 1 (GuestABCD vs. admin) Game drawn by repetition} 1/2-1/2', t)
         self.expect('{Game 1 (GuestABCD vs. admin) Game drawn by repetition} 1/2-1/2', t2)
 
+        t2.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t2)
+
         self.close(t)
         self.close(t2)
 
@@ -310,6 +313,9 @@ class TestResign(Test):
         t.write('resign\n')
         self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD resigns} 0-1', t)
         self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD resigns} 0-1', t2)
+
+        t2.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t2)
         self.close(t)
         self.close(t2)
 
@@ -326,6 +332,9 @@ class TestResign(Test):
         t2.write('resign\n')
         self.expect('{Game 1 (GuestABCD vs. admin) admin resigns} 1-0', t)
         self.expect('{Game 1 (GuestABCD vs. admin) admin resigns} 1-0', t2)
+
+        t2.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t2)
         self.close(t)
         self.close(t2)
 
@@ -465,6 +474,9 @@ class TestDisconnect(Test):
 
         t.close()
         self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD forfeits by disconnection} 0-1', t2)
+
+        t2.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t2)
         self.close(t2)
 
     def test_forfeit_disconnection_quit(self):
@@ -480,7 +492,10 @@ class TestDisconnect(Test):
         t.write('quit\n')
         self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD forfeits by disconnection} 0-1', t)
         self.expect('{Game 1 (GuestABCD vs. admin) GuestABCD forfeits by disconnection} 0-1', t2)
+
         t.close()
+        t2.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t2)
         self.close(t2)
 
     def test_abort_disconnection(self):
