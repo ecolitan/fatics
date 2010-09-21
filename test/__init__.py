@@ -26,7 +26,7 @@ def check_server():
         sys.exit(1)
 
     # remove players possibly left over from an old run
-    remove_list = ['testplayer', 'testtwo', 'admintwo']
+    remove_list = ['testplayer', 'testtwo', 'admintwo', 'testobs']
     t.write('admin\n')
     t.write('%s\n' % admin_passwd)
     for r in remove_list:

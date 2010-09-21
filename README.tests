@@ -4,13 +4,11 @@ You can run the tests with "./chessd test".  The server must be running
 or you will get an error.  To run a specific test, use e.g.
 "trial test.test_kibitz.TestXkibitz".
 
-The tests assume the database and server are a clean state; most notably they
-require that the admin user has no history and that no one is currently
-logged on to the server.  They also require that certain accounts not exist
-yet, such as "testplayer", "testtwo", and "admintwo".  (Sometimes these
-accounts can be left over from a failed test run.)  One way to
-ensure the necessary conditions is to recreate the database from the
-schema and reload the ECO codes using scripts/import-eco.py.
+The tests assume the database and server are a clean state; for example,
+they require that the admin user has no history and that no one is
+currently logged on to the server.  One way to ensure the necessary
+conditions is to recreate the database from the schema and reload the
+ECO codes by executing scripts/import-eco.py.
 
 The server address and admin password for the tests can be configured
 in test/test.py.  All the tests pass for me.  There are probably some

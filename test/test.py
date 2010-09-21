@@ -22,8 +22,8 @@ import socket
 import os
 from twisted.trial import unittest
 
-host = '127.0.0.1'
-#host = 'sheila'
+#host = '127.0.0.1'
+host = 'sheila'
 port = '5000'
 admin_passwd = 'admin'
 
@@ -39,7 +39,7 @@ def connect():
     return t
 
 class Test(unittest.TestCase):
-    def expect(self, s, t, msg=None, timeout=2):
+    def expect(self, s, t, msg=None, timeout=6):
         ret = t.read_until(s, timeout)
         if not s in ret:
             print("\ngot {{%s}}\nexp {{%s}}\n" % (repr(ret), repr(s)))
