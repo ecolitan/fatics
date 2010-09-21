@@ -24,41 +24,64 @@ import time
 
 from test import *
 
-seal_prog = '../timeseal/openseal'
-seal_prog_win = '/home/wmahan/chess/timeseal.exe'
+timeseal_prog = '../timeseal/openseal'
+wine_prog = '/usr/bin/wine'
+timeseal_prog_win = '/home/wmahan/chess/timeseal.exe'
 
 class TestTimeseal(Test):
     def test_timeseal(self):
-        if not os.path.exists(seal_prog):
-            self._skip('no timeseal binary')
-        process = subprocess.Popen([seal_prog, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        process.stdin.write('admin\n')
-        process.stdin.write('%s\n' % admin_passwd)
-        process.stdin.write('finger\n')
-        process.stdin.write('quit\n')
-        time.sleep(5)
-        [out, err] = process.communicate()
-        self.assert_('fics%' in out)
-        self.assert_('Finger of admin' in out)
-        self.assert_('Timeseal:    On\r\n' in out)
-        self.assert_('Thank you for using' in out)
+        if not os.path.exists(timeseal_prog):
+            raise unittest.SkipTest('no timeseal binary')
+
+        try:
+            import pexpect
+        except ImportError:
+            raise unittest.SkipTest('pexpect module not installed')
+
+        process = pexpect.spawn(timeseal_prog, [host, str(port)])
+
+        process.expect_exact('login:')
+        process.send('admin\n')
+        process.send('%s\n' % admin_passwd)
+
+        process.expect_exact('fics%')
+
+        process.send('finger\n')
+        process.expect_exact('Finger of admin')
+        process.expect_exact('Timeseal:    On')
+
+        process.send('quit\n')
+        process.expect_exact('Thank you for using')
+        process.expect_exact(pexpect.EOF)
+        process.close()
 
 class TestTimesealWindows(Test):
     def test_timeseal_windows(self):
-        if not os.path.exists(seal_prog_win):
-            self._skip('no timeseal windows binary')
-            return
-        process = subprocess.Popen(['/usr/bin/wine', seal_prog_win, host, port], stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        if not os.path.exists(wine_prog):
+            raise unittest.SkipTest('no wine binary')
+        if not os.path.exists(timeseal_prog_win):
+            raise unittest.SkipTest('no timeseal windows binary')
 
-        process.stdin.write('admin\r\n')
-        process.stdin.write('%s\r\n' % admin_passwd)
-        process.stdin.write('finger\n')
-        process.stdin.write('quit\n')
-        time.sleep(10)
-        [out, err] = process.communicate()
-        self.assert_('fics%' in out)
-        self.assert_('Finger of admin' in out)
-        self.assert_('Timeseal:    On\r\n' in out)
-        self.assert_('Thank you for using' in out)
+        try:
+            import pexpect
+        except ImportError:
+            raise unittest.SkipTest('pexpect module not installed')
+
+        process = pexpect.spawn(wine_prog,
+            [timeseal_prog_win, host, str(port)])
+
+        process.expect_exact('login:')
+        process.send('admin\n')
+        process.send('%s\n' % admin_passwd)
+        process.expect_exact('fics%')
+
+        process.send('finger\n')
+        process.expect_exact('Finger of admin')
+        process.expect_exact('Timeseal:    On')
+
+        process.send('quit\n')
+        process.expect_exact('Thank you for using')
+        process.expect_exact(pexpect.EOF)
+        process.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -25,33 +25,22 @@ import time
 
 from test import *
 
-seal_prog = '../timeseal/zipseal'
+zipseal_prog = '../timeseal/zipseal'
 wine_prog = '/usr/bin/wine'
-seal_prog_win = '../timeseal/win32/zipseal.exe'
+zipseal_prog_win = '../timeseal/win32/zipseal.exe'
 zipseal_port = 5001
-
-
-'''class PexpectMixin(object):
-    def _spawn_timeseal(self):
-        try:
-            import pexpect
-        except ImportError:
-            self._skip('pexpect module not installed')
-
-        p = pexpect.spawn(seal_prog, [host, str(zipseal_port)])
-        return p'''
 
 class TestZipseal(Test):
     def test_zipseal(self):
-        if not os.path.exists(seal_prog):
-            self._skip('no zipseal binary')
+        if not os.path.exists(zipseal_prog):
+            raise unittest.SkipTest('no zipseal binary')
             return
         try:
             import pexpect
         except ImportError:
-            self._skip('pexpect module not installed')
+            raise unittest.SkipTest('pexpect module not installed')
 
-        process = pexpect.spawn(seal_prog, [host, str(zipseal_port)])
+        process = pexpect.spawn(zipseal_prog, [host, str(zipseal_port)])
 
         process.expect_exact('login:')
         process.send('admin\n')
@@ -74,15 +63,17 @@ class TestZipseal(Test):
 
 class TestZipsealWindows(Test):
     def test_zipseal_windows(self):
-        if not os.path.exists(seal_prog_win):
-            self._skip('no zipseal windows binary')
-            return
+        if not os.path.exists(wine_prog):
+            raise unittest.SkipTest('no wine binary')
+        if not os.path.exists(zipseal_prog_win):
+            raise unittest.SkipTest('no zipseal windows binary')
         try:
             import pexpect
         except ImportError:
-            self._skip('pexpect module not installed')
+            raise unittest.SkipTest('pexpect module not installed')
 
-        process = pexpect.spawn(wine_prog, [seal_prog_win, host, str(zipseal_port)])
+        process = pexpect.spawn(wine_prog,
+            [zipseal_prog_win, host, str(zipseal_port)])
 
         process.expect_exact('login:')
         process.send('admin\n')
