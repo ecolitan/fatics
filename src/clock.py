@@ -29,16 +29,8 @@ running_clocks = []
 clock_names = {}
 
 class Clock(object):
-    pass
-
-class FischerClock(Clock):
-    def __init__(self, white_start, black_start, inc):
-        self.name = 'fischer'
-        super(FischerClock, self).__init__()
+    def __init__(self):
         self.is_ticking = False
-        self._white_time = white_start
-        self._black_time = black_start
-        self.inc = inc
         running_clocks.append(self)
         self.started_time = None
 
@@ -47,22 +39,8 @@ class FischerClock(Clock):
         self._side_ticking = side
         self.started_time = time.time()
 
-    def update(self, side, elapsed=None):
-        """Record the time remaining for the player whose clock was
-        ticking, and stop the clock.  Returns a string representing
-        the time taken for the move."""
-        assert(self.is_ticking)
-        assert(self._side_ticking == side)
-
-        self.stop()
-        if elapsed is None:
-            # no timeseal, so use our own timer
-            elapsed = time.time() - self.started_time
-        if side == WHITE:
-            self._white_time -= elapsed
-        else:
-            self._black_time -= elapsed
-        return elapsed
+    def stop(self):
+        self.is_ticking = False
 
     def get_white_time(self):
         ret = self._white_time
@@ -99,16 +77,74 @@ class FischerClock(Clock):
                     game.result('%s forfeits on time' % game.black.name, '1-0')
         return not game.is_active
 
+class FischerClock(Clock):
+    def __init__(self, white_start, black_start, inc):
+        super(FischerClock, self).__init__()
+        self._white_time = white_start
+        self._black_time = black_start
+        self.inc = inc
+
+    def got_move(self, side, ply, elapsed=None):
+        """ Stop the clock, and record the time remaining for the player
+        whose clock was ticking.  Returns the time taken for the move.
+        If elapsed is supplied, it is used as the time taken instead
+        of the wall-clock time (this is used for timeseal). """
+        assert(self.is_ticking)
+        assert(self._side_ticking == side)
+
+        self.stop()
+        if elapsed is None:
+            # no timeseal, so use our own timer
+            elapsed = time.time() - self.started_time
+        if side == WHITE:
+            self._white_time -= elapsed
+        else:
+            self._black_time -= elapsed
+        return elapsed
+
     def add_increment(self, side):
         if side == WHITE:
             self._white_time += self.inc
         else:
             self._black_time += self.inc
-
-    def stop(self):
-        self.is_ticking = False
 clock_names['fischer'] = FischerClock
 
 
+class BronsteinClock(Clock):
+    def __init__(self, white_start, black_start, inc):
+        super(BronsteinClock, self).__init__()
+        self._white_time = white_start
+        self._black_time = black_start
+        self.inc = inc
+        self.last_elapsed = None
+
+    def got_move(self, side, ply, elapsed=None):
+        """ Stop the clock, and record the time remaining for the player
+        whose clock was ticking.  Returns the time taken for the move.
+        If elapsed is supplied, it is used as the time taken instead
+        of the wall-clock time (this is used for timeseal). """
+        assert(self.is_ticking)
+        assert(self._side_ticking == side)
+
+        self.stop()
+        if elapsed is None:
+            # no timeseal, so use our own timer
+            elapsed = time.time() - self.started_time
+        if side == WHITE:
+            self._white_time -= elapsed
+        else:
+            self._black_time -= elapsed
+        self.last_elapsed = elapsed
+        return elapsed
+
+    def add_increment(self, side):
+        assert(self.last_elapsed is not None)
+        inc = min(self.last_elapsed, self.inc)
+
+        if side == WHITE:
+            self._white_time += inc
+        else:
+            self._black_time += inc
+clock_names['bronstein'] = BronsteinClock
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -41,13 +41,13 @@ def connect():
     return t
 
 class Test(unittest.TestCase):
-    def expect(self, s, t, msg=None, timeout=6):
+    def expect(self, s, t, msg=None, timeout=2):
         ret = t.read_until(s, timeout)
         if not s in ret:
             print("\ngot {{%s}}\nexp {{%s}}\n" % (repr(ret), repr(s)))
         self.assert_(s in ret)
 
-    def expect_re(self, s, t, timeout=6):
+    def expect_re(self, s, t, timeout=2):
         ret = t.expect([re.compile(s)], timeout)
         if ret[0] != 0:
             print("\ngot {{%r}}\nexp {{%r}}\n" % (ret, s))

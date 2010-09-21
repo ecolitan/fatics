@@ -413,11 +413,14 @@ class PlayedGame(Game):
             moved_side = opp(self.variant.get_turn())
             if self.clock.is_ticking:
                 if conn.user.has_timeseal():
-                    assert(conn.session.move_ping_time is not None)
-                    elapsed = (conn.session.timeseal_last_timestamp - conn.session.move_ping_time) / 1000.0
-                    time = self.clock.update(moved_side, elapsed)
+                    assert(conn.session.move_sent_timestamp is not None)
+                    elapsed = (conn.session.timeseal_last_timestamp -
+                        conn.session.move_sent_timestamp) / 1000.0
+                    time = self.clock.got_move(moved_side,
+                        self.variant.pos.ply, elapsed)
                 else:
-                    time = self.clock.update(moved_side)
+                    time = self.clock.got_move(moved_side,
+                        self.variant.pos.ply)
             if self.get_user_to_move().vars['autoflag']:
                 self.clock.check_flag(self, moved_side)
             if self.is_active:

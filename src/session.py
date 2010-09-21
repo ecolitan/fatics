@@ -37,7 +37,7 @@ class Session(object):
         self.use_timeseal = False
         self.ping_sent = []
         self.ping_time = []
-        self.move_ping_time = None
+        self.move_sent_timestamp = None
         self.use_zipseal = False
         self.check_for_timeseal = True
         self.offers_sent = []
@@ -123,6 +123,6 @@ class Session(object):
         self.ping_time.append(reply_time)
 
         if for_move:
-            self.move_ping_time = t
+            self.move_sent_timestamp = t
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
