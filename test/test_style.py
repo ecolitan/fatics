@@ -42,8 +42,12 @@ class TestStyle12(Test):
         self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 60 60 1 P/d2-d4 (0:00) d4 1 0 0\r\n', t2)
 
         t2.write('d5\n')
-        self.expect('\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 60000 60000 2 P/d7-d5 (0:00.000) d5 0 1 0\r\n', t)
+        #m = self.expect_re(r'\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 (\d+) 60000 2 P/d7-d5 (0:00.000) d5 0 1 0\r\n', t)
+        m = self.expect_re(r'\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin 1 1 0 39 39 (\d+)', t)
+        # on slow machines a ms may tick away
+        self.assert_(59999 <= int(m.group(1)) <= 60000)
         self.expect('\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60 60 2 P/d7-d5 (0:00) d5 1 1 0\r\n', t2)
+        self.expect
 
         self.close(t)
         self.close(t2)

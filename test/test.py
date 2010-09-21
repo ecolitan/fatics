@@ -20,6 +20,8 @@ import sys
 import telnetlib
 import socket
 import os
+import re
+
 from twisted.trial import unittest
 
 #host = '127.0.0.1'
@@ -45,8 +47,10 @@ class Test(unittest.TestCase):
             print("\ngot {{%s}}\nexp {{%s}}\n" % (repr(ret), repr(s)))
         self.assert_(s in ret)
 
-    def expect_re(self, s, t, timeout=2):
-        ret = t.expect([s], timeout)
+    def expect_re(self, s, t, timeout=6):
+        ret = t.expect([re.compile(s)], timeout)
+        if ret[0] != 0:
+            print("\ngot {{%r}}\nexp {{%r}}\n" % (ret, s))
         self.assert_(ret[0] == 0)
         return ret[1]
 
