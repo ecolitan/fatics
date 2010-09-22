@@ -20,7 +20,7 @@ import gettext
 
 langs = {
     'en': gettext.NullTranslations(),
-    'es': gettext.translation('chessd', languages=['es'], localedir='./locale'),
+    'es': gettext.translation('chessd', languages=['es'], localedir='./locale', fallback=True),
     'compat': gettext.translation('chessd', languages=['compat'], localedir='./locale'),
     # for testing
     'upper': gettext.translation('chessd', languages=['upper'], localedir='./locale'),

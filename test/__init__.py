@@ -17,7 +17,8 @@
 #
 
 import sys
-import unittest
+
+from twisted.trial import unittest
 
 from test import connect, admin_passwd
 

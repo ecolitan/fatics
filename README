@@ -17,7 +17,12 @@ System requirements
 * MySQL 5.0 or later
 * The MySQLdb Python module
 * The python-bcrypt module
+* GNU gettext
 * (optional) The pexpect module, for timeseal/zipseal tests
+
+============
+INSTALLATION
+============
 
 Timeseal and zipseal
 ====================
@@ -30,6 +35,12 @@ The source code for Win32 version of zipseal is in timeseal/win32/, but it
 doesn't have a proper build instructions, because I don't have Windows.
 I currently compile it with an unholy mix of wine and a Microsoft
 compiler.
+
+Gettext messages
+================
+The gettext messages need to be compiled into machine-readable (.mo)
+format.  Assuming you have GNU gettext, you can do this by executing
+scripts/compile-messages from the top of the source tree.
 
 Running the server
 ==================

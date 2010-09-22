@@ -1,4 +1,6 @@
 #!/bin/sh
+
+mkdir -p locale
 xgettext --language=Python --keyword=N_ --keyword=write_ --keyword=nwrite_ --keyword=translate --output=locale/chessd.pot --from-code=utf-8 --package-name=FatICS src/*.py src/*/*.py
 
 # for testing:
@@ -11,7 +13,8 @@ for lang in upper; do
 	msginit --no-translator -i locale/chessd.pot -o locale/$lang.po
 done
 
-#for lang in compat es; do
-#	msginit -i locale/chessd.pot -o locale/$lang.po
-#done
+# these translations must be done by hand
+for lang in es compat; do
+	msginit -i locale/chessd.pot -o locale/$lang.po
+done
 

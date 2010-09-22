@@ -24,16 +24,17 @@ linux 2.6 and use epoll.
 
 """
 
-import unittest
 import time
+from twisted.trial import unittest
 from twisted.conch import telnet
 from twisted.internet import protocol, epollreactor
 import cProfile
 profile = 1
 
-from test import host, port
+#from test import host, port
+from test import *
 
-epollreactor.install()
+#epollreactor.install()
 
 from twisted.internet import reactor
 
@@ -66,9 +67,9 @@ class TestProtocol(telnet.Telnet):
     def connectionLost(self, reason):
         self.state = 'done'
 
-@unittest.skip('slow test')
-class TestLoad(unittest.TestCase):
+class TestLoad(Test):
     def test_load(self):
+        self._skip('slow test')
         fact = protocol.ClientFactory()
         fact.protocol = TestProtocol
         fact.tester = self
