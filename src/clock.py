@@ -157,7 +157,7 @@ class OvertimeClock(Clock):
     def got_move(self, side, ply, elapsed=None):
         elapsed = super(OvertimeClock, self).got_move(side, ply, elapsed)
 
-        # add the time to the opp of the player who moved
+        # check whether the time control has been reached
         if side == WHITE:
             if ply == 2 * self.overtime_move_num - 1:
                 self._white_time += self.overtime_bonus
@@ -174,5 +174,21 @@ class OvertimeClock(Clock):
         else:
             self._black_time += self.inc
 clock_names['overtime'] = OvertimeClock
+
+class UntimedClock(Clock):
+    def __init__(self, g):
+        self.is_ticking = False
+        self._white_time = 0
+        self._black_time = 0
+
+    def got_move(self, side, ply, elapsed=None):
+        pass
+
+    def check_flag(self, game, side):
+        return False
+
+    def add_increment(self, side):
+        pass
+clock_names['untimed'] = UntimedClock
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

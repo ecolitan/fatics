@@ -199,6 +199,9 @@ class Challenge(Offer):
             #raise InvalidOfferError()
             return
 
+        if self.time == 0 and self.inc == 0:
+            self.set_clock_name('untimed')
+
         if self.time is None:
             self.time = a.vars['time']
         if self.inc is None:
