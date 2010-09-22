@@ -294,25 +294,26 @@ class PlayedGame(Game):
             self.idn = random.randint(0, 959)
         else:
             self.idn = self._pick_idn(chal.a, chal.b)
+        if chal.clock_name == 'overtime':
+            self.overtime_move_num = chal.overtime_move_num
+            self.overtime_bonus = chal.overtime_bonus
 
         self.white.session.is_white = True
         self.black.session.is_white = False
 
         self.rated = chal.rated
         self.rated_str = 'rated' if self.rated else 'unrated'
-        time_str = '%d %d' % (self.white_time,self.inc)
 
         self.flip = False
         self.private = False
         self.start_time = time.time()
         self.is_active = True
 
-        self.clock = clock.clock_names[chal.clock_name](
-            self.white_time * 60.0, self.black_time * 60.0, self.inc)
+        self.clock = clock.clock_names[chal.clock_name](self)
         self.when_started = datetime.datetime.utcnow()
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
-        create_str = _('Creating: %s (%s) %s (%s) %s %s %s\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.speed_variant, time_str)
+        create_str = _('Creating: %s (%s) %s (%s) %s %s %d %d\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.speed_variant, self.white_time, self.inc)
 
         self.white.write(create_str)
         self.black.write(create_str)

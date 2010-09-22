@@ -211,6 +211,18 @@ class Challenge(Offer):
         if self.clock_name == 'hourglass' and self.inc:
             a.write_('Games using an hourglass clock may not have an increment.\n')
             return
+        if self.clock_name == 'overtime':
+            if self.time < 1:
+                a.write_('Games using an overtime clock must have a positive initial time.\n')
+                return
+            if self.overtime_bonus < 1:
+                a.write_('Games using an overtime clock must have a positive overtime bonus.\n')
+                return
+            # I would make the limit higher, but the test depends on it
+            # being low....
+            if self.overtime_move_num < 3:
+                a.write_('Invalid number of moves before overtime bonus.\n')
+                return
 
         if self.side is not None:
             side_str = ' [%s]' % game.side_to_str(self.side)
@@ -231,8 +243,12 @@ class Challenge(Offer):
 
         rated_str = "rated" if self.rated else "unrated"
 
-        time_str = "%d %d" % (self.time, self.inc)
         expected_duration = self.time + self.inc * float(2) / 3
+        if self.clock_name == 'overtime':
+            expected_duration += self.overtime_bonus
+        elif self.clock_name == 'hourglass':
+            # ???
+            expected_duration *= 3
         assert(expected_duration > 0)
         if expected_duration < 3.0:
             self.speed_name = 'lightning'
@@ -249,12 +265,16 @@ class Challenge(Offer):
         self.b_rating = b.get_rating(self.speed_variant)
 
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
-        challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, time_str)
+        challenge_str = '%s (%s)%s %s (%s) %s %s %d %d' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, self.time, self.inc)
 
-        if self.clock_name != 'fischer':
-            challenge_str = '%s %s' % (challenge_str, self.clock_name)
         if self.idn is not None:
             challenge_str = '%s idn=%d' % (challenge_str, self.idn)
+        if self.clock_name != 'fischer':
+            challenge_str = '%s %s' % (challenge_str, self.clock_name)
+        if self.clock_name == 'overtime':
+            challenge_str = '%s %d/%d,SD/%d+%d' % (challenge_str,
+                self.overtime_move_num, self.time, self.overtime_bonus,
+                self.inc)
 
         #if self.board is not None:
         #    challenge_str = 'Loaded from a board'
@@ -383,6 +403,8 @@ class Challenge(Offer):
     _wild_re = re.compile(r'w(\d+)')
     _idn_re = re.compile(r'idn=(\d+)')
     _plus_re = re.compile(r'(\d+)\+(\d+)')
+    # e.g. 40/90,sd/30+30
+    _overtime_re = re.compile(r'(\d+)/(\d+),sd/(\d+)(?:\+(\d+))?', re.I)
     def _parse_opts(self, opts):
         opts = opts.lower()
         args = re.split(r'\s+', opts)
@@ -440,6 +462,19 @@ class Challenge(Offer):
                 if m:
                     self._set_time(int(m.group(1)))
                     self._set_inc(int(m.group(2)))
+                    continue
+
+                m = re.match(self._overtime_re, w)
+                if m:
+                    self._set_clock_name('overtime')
+                    # e.g. 40/90,sd/30+30
+                    self.overtime_move_num = int(m.group(1))
+                    self._set_time(int(m.group(2)))
+                    self.overtime_bonus = int(int(m.group(3)))
+                    if m.group(4) is not None:
+                        self._set_inc(int(m.group(4)))
+                    else:
+                        self._set_inc(0)
                     continue
 
                 #print('got unknown keyword %s' % w)

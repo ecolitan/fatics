@@ -137,5 +137,74 @@ class TestHourglass(Test):
         self.close(t)
         self.close(t2)
 
+class TestStandardClock(Test):
+    def test_bad_standard_clock(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+
+        t.write('set style 12\n')
+
+        t2.write('match admin 40/90\n')
+        self.expect('Usage:', t2)
+        t2.write('match admin 40/90 sd/30\n')
+        self.expect('Usage:', t2)
+        t2.write('match admin 40/90,sd/0\n')
+        self.expect('must have a positive overtime', t2)
+        t2.write('match admin 40/0,sd/30\n')
+        self.expect('must have a positive initial time', t2)
+        t2.write('match admin 1/90,sd/30\n')
+        self.expect('Invalid', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('testplayer', 'testpass')
+    def test_standard_clock(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('match admin 40/90,sd/30+30\n')
+        self.expect('Challenge:', t)
+        self.expect('40/90,SD/30+30', t)
+        t.write('decl\n')
+        self.expect('admin declines', t2)
+
+        t2.write('match admin 3/90,SD/10+15 white\n')
+        self.expect('Challenge:', t)
+        self.expect('3/90,SD/10+15', t)
+        t.write('a\n')
+
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 90 15 39 39 5400 5400 1 none (0:00) none 1 0 0\r\n', t)
+
+        t2.write('d4\n')
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B -1 1 1 1 1 0 1 testplayer admin 1 90 15 39 39 5400 5400 1 P/d2-d4 (0:00) d4 1 0 0\r\n', t)
+
+        t.write('d5\n')
+        self.expect('\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 90 15 39 39 5400 5400 2 P/d7-d5 (0:00) d5 1 1 0\r\n', t)
+
+        # 15-second increment only
+        time.sleep(1.0)
+        t2.write('c4\n')
+        self.expect('\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- --PP---- -------- PP--PPPP RNBQKBNR B -1 1 1 1 1 0 1 testplayer admin 1 90 15 39 39 5414 5400 2 P/c2-c4 (0:01) c4 1 1 0\r\n', t)
+
+        t.write('e5\n')
+        self.expect('\r\n<12> rnbqkbnr ppp--ppp -------- ---pp--- --PP---- -------- PP--PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 90 15 39 39 5414 5415 3 P/e7-e5 (0:00) e5 1 1 0\r\n', t)
+
+        # 10-minute bonus after 3rd move (plus usual 15s increment)
+        time.sleep(1.0)
+        t2.write('dxe5\n')
+        self.expect('\r\n<12> rnbqkbnr ppp--ppp -------- ---pP--- --P----- -------- PP--PPPP RNBQKBNR B -1 1 1 1 1 0 1 testplayer admin 1 90 15 39 38 6028 5415 3 P/d4-e5 (0:01) dxe5 1 1 0\r\n', t)
+
+        # likewise
+        t.write('d4\n')
+        self.expect('\r\n<12> rnbqkbnr ppp--ppp -------- ----P--- --Pp---- -------- PP--PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 90 15 39 38 6028 6030 4 P/d5-d4 (0:00) d4 1 1 0\r\n', t)
+
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.expect('aborted by agreement', t)
+
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

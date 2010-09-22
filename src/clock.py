@@ -29,7 +29,10 @@ running_clocks = []
 clock_names = {}
 
 class Clock(object):
-    def __init__(self):
+    def __init__(self, g):
+        self._white_time = 60.0 * g.white_time
+        self._black_time = 60.0 * g.black_time
+        self.inc = g.inc
         self.is_ticking = False
         running_clocks.append(self)
         self.started_time = None
@@ -98,12 +101,6 @@ class Clock(object):
         return not game.is_active
 
 class FischerClock(Clock):
-    def __init__(self, white_start, black_start, inc):
-        super(FischerClock, self).__init__()
-        self._white_time = white_start
-        self._black_time = black_start
-        self.inc = inc
-
     def add_increment(self, side):
         if side == WHITE:
             self._white_time += self.inc
@@ -111,13 +108,9 @@ class FischerClock(Clock):
             self._black_time += self.inc
 clock_names['fischer'] = FischerClock
 
-
 class BronsteinClock(Clock):
-    def __init__(self, white_start, black_start, inc):
-        super(BronsteinClock, self).__init__()
-        self._white_time = white_start
-        self._black_time = black_start
-        self.inc = inc
+    def __init__(self, g):
+        super(BronsteinClock, self).__init__(g)
         self.last_elapsed = None
 
     def got_move(self, side, ply, elapsed=None):
@@ -136,11 +129,9 @@ class BronsteinClock(Clock):
 clock_names['bronstein'] = BronsteinClock
 
 class HourglassClock(Clock):
-    def __init__(self, white_start, black_start, inc):
-        super(HourglassClock, self).__init__()
-        self._white_time = white_start
-        self._black_time = black_start
-        assert(not inc)
+    def __init__(self, g):
+        super(HourglassClock, self).__init__(g)
+        assert(not g.inc)
 
     def got_move(self, side, ply, elapsed=None):
         elapsed = super(HourglassClock, self).got_move(side, ply, elapsed)
@@ -156,5 +147,32 @@ class HourglassClock(Clock):
     def add_increment(self, side):
         pass
 clock_names['hourglass'] = HourglassClock
+
+class OvertimeClock(Clock):
+    def __init__(self, g):
+        super(OvertimeClock, self).__init__(g)
+        self.overtime_move_num = g.overtime_move_num
+        self.overtime_bonus = 60.0 * g.overtime_bonus
+
+    def got_move(self, side, ply, elapsed=None):
+        elapsed = super(OvertimeClock, self).got_move(side, ply, elapsed)
+
+        # add the time to the opp of the player who moved
+        if side == WHITE:
+            if ply == 2 * self.overtime_move_num - 1:
+                self._white_time += self.overtime_bonus
+        else:
+            self._white_time += elapsed
+            if ply == 2 * self.overtime_move_num:
+                self._black_time += self.overtime_bonus
+
+        return elapsed
+
+    def add_increment(self, side):
+        if side == WHITE:
+            self._white_time += self.inc
+        else:
+            self._black_time += self.inc
+clock_names['overtime'] = OvertimeClock
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
