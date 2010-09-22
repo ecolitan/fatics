@@ -74,6 +74,29 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
 
+    def test_default_match(self):
+        """ Test default time controls using the 'time' and 'inc'
+        vars. """
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+
+        t2.write('match admin\n')
+        self.expect('Challenge:', t)
+        self.expect('rated blitz 2 12', t)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_plus_syntax(self):
+        """ Test syntax like 'match admin 3+0' """
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+
+        t2.write('match admin 3+1 white\n')
+        self.expect('Challenge: GuestABCD (++++) [white] admin (----) unrated blitz 3 1', t)
+
+        self.close(t)
+        self.close(t2)
 
     def test_withdraw_logout(self):
         t = self.connect_as_guest()

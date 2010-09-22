@@ -178,12 +178,10 @@ class Challenge(Offer):
         self.variant_name = None
         self.clock_name = None
 
-        self.time = a.vars['time']
-        self.inc = a.vars['inc']
-
+        self.time = None
+        self.inc = None
         self.rated = None
-        # the side requested by a, if any
-        self.side = None
+        self.side = None # the side requested by a, if any
         self.idn = None
 
         if opts is not None:
@@ -201,6 +199,12 @@ class Challenge(Offer):
             #raise InvalidOfferError()
             return
 
+        if self.time is None:
+            self.time = a.vars['time']
+        if self.inc is None:
+            # hourglass defaults to no increment
+            self.inc = a.vars['inc'] if self.clock_name != 'hourglass' else 0
+
         if self.clock_name == 'bronstein' and not self.inc:
             a.write_('Games using a Bronstein clock must have an increment.\n')
             return
@@ -208,9 +212,8 @@ class Challenge(Offer):
             a.write_('Games using an hourglass clock may not have an increment.\n')
             return
 
-        #a.write('%(aname) (%(arat))%(acol) %(bname) %(brat) %(rat) %(variant)')
         if self.side is not None:
-            side_str = " [%s]" % game.side_to_str(self.side)
+            side_str = ' [%s]' % game.side_to_str(self.side)
         else:
             side_str = ''
 
@@ -248,6 +251,8 @@ class Challenge(Offer):
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
         challenge_str = '%s (%s)%s %s (%s) %s %s %s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, time_str)
 
+        if self.clock_name != 'fischer':
+            challenge_str = '%s %s' % (challenge_str, self.clock_name)
         if self.idn is not None:
             challenge_str = '%s idn=%d' % (challenge_str, self.idn)
 
@@ -363,8 +368,21 @@ class Challenge(Offer):
             raise command_parser.BadCommandError()
         self.clock_name = val
 
-    _wild_re = re.compile('w(\d+)')
-    _idn_re = re.compile('idn=(\d+)')
+    def _set_time(self, val):
+        if self.time is not None:
+            raise command_parser.BadCommandError()
+        assert(val >= 0)
+        self.time = val
+
+    def _set_inc(self, val):
+        if self.inc is not None:
+            raise command_parser.BadCommandError()
+        assert(val >= 0)
+        self.inc = val
+
+    _wild_re = re.compile(r'w(\d+)')
+    _idn_re = re.compile(r'idn=(\d+)')
+    _plus_re = re.compile(r'(\d+)\+(\d+)')
     def _parse_opts(self, opts):
         opts = opts.lower()
         args = re.split(r'\s+', opts)
@@ -418,6 +436,12 @@ class Challenge(Offer):
                         raise command_parser.BadCommandError
                     continue
 
+                m = re.match(self._plus_re, w)
+                if m:
+                    self._set_time(int(m.group(1)))
+                    self._set_inc(int(m.group(2)))
+                    continue
+
                 #print('got unknown keyword %s' % w)
                 raise command_parser.BadCommandError()
 
@@ -427,9 +451,9 @@ class Challenge(Offer):
             # time odds not supported
             raise command_parser.BadCommandError()
         elif len(times) == 2:
-            self.time = times[0]
-            self.inc = times[1]
+            self._set_time(times[0])
+            self._set_inc(times[1])
         elif len(times) == 1:
-            self.time = times[0]
+            self._set_time(times[0])
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

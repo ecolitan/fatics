@@ -69,6 +69,7 @@ class TestBronstein(Test):
 
         t2.write('match admin 3 2 chess bronstein white\n')
         self.expect('Challenge:', t)
+        self.expect('bronstein', t)
         t.write('a\n')
 
         self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 3 2 39 39 180 180 1 none (0:00) none 1 0 0\r\n', t)
@@ -111,8 +112,9 @@ class TestHourglass(Test):
         t.write('set style 12\n')
         self.expect('style set', t)
 
-        t2.write('match admin 1 0 chess hourglass white\n')
+        t2.write('match admin 1 chess hourglass white\n')
         self.expect('Challenge:', t)
+        self.expect('hourglass', t)
         t.write('a\n')
 
         self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 1 0 39 39 60 60 1 none (0:00) none 1 0 0\r\n', t)
