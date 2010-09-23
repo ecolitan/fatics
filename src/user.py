@@ -275,7 +275,7 @@ class BaseUser(object):
         return self.session.use_timeseal or self.session.use_zipseal
 
     def in_silence(self):
-        return self.vars['silence'] and (self.session.games
+        return self.vars['silence'] and (self.session.game
             or self.session.observed)
 
     def hears_channels(self):

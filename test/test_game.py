@@ -296,6 +296,9 @@ class TestGame(Test):
         self.expect('Offering a draw', t2)
         self.expect_not('drawn by repetition', t)
 
+        t.write('abort\n')
+        t2.write('abort\n')
+
         self.close(t)
         self.close(t2)
 

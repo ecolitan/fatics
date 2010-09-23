@@ -18,8 +18,8 @@
 
 from test import *
 
-class TestObserve(Test):
-    def test_observe_unobserve(self):
+class TestUnobserve(Test):
+    def test_unobserve(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as('GuestEFGH', '')
         t3 = self.connect_as('GuestIJKL', '')
@@ -86,6 +86,60 @@ class TestObserve(Test):
         self.close(t)
         self.close(t2)
         self.close(t3)
+
+    def test_unobserve_logout(self):
+        """ Test that games are implicitly unobserved when logging out. """
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+
+        t2.write('match guestijkl 1 0 w\n')
+        self.expect('Challenge:', t3)
+        t3.write('a\n')
+        self.expect('Creating:', t2)
+        self.expect('Creating:', t3)
+
+        t.write('o guestefgh\n')
+        self.expect('You are now observing', t)
+
+        t.write('quit\n')
+        self.expect('Removing game 1 from observation list.', t)
+        t.close()
+
+        self.close(t2)
+        self.close(t3)
+
+    def test_unobserve_multiple(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+        t5 = self.connect_as_guest()
+
+        t.write('match guestefgh 1+0\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('Creating:', t)
+
+        t3.write('match guestmnop 15+5 chess960\n')
+        self.expect('Challenge:', t4)
+        t4.write('a\n')
+        self.expect('Creating:', t3)
+
+        t5.write('o guestabcd\n')
+        self.expect('You are now observing game 1', t5)
+        t5.write('o guestmnop\n')
+        self.expect('You are now observing game 2', t5)
+
+        t5.write('unob\n')
+        self.expect('Removing game 1 from observation list.', t5)
+        self.expect('Removing game 2 from observation list.', t5)
+
+        t.write('abort\n')
+        t3.write('abort\n')
+
+        for tt in [t, t2, t3, t4, t5]:
+            self.close(tt)
 
 class TestAllobservers(Test):
     def test_allobservers(self):

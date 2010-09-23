@@ -240,6 +240,14 @@ class TestUntimed(Test):
         t.write('a\n')
         self.expect('Creating: testplayer (----) admin (----) unrated untimed 0 0\r\n', t)
 
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 0 0 39 39 0 0 1 none (0:00) none 1 0 0\r\n', t)
+
+        t2.write('d4\n')
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B -1 1 1 1 1 0 1 testplayer admin 1 0 0 39 39 0 0 1 P/d2-d4 (0:00) d4 1 0 0\r\n', t)
+
+        t.write('d5\n')
+        self.expect('\r\n<12> rnbqkbnr ppp-pppp -------- ---p---- ---P---- -------- PPP-PPPP RNBQKBNR W -1 1 1 1 1 0 1 testplayer admin -1 0 0 39 39 0 0 2 P/d7-d5 (0:00) d5 1 1 0\r\n', t)
+
         t.write('abort\n')
         t2.write('abort\n')
         self.expect('aborted', t)

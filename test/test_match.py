@@ -137,6 +137,9 @@ class TestMatch(Test):
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
 
+        t.write('match admin\n')
+        self.expect("You can't challenge while you are playing", t)
+
         self.close(t)
         self.close(t2)
 

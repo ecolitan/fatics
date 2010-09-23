@@ -33,7 +33,8 @@ class ExaminedGame(Game):
         self.inc = 0
         self.players = [user]
         self.rated_str = 'unrated'
-        user.session.games.add(self, '[examined]')
+        assert(user.session.game is None)
+        user.session.game = self
         self.start_time = time.time()
         if hist_game is None:
             self.speed_variant = speed_variant.from_names('untimed', 'chess')
@@ -154,7 +155,8 @@ class ExaminedGame(Game):
 
     def leave(self, user):
         self.players.remove(user)
-        user.session.games.free('[examined]')
+        assert(user.session.game == self)
+        user.session.game = None
         # user may be offline if he or she disconnected unexpectedly
         if user.is_online:
             user.write(N_('You are no longer examining game %d.\n') % self.number)
@@ -172,6 +174,7 @@ class ExaminedGame(Game):
     def free(self):
         super(ExaminedGame, self).free()
         for p in self.players:
-            p.session.games.free('[examined]')
+            assert(user.session.game == self)
+            p.session.game = None
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

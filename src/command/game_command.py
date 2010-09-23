@@ -25,13 +25,13 @@ class GameCommand(Command):
 @ics_command('abort', 'n', admin.Level.user)
 class Abort(GameCommand):
     def run(self, args, conn):
-        if not conn.user.session.games or conn.user.session.games.current().gtype != game.PLAYED:
+        if not conn.user.session.game or conn.user.session.game.gtype != game.PLAYED:
             conn.write(_("You are not playing a game.\n"))
             return
-        if len(conn.user.session.games) > 1:
+        '''if len(conn.user.session.games) > 1:
             conn.write(_('Please use "simabort" for simuls.\n'))
-            return
-        g = conn.user.session.games.current()
+            return'''
+        g = conn.user.session.game
         if g.variant.pos.ply < 2:
             g.result('Game aborted on move 1 by %s' % conn.user.name, '*')
         else:
@@ -41,10 +41,10 @@ class Abort(GameCommand):
 class Draw(Command):
     def run(self, args, conn):
         if args[0] is None:
-            if len(conn.user.session.games) == 0:
+            if not conn.user.session.game:
                 conn.write(_("You are not playing a game.\n"))
                 return
-            g = conn.user.session.games.current()
+            g = conn.user.session.game
             offer.Draw(g, conn.user)
         else:
             conn.write('TODO: DRAW PARAM\n')
@@ -55,10 +55,10 @@ class Resign(Command):
         if args[0] is not None:
             conn.write('TODO: RESIGN PLAYER\n')
             return
-        if len(conn.user.session.games) == 0:
+        if not conn.user.session.game:
             conn.write(_("You are not playing a game.\n"))
             return
-        g = conn.user.session.games.current()
+        g = conn.user.session.game
         g.resign(conn.user)
 
 class GameParam(object):
@@ -68,10 +68,10 @@ class GameParam(object):
         if param is not None:
             g = game.from_name_or_number(param, conn)
         else:
-            if conn.user.session.games:
-                g = conn.user.session.games.current()
+            if conn.user.session.game:
+                g = conn.user.session.game
             elif conn.user.session.observed:
-                g = list(conn.user.session.observed)[0]
+                g = conn.user.session.observed.primary()
             else:
                 conn.write(_("You are not playing, examining, or observing a game.\n"))
                 g = None

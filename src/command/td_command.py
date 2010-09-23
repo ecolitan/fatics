@@ -35,10 +35,10 @@ class Rmatch(Command):
         if u1 == u2:
             conn.write(_("A player cannot match himself or herself.\n"))
             return
-        if len(u1.session.games) != 0:
+        if u1.session.game:
             conn.write(_("%s is playing a game.\n") % u1.name)
             return
-        if len(u2.session.games) != 0:
+        if u2.session.game:
             conn.write(_("%s is playing a game.\n") % u2.name)
             return
         offer.Challenge(u1, u2, args[2])

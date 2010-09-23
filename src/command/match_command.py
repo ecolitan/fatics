@@ -19,6 +19,8 @@
 
 from command import *
 
+import game
+
 class MatchMixin(object):
     def _check_opp(self, conn, opp):
         """ Test whether a user can play a given opponent. """
@@ -31,8 +33,11 @@ class MatchMixin(object):
         if not opp.vars['open']:
             conn.write(_("%s is not open to match requests.\n") % opp.name)
             return False
-        if len(opp.session.games) != 0:
-            conn.write(_("%s is playing a game.\n") % opp.name)
+        if opp.session.game:
+            if opp.session.game.gtype == game.EXAMINED:
+                conn.write(_("%s is examining a game.\n") % opp.name)
+            else:
+                conn.write(_("%s is playing a game.\n") % opp.name)
             return False
 
         if not conn.user.vars['open']:
@@ -43,8 +48,11 @@ class MatchMixin(object):
 @ics_command('match', 'wt', admin.Level.user)
 class Match(Command, MatchMixin):
     def run(self, args, conn):
-        if len(conn.user.session.games) != 0:
-            conn.write(_("You can't challenge while you are playing a game.\n"))
+        if conn.user.session.game:
+            if conn.user.session.game.gtype == game.EXAMINED:
+                conn.write(_("You can't challenge while you are examining a game.\n"))
+            else:
+                conn.write(_("You can't challenge while you are playing a game.\n"))
             return
         u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
         if not u:

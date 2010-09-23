@@ -42,10 +42,10 @@ class Session(object):
         self.check_for_timeseal = True
         self.offers_sent = []
         self.offers_received = []
-        self.games = GameList()
+        self.game = None
         self.ivars = var.varlist.get_default_ivars()
         self.lag = 0
-        self.observed = set()
+        self.observed = GameList()
         self.closed = False
 
     def set_user(self, user):
@@ -77,14 +77,18 @@ class Session(object):
             v.decline(notify=False)
             v.b.write(_('Declining the match offer from %s.\n') % v.a.name)
             v.a.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
-        self.games.leave_all(self.user)
+
+        if self.game:
+            if self.game.gtype == game.PLAYED:
+                self.conn.write('Your game will be lost because adjourning is not implemented.\n') # TODO
+            self.game.leave(self.user)
+            assert(self.game == None)
         del self.offers_received[:]
         del self.offers_sent[:]
-        if self.games and self.games.current().gtype == game.PLAYED:
-            self.conn.write('Your game will be lost because adjourning is not implemented.\n')
 
         # unobserve games
-        for g in copy.copy(self.observed):
+        assert(self.user.session == self)
+        for g in self.observed.copy():
             g.unobserve(self.user)
         assert(not self.observed)
 

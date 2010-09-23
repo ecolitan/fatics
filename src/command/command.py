@@ -133,21 +133,6 @@ class Alias(Command):
         else:
             conn.write(_('Alias "%s" set.\n') % aname)
 
-@ics_command('allobservers', 'o', admin.Level.user)
-class Allobservers(Command):
-    def run(self, args, conn):
-        if args[0] is not None:
-            g = game.from_name_or_number(args[0], conn)
-            if g:
-                if not g.observers:
-                    conn.write(_('No one is observing game %d.\n')
-                        % g.number)
-                else:
-                    g.show_observers(conn)
-        else:
-            for g in game.games.itervalues():
-                g.show_observers(conn)
-
 @ics_command('date', '', admin.Level.user)
 class Date(Command):
     def run(self, args, conn):
@@ -171,8 +156,8 @@ class Finger(Command):
                 if u.vars['silence']:
                     conn.write(_('%s is in silence mode.\n') % u.name)
 
-                if len(u.session.games) > 0:
-                    g = u.session.games.current()
+                if u.session.game:
+                    g = u.session.game
                     if g.gtype == game.PLAYED:
                         conn.write(_('(playing game %d: %s vs. %s)\n') % (g.number, g.white.name, g.black.name))
                     elif g.gtype == game.EXAMINED:
@@ -227,10 +212,10 @@ class Finger(Command):
 @ics_command('flag', '', admin.Level.user)
 class Flag(Command):
     def run(self, args, conn):
-        if len(conn.user.session.games) == 0:
+        if not conn.user.session.game:
             conn.write(_("You are not playing a game.\n"))
             return
-        g = conn.user.session.games.current()
+        g = conn.user.session.game
         if not g.clock.check_flag(g, g.get_user_opp_side(conn.user)):
             conn.write(_('Your opponent is not out of time.\n'))
 
@@ -275,23 +260,6 @@ class History(Command):
         if u:
             history.show_for_user(u, conn)
 
-@ics_command('observe', 'i', admin.Level.user)
-class Observe(Command):
-    def run(self, args, conn):
-        if args[0] in ['/l', '/b', '/s', '/S', '/w', '/z', '/B', '/L', '/x']:
-            conn.write('TODO: observe flag\n')
-            return
-        g = game.from_name_or_number(args[0], conn)
-        if g:
-            if g in conn.user.session.observed:
-                conn.write(_('You are already observing game %d.\n' % g.number))
-            elif conn.user == g.white or conn.user == g.black:
-                conn.write(_('You cannot observe yourself.\n'))
-            else:
-                assert(conn.user not in g.observers)
-                conn.user.session.observed.add(g)
-                g.observe(conn.user)
-
 @ics_command('password', 'WW', admin.Level.user)
 class Password(Command):
     def run(self, args, conn):
@@ -323,27 +291,6 @@ class Unalias(Command):
         else:
             conn.user.set_alias(aname, None)
             conn.write(_('Alias "%s" unset.\n') % aname)
-
-@ics_command('unobserve', 'n', admin.Level.user)
-class Unobserve(Command):
-    def run(self, args, conn):
-        if args[0] is not None:
-            g = game.from_name_or_number(args[0], conn)
-            if g:
-                if g in conn.user.session.observed:
-                    g.unobserve(conn.user)
-                else:
-                    conn.write(_('You are not observing game %d.\n')
-                        % g.number)
-        else:
-            if not conn.user.session.observed:
-                conn.write(_('You are not observing any games.\n'))
-            else:
-                for g in conn.user.session.observed.copy():
-                    g.unobserve(conn.user)
-                    #conn.write(_('Removing game %d from observation list.\n') % g.number)
-                    #g.observers.remove(conn.user)
-                assert(not conn.user.session.observed)
 
 @ics_command('uptime', '', admin.Level.user)
 class Uptime(Command):

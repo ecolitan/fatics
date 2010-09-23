@@ -116,8 +116,8 @@ class Qtell(Command):
 @ics_command('say', 'S')
 class Say(Command):
     def run(self, args, conn):
-        if conn.user.session.games:
-            g = conn.user.session.games.current()
+        if conn.user.session.game:
+            g = conn.user.session.game
             opp = g.get_opp(conn.user)
             assert(opp.is_online)
             opp.write_("%s[%d] says: %s\n", (conn.user.get_display_name(),

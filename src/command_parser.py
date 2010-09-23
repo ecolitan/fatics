@@ -63,8 +63,8 @@ class CommandParser(object):
             # ignore blank line
             return block.BLK_NULL
 
-        if conn.session.games:
-            if conn.session.games.current().parse_move(s, conn):
+        if conn.session.game:
+            if conn.session.game.parse_move(s, conn):
                 return block.BLK_GAME_MOVE
 
         if s[0] == '$':

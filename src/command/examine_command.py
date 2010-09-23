@@ -24,8 +24,8 @@ from command import *
 @ics_command('examine', 'on', admin.Level.user)
 class Examine(Command):
     def run(self, args, conn):
-        if len(conn.user.session.games) != 0:
-            if conn.user.session.games.current().gtype == game.EXAMINED:
+        if conn.user.session.game:
+            if conn.user.session.game.gtype == game.EXAMINED:
                 conn.write(_("You are already examining a game.\n"))
             else:
                 conn.write(_("You are playing a game.\n"))
@@ -71,29 +71,29 @@ class Examine(Command):
 class Backward(Command):
     def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
-        if not conn.user.session.games or conn.user.session.games.current().gtype != game.EXAMINED:
+        if not conn.user.session.game or conn.user.session.game.gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.games.current()
+        g = conn.user.session.game
         g.backward(n, conn)
 
 @ics_command('forward', 'p', admin.Level.user)
 class Forward(Command):
     def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
-        if not conn.user.session.games or conn.user.session.games.current().gtype != game.EXAMINED:
+        if not conn.user.session.game or conn.user.session.game.gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.games.current()
+        g = conn.user.session.game
         g.forward(n, conn)
 
 @ics_command('unexamine', '')
 class Unexamine(Command):
     def run(self, args, conn):
-        if not conn.user.session.games or conn.user.session.games.current().gtype != game.EXAMINED:
+        if not conn.user.session.game or conn.user.session.game.gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.games.current()
+        g = conn.user.session.game
         g.leave(conn.user)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

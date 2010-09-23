@@ -65,11 +65,11 @@ def from_name_or_number(arg, conn):
         u = user.find.by_prefix_for_user(arg, conn,
             online_only=True)
         if u:
-            if not u.session.games:
+            if not u.session.game:
                 conn.write(_("%s is not playing or examining a game.\n")
                     % u.name)
             else:
-                g = u.session.games.current()
+                g = u.session.game
     return g
 
 class Game(object):
@@ -339,8 +339,10 @@ class PlayedGame(Game):
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
 
-        self.white.session.games.add(self, self.black.name)
-        self.black.session.games.add(self, self.white.name)
+        assert(self.white.session.game is None)
+        assert(self.black.session.game is None)
+        self.white.session.game = self
+        self.black.session.game = self
 
         self.white.session.last_opp = self.black
         self.black.session.last_opp = self.white
@@ -475,7 +477,6 @@ class PlayedGame(Game):
         u.write(_('You are now observing game %d.\n') % self.number)
         u.send_board(self)
 
-
     def resign(self, user):
         side = self.get_user_side(user)
         if side == WHITE:
@@ -495,7 +496,9 @@ class PlayedGame(Game):
 
     def free(self):
         super(PlayedGame, self).free()
-        self.white.session.games.free(self.black.name)
-        self.black.session.games.free(self.white.name)
+        assert(self.white.session.game == self)
+        assert(self.black.session.game == self)
+        self.white.session.game = None
+        self.black.session.game = None
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

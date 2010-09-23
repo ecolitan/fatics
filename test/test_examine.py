@@ -66,6 +66,7 @@ class TestExamine(Test):
     def test_examine_history(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
+
         t.write('set style 12\n')
         t2.write('set style 12\n')
         t.write('aclearhist admin\n')
@@ -140,6 +141,10 @@ class TestExamine(Test):
         self.expect('<12> ', t)
         t.write('forward 1\n')
         self.expect('admin resigns 0-1', t)
+
+        t.write('match testplayer\n')
+        self.expect("You can't challenge while you are examining", t)
+
         t.write('unex\n')
         self.expect('You are no longer examining game 1.', t)
 

@@ -18,6 +18,18 @@
 
 from test import *
 
+class TestNotPlaying(Test):
+    def test_not_played(self):
+        t = self.connect_as_guest()
+
+        t.write('draw\n')
+        self.expect('You are not playing a game.', t)
+
+        t.write('abort\n')
+        self.expect('You are not playing a game.', t)
+
+        self.close(t)
+
 class TestAbort(Test):
     def test_abort_ply_0(self):
         t = self.connect_as_guest()
