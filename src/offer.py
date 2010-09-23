@@ -188,7 +188,8 @@ class Challenge(Offer):
             self._parse_opts(opts)
 
         if self.rated is None:
-            if a.is_guest or b.is_guest:
+            if a.is_guest or b.is_guest or self.clock_name in [
+                    'hourglass', 'untimed']:
                 a.write_('Setting match offer to unrated.\n')
                 self.rated = False
             else:
@@ -198,15 +199,24 @@ class Challenge(Offer):
             a.write_('Only registered players can play rated games.\n')
             #raise InvalidOfferError()
             return
+        elif self.rated and self.clock_name in ['hourglass', 'untimed']:
+            a.write_('This clock type cannot be used in rated games.\n')
+            return
 
-        if self.time == 0 and self.inc == 0:
-            self.set_clock_name('untimed')
+        if self.clock_name == 'untimed':
+            if self.time != 0:
+                self._set_time(0)
+            if self.inc != 0:
+                self._set_inc(0)
 
         if self.time is None:
             self.time = a.vars['time']
         if self.inc is None:
-            # hourglass defaults to no increment
-            self.inc = a.vars['inc'] if self.clock_name != 'hourglass' else 0
+            if self.clock_name == 'hourglass':
+                # default to no increment
+                self.inc = 0
+            else:
+                self.inc = a.vars['inc']
 
         if self.clock_name == 'bronstein' and not self.inc:
             a.write_('Games using a Bronstein clock must have an increment.\n')
@@ -226,6 +236,9 @@ class Challenge(Offer):
             if self.overtime_move_num < 3:
                 a.write_('Invalid number of moves before overtime bonus.\n')
                 return
+        if self.time == 0 and self.inc == 0:
+            if self.clock_name != 'untimed':
+                self._set_clock_name('untimed')
 
         if self.side is not None:
             side_str = ' [%s]' % game.side_to_str(self.side)
@@ -246,33 +259,42 @@ class Challenge(Offer):
 
         rated_str = "rated" if self.rated else "unrated"
 
-        expected_duration = self.time + self.inc * float(2) / 3
-        if self.clock_name == 'overtime':
-            expected_duration += self.overtime_bonus
-        elif self.clock_name == 'hourglass':
-            # ???
-            expected_duration *= 3
-        assert(expected_duration > 0)
-        if expected_duration < 3.0:
-            self.speed_name = 'lightning'
-        elif expected_duration < 15.0:
-            self.speed_name = 'blitz'
-        elif expected_duration < 75.0:
-            self.speed_name = 'standard'
+        if self.clock_name == 'untimed':
+            self.speed_name = 'untimed'
         else:
-            self.speed_name = 'slow'
+            expected_duration = self.time + self.inc * float(2) / 3
+            if self.clock_name == 'overtime':
+                expected_duration += self.overtime_bonus
+            elif self.clock_name == 'hourglass':
+                # ???
+                expected_duration *= 3
+            assert(expected_duration > 0)
+            if expected_duration < 3.0:
+                self.speed_name = 'lightning'
+            elif expected_duration < 15.0:
+                self.speed_name = 'blitz'
+            elif expected_duration < 75.0:
+                self.speed_name = 'standard'
+            else:
+                self.speed_name = 'slow'
 
         self.speed_variant = speed_variant.from_names(self.speed_name,
             self.variant_name)
         self.a_rating = a.get_rating(self.speed_variant)
         self.b_rating = b.get_rating(self.speed_variant)
 
+        if self.clock_name == 'untimed':
+            time_str = ''
+        else:
+            time_str = ' %d %d' % (self.time, self.inc)
+
+
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
-        challenge_str = '%s (%s)%s %s (%s) %s %s %d %d' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, self.time, self.inc)
+        challenge_str = '%s (%s)%s %s (%s) %s %s%s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, time_str)
 
         if self.idn is not None:
             challenge_str = '%s idn=%d' % (challenge_str, self.idn)
-        if self.clock_name != 'fischer':
+        if self.clock_name not in ['fischer', 'untimed']:
             challenge_str = '%s %s' % (challenge_str, self.clock_name)
         if self.clock_name == 'overtime':
             challenge_str = '%s %d/%d,SD/%d+%d' % (challenge_str,

@@ -98,14 +98,20 @@ class TestBronstein(Test):
         self.close(t2)
 
 class TestHourglass(Test):
+    @with_player('testplayer', 'testpass')
     def test_bad_hourglass(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as_guest()
+        t2 = self.connect_as('testplayer', 'testpass')
+
         t2.write('match admin 1 1 hourglass\n')
         self.expect('Games using an hourglass clock may not have an increment.', t2)
+        t2.write('match admin r hourglass\n')
+        self.expect('This clock type cannot be used in rated', t2)
+
         self.close(t)
         self.close(t2)
 
+    @with_player('testplayer', 'testpass')
     def test_hourglass(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
@@ -141,8 +147,6 @@ class TestStandardClock(Test):
     def test_bad_standard_clock(self):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
-
-        t.write('set style 12\n')
 
         t2.write('match admin 40/90\n')
         self.expect('Usage:', t2)
@@ -203,6 +207,56 @@ class TestStandardClock(Test):
         t2.write('abort\n')
         self.expect('aborted by agreement', t)
 
+        self.close(t)
+        self.close(t2)
+
+class TestUntimed(Test):
+    @with_player('testplayer', 'testpass')
+    def test_bad_untimed(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('match admin 0 0 fischer\n')
+        self.expect('Usage:', t2)
+        t2.write('match admin 1 0 untimed\n')
+        self.expect('Usage:', t2)
+        t2.write('match admin 0+1 untimed\n')
+        self.expect('Usage:', t2)
+        t2.write('match admin untimed rated\n')
+        self.expect('This clock type cannot be used in rated', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('testplayer', 'testpass')
+    def test_untimed(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+
+        t2.write('match admin untimed white\n')
+        self.expect('Issuing: testplayer (----) [white] admin (----) unrated untimed\r\n', t2)
+        self.expect('Challenge: testplayer (----) [white] admin (----) unrated untimed\r\n', t)
+        t.write('a\n')
+        self.expect('Creating: testplayer (----) admin (----) unrated untimed 0 0\r\n', t)
+
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.expect('aborted', t)
+
+        # with 'untimed' keyword and zero time and inc
+        t2.write('match admin untimed 0 0\n')
+        self.expect('Challenge:', t)
+        self.expect('untimed', t)
+        t.write('decl\n')
+        self.expect('admin declines', t2)
+
+        # without 'untimed' keyword
+        t2.write('match admin 0 0\n')
+        self.expect('Challenge:', t)
+        self.expect('untimed', t)
+        t.write('decl\n')
+        self.expect('admin declines', t2)
 
         self.close(t)
         self.close(t2)
