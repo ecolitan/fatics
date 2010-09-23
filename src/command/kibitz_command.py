@@ -17,7 +17,7 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from game_command import GameParam
+from game_command import GameMixin
 
 from command import *
 
@@ -55,7 +55,7 @@ class WhisperCommand(Command):
         conn.write(ngettext('(whispered to %d player)\n', '(whispered to %d players)\n', count) % count)
 
 @ics_command('kibitz', 'S', admin.Level.user)
-class Kibitz(KibitzCommand, GameParam):
+class Kibitz(KibitzCommand, GameMixin):
     def run(self, args, conn):
         g = self._game_param(None, conn)
         if not g:
@@ -66,7 +66,7 @@ class Kibitz(KibitzCommand, GameParam):
         self._do_kibitz(g, args[0], conn)
 
 @ics_command('whisper', 'S', admin.Level.user)
-class Whisper(WhisperCommand, GameParam):
+class Whisper(WhisperCommand, GameMixin):
     def run(self, args, conn):
         g = self._game_param(None, conn)
         if not g:

@@ -19,52 +19,17 @@
 
 from command import *
 
-class GameCommand(Command):
-    pass
-
-@ics_command('abort', 'n', admin.Level.user)
-class Abort(GameCommand):
-    def run(self, args, conn):
-        if not conn.user.session.game or conn.user.session.game.gtype != game.PLAYED:
-            conn.write(_("You are not playing a game.\n"))
-            return
-        '''if len(conn.user.session.games) > 1:
-            conn.write(_('Please use "simabort" for simuls.\n'))
-            return'''
+class GameMixin(object):
+    def _get_played_game(self, conn):
         g = conn.user.session.game
-        if g.variant.pos.ply < 2:
-            g.result('Game aborted on move 1 by %s' % conn.user.name, '*')
-        else:
-            offer.Abort(g, conn.user)
-
-@ics_command('draw', 'o', admin.Level.user)
-class Draw(Command):
-    def run(self, args, conn):
-        if args[0] is None:
-            if not conn.user.session.game:
-                conn.write(_("You are not playing a game.\n"))
-                return
-            g = conn.user.session.game
-            offer.Draw(g, conn.user)
-        else:
-            conn.write('TODO: DRAW PARAM\n')
-
-@ics_command('resign', 'o', admin.Level.user)
-class Resign(Command):
-    def run(self, args, conn):
-        if args[0] is not None:
-            conn.write('TODO: RESIGN PLAYER\n')
-            return
-        if not conn.user.session.game:
+        if not g or g.gtype != game.PLAYED:
+            g = None
             conn.write(_("You are not playing a game.\n"))
-            return
-        g = conn.user.session.game
-        g.resign(conn.user)
+        return g
 
-class GameParam(object):
-    """ A mixin to find a game from a command argument, currently being
-    played, examined, or observed, prioritized in that order. """
     def _game_param(self, param, conn):
+        """ Find a game from a command argument, currently being
+        played, examined, or observed, prioritized in that order. """
         if param is not None:
             g = game.from_name_or_number(param, conn)
         else:
@@ -77,8 +42,45 @@ class GameParam(object):
                 g = None
         return g
 
+
+@ics_command('abort', 'n', admin.Level.user)
+class Abort(Command, GameMixin):
+    def run(self, args, conn):
+        g = self._get_played_game(conn)
+        if not g:
+            return
+        '''if len(conn.user.session.games) > 1:
+            conn.write(_('Please use "simabort" for simuls.\n'))
+            return'''
+        g = conn.user.session.game
+        if g.variant.pos.ply < 2:
+            g.result('Game aborted on move 1 by %s' % conn.user.name, '*')
+        else:
+            offer.Abort(g, conn.user)
+
+@ics_command('draw', 'o', admin.Level.user)
+class Draw(Command, GameMixin):
+    def run(self, args, conn):
+        if args[0] is None:
+            g = self._get_played_game(conn)
+            if not g:
+                return
+            offer.Draw(g, conn.user)
+        else:
+            conn.write('TODO: DRAW PARAM\n')
+
+@ics_command('resign', 'o', admin.Level.user)
+class Resign(Command, GameMixin):
+    def run(self, args, conn):
+        if args[0] is not None:
+            conn.write('TODO: RESIGN PLAYER\n')
+            return
+        g = self._get_played_game(conn)
+        if g:
+            g.resign(conn.user)
+
 @ics_command('eco', 'oo', admin.Level.user)
-class Eco(Command, GameParam):
+class Eco(Command, GameMixin):
     eco_pat = re.compile(r'[a-z][0-9][0-9][a-z]?')
     nic_pat = re.compile(r'[a-z][a-z]\.[0-9][0-9]')
     def run(self, args, conn):
@@ -123,19 +125,18 @@ class Eco(Command, GameParam):
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
 
 @ics_command('moves', 'n', admin.Level.user)
-class Moves(Command, GameParam):
+class Moves(Command, GameMixin):
     def run(self, args, conn):
         g = self._game_param(args[0], conn)
         if g:
             g.write_moves(conn)
 
 @ics_command('refresh', 'n', admin.Level.user)
-class Refresh(Command, GameParam):
+class Refresh(Command, GameMixin):
     def run(self, args, conn):
         g = self._game_param(args[0], conn)
         if g:
             conn.user.send_board(g)
-
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
 

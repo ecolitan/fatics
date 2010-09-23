@@ -302,6 +302,34 @@ class TestGame(Test):
         self.close(t)
         self.close(t2)
 
+    def test_examine_commands(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t.write('ex\n')
+        self.expect('You are playing a game.', t)
+
+        t.write('forward\n')
+        self.expect('You are not examining a game.', t)
+
+        t.write('back\n')
+        self.expect('You are not examining a game.', t)
+
+        t.write('unex\n')
+        self.expect('You are not examining a game.', t)
+
+        t.write('abort\n')
+        self.expect('aborted on move 1', t2)
+
+        self.close(t)
+        self.close(t2)
+
 class TestResign(Test):
     def test_resign_white(self):
         t = self.connect_as('GuestABCD', '')

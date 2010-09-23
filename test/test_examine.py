@@ -201,6 +201,26 @@ class TestExamine(Test):
 
         self.close(t)
 
+    def test_playing_commands(self):
+        t = self.connect_as_guest()
+
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+
+        t.write('abort\n')
+        self.expect('You are not playing a game.', t)
+
+        t.write('draw\n')
+        self.expect('You are not playing a game.', t)
+
+        t.write('resign\n')
+        self.expect('You are not playing a game.', t)
+
+        t.write('unex\n')
+        self.expect('no longer examining', t)
+
+        self.close(t)
+
 class TestUnexamine(Test):
     def test_unexamine(self):
         t = self.connect_as_guest()
