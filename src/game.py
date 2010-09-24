@@ -128,6 +128,12 @@ class Game(object):
         else:
             return self.black
 
+    def observe(self, u):
+        u.session.observed.add(self)
+        self.observers.add(u)
+        u.write(_('You are now observing game %d.\n') % self.number)
+        u.send_board(self)
+
     def unobserve(self, u):
         """Remove the given user as an observer and notify the user."""
         u.write(_('Removing game %d from observation list.\n')
@@ -239,11 +245,17 @@ class Game(object):
     def show_observers(self, conn):
         if self.observers:
             olist = [u.get_display_name() for u in self.observers]
+            if self.gtype == EXAMINED:
+                white_name = self.players[0].name
+                black_name = self.players[0].name
+            else:
+                white_name = self.white.name
+                black_name = self.black.name
             conn.write(ngettext('Observing %d [%s vs. %s]: %s (%d user)\n',
                     'Observing %d [%s vs. %s]: %s (%d users)\n',
                     len(olist)) %
-                (self.number, self.white.name, self.black.name,
-                ' '.join(olist), len(olist)))
+                (self.number, white_name, black_name,
+                    ' '.join(olist), len(olist)))
 
     def parse_move(self, s, conn):
         try:
@@ -470,12 +482,6 @@ class PlayedGame(Game):
                     raise RuntimeError('game.result: unexpected result code')
                 rating.update_ratings(self, white_score, black_score)
         self.free()
-
-    def observe(self, u):
-        u.session.observed.add(self)
-        self.observers.add(u)
-        u.write(_('You are now observing game %d.\n') % self.number)
-        u.send_board(self)
 
     def resign(self, user):
         side = self.get_user_side(user)

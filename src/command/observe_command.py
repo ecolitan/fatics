@@ -29,7 +29,7 @@ class Observe(Command):
         if g:
             if g in conn.user.session.observed:
                 conn.write(_('You are already observing game %d.\n' % g.number))
-            elif conn.user == g.white or conn.user == g.black:
+            elif conn.user in g.players:
                 conn.write(_('You cannot observe yourself.\n'))
             else:
                 assert(conn.user not in g.observers)
@@ -68,5 +68,28 @@ class Unobserve(Command):
                 for g in conn.user.session.observed.copy():
                     g.unobserve(conn.user)
                 assert(not conn.user.session.observed)
+
+@ics_command('primary', 'n', admin.Level.user)
+class Primary(Command):
+    def run(self, args, conn):
+        if args[0] is None:
+            if not conn.user.session.observed:
+                conn.write(_('You are not observing any games.\n'))
+            else:
+                conn.write('TODO: primary no param\n')
+        else:
+            g = game.from_name_or_number(args[0], conn)
+            if g:
+                if g in conn.user.session.observed:
+                    if g == conn.user.session.observed.primary():
+                        conn.write(_('Game %d is already your primary game.\n') %
+                            g.number)
+                    else:
+                        conn.user.session.observed.make_primary(g)
+                        conn.write(_('Game %d is now your primary game.\n') %
+                            g.number)
+
+                else:
+                    conn.write('You are not observing game %d.\n' % conn)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

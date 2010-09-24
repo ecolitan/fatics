@@ -18,8 +18,8 @@
 
 from test import *
 
-class TestUnobserve(Test):
-    def test_unobserve(self):
+class TestObserve(Test):
+    def test_observe_and_unobserve(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as('GuestEFGH', '')
         t3 = self.connect_as('GuestIJKL', '')
@@ -86,6 +86,28 @@ class TestUnobserve(Test):
         self.close(t)
         self.close(t2)
         self.close(t3)
+
+    def test_observe_examined(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t2.write('set style 12\n')
+
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t2.write('o guestabcd\n')
+        self.expect('You are now observing game 1.', t2)
+        self.expect('<12> ', t2)
+
+        t.write('e4\n')
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- ----P--- -------- PPPP-PPP RNBQKBNR B -1 1 1 1 1 0 1 GuestABCD GuestABCD -2 0 0 39 39 0 0 1 P/e2-e4 (0:00) e4 0 0 0', t2)
+
+        t.write('unex\n')
+        self.expect('GuestABCD has stopped examining game 1.', t2)
+        self.expect('Game 1 (which you were observing) has no examiners.', t2)
+        self.expect('Removing game 1 from observation list.', t2)
+
+        self.close(t)
+        self.close(t2)
 
     def test_unobserve_logout(self):
         """ Test that games are implicitly unobserved when logging out. """
@@ -201,5 +223,72 @@ class TestAllobservers(Test):
         self.close(t2)
         self.close(t3)
         self.close(t4)
+
+class TestPrimary(Test):
+    @with_player('testobs', 'testpass')
+    def test_primary(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+        t5 = self.connect_as('testobs', 'testpass')
+
+        t5.write('primary\n')
+        self.expect('You are not observing any games.', t5)
+
+        t5.write('primary 1\n')
+        self.expect('There is no such game.', t5)
+
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+
+        t2.write('match guestijkl 2+12\n')
+        self.expect('Challenge:', t3)
+        t3.write('a\n')
+        self.expect('Creating:', t2)
+
+        t4.write('ex\n')
+        self.expect('Starting a game', t4)
+
+        t5.write('o 1\n')
+        self.expect('now observing game 1', t5)
+        t5.write('o 2\n')
+        self.expect('now observing game 2', t5)
+        t5.write('o 3\n')
+        self.expect('now observing game 3', t5)
+
+        t5.write('primary 1\n')
+        t5.write('allobs 1\n')
+        self.expect('Game 1 is already your primary game.', t5)
+        t5.write('primary guestabcd\n')
+        self.expect('Game 1 is already your primary game.', t5)
+
+        t5.write('ki kibitz testing 123\n')
+        t5.write('allobs 1\n')
+        self.expect('kibitz testing 123', t)
+
+        t5.write('pri 3\n')
+        self.expect('Game 3 is now your primary game.', t5)
+        t5.write('ki kibitz testing 456\n')
+        self.expect('kibitz testing 456', t4)
+
+        t5.write('pri guestefgh\n')
+        self.expect('Game 2 is now your primary game.', t5)
+        t5.write('ki kibitz testing 789\n')
+        self.expect('kibitz testing 789', t2)
+
+        t2.write('abort\n')
+        self.expect('aborted on move 1', t5)
+        t5.write('ki kibitz testing 987\n')
+        self.expect('kibitz testing 987', t4)
+
+        #t.write('primary\n') TODO
+
+        t.write('unex\n')
+        t2.write('abort\n')
+        t4.write('unex\n')
+
+        for tt in [t, t2, t3, t4, t5]:
+            self.close(tt)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

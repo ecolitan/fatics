@@ -25,6 +25,10 @@ class GameList(object):
     def primary(self):
         return self.games[0]
 
+    def make_primary(self, game):
+        self.games.remove(game)
+        self.games.insert(0, game)
+
     def add(self, game):
         assert(game not in self.games)
         self.games.append(game)

@@ -150,7 +150,7 @@ class ExaminedGame(Game):
         mv.time = 0.0
         super(ExaminedGame, self).next_move(mv, conn)
         for p in self.players + list(self.observers):
-            p.write(N_('Game %d: %s moves: %s\n') % (self.number, conn.user.name, mv.to_san()))
+            p.write_('Game %d: %s moves: %s\n', (self.number, conn.user.name, mv.to_san()))
         self._check_result()
 
     def leave(self, user):
@@ -159,17 +159,17 @@ class ExaminedGame(Game):
         user.session.game = None
         # user may be offline if he or she disconnected unexpectedly
         if user.is_online:
-            user.write(N_('You are no longer examining game %d.\n') % self.number)
+            user.write_('You are no longer examining game %d.\n', self.number)
         for p in self.players + list(self.observers):
-            p.write(N_('%s has stopped examining game %d.\n') % (user.name, self.number))
+            p.write_('%s has stopped examining game %d.\n', (user.name, self.number))
         if not self.players:
             for p in self.observers:
-                p.write('Game %d (which you were observing) has no examiners.\n', (self.number,))
+                p.write_('Game %d (which you were observing) has no examiners.\n', (self.number,))
             self.free()
 
     def result(self, msg, result_code):
         for p in self.players + list(self.observers):
-            p.write(N_('Game %d: %s %s\n') % (self.number, msg, result_code))
+            p.write_('Game %d: %s %s\n', (self.number, msg, result_code))
 
     def free(self):
         super(ExaminedGame, self).free()

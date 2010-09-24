@@ -24,9 +24,7 @@ from command import *
 class KibitzCommand(Command):
     def _do_kibitz(self, g, msg, conn):
         name = conn.user.get_display_name()
-        all = list(g.observers)
-        if g.gtype == game.PLAYED:
-            all += [g.white, g.black]
+        all = g.players + list(g.observers)
         assert(len(all) > 0)
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
