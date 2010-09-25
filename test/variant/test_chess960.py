@@ -29,7 +29,7 @@ class TestChess960(Test):
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0 fr idn=960\n')
-        self.expect('Usage:', t)
+        self.expect('idn must be between', t)
 
         self.close(t)
         self.close(t2)

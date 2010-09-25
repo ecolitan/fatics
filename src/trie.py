@@ -198,11 +198,11 @@ class Trie(object):
         for node in self.root.walk():
             yield node.keypath, node.value'''
 
+    # XXX slow!
     def itervalues(self):
         """Yield values in order."""
         for node in self.root.walk():
             yield node.value
-
 
 if __name__ == '__main__':
     import doctest

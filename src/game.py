@@ -30,9 +30,9 @@ from timer import timer
 from db import db
 from game_constants import *
 
-games = {}
-
 from variant.variant_factory import variant_factory
+
+games = {}
 
 def opp(side):
     assert(side in [WHITE, BLACK])

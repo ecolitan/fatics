@@ -17,10 +17,15 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import datetime
+
 import user
 import command_parser
+import online
+import admin
+import speed_variant
 
-from command import *
+from command import Command, ics_command
 
 @ics_command('aclearhistory', 'w', admin.Level.admin)
 class Aclearhistory(Command):
@@ -53,7 +58,7 @@ class Announce(Command):
     def run(self, args, conn):
         count = 0
         # the announcement message isn't localized
-        for u in online.itervalues():
+        for u in online.online:
             if u != conn.user:
                 count = count + 1
                 u.write("\n\n    **ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))
@@ -64,7 +69,7 @@ class Annunreg(Command):
     def run(self, args, conn):
         count = 0
         # the announcement message isn't localized
-        for u in online.itervalues():
+        for u in online.online:
             if u != conn.user and u.is_guest:
                 count = count + 1
                 u.write("\n\n    **UNREG ANNOUNCEMENT** from %s: %s\n\n" % (conn.user.name, args[0]))

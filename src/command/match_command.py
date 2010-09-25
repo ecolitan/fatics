@@ -17,9 +17,15 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
-
 import game
+import match
+import var
+import admin
+import user
+import speed_variant
+
+from command import Command, ics_command
+from online import online
 
 class MatchMixin(object):
     def _check_opp(self, conn, opp):
@@ -64,7 +70,7 @@ class Match(Command, MatchMixin):
         if not self._check_opp(conn, u):
             return
 
-        offer.Challenge(conn.user, u, args[1])
+        match.Challenge(conn.user, u, args[1])
 
 # TODO: parameters?
 @ics_command('rematch', '')
@@ -87,6 +93,6 @@ class Rematch(Command, MatchMixin):
         assert(h['flags'][2] in ['r', 'u'])
         match_str = '%d %d %s %s' % (h['time'], h['inc'], h['flags'][2],
             variant_name)
-        offer.Challenge(conn.user, opp, match_str)
+        match.Challenge(conn.user, opp, match_str)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

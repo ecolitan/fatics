@@ -47,6 +47,7 @@ class Session(object):
         self.lag = 0
         self.observed = GameList()
         self.closed = False
+        self.seeks = []
 
     def set_user(self, user):
         self.user = user
@@ -91,6 +92,12 @@ class Session(object):
         for g in self.observed.copy():
             g.unobserve(self.user)
         assert(not self.observed)
+
+        # remove seeks
+        if self.seeks:
+            for s in self.seeks:
+                s.remove()
+            self.conn.write(_('Your seeks have been removed.\n'))
 
     def set_ivars_from_str(self, s):
         """Parse a %b string sent by Jin to set ivars before logging in."""

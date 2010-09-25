@@ -19,6 +19,8 @@
 
 from command import *
 
+import var
+
 @ics_command('iset', 'wS', admin.Level.user)
 class Iset(Command):
     def run(self, args, conn):

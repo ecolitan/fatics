@@ -17,21 +17,18 @@
 #
 
 import time
-import datetime
 import re
 
 import user
 import trie
 import admin
-import var
-import offer
 import game
 import history
 import rating
 import speed_variant
+import online
 
 from timer import timer
-from online import online
 from reload import reload
 from server import server
 from command_parser import BadCommandError
@@ -304,7 +301,7 @@ class Uptime(Command):
 class Who(Command):
     def run(self, args, conn):
         count = 0
-        for u in online.itervalues():
+        for u in online.online:
             conn.write(u.get_display_name() + '\n')
             count = count + 1
         conn.write('\n')

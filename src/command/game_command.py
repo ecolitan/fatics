@@ -19,6 +19,8 @@
 
 from command import *
 
+import offer
+
 class GameMixin(object):
     def _get_played_game(self, conn):
         g = conn.user.session.game

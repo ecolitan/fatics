@@ -29,7 +29,7 @@ class Shout(Command):
             count = 0
             name = conn.user.name
             dname = conn.user.get_display_name()
-            for u in online.itervalues():
+            for u in online.online:
                 if u.vars['shout'] and not u.in_silence():
                     if name not in u.censor:
                         u.write(_("%s shouts: %s\n") % (name, args[0]))
@@ -46,7 +46,7 @@ class It(Command):
             count = 0
             name = conn.user.name
             dname = conn.user.get_display_name()
-            for u in online.itervalues():
+            for u in online.online:
                 if u.vars['shout'] and not u.in_silence():
                     if name not in u.censor:
                         u.write(_("--> %s %s\n") %
@@ -64,7 +64,7 @@ class Cshout(Command):
             count = 0
             name = conn.user.name
             dname = conn.user.get_display_name()
-            for u in online.itervalues():
+            for u in online.online:
                 if u.vars['cshout'] and not u.in_silence():
                     if name not in u.censor:
                         u.write_("%s c-shouts: %s\n", (dname, args[0]))

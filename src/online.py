@@ -24,26 +24,28 @@ import trie
 class Online(object):
     def __init__(self):
         self.online = trie.Trie()
+        # this is redundant, but faster; it's very slow to iterate
+        # over the trie
+        self.online_names = {}
 
     def add(self, u):
         self.online[u.name.lower()] = u
+        self.online_names[u.name.lower()] = u
 
     def remove(self, u):
         try:
             del self.online[u.name.lower()]
+            del self.online_names[u.name.lower()]
         except KeyError:
             pass
 
     def is_online(self, name):
-        # there's probably a more efficient way
-        return self.find_exact(name) is not None
+        return name.lower() in self.online_names
 
     def find_exact(self, name):
         name = name.lower()
         try:
-            u = self.online[name]
-        except trie.NeedMore:
-            u = None
+            u = self.online_names[name.lower()]
         except KeyError:
             u = None
         return u
@@ -58,10 +60,7 @@ class Online(object):
         return ulist
 
     def __iter__(self):
-        return self.online.itervalues()
-
-    def itervalues(self):
-        return self.online.itervalues()
+        return iter(self.online_names.values())
 
 online = Online()
 

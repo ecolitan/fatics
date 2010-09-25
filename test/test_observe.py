@@ -285,7 +285,6 @@ class TestPrimary(Test):
         #t.write('primary\n') TODO
 
         t.write('unex\n')
-        t2.write('abort\n')
         t4.write('unex\n')
 
         for tt in [t, t2, t3, t4, t5]:

@@ -19,6 +19,8 @@
 
 from command import *
 
+import match
+
 @ics_command('rmatch', 'wwt')
 class Rmatch(Command):
     def run(self, args, conn):
@@ -41,7 +43,7 @@ class Rmatch(Command):
         if u2.session.game:
             conn.write(_("%s is playing a game.\n") % u2.name)
             return
-        offer.Challenge(u1, u2, args[2])
+        match.Challenge(u1, u2, args[2])
 
 
 @ics_command('tournset', 'wd')

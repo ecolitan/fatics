@@ -87,6 +87,20 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('testplayer', 'testpass')
+    def test_match_case(self):
+        """ Test default time controls using the 'time' and 'inc'
+        vars. """
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('match admin 3 0 R cRaZyHousE\n')
+        self.expect('Challenge:', t)
+        self.expect('rated blitz crazyhouse 3 0', t)
+
+        self.close(t)
+        self.close(t2)
+
     def test_plus_syntax(self):
         """ Test syntax like 'match admin 3+0' """
         t = self.connect_as_admin()

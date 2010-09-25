@@ -17,9 +17,12 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
+from command import Command, ics_command
 
 import channel
+import user
+import online
+import admin
 
 class TellCommand(Command):
     def _do_tell(self, args, conn):
@@ -33,7 +36,7 @@ class TellCommand(Command):
                 # try to find the user if he or she has logged off
                 # and since reconnected
                 name = u.name
-                u = online.find_exact(name)
+                u = online.online.find_exact(name)
                 if not u:
                     conn.write(_('%s is no longer online.\n') % name)
         elif args[0] == ',':
@@ -129,7 +132,7 @@ class Say(Command):
             if opp:
                 if not opp.is_online:
                     name = opp.name
-                    opp = online.find_exact(name)
+                    opp = online.online.find_exact(name)
                     if not opp:
                         conn.write(_('%s is no longer online.\n') % name)
                 if opp:

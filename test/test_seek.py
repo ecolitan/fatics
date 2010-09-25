@@ -16,13 +16,27 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = ['admin_command', 'channel_command', 'command', 'examine_command',
-'game_command',
-'kibitz_command', 'list_command', 'match_command', 'message_command',
-'news_command',
-'notify_command', 'observe_command',
-'offer_command', 'ping_command', 'seek_command',
-'shout_command', 'td_command',
-'tell_command', 'var_command']
+from test import *
+
+# GuestFXLR (++++) seeking 5 0 unrated blitz m ("play 37" to respond)
+
+class TestSeek(Test):
+    def test_seek_guest(self):
+        t = self.connect_as('GuestABCD', '')
+
+        t.write('seek 3 0\n')
+        self.expect('GuestABCD(U) (++++) seeking 3 0 unrated blitz ("play 1" to respond)', t)
+        self.expect('Your seek has been posted with index 1.', t)
+        self.expect('(1 player saw the seek.)', t)
+
+        t.write('seek 15+5\n')
+        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard ("play 2" to respond)', t)
+        self.expect('Your seek has been posted with index 2.', t)
+        self.expect('(1 player saw the seek.)', t)
+
+        t.write('unseek\n')
+        self.expect('Your seeks have been removed.', t)
+
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
