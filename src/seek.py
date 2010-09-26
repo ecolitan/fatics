@@ -65,8 +65,9 @@ def find_matching(seek):
 class Seek(MatchStringParser):
     def __init__(self, user, args):
         """ Create a new seek."""
-        self.user = user
+        self.a = user
         self.manual = None
+        self.expired = False
 
         try:
             self._parse_args(args)
@@ -100,26 +101,36 @@ class Seek(MatchStringParser):
 
     def _parse_args(self, args):
         """ Parse the args, including seek-specific parsing. """
-        self._parse_args_common(args, self.user)
+        self._parse_args_common(args, self.a)
 
         # seek-specific (not used in the match command)
         if self.rated is None:
-            if self.user.is_guest or self.clock_name in [
+            if self.a.is_guest or self.clock_name in [
                     'hourglass', 'untimed']:
-                self.user.write(_('Setting seek to unrated.\n'))
+                self.a.write(_('Setting seek to unrated.\n'))
                 self.rated = False
             else:
                 # Original FICS uses the 'rated' var, but we default to True
                 self.rated = True
-        elif self.rated and self.user.is_guest:
+        elif self.rated and self.a.is_guest:
             raise MatchError(_('Only registered players can play rated games.\n'))
 
-        self.rating = self.user.get_rating(self.speed_variant)
+        self.rating = self.a.get_rating(self.speed_variant)
+
+    def __eq__(self, other):
+        """ Determine whether two seeks are exactly the same (same poster
+        and parameters). """
+        # ignore "manual" and "side" for comparison purposes
+        return (self.expired == other.expired and
+            self.a == other.a and self.tags == other.tags)
 
     def matches(self, other):
         """ Determine whether this seek matches another. """
-
         if other.expired:
+            return False
+
+        if self.a == other.a:
+            # can't match own seek
             return False
 
         # side is a special case because it should be opposite
@@ -135,14 +146,15 @@ class Seek(MatchStringParser):
     def post(self):
         """ Add this seek to the seek list.  Returns the number of users
         notified of the seek. """
+        assert(not self.expired)
+
         self.when_posted = time.time()
-        self.expired = False
         self.num = find_free_slot()
         seeks[self.num] = self
-        self.user.session.seeks.append(self)
+        self.a.session.seeks.append(self)
 
         # build the seek string
-        name = self.user.get_display_name()
+        name = self.a.get_display_name()
         rated_str = 'rated' if self.tags['rated'] else 'unrated'
         speed_name = self.speed_variant.speed.name
         variant_str = '' if self.variant_name == 'chess' else (
@@ -158,6 +170,10 @@ class Seek(MatchStringParser):
         count = 0
         for u in online.online:
             if u.vars['seek'] and not u.session.game:
+                # showownseek is both a variable and an ivariable
+                if u == self.a and not (u.vars['showownseek']
+                        and u.session.ivars['showownseek']):
+                    continue
                 # TODO: check formula for both players
                 count += 1
                 u.write(seek_str)
@@ -166,8 +182,8 @@ class Seek(MatchStringParser):
 
     def remove(self):
         assert(seeks[self.num] == self)
-        self.user.session.seeks.remove(self)
         self.expired = True
+        self.a.session.seeks.remove(self)
         self.expired_time = time.time()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

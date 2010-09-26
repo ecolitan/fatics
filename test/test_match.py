@@ -220,15 +220,17 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
 
-    def test_accept_identical(self):
-        t = self.connect_as_guest()
+    def test_intercept(self):
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
 
         t.write('match admin 1 2 white\n')
         self.expect('Challenge:', t2)
-        t2.write('match Guest 1 2 black\n')
-        self.expect('Accepting the match offer', t2)
-        self.expect('accepts your match offer', t)
+        t2.write('match Guestabcd 1 2 black\n')
+        self.expect("Your challenge intercepts GuestABCD's challenge.", t2)
+        self.expect("admin's challenge intercepts your challenge.", t)
+        #self.expect('Accepting the match offer', t2)
+        #self.expect('accepts your match offer', t)
 
         self.close(t)
         self.close(t2)

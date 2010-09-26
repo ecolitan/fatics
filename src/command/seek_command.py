@@ -25,16 +25,26 @@ import seek
 class Seek(Command):
     def run(self, args, conn):
         s = seek.Seek(conn.user, args[0])
+
+        # Check if the user has already posted the same seek.  It might be
+        # more efficient to do this check as part of seek.find_matching()
+        if s in seek.seeks.values():
+            conn.write(_('You already have an active seek with the same parameters.\n'))
+            return
+
         (auto_matches, manual_matches) = seek.find_matching(s)
         if auto_matches:
             ad = auto_matches[0]
-            conn.write(_('Your seek matches one posted by %s.\n' %
-                ad.user.name))
+            conn.write(_('Your seek matches one posted by %s.\n') %
+                ad.a.name)
+            ad.a.write_('Your seek matches one posted by %s.\n',
+                (conn.user.name,))
+            ad.b = conn.user
+            g = game.PlayedGame(ad)
             return
-
         if manual_matches:
             conn.write(_('Issuing match request because seek was.\n' %
-                ad.user.name))
+                ad.a.name))
             for ad in manual_matches:
                 pass
 
@@ -48,7 +58,7 @@ class Unseek(Command):
     def run(self, args, conn):
         n = args[0]
         if n:
-            if n in seek.seeks and seek.seeks[n].user == conn.user:
+            if n in seek.seeks and seek.seeks[n].a == conn.user:
                 seek.seeks[n].remove()
                 conn.write(_('Your seek %d has been removed.\n') % n)
             else:

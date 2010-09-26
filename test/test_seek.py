@@ -23,16 +23,65 @@ from test import *
 class TestSeek(Test):
     def test_seek_guest(self):
         t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest()
 
         t.write('seek 3 0\n')
-        self.expect('GuestABCD(U) (++++) seeking 3 0 unrated blitz ("play 1" to respond)', t)
-        self.expect('Your seek has been posted with index 1.', t)
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n = int(m.group(1))
+        self.expect('GuestABCD(U) (++++) seeking 3 0 unrated blitz ("play %d" to respond)' % n, t2)
         self.expect('(1 player saw the seek.)', t)
 
+        t.write('seek 3 0\n')
+        self.expect('You already have an active seek with the same parameters.', t)
+
         t.write('seek 15+5\n')
-        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard ("play 2" to respond)', t)
-        self.expect('Your seek has been posted with index 2.', t)
+        self.expect('Your seek has been posted with index %d.' %
+            (n  + 1), t)
+        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard ("play %d" to respond)' % (n + 1), t2)
         self.expect('(1 player saw the seek.)', t)
+
+        t.write('unseek\n')
+        self.expect('Your seeks have been removed.', t)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_matching_seek(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t.write('seek 15+5 bronstein zh\n')
+        self.expect('Your seek has been posted with index ', t)
+        self.expect('(1 player saw the seek.)', t)
+        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard crazyhouse bronstein ("play ', t2)
+
+        t2.write('seek 15 5 bronstein crazyhouse\n')
+        self.expect('Your seek matches one posted by GuestABCD.', t2)
+        self.expect('Your seek matches one posted by GuestEFGH.', t)
+
+        self.expect('Creating:', t)
+        self.expect('unrated standard crazyhouse 15 5', t)
+        self.expect('Creating:', t2)
+        self.expect('unrated standard crazyhouse 15 5', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_showownseek(self):
+        """ Test the showownseek var and ivar. """
+        t = self.connect_as('GuestABCD', '')
+        t.write('see 3+0\n')
+        self.expect('(0 players saw the seek.)', t)
+
+        t.write('set showownseek 1\n')
+        self.expect('You will now see your own seeks.', t)
+        t.write('see 4+0\n')
+        self.expect('(1 player saw the seek.)', t)
+
+        t.write('iset showownseek 0\n')
+        self.expect('showownseek unset.', t)
+        t.write('see 5+0\n')
+        self.expect('(0 players saw the seek.)', t)
 
         t.write('unseek\n')
         self.expect('Your seeks have been removed.', t)

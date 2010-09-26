@@ -271,6 +271,9 @@ class Challenge(Offer, MatchStringParser):
             o.name == self.name and o.equivalent_to(self)), None)
         if o:
             # a already received an identical offer, so just accept it
+            a.write_("Your challenge intercepts %s's challenge.\n", (o.a.name))
+            b.write_("%s's challenge intercepts your challenge.\n", (a.name))
+            # XXX don't send "Accepting" and "USER accepts" messages?
             o.accept()
             return
 

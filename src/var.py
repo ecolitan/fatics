@@ -249,6 +249,7 @@ class VarList(object):
         BoolVar("echo", True, N_("You will not hear communications echoed.\n"), N_("You will now not hear communications echoed.\n")).persist().add_as_var()
         BoolVar("examine", False, N_("You will now enter examine mode after a game.\n"), N_("You will now not enter examine mode after a game.\n")).persist().add_as_var()
         BoolVar("mailmess", False, N_("Your messages will be mailed to you.\n"), N_("Your messages will not be mailed to you.\n")).persist().add_as_var()
+        BoolVar("showownseek", False, N_("You will now see your own seeks.\n"), N_("You will not see your own seeks.\n")).persist().add_as_var()
 
         # non-persistent
         BoolVar("tourney", False, N_("Your tournament variable is now set.\n"), N_("Your tournament variable is no longer set.\n")).add_as_var()
@@ -305,7 +306,7 @@ class VarList(object):
         BoolVar("boardinfo", False).add_as_ivar(19)
         BoolVar("extuserinfo", False).add_as_ivar(20)
         BoolVar("seekca", False).add_as_ivar(21)
-        BoolVar("showownseek", False).add_as_ivar(22)
+        BoolVar("showownseek", True).add_as_ivar(22)
         BoolVar("premove", False).add_as_ivar(23)
         BoolVar("smartmove", False).add_as_ivar(24)
         BoolVar("movecase", False).add_as_ivar(25)
@@ -352,7 +353,7 @@ gameinfo graph
 lock losers
 nohighlight nowrap
 pendinfo pin pinginfo premove
-seekca seekinfo seekremove showownseek showserver singleboard smartmove startpos suicide
+seekca seekinfo seekremove showserver singleboard smartmove startpos suicide
 vthighlight
 wildcastle
 xml ?
