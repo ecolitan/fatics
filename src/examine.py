@@ -26,12 +26,13 @@ from variant.variant_factory import variant_factory
 
 class ExaminedGame(Game):
     def __init__(self, user, hist_game=None):
-        super(ExaminedGame, self).__init__()
         self.gtype = EXAMINED
+        self.players = [user]
+        super(ExaminedGame, self).__init__()
+
         self.white_time = 0
         self.black_time = 0
         self.inc = 0
-        self.players = [user]
         self.rated_str = 'unrated'
         assert(user.session.game is None)
         user.session.game = self

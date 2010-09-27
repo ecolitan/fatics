@@ -79,6 +79,11 @@ class Game(object):
         self.observers = set()
         self.pending_offers = []
 
+        # (silently) remove each player's seeks
+        for p in self.players:
+            for s in p.session.seeks:
+                s.remove()
+
     def send_boards(self):
         for p in self.players:
             p.send_board(self)
@@ -278,9 +283,6 @@ class Game(object):
 
 class PlayedGame(Game):
     def __init__(self, chal):
-        super(PlayedGame, self).__init__()
-        self.gtype = PLAYED
-
         side = chal.side
         if side is None:
             side = self._pick_color(chal.a, chal.b)
@@ -291,7 +293,11 @@ class PlayedGame(Game):
             assert(side == BLACK)
             self.white = chal.b
             self.black = chal.a
+
+        self.gtype = PLAYED
         self.players = [self.white, self.black]
+        super(PlayedGame, self).__init__()
+
 
         self.speed_variant = chal.speed_variant
         self.white_rating = self.white.get_rating(self.speed_variant)

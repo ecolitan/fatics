@@ -36,6 +36,11 @@ class MatchMixin(object):
         if conn.user.name in opp.noplay:
             conn.write(_("You are on %s's noplay list.\n") % opp.name)
             return False
+        return True
+
+    def _check_open(self, conn, opp):
+        """ Test whether an opponent is open to match requests, and
+        open the challenging player to match requests if necessary. """
         if not opp.vars['open']:
             conn.write(_("%s is not open to match requests.\n") % opp.name)
             return False
@@ -69,6 +74,8 @@ class Match(Command, MatchMixin):
 
         if not self._check_opp(conn, u):
             return
+        if not self._check_open(conn, u):
+            return
 
         match.Challenge(conn.user, u, args[1])
 
@@ -88,6 +95,8 @@ class Rematch(Command, MatchMixin):
             conn.write(_('Your last opponent, %s, is not logged in.\n') % h['opp_name'])
             return
         if not self._check_opp(conn, opp):
+            return
+        if not self._check_open(conn, opp):
             return
         variant_name = speed_variant.variant_abbrevs[h['flags'][1]]
         assert(h['flags'][2] in ['r', 'u'])

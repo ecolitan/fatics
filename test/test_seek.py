@@ -67,6 +67,79 @@ class TestSeek(Test):
         self.close(t)
         self.close(t2)
 
+    def test_bad_seek(self):
+        t = self.connect_as_guest()
+        t.write('seek 3+0 r\n')
+        self.expect('Only registered players can play rated games.', t)
+        t.write('play 9999\n')
+        self.expect('That seek is not available.', t)
+        t.write('play nosuchuser\n')
+        self.expect('No player named "nosuchuser" is online', t)
+
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t.write('seek 3+0\n')
+        self.expect('You are examining a game.', t)
+        t.write('play 1\n')
+        self.expect('You are examining a game.', t)
+        t.write('unex\n')
+
+        self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_censor(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('+cen admin\n')
+        self.expect('admin added to your censor list.', t2)
+
+        t2.write('seek 3 0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t2)
+        n = int(m.group(1))
+        self.expect('(0 players saw the seek.)', t2)
+
+        t.write('play %d\n' % n)
+        self.expect('TestPlayer is censoring you.', t)
+
+        t2.write('-cen admin\n')
+        self.expect('admin removed from your censor list.', t2)
+
+        self.close(t2)
+        self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_noplay(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('+noplay admin\n')
+        self.expect('admin added to your noplay list.', t2)
+
+        t2.write('seek 3 0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t2)
+        n = int(m.group(1))
+        self.expect('(0 players saw the seek.)', t2)
+
+        t.write('play %d\n' % n)
+        self.expect("You are on TestPlayer's noplay list.", t)
+
+        t2.write('-noplay admin\n')
+        self.expect('admin removed from your noplay list.', t2)
+
+        self.close(t2)
+        self.close(t)
+
+    def test_game_removes_seek(self):
+        t = self.connect_as_guest()
+        t.write('seek 3 0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t.write('unseek\n')
+        self.expect('You have no active seeks.', t)
+        self.close(t)
+
     def test_showownseek(self):
         """ Test the showownseek var and ivar. """
         t = self.connect_as('GuestABCD', '')
@@ -86,6 +159,45 @@ class TestSeek(Test):
         t.write('unseek\n')
         self.expect('Your seeks have been removed.', t)
 
+        self.close(t)
+
+    def test_seek_limit(self):
+        t = self.connect_as('GuestABCD', '')
+
+        t.write('see 1+0\n')
+        self.expect('(0 players saw the seek.)', t)
+        t.write('see 5+0\n')
+        self.expect('(0 players saw the seek.)', t)
+        t.write('see 15+0\n')
+        self.expect('(0 players saw the seek.)', t)
+        t.write('see 60+0\n')
+        self.expect('You can only have 3 active seeks.', t)
+
+        t.write('unseek\n')
+        self.expect('Your seeks have been removed.', t)
+
+        self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_play(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('seek 3 0 white\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t2)
+        n = int(m.group(1))
+        self.expect('(1 player saw the seek.)', t2)
+
+        t.write('play %d\n' % n)
+        self.expect('admin accepts your seek.', t2)
+
+        self.expect('Creating: TestPlayer (----) admin (----) rated blitz 3 0', t)
+        self.expect('Creating: TestPlayer (----) admin (----) rated blitz 3 0', t2)
+
+        t.write('abo\n')
+        self.expect('aborted on move 1', t)
+
+        self.close(t2)
         self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

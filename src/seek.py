@@ -22,6 +22,7 @@ import re
 
 import speed_variant
 import online
+import game
 
 from match import MatchStringParser, MatchError
 from game_constants import *
@@ -30,6 +31,9 @@ from game_constants import *
 # (this is the value GICS uses; original FICS is likely the
 # same or similar)
 EXPIRE_DELAY = 90
+
+""" Max number of seeks per user. """
+LIMIT = 3
 
 
 seeks = {}
@@ -64,16 +68,14 @@ def find_matching(seek):
 
 class Seek(MatchStringParser):
     def __init__(self, user, args):
-        """ Create a new seek."""
+        """ Create a new seek.  Raises a MatchError if given an invalid
+        match string. """
         self.a = user
         self.manual = None
         self.expired = False
 
-        try:
-            self._parse_args(args)
-        except MatchError as e:
-            user.write(e[0])
-            return
+        # may raise MatchError
+        self._parse_args(args)
 
         assert(self.time is not None and self.inc is not None)
         assert(self.rated is not None)
@@ -174,16 +176,29 @@ class Seek(MatchStringParser):
                 if u == self.a and not (u.vars['showownseek']
                         and u.session.ivars['showownseek']):
                     continue
+                # if either player censors or noplays the other, don't
+                # notify of the seek
+                if (self.a.name in u.censor or self.a.name in u.noplay
+                        or u.name in self.a.censor or u.name in self.a.noplay):
+                    continue
                 # TODO: check formula for both players
                 count += 1
                 u.write(seek_str)
 
         return count
 
+    def accept(self, b):
+        assert(not self.expired)
+        self.b = b
+        # will remove this seek
+        game.PlayedGame(self)
+        assert(self.expired)
+
     def remove(self):
         assert(seeks[self.num] == self)
         self.expired = True
         self.a.session.seeks.remove(self)
         self.expired_time = time.time()
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -18,13 +18,30 @@
 #
 
 from command import *
+from .match_command import MatchMixin
 
 import seek
+import match
 
 @ics_command('seek', 't')
 class Seek(Command):
     def run(self, args, conn):
-        s = seek.Seek(conn.user, args[0])
+        if conn.user.session.game:
+            if conn.user.session.game.gtype == game.EXAMINED:
+                conn.write(_('You are examining a game.\n'))
+            else:
+                conn.write(_('You are playing a game.\n'))
+            return
+
+        if len(conn.user.session.seeks) >= seek.LIMIT:
+            conn.write(_('You can only have %d active seeks.\n') % seek.LIMIT)
+            return
+
+        try:
+            s = seek.Seek(conn.user, args[0])
+        except match.MatchError as e:
+            conn.write(e[0])
+            return
 
         # Check if the user has already posted the same seek.  It might be
         # more efficient to do this check as part of seek.find_matching()
@@ -70,5 +87,32 @@ class Unseek(Command):
                 conn.write(_('Your seeks have been removed.\n'))
             else:
                 conn.write(_('You have no active seeks.\n'))
+
+@ics_command('play', 'i')
+class Play(Command, MatchMixin):
+    def run(self, args, conn):
+        if conn.user.session.game:
+            if conn.user.session.game.gtype == game.EXAMINED:
+                conn.write(_('You are examining a game.\n'))
+            else:
+                conn.write(_('You are playing a game.\n'))
+            return
+
+        if type(args[0]) == str:
+            u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+            if u:
+                conn.write('TODO: play name\n')
+        else:
+            if args[0] not in seek.seeks:
+                # no such seek
+                conn.write(_('That seek is not available.\n'))
+                return
+            s = seek.seeks[args[0]]
+            # check censor and noplay
+            if not self._check_opp(conn, s.a):
+                return
+            # TODO: manual seek
+            s.a.write_('%s accepts your seek.' % (conn.user.name,))
+            s.accept(conn.user)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
