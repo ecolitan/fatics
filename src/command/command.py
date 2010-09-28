@@ -31,7 +31,6 @@ import online
 from timer import timer
 from reload import reload
 from server import server
-from command_parser import BadCommandError
 from db import db, DeleteError
 
 class CommandList(object):

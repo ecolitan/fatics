@@ -101,6 +101,13 @@ class Seek(MatchStringParser):
         self.speed_variant = speed_variant.from_names(self.speed_name,
             self.variant_name)
 
+        name = self.a.get_display_name()
+        speed_name = self.speed_variant.speed.name
+        variant_str = '' if self.variant_name == 'chess' else (
+            ' %s' % self.variant_name)
+        clock_str = '' if self.clock_name == 'fischer' else (
+            ' %s' % self.clock_name)
+
     def _parse_args(self, args):
         """ Parse the args, including seek-specific parsing. """
         self._parse_args_common(args, self.a)
@@ -163,11 +170,16 @@ class Seek(MatchStringParser):
             ' %s' % self.variant_name)
         clock_str = '' if self.clock_name == 'fischer' else (
             ' %s' % self.clock_name)
+        if self.side is None:
+            side_str = ''
+        else:
+            side_str = ' [white]' if self.side == WHITE else ' [black]'
 
         # not currently translated, for efficiency
-        seek_str = '%s (%s) seeking %d %d %s %s%s%s ("play %d" to respond)\n' % (
+        seek_str = '%s (%s) seeking %d %d %s %s%s%s%s ("play %d" to respond)\n' % (
                 name, self.rating, self.tags['time'], self.tags['inc'],
-                rated_str, speed_name, variant_str, clock_str, self.num)
+                rated_str, speed_name, variant_str, clock_str,
+                side_str, self.num)
 
         count = 0
         for u in online.online:
@@ -185,9 +197,21 @@ class Seek(MatchStringParser):
                 count += 1
                 u.write(seek_str)
 
+        # set the string for use in the "sought" display
+        self._str = '%3d %4s %-17s %3d %3d %s %s%s%s%s\n' % (
+            self.num, self.rating, name, self.time, self.inc,
+            rated_str, speed_name, variant_str, clock_str,
+            side_str)
+
         return count
 
+    def met_by(self, b):
+        """ Check whether the user B meets the requirements for accepting
+        this seek. """
+        return True
+
     def accept(self, b):
+        assert(self.met_by(b))
         assert(not self.expired)
         self.b = b
         # will remove this seek
@@ -200,5 +224,7 @@ class Seek(MatchStringParser):
         self.a.session.seeks.remove(self)
         self.expired_time = time.time()
 
+    def __str__(self):
+        return self._str
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

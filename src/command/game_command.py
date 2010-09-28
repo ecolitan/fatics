@@ -21,6 +21,8 @@ from command import *
 
 import offer
 
+from command_parser import BadCommandError
+
 class GameMixin(object):
     def _get_played_game(self, conn):
         g = conn.user.session.game

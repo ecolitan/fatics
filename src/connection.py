@@ -18,8 +18,8 @@
 
 import time
 import re
-from twisted.protocols import basic
 import twisted.internet.interfaces
+from twisted.protocols import basic
 from twisted.internet import reactor
 from zope.interface import implements
 
@@ -45,7 +45,6 @@ class Connection(basic.LineReceiver):
     user = None
     logged_in_again = False
     buffer_output = False
-    #quit = False
     ivar_pat = re.compile(r'%b([01]{32})')
 
     def connectionMade(self):
@@ -73,7 +72,6 @@ class Connection(basic.LineReceiver):
         self.loseConnection('idle timeout')
 
     def login(self):
-        #assert(self.state == 'login')
         self.state = 'login'
         self.write(config.login_msg)
         self.write("login: ")
@@ -192,7 +190,6 @@ class Connection(basic.LineReceiver):
         try:
             if self.user.is_online:
                 if self.logged_in_again:
-                    #self.session.close()
                     self.logged_in_again = False
                 else:
                     # abrupt disconnection

@@ -137,6 +137,17 @@ class TestMatch(Test):
         self.expect('admin, whom you were challenging, has departed', t)
         self.close(t)
 
+    def test_decline_unclean_logout(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin\n')
+        self.expect('Challenge:', t2)
+        t2.close()
+
+        self.expect('admin, whom you were challenging, has departed', t)
+        self.close(t)
+
     def test_accept(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()

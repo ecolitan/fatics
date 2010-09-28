@@ -466,6 +466,10 @@ class TestMoves(Test):
         self.expect('''Move  GuestABCD               admin\r\n----  ---------------------   ---------------------\r\n  1.  e4      (0:00.000)      c5      (0:00.000)\r\n      {Still in progress} *''', t3)
         self.close(t3)
 
+        t.write('abo\n')
+        t2.write('abo\n')
+        self.expect('aborted by agreement', t)
+
         self.close(t)
         self.close(t2)
 

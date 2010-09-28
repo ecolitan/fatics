@@ -23,6 +23,8 @@ import online
 import admin
 import user
 
+from command_parser import BadCommandError
+
 @ics_command('summon', 'w')
 class Summon(Command):
     def run(self, args, conn):

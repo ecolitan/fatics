@@ -18,7 +18,8 @@
 
 from test import *
 
-# GuestFXLR (++++) seeking 5 0 unrated blitz m ("play 37" to respond)
+# GuestWXYZ (++++) seeking 5 0 unrated blitz [white] mf ("play 37" to respond)
+
 
 class TestSeek(Test):
     def test_seek_guest(self):
@@ -83,6 +84,13 @@ class TestSeek(Test):
         t.write('play 1\n')
         self.expect('You are examining a game.', t)
         t.write('unex\n')
+
+        t.write('unseek\n')
+        self.expect('You have no active seeks.', t)
+        t.write('unseek 1\n')
+        self.expect('You have no seek 1.', t)
+        t.write('unseek foo\n')
+        self.expect('Usage:', t)
 
         self.close(t)
 
@@ -178,10 +186,12 @@ class TestSeek(Test):
 
         self.close(t)
 
+class TestPlay(Test):
     @with_player('TestPlayer', 'testpass')
     def test_play(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
+        t2.write('set style 12\n')
 
         t2.write('seek 3 0 white\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t2)
@@ -194,10 +204,52 @@ class TestSeek(Test):
         self.expect('Creating: TestPlayer (----) admin (----) rated blitz 3 0', t)
         self.expect('Creating: TestPlayer (----) admin (----) rated blitz 3 0', t2)
 
+        t2.write('d4\n')
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- ---P---- -------- PPP-PPPP RNBQKBNR B -1 1 1 1 1 0 1 TestPlayer admin -1 3 0 39 39 180 180 1 P/d2-d4 (0:00) d4 0 0 0\r\n', t2)
+
         t.write('abo\n')
         self.expect('aborted on move 1', t)
 
         self.close(t2)
         self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_play_name(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t2.write('set style 12\n')
+
+        t2.write('play admin\n')
+        self.expect("admin isn't seeking any games.", t2)
+
+        t.write('seek 1+0 zh black\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n1 = int(m.group(1))
+
+        t.write('seek 2+12\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n2 = int(m.group(1))
+
+        t2.write('play admin\n')
+        self.expect('admin is seeking several games.', t2)
+
+        t.write('unseek %d\n' % n2)
+        self.expect('Your seek %d has been removed.' % n2, t)
+
+        t2.write('play admin\n')
+        self.expect('Creating: TestPlayer (----) admin (----) rated lightning crazyhouse 1 0', t)
+        self.expect('Creating: TestPlayer (----) admin (----) rated lightning crazyhouse 1 0', t2)
+
+        t.write('abo\n')
+        self.expect('aborted on move 1', t)
+
+        self.close(t2)
+        self.close(t)
+
+#  7 1500 SomePlayerA         5   2 rated   blitz      [white]  1300-9999 m
+class TestSought(Test):
+    def test_sought(self):
+        pass
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

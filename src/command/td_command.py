@@ -21,6 +21,8 @@ from command import *
 
 import match
 
+from command_parser import BadCommandError
+
 @ics_command('rmatch', 'wwt')
 class Rmatch(Command):
     def run(self, args, conn):

@@ -19,6 +19,7 @@
 
 from command import *
 from .match_command import MatchMixin
+from command_parser import BadCommandError
 
 import seek
 import match
@@ -98,21 +99,48 @@ class Play(Command, MatchMixin):
                 conn.write(_('You are playing a game.\n'))
             return
 
+        s = None
         if type(args[0]) == str:
             u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
             if u:
-                conn.write('TODO: play name\n')
+                if not u.session.seeks:
+                    conn.write(_("%s isn't seeking any games.\n") % u.name)
+                elif len(u.session.seeks) > 1:
+                    conn.write(_("%s is seeking several games.\n") % u.name)
+                else:
+                    s = u.session.seeks[0]
         else:
-            if args[0] not in seek.seeks:
+            try:
+                s = seek.seeks[args[0]]
+            except KeyError:
                 # no such seek
                 conn.write(_('That seek is not available.\n'))
-                return
-            s = seek.seeks[args[0]]
+
+        if s:
             # check censor and noplay
             if not self._check_opp(conn, s.a):
-                return
+                s = None
+            elif not s.met_by(conn.user):
+                s = None
+
+        if s:
             # TODO: manual seek
             s.a.write_('%s accepts your seek.' % (conn.user.name,))
             s.accept(conn.user)
+
+#  7 1500 SomePlayerA         5   2 rated   blitz      [white]  1300-9999 m
+@ics_command('sought', 'o')
+class Sought(Command):
+    def run(self, args, conn):
+        if args[0] is not None:
+            if args[0] == 'all':
+                slist = seek.seeks.values()
+            else:
+                raise BadCommandError
+        else:
+            slist = [s for s in seek.seeks.values if s.met_by(conn.user)]
+
+        for s in slist:
+            conn.write('%s\n' % s)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
