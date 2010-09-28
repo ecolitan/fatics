@@ -51,12 +51,12 @@ class TestSeek(Test):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as('GuestEFGH', '')
 
-        t.write('seek 15+5 bronstein zh\n')
+        t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
         self.expect('(1 player saw the seek.)', t)
-        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard crazyhouse bronstein ("play ', t2)
+        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard crazyhouse bronstein [white] ("play ', t2)
 
-        t2.write('seek 15 5 bronstein crazyhouse\n')
+        t2.write('seek 15 5 bronstein crazyhouse black\n')
         self.expect('Your seek matches one posted by GuestABCD.', t2)
         self.expect('Your seek matches one posted by GuestEFGH.', t)
 
@@ -186,6 +186,32 @@ class TestSeek(Test):
 
         self.close(t)
 
+    def test_manual(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t.write('see 90+5 white fischer m\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n1 = int(m.group(1))
+
+        self.expect('GuestABCD(U) (++++) seeking 90 5 unrated slow [white] m ("play %d" to respond)' % n1, t2)
+        t2.write('play %d\n' % n1)
+        self.expect('Issuing match request since the seek was set to manual.', t2)
+
+        self.expect('Challenge: GuestEFGH (++++) [black] GuestABCD (++++) unrated slow 90 5', t)
+
+        t2.write('play %d\n' % n1)
+        self.expect('Issuing match request since the seek was set to manual.', t2)
+        self.expect('You are already offering an identical match to GuestABCD.', t2)
+
+        t.write('a\n')
+        self.expect('Creating:', t)
+        self.expect('Creating:', t2)
+        t.write('abo\n')
+
+        self.close(t)
+        self.close(t2)
+
 class TestPlay(Test):
     @with_player('TestPlayer', 'testpass')
     def test_play(self):
@@ -248,8 +274,25 @@ class TestPlay(Test):
 
 #  7 1500 SomePlayerA         5   2 rated   blitz      [white]  1300-9999 m
 class TestSought(Test):
-    def test_sought(self):
-        pass
+    def test_sought_all(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+
+        t.write('seek 1+0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n1 = int(m.group(1))
+
+        t2.write('seek 2+12 fr bronstein black\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t2)
+        n2 = int(m.group(1))
+
+        t.write('sought all\n')
+        self.expect('%3d ---- admin(*)            1   0 rated   lightning' % n1,
+            t)
+        self.expect('%3d ++++ GuestABCD(U)        2  12 unrated blitz chess960 bronstein [black]' % n2, t)
+
+        self.close(t)
+        self.close(t2)
 
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

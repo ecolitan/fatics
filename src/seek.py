@@ -71,7 +71,6 @@ class Seek(MatchStringParser):
         """ Create a new seek.  Raises a MatchError if given an invalid
         match string. """
         self.a = user
-        self.manual = None
         self.expired = False
 
         # may raise MatchError
@@ -84,11 +83,13 @@ class Seek(MatchStringParser):
         assert(self.side in [None, WHITE, BLACK])
 
         self.tags = {
+            'rated': self.rated,
+            'speed_name': self.speed_name,
+            'variant_name': self.variant_name,
+            'clock_name': self.clock_name,
             'time': self.time,
             'inc': self.inc,
-            'rated': self.rated,
-            'variant_name': self.variant_name,
-            'clock_name': self.clock_name
+            'idn': self.idn,
         }
 
         # defaults
@@ -96,6 +97,10 @@ class Seek(MatchStringParser):
             self.manual = False
         if self.clock_name is None:
             self.clock_name = 'fischer'
+        if self.formula is None:
+            self.formula = False
+        if self.manual is None:
+            self.manual = False
         assert(self.manual in [True, False])
 
         self.speed_variant = speed_variant.from_names(self.speed_name,
@@ -164,7 +169,7 @@ class Seek(MatchStringParser):
 
         # build the seek string
         name = self.a.get_display_name()
-        rated_str = 'rated' if self.tags['rated'] else 'unrated'
+        rated_str = 'rated  ' if self.tags['rated'] else 'unrated'
         speed_name = self.speed_variant.speed.name
         variant_str = '' if self.variant_name == 'chess' else (
             ' %s' % self.variant_name)
@@ -174,12 +179,21 @@ class Seek(MatchStringParser):
             side_str = ''
         else:
             side_str = ' [white]' if self.side == WHITE else ' [black]'
+        if self.manual or self.formula:
+            if self.manual and self.formula:
+                mf_str = ' mf'
+            elif self.manual:
+                mf_str = ' m'
+            else:
+                mf_str = ' f'
+        else:
+            mf_str = ''
 
         # not currently translated, for efficiency
-        seek_str = '%s (%s) seeking %d %d %s %s%s%s%s ("play %d" to respond)\n' % (
+        seek_str = '%s (%s) seeking %d %d %s %s%s%s%s%s ("play %d" to respond)\n' % (
                 name, self.rating, self.tags['time'], self.tags['inc'],
                 rated_str, speed_name, variant_str, clock_str,
-                side_str, self.num)
+                side_str, mf_str, self.num)
 
         count = 0
         for u in online.online:

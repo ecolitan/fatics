@@ -39,7 +39,9 @@ shortcuts = {
     'fr': 'chess960',
     'cra': 'crazyhouse',
     'zh': 'crazyhouse',
-    'f': 'formula' # seeks only
+    # seeks only
+    'm': 'manual',
+    'f': 'formula',
 }
 
 class MatchError(Exception):
@@ -83,6 +85,16 @@ class MatchStringParser(object):
         assert(val >= 0)
         self.inc = val
 
+    def _set_manual(self, val):
+        if self.manual is not None:
+            raise command_parser.BadCommandError()
+        self.manual = val
+
+    def _set_formula(self, val):
+        if self.formula is not None:
+            raise command_parser.BadCommandError()
+        self.formula = val
+
     _wild_re = re.compile(r'w(\d+)')
     _idn_re = re.compile(r'idn=(\d+)')
     _plus_re = re.compile(r'(\d+)\+(\d+)')
@@ -100,6 +112,9 @@ class MatchStringParser(object):
         self.rated = None
         self.side = None # the side requested, if any
         self.idn = None
+        # seeks only
+        self.manual = None
+        self.formula = None
 
         if args is None:
             words = []
@@ -126,6 +141,15 @@ class MatchStringParser(object):
                 self._set_side(WHITE)
             elif w == 'black':
                 self._set_side(BLACK)
+
+            elif w == 'manual':
+                self._set_manual(True)
+            elif w == 'auto':
+                self._set_manual(False)
+            elif w == 'formula':
+                self._set_formula(True)
+            # currently there no way to explicitly specify the default of
+            # no formula
 
             elif w in speed_variant.variant_names:
                 self._set_variant_name(w)
@@ -252,7 +276,7 @@ class MatchStringParser(object):
 
 class Challenge(Offer, MatchStringParser):
     """ represents a match offer from one player to another """
-    def __init__(self, a, b, args):
+    def __init__(self, a, b, args=None, tags=None):
         """ Initiate a new offer.  "a" is the player issuing the offer;
         "b" receives the request """
         Offer.__init__(self, "match offer")
@@ -260,11 +284,28 @@ class Challenge(Offer, MatchStringParser):
         self.a = a
         self.b = b
 
-        try:
-            self._parse_args(args, a, b)
-        except MatchError as e:
-            a.write(e[0])
-            return
+        if tags:
+            # copy match parameters
+            self.side = tags['side']
+            self.rated = tags['rated']
+            self.speed_name = tags['speed_name']
+            self.variant_name = tags['variant_name']
+            self.clock_name = tags['clock_name']
+            self.time = tags['time']
+            self.inc = tags['inc']
+            self.idn = tags['idn']
+            self.speed_variant = speed_variant.from_names(self.speed_name,
+                self.variant_name)
+            self.a_rating = a.get_rating(self.speed_variant)
+            self.b_rating = b.get_rating(self.speed_variant)
+            # TODO: overtime move number, bonus
+        else:
+            # get match parameters from a string or use defaults
+            try:
+                self._parse_args(args, a, b)
+            except MatchError as e:
+                a.write(e[0])
+                return
 
         # look for a matching offer from player b
         o = next((o for o in a.session.offers_received if
@@ -354,6 +395,8 @@ class Challenge(Offer, MatchStringParser):
         self.speed_variant
 
         # match-specific parsing
+        if self.formula is not None or self.manual is not None:
+            raise MatchError(_('The "formula" and "manual" keywords may not be used with match requests.\n'))
         if self.rated is None:
             if a.is_guest or b.is_guest or self.clock_name in [
                     'hourglass', 'untimed']:
@@ -375,7 +418,10 @@ class Challenge(Offer, MatchStringParser):
                 self.b == other.b and
                 self.time == other.time and
                 self.inc == other.inc and
-                self.side == other.side):
+                self.side == other.side and
+                self.variant_name == other.variant_name and
+                self.clock_name == other.clock_name and
+                self.idn == other.idn):
             return True
         return False
 

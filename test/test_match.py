@@ -220,6 +220,19 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
 
+    def test_update_offer_clock(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+
+        t.write('match admin 2+12\n')
+        self.expect('Challenge:', t2)
+        t.write('match admin 2 12 bronstein\n')
+        self.expect('Updating the offer already made to admin', t)
+        self.expect('GuestABCD updates the offer', t2)
+
+        self.close(t)
+        self.close(t2)
+
     def test_offer_identical(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()

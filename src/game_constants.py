@@ -29,4 +29,12 @@
 [A2, B2, C2, D2, E2, F2, G2, H2] = range(0x10, 0x18)
 [A1, B1, C1, D1, E1, F1, G1, H1] = range(0x00, 0x08)
 
+def opp(side):
+    assert(side in [WHITE, BLACK])
+    return BLACK if side == WHITE else WHITE
+
+def side_to_str(side):
+    assert(side in [WHITE, BLACK])
+    return "white" if side == WHITE else "black"
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

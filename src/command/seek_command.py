@@ -17,12 +17,16 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
-from .match_command import MatchMixin
-from command_parser import BadCommandError
 
 import seek
 import match
+import game
+import user
+
+from .match_command import MatchMixin
+from command_parser import BadCommandError
+from game_constants import *
+from command import Command, ics_command
 
 @ics_command('seek', 't')
 class Seek(Command):
@@ -53,6 +57,7 @@ class Seek(Command):
         (auto_matches, manual_matches) = seek.find_matching(s)
         if auto_matches:
             ad = auto_matches[0]
+            assert(not ad.manual)
             conn.write(_('Your seek matches one posted by %s.\n') %
                 ad.a.name)
             ad.a.write_('Your seek matches one posted by %s.\n',
@@ -60,11 +65,19 @@ class Seek(Command):
             ad.b = conn.user
             g = game.PlayedGame(ad)
             return
+
         if manual_matches:
-            conn.write(_('Issuing match request because seek was.\n' %
-                ad.a.name))
+            conn.write(_('Issuing match request since the seek was set to manual.\n'))
             for ad in manual_matches:
-                pass
+                tags = ad.tags.copy()
+                # the challenge should use the same parameters as the
+                # seek, except that the color requested (if any) is reversed
+                if ad.side is not None:
+                    tags['side'] = opp(ad.side)
+                else:
+                    tags['side'] = None
+                match.Challenge(conn.user, ad.a, tags=tags)
+            # go on to post the seek, too
 
         count = s.post()
         conn.write(_('Your seek has been posted with index %d.\n') % s.num)
@@ -99,7 +112,7 @@ class Play(Command, MatchMixin):
                 conn.write(_('You are playing a game.\n'))
             return
 
-        s = None
+        ad = None
         if type(args[0]) == str:
             u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
             if u:
@@ -108,25 +121,33 @@ class Play(Command, MatchMixin):
                 elif len(u.session.seeks) > 1:
                     conn.write(_("%s is seeking several games.\n") % u.name)
                 else:
-                    s = u.session.seeks[0]
+                    ad = u.session.seeks[0]
         else:
             try:
-                s = seek.seeks[args[0]]
+                ad = seek.seeks[args[0]]
             except KeyError:
                 # no such seek
                 conn.write(_('That seek is not available.\n'))
 
-        if s:
+        if ad:
             # check censor and noplay
-            if not self._check_opp(conn, s.a):
-                s = None
-            elif not s.met_by(conn.user):
-                s = None
+            if not self._check_opp(conn, ad.a):
+                ad = None
+            elif not ad.met_by(conn.user):
+                ad = None
 
-        if s:
-            # TODO: manual seek
-            s.a.write_('%s accepts your seek.' % (conn.user.name,))
-            s.accept(conn.user)
+        if ad:
+            if ad.manual:
+                conn.write(_('Issuing match request since the seek was set to manual.\n'))
+                tags = ad.tags.copy()
+                if ad.side is not None:
+                    tags['side'] = opp(ad.side)
+                else:
+                    tags['side'] = None
+                match.Challenge(conn.user, ad.a, tags=tags)
+            else:
+                ad.a.write_('%s accepts your seek.' % (conn.user.name,))
+                ad.accept(conn.user)
 
 #  7 1500 SomePlayerA         5   2 rated   blitz      [white]  1300-9999 m
 @ics_command('sought', 'o')

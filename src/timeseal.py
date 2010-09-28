@@ -55,6 +55,7 @@ class Timeseal(object):
 
     def compress_zipseal(self, line):
         try:
+            line = line[0:1023] # XXX
             self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
             count = int(self.zipseal_encoder.stdout.read(4), 16)
             ret = self.zipseal_encoder.stdout.read(count)
