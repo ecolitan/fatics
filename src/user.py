@@ -194,6 +194,13 @@ class BaseUser(object):
     def remove_noplay(self, user):
         self.noplay.remove(user.name)
 
+    def censor_or_noplay(self, b):
+        """ Check whether either player censors or noplays the other, without
+        printing any messages to the users. """
+        a = self
+        return (a.name in b.censor or a.name in b.noplay
+            or b.name in a.censor or b.name in a.noplay)
+
     def send_board(self, game):
         self.write(game.variant.to_style12(self))
 

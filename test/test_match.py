@@ -273,6 +273,38 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
 
+    def test_censor(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t.write('+cen guestefgh\n')
+        self.expect('GuestEFGH added to your censor list.', t)
+
+        t.write('match guestefgh 2+12\n')
+        self.expect('You are censoring GuestEFGH.', t)
+
+        t2.write('match guestabcd 2+12\n')
+        self.expect('GuestABCD is censoring you.', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_noplay(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t.write('+nop guestefgh\n')
+        self.expect('GuestEFGH added to your noplay list.', t)
+
+        t.write('match guestefgh 2+12\n')
+        self.expect('You have GuestEFGH on your noplay list.', t)
+
+        t2.write('match guestabcd 2+12\n')
+        self.expect("You are on GuestABCD's noplay list.", t2)
+
+        self.close(t)
+        self.close(t2)
+
 class TestRmatch(Test):
     @with_player('testplayer', 'testplayer')
     @with_player('tdplayer', 'tdplayer', ['td'])

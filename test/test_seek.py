@@ -69,6 +69,24 @@ class TestSeek(Test):
         self.close(t)
         self.close(t2)
 
+    def test_matching_seek_formula(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t.write('seek 15+5 bronstein zh white\n')
+        self.expect('Your seek has been posted with index ', t)
+        self.expect('(1 player saw the seek.)', t)
+        self.expect('GuestABCD (++++) seeking 15 5 unrated standard crazyhouse bronstein [white] ("play ', t2)
+
+        t2.write('set formula rating > 0\n')
+        t2.write('seek 15 5 bronstein crazyhouse black f\n')
+        self.expect('(0 players saw the seek.)', t2)
+
+        self.expect_not('Creating:', t)
+
+        self.close(t)
+        self.close(t2)
+
     def test_bad_seek(self):
         t = self.connect_as_guest()
         t.write('seek 3+0 r\n')
@@ -105,14 +123,22 @@ class TestSeek(Test):
 
         t2.write('seek 3 0\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t2)
-        n = int(m.group(1))
+        n1 = int(m.group(1))
         self.expect('(0 players saw the seek.)', t2)
 
-        t.write('play %d\n' % n)
+        t.write('play %d\n' % n1)
         self.expect('TestPlayer is censoring you.', t)
 
         t.write('sou\n')
         self.expect('0 ads displayed.', t)
+
+        t.write('seek 3 0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n2 = int(m.group(1))
+        self.expect('(0 players saw the seek.)', t)
+
+        t2.write('play %d\n' % n2)
+        self.expect('You are censoring admin.', t2)
 
         t2.write('-cen admin\n')
         self.expect('admin removed from your censor list.', t2)
@@ -130,14 +156,19 @@ class TestSeek(Test):
 
         t2.write('seek 3 0\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t2)
-        n = int(m.group(1))
+        n1 = int(m.group(1))
         self.expect('(0 players saw the seek.)', t2)
 
-        t.write('play %d\n' % n)
+        t.write('play %d\n' % n1)
         self.expect("You are on TestPlayer's noplay list.", t)
 
         t.write('seek 3 0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n2 = int(m.group(1))
         self.expect('(0 players saw the seek.)', t)
+
+        t2.write('play %d\n' % n2)
+        self.expect('You have admin on your noplay list.', t2)
 
         t2.write('-noplay admin\n')
         self.expect('admin removed from your noplay list.', t2)

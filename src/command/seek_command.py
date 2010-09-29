@@ -140,11 +140,13 @@ class Play(Command, MatchMixin):
             # check censor and noplay
             if not self._check_opp(conn, ad.a):
                 ad = None
-            # check formula (XXX does a redundant check of censor and noplay)
-            elif not ad.met_by(conn.user):
+            # check formula
+            elif not ad.check_formula(conn.user):
                 conn.write(_('Match request does not fit formula for %s:') %
                     ad.a.name)
                 ad = None
+            # we don't check this user's formula, since using the "play"
+            # command implicitly accepted the match terms
 
         if ad:
             if ad.manual:
@@ -170,7 +172,8 @@ class Sought(Command):
                 raise BadCommandError
         else:
             slist = [s for s in seek.seeks.values() if not s.expired and
-                s.met_by(conn.user) and s.meets_formula_for(conn.user)]
+                not conn.user.censor_or_noplay(s.a) and
+                s.check_formula(conn.user) and s.meets_formula_for(conn.user)]
 
         slist.sort(key=lambda s: s.num)
         count = 0

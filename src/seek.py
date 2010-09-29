@@ -60,8 +60,8 @@ def find_matching(seek):
     manual_matches = []
     for s in seeks.values():
         if seek.matches(s):
-            assert(s.met_by(seek.a) == seek.met_by(s.a))
-            if s.met_by(seek.a):
+            if (not seek.a.censor_or_noplay(s.a) and
+                    s.check_formula(seek.a) and seek.check_formula(s.a)):
                 if s.manual:
                     manual_matches.append(s)
                 else:
@@ -207,7 +207,9 @@ class Seek(MatchStringParser):
                     continue
                 if not self.meets_formula_for(u):
                     continue
-                if not self.met_by(u):
+                if not self.check_formula(u):
+                    continue
+                if u.censor_or_noplay(self.a):
                     continue
                 # TODO: check formula for both players
                 count += 1
@@ -221,16 +223,9 @@ class Seek(MatchStringParser):
 
         return count
 
-    def met_by(self, b):
-        """ Check whether the user B meets the requirements for accepting
-        this seek.  Checks the formula for the seeker if appropriate,
-        and whether either player censors or noplays the other. """
-        assert(not self.expired)
-        # does either player censor or noplay the other?
-        if (self.a.name in b.censor or self.a.name in b.noplay
-                or b.name in self.a.censor or b.name in self.a.noplay):
-            return False
-
+    def check_formula(self, b):
+        """ Check whether the user B meets the formula for the advertiser
+        of this seek, if the formula flag is set. """
         assert(self.b is None)
         # swap a and b
         self.b = self.a
@@ -256,7 +251,8 @@ class Seek(MatchStringParser):
             self.b = None
 
     def accept(self, b):
-        assert(self.met_by(b))
+        assert(self.check_formula(b))
+        assert(not self.a.censor_or_noplay(b))
         assert(not self.expired)
         self.b = b
         # will remove this seek

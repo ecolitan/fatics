@@ -284,6 +284,7 @@ class VarList(object):
                 self.transient_vars[var.name] = var.default
 
     def init_ivars(self):
+        # "help iv_list" on original FICS has this list
         BoolVar("compressmove", False).add_as_ivar(0)
         BoolVar("audiochat", False).add_as_ivar(1)
         BoolVar("seekremove", False).add_as_ivar(2)
@@ -292,7 +293,7 @@ class VarList(object):
         BoolVar("startpos", False).add_as_ivar(5)
         BoolVar("block", False).add_as_ivar(6)
         BoolVar("gameinfo", False).add_as_ivar(7)
-        BoolVar("xdr", False).add_as_ivar(8)
+        BoolVar("xdr", False).add_as_ivar(8) # ignored
         BoolVar("pendinfo", False).add_as_ivar(9)
         BoolVar("graph", False).add_as_ivar(10)
         BoolVar("seekinfo", False).add_as_ivar(11)
@@ -317,7 +318,7 @@ class VarList(object):
         BoolVar("fr", False).add_as_ivar(30)
         BoolVar("nowrap", False).add_as_ivar(31)
         BoolVar("allresults", False).add_as_ivar(32)
-        BoolVar("obsping", False).add_as_ivar(33)
+        BoolVar("obsping", False).add_as_ivar(33) # ignored
         BoolVar("singleboard", False).add_as_ivar(34)
 
         self.default_ivars = {}

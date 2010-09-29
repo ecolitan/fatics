@@ -36,6 +36,12 @@ class MatchMixin(object):
         if conn.user.name in opp.noplay:
             conn.write(_("You are on %s's noplay list.\n") % opp.name)
             return False
+        if opp.name in conn.user.censor:
+            conn.write(_("You are censoring %s.\n") % opp.name)
+            return False
+        if opp.name in conn.user.noplay:
+            conn.write(_("You have %s on your noplay list.\n") % opp.name)
+            return False
         return True
 
     def _check_open(self, conn, opp):
