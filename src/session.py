@@ -95,9 +95,10 @@ class Session(object):
 
         # remove seeks
         if self.seeks:
-            for s in self.seeks:
+            for s in self.seeks[:]:
                 s.remove()
             self.conn.write(_('Your seeks have been removed.\n'))
+        assert(not self.seeks)
 
     def set_ivars_from_str(self, s):
         """Parse a %b string sent by Jin to set ivars before logging in."""

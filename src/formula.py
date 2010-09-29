@@ -212,20 +212,20 @@ class IncSymbol(Symbol):
 class RatingSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.a.get_rating(chal.speed_variant) if chal else None
+        return int(chal.a.get_rating(chal.speed_variant)) if chal else None
 
 @Token(['myrating'])
 class MyratingSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return chal.b.get_rating(chal.speed_variant) if chal else None
+        return int(chal.b.get_rating(chal.speed_variant)) if chal else None
 
 @Token(['ratingdiff'])
 class RatingdiffSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return (chal.a.get_rating(chal.speed_variant) -
-            chal.b.get_rating(chal.speed_variant)) if chal else None
+        return (int(chal.a.get_rating(chal.speed_variant)) -
+            int(chal.b.get_rating(chal.speed_variant))) if chal else None
 
 @Token(['white'])
 class WhiteSymbol(Symbol):
@@ -388,10 +388,12 @@ def check_formula(chal_, s, num=0):
     token = next()
     return expression()
 
-#print check_formula(None, '7 * (3 * (3 + 2) /  2) - 42 * 2')
-#print check_formula(None, '(2 + 5 * 5) - 1')
-#print check_formula(None, '(2 + 5 * 5) - 1')
-#print check_formula(None, '!lightning && !blitz')
-#print check_formula(None, '33-')
+if __name__ == '__main__':
+    #print check_formula(None, '7 * (3 * (3 + 2) /  2) - 42 * 2')
+    #print check_formula(None, '(2 + 5 * 5) - 1')
+    #print check_formula(None, '(2 + 5 * 5) - 1')
+    #print check_formula(None, '!lightning && !blitz')
+    #print check_formula(None, '33-')
+    print check_formula(None, '1000 <= 1500 and 1500 <= 2000')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

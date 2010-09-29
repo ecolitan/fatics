@@ -18,8 +18,9 @@
 
 from test import *
 
-# GuestWXYZ (++++) seeking 5 0 unrated blitz [white] mf ("play 37" to respond)
+import time
 
+# GuestWXYZ (++++) seeking 5 0 unrated blitz [white] mf ("play 37" to respond)
 
 class TestSeek(Test):
     def test_seek_guest(self):
@@ -29,7 +30,7 @@ class TestSeek(Test):
         t.write('seek 3 0\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t)
         n = int(m.group(1))
-        self.expect('GuestABCD(U) (++++) seeking 3 0 unrated blitz ("play %d" to respond)' % n, t2)
+        self.expect('GuestABCD (++++) seeking 3 0 unrated blitz ("play %d" to respond)' % n, t2)
         self.expect('(1 player saw the seek.)', t)
 
         t.write('seek 3 0\n')
@@ -38,7 +39,7 @@ class TestSeek(Test):
         t.write('seek 15+5\n')
         self.expect('Your seek has been posted with index %d.' %
             (n  + 1), t)
-        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard ("play %d" to respond)' % (n + 1), t2)
+        self.expect('GuestABCD (++++) seeking 15 5 unrated standard ("play %d" to respond)' % (n + 1), t2)
         self.expect('(1 player saw the seek.)', t)
 
         t.write('unseek\n')
@@ -54,7 +55,7 @@ class TestSeek(Test):
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
         self.expect('(1 player saw the seek.)', t)
-        self.expect('GuestABCD(U) (++++) seeking 15 5 unrated standard crazyhouse bronstein [white] ("play ', t2)
+        self.expect('GuestABCD (++++) seeking 15 5 unrated standard crazyhouse bronstein [white] ("play ', t2)
 
         t2.write('seek 15 5 bronstein crazyhouse black\n')
         self.expect('Your seek matches one posted by GuestABCD.', t2)
@@ -132,6 +133,9 @@ class TestSeek(Test):
         t.write('play %d\n' % n)
         self.expect("You are on TestPlayer's noplay list.", t)
 
+        t.write('seek 3 0\n')
+        self.expect('(0 players saw the seek.)', t)
+
         t2.write('-noplay admin\n')
         self.expect('admin removed from your noplay list.', t2)
 
@@ -142,11 +146,34 @@ class TestSeek(Test):
         t = self.connect_as_guest()
         t.write('seek 3 0\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n = int(m.group(1))
         t.write('ex\n')
         self.expect('Starting a game', t)
         t.write('unseek\n')
         self.expect('You have no active seeks.', t)
+
+        t2 = self.connect_as_guest()
+        t2.write('play %d\n' % n)
+        self.expect('That seek is not available.', t2)
+        self.close(t2)
+
         self.close(t)
+
+    def test_logout_removes_seek(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_guest()
+        t.write('seek 3 0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n = int(m.group(1))
+        self.close(t)
+
+        t2.write('play %d\n' % n)
+        self.expect('That seek is not available.', t2)
+
+        t2.write('seek 3 0\n')
+        self.expect_re('Your seek has been posted with index (\d+).', t2)
+
+        self.close(t2)
 
     def test_showownseek(self):
         """ Test the showownseek var and ivar. """
@@ -194,7 +221,7 @@ class TestSeek(Test):
         m = self.expect_re('Your seek has been posted with index (\d+).', t)
         n1 = int(m.group(1))
 
-        self.expect('GuestABCD(U) (++++) seeking 90 5 unrated slow [white] m ("play %d" to respond)' % n1, t2)
+        self.expect('GuestABCD (++++) seeking 90 5 unrated slow [white] m ("play %d" to respond)' % n1, t2)
         t2.write('play %d\n' % n1)
         self.expect('Issuing match request since the seek was set to manual.', t2)
 
@@ -211,6 +238,93 @@ class TestSeek(Test):
 
         self.close(t)
         self.close(t2)
+
+    def test_seek_delay(self):
+        t = self.connect_as_guest()
+        t.write('seek\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n = int(m.group(1))
+        t.write('unseek %d\n' % n)
+        self.expect('Your seek %d has been removed.' % n, t)
+        time.sleep(0.25)
+
+        t.write('seek\n')
+        self.expect('Your seek has been posted with index %d.' % (n + 1), t)
+        self.close(t)
+
+    def test_seek_expire(self):
+        self._skip('slow test')
+        t = self.connect_as_guest()
+        t.write('seek\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n1 = int(m.group(1))
+        t.write('unseek %d\n' % n1)
+        self.expect('Your seek %d has been removed.' % n1, t)
+        time.sleep(91)
+
+        t.write('seek\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n2 = int(m.group(1))
+        self.assert_(n2 <= n1)
+        self.close(t)
+
+    @with_player('testplayer', 'testpass')
+    @with_player('testtwo', 'testpass')
+    def test_seeker_formula(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t3 = self.connect_as('testtwo', 'testpass')
+
+        t.write('asetrating testplayer blitz chess 1500 200 .005 100 75 35\n')
+        self.expect('Set blitz chess rating for testplayer.', t)
+        t.write('asetrating testtwo blitz chess 2001 200 .005 100 75 35\n')
+        self.expect('Set blitz chess rating for testtwo.', t)
+
+        t.write('set formula 1000 <= rating and rating <= 2000\n')
+        self.expect('formula set to ', t)
+        t.write('seek 3+0 f\n')
+        self.expect('(1 player saw the seek.)', t)
+        m = self.expect_re(r'admin \(----\) seeking 3 0 rated blitz f \("play (\d+)"', t2)
+        n = int(m.group(1))
+
+        t3.write('play %d\n' % n)
+        # Match request does not fit formula for GuestSFPP:
+        # GuestSFPP's formula: rating > 0
+        self.expect('Match request does not fit formula for admin:', t3)
+
+        t2.write('play %d\n' % n)
+        self.expect('Creating:', t)
+        self.expect('Creating:', t2)
+        t.write('abo\n')
+        self.expect('aborted on move 1', t2)
+
+        t.write('set formula\n')
+        self.expect('formula unset.', t)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+    def test_filter_formula(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest()
+
+        t2.write('set formula !blitz\n')
+        self.expect('formula set to "!blitz".', t2)
+
+        t.write('seek 1+0\n')
+        self.expect('(1 player saw the seek.)', t)
+        self.expect('GuestABCD (++++) seeking', t2)
+        t.write('seek 3+0\n')
+        self.expect('(0 players saw the seek.)', t)
+        self.expect_not('seeking', t2)
+
+        t.write('uns\n')
+        t2.write('uns\n')
+
+        self.close(t)
+        self.close(t2)
+
 
 class TestPlay(Test):
     @with_player('TestPlayer', 'testpass')
@@ -286,10 +400,18 @@ class TestSought(Test):
         m = self.expect_re('Your seek has been posted with index (\d+).', t2)
         n2 = int(m.group(1))
 
+        # a removed seek that should not be shown
+        t2.write('seek 5+12\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t2)
+        n3 = int(m.group(1))
+        t2.write('uns %d\n' % n3)
+        self.expect('Your seek %d has been removed.' % n3, t2)
+
         t.write('sought all\n')
         self.expect('%3d ---- admin(*)            1   0 rated   lightning' % n1,
             t)
         self.expect('%3d ++++ GuestABCD(U)        2  12 unrated blitz chess960 bronstein [black]' % n2, t)
+        self.expect_not(' 5 12', t)
 
         self.close(t)
         self.close(t2)

@@ -23,6 +23,7 @@ import re
 import speed_variant
 import online
 import game
+import formula
 
 from match import MatchStringParser, MatchError
 from game_constants import *
@@ -59,10 +60,12 @@ def find_matching(seek):
     manual_matches = []
     for s in seeks.values():
         if seek.matches(s):
-            if s.manual:
-                manual_matches.append(s)
-            else:
-                auto_matches.append(s)
+            assert(s.met_by(seek.a) == seek.met_by(s.a))
+            if s.met_by(seek.a):
+                if s.manual:
+                    manual_matches.append(s)
+                else:
+                    auto_matches.append(s)
     auto_matches.sort(key=lambda s: s.when_posted)
     return (auto_matches, manual_matches)
 
@@ -71,6 +74,7 @@ class Seek(MatchStringParser):
         """ Create a new seek.  Raises a MatchError if given an invalid
         match string. """
         self.a = user
+        self.b = None
         self.expired = False
 
         # may raise MatchError
@@ -106,8 +110,6 @@ class Seek(MatchStringParser):
         self.speed_variant = speed_variant.from_names(self.speed_name,
             self.variant_name)
 
-        name = self.a.get_display_name()
-        speed_name = self.speed_variant.speed.name
         variant_str = '' if self.variant_name == 'chess' else (
             ' %s' % self.variant_name)
         clock_str = '' if self.clock_name == 'fischer' else (
@@ -140,6 +142,7 @@ class Seek(MatchStringParser):
 
     def matches(self, other):
         """ Determine whether this seek matches another. """
+        assert(not self.expired)
         if other.expired:
             return False
 
@@ -168,8 +171,8 @@ class Seek(MatchStringParser):
         self.a.session.seeks.append(self)
 
         # build the seek string
-        name = self.a.get_display_name()
-        rated_str = 'rated  ' if self.tags['rated'] else 'unrated'
+        dname = self.a.get_display_name()
+        rated_str = 'rated' if self.tags['rated'] else 'unrated'
         speed_name = self.speed_variant.speed.name
         variant_str = '' if self.variant_name == 'chess' else (
             ' %s' % self.variant_name)
@@ -191,7 +194,7 @@ class Seek(MatchStringParser):
 
         # not currently translated, for efficiency
         seek_str = '%s (%s) seeking %d %d %s %s%s%s%s%s ("play %d" to respond)\n' % (
-                name, self.rating, self.tags['time'], self.tags['inc'],
+                self.a.name, self.rating, self.tags['time'], self.tags['inc'],
                 rated_str, speed_name, variant_str, clock_str,
                 side_str, mf_str, self.num)
 
@@ -202,18 +205,17 @@ class Seek(MatchStringParser):
                 if u == self.a and not (u.vars['showownseek']
                         and u.session.ivars['showownseek']):
                     continue
-                # if either player censors or noplays the other, don't
-                # notify of the seek
-                if (self.a.name in u.censor or self.a.name in u.noplay
-                        or u.name in self.a.censor or u.name in self.a.noplay):
+                if not self.meets_formula_for(u):
+                    continue
+                if not self.met_by(u):
                     continue
                 # TODO: check formula for both players
                 count += 1
                 u.write(seek_str)
 
         # set the string for use in the "sought" display
-        self._str = '%3d %4s %-17s %3d %3d %s %s%s%s%s\n' % (
-            self.num, self.rating, name, self.time, self.inc,
+        self._str = '%3d %4s %-17s %3d %3d %-7s %s%s%s%s\n' % (
+            self.num, self.rating, dname, self.time, self.inc,
             rated_str, speed_name, variant_str, clock_str,
             side_str)
 
@@ -221,8 +223,37 @@ class Seek(MatchStringParser):
 
     def met_by(self, b):
         """ Check whether the user B meets the requirements for accepting
-        this seek. """
-        return True
+        this seek.  Checks the formula for the seeker if appropriate,
+        and whether either player censors or noplays the other. """
+        assert(not self.expired)
+        # does either player censor or noplay the other?
+        if (self.a.name in b.censor or self.a.name in b.noplay
+                or b.name in self.a.censor or b.name in self.a.noplay):
+            return False
+
+        assert(self.b is None)
+        # swap a and b
+        self.b = self.a
+        self.a = b
+        try:
+            if self.formula:
+                f = self.a.vars['formula']
+                if not formula.check_formula(self, self.b.vars['formula']):
+                    return False
+            return True
+        finally:
+            self.a = self.b
+            self.b = None
+
+    def meets_formula_for(self, b):
+        """ Check whether this seek meets the formula for the given user,
+        as if it were a match challenge. """
+        assert(self.b is None)
+        self.b = b
+        try:
+            return formula.check_formula(self, b.vars['formula'])
+        finally:
+            self.b = None
 
     def accept(self, b):
         assert(self.met_by(b))

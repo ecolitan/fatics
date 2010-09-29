@@ -58,6 +58,7 @@ class Seek(Command):
         if auto_matches:
             ad = auto_matches[0]
             assert(not ad.manual)
+            assert(not ad.expired)
             conn.write(_('Your seek matches one posted by %s.\n') %
                 ad.a.name)
             ad.a.write_('Your seek matches one posted by %s.\n',
@@ -122,18 +123,27 @@ class Play(Command, MatchMixin):
                     conn.write(_("%s is seeking several games.\n") % u.name)
                 else:
                     ad = u.session.seeks[0]
+                    assert(not ad.expired)
         else:
             try:
                 ad = seek.seeks[args[0]]
             except KeyError:
                 # no such seek
+                ad = None
+            else:
+                if ad.expired:
+                    ad = None
+            if not ad:
                 conn.write(_('That seek is not available.\n'))
 
         if ad:
             # check censor and noplay
             if not self._check_opp(conn, ad.a):
                 ad = None
+            # check formula (XXX does a redundant check of censor and noplay)
             elif not ad.met_by(conn.user):
+                conn.write(_('Match request does not fit formula for %s:') %
+                    ad.a.name)
                 ad = None
 
         if ad:
@@ -155,12 +165,14 @@ class Sought(Command):
     def run(self, args, conn):
         if args[0] is not None:
             if args[0] == 'all':
-                slist = seek.seeks.values()
+                slist = [s for s in seek.seeks.values() if not s.expired]
             else:
                 raise BadCommandError
         else:
-            slist = [s for s in seek.seeks.values if s.met_by(conn.user)]
+            slist = [s for s in seek.seeks.values() if not s.expired and
+                s.met_by(conn.user)]
 
+        slist.sort(key=lambda s: s.num)
         for s in slist:
             conn.write('%s\n' % s)
 
