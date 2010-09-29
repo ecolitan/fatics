@@ -111,6 +111,9 @@ class TestSeek(Test):
         t.write('play %d\n' % n)
         self.expect('TestPlayer is censoring you.', t)
 
+        t.write('sou\n')
+        self.expect('0 ads displayed.', t)
+
         t2.write('-cen admin\n')
         self.expect('admin removed from your censor list.', t2)
 
@@ -411,10 +414,36 @@ class TestSought(Test):
         self.expect('%3d ---- admin(*)            1   0 rated   lightning' % n1,
             t)
         self.expect('%3d ++++ GuestABCD(U)        2  12 unrated blitz chess960 bronstein [black]' % n2, t)
-        self.expect_not(' 5 12', t)
+        self.expect('2 ads displayed.', t)
 
         self.close(t)
         self.close(t2)
 
+    def test_sought(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+        t3 = self.connect_as_guest()
+
+        t.write('set formula time < 15\n')
+        self.expect('formula set to "time < 15".', t)
+
+        t2.write('see 3+0\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t2)
+        n1 = int(m.group(1))
+        t2.write('see 15+0\n')
+
+        # seek filtered out by seeker's formula
+        t3.write('set formula rating > 9999\n')
+        t3.write('seek 2+12 f\n')
+
+        t.write('sou\n')
+        self.expect('%3d ++++ GuestABCD(U)        3   0 unrated blitz' % n1, t)
+        self.expect('1 ad displayed.', t)
+
+        t.write('set formula\n')
+        self.expect('formula unset.', t)
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

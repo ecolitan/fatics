@@ -170,10 +170,14 @@ class Sought(Command):
                 raise BadCommandError
         else:
             slist = [s for s in seek.seeks.values() if not s.expired and
-                s.met_by(conn.user)]
+                s.met_by(conn.user) and s.meets_formula_for(conn.user)]
 
         slist.sort(key=lambda s: s.num)
+        count = 0
         for s in slist:
             conn.write('%s\n' % s)
+            count += 1
+        conn.write(ngettext('%d ad displayed.\n', '%d ads displayed.\n',
+            count) % count)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
