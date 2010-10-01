@@ -172,6 +172,14 @@ class TestGameinfo(Test):
         t2.write('a\n')
 
         self.expect('<g1> 1 p=0 t=chess r=0 u=1,0 it=120,12 i=120,12 pt=0 rt=0,0 ts=0,0 m=2 n=0', t)
+
+        # <g1> 482 p=0 t=blitz r=1 u=0,0 it=180,0 i=180,0 pt=0 rt=2009,2013 ts=1,1 m=2 n=0
+        t3 = self.connect_as_guest()
+        t3.write('iset gameinfo 1\n')
+        t3.write('o 1\n')
+        self.expect('<g1> 1 p=0 t=chess r=0 u=1,0 it=120,12 i=120,12 pt=0 rt=0,0 ts=0,0 m=2 n=0', t3)
+        self.close(t3)
+
         t.write('abort\n')
 
         self.close(t)

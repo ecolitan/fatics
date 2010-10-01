@@ -332,19 +332,19 @@ class PlayedGame(Game):
         self.white.write(create_str_2)
         self.black.write(create_str_2)
 
-        if self.white.session.ivars['gameinfo'] or \
-                self.black.session.ivars['gameinfo']:
-            # The order of fields FICS sends differs from the
-            # "help iv_gameinfo" documentation; the it= field gives
-            # the initial time increment for white, and the i= field
-            # does the same for black.  This seems wrong since "it" was
-            # supposed to stand for "initial time", but compatability
-            # with FICS is more important than being logical.
-            gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, 60 * self.white_time, self.inc, 60 * self.black_time, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
-            if self.white.session.ivars['gameinfo']:
-                self.white.write(gameinfo_str)
-            if self.black.session.ivars['gameinfo']:
-                self.black.write(gameinfo_str)
+        # The order of fields FICS sends differs from the
+        # "help iv_gameinfo" documentation; the it= field gives
+        # the initial time increment for white, and the i= field
+        # does the same for black.  This seems wrong since "it" was
+        # supposed to stand for "initial time", but compatability
+        # with FICS is more important than being logical.
+        # not sure about the m and n; maybe they are a version number?
+        # TODO: add info about clock style, variant/speed to gameinfo string
+        self.gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, 60 * self.white_time, self.inc, 60 * self.black_time, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
+        if self.white.session.ivars['gameinfo']:
+            self.white.write(self.gameinfo_str)
+        if self.black.session.ivars['gameinfo']:
+            self.black.write(self.gameinfo_str)
 
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
@@ -455,6 +455,13 @@ class PlayedGame(Game):
             self.result('Game drawn by stalemate', '1/2-1/2')
         elif self.variant.pos.is_draw_nomaterial:
             self.result('Game drawn because neither player has mating material', '1/2-1/2')
+
+    def observe(self, u):
+        """ For some reason it seems that FICS only sends gameinfo strings
+        for played games, not examined games. """
+        super(PlayedGame, self).observe(u)
+        if u.session.ivars['gameinfo']:
+            u.write(self.gameinfo_str)
 
     def result(self, msg, result_code):
         self.when_ended = datetime.datetime.utcnow()
