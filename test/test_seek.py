@@ -477,4 +477,41 @@ class TestSought(Test):
         self.close(t)
         self.close(t2)
 
+# <s> 47 w=GuestWWPQ ti=01 rt=0P t=2 i=12 r=u tp=blitz c=W rr=0-9999 a=f f=f
+class TestSeekinfo(Test):
+    def test_seekinfo(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as('GuestABCD', '')
+        t3 = self.connect_as_admin()
+
+        t.write('iset seekinfo 1\n')
+        t.write('iset seekremove 1\n')
+        self.expect('seekremove set.', t)
+
+        t3.write('+gm admin\n')
+        self.expect('admin added to the GM list.', t3)
+
+        t2.write('seek 3+1 fr\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t2)
+        n1 = int(m.group(1))
+        self.expect('<s> %d w=GuestABCD ti=01 rt=0  t=3 i=1 r=u tp=chess960 c=? rr=0-9999 a=t f=f' % n1, t)
+
+        t3.write('seek 15+5 white r m f\n')
+        m = self.expect_re('Your seek has been posted with index (\d+).', t3)
+        n2 = int(m.group(1))
+        self.expect('<s> %d w=admin ti=04 rt=0  t=15 i=5 r=r tp=chess c=W rr=0-9999 a=f f=t' % n2, t)
+
+        # seekremove
+        t2.write('unseek %d\n' % n1)
+        self.expect('<sr> %d' % n1, t)
+        t3.write('unseek\n')
+        self.expect('<sr> %d' % n2, t)
+
+        t3.write('-gm admin\n')
+        self.expect('admin removed from the GM list.', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

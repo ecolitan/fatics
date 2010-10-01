@@ -69,6 +69,25 @@ def find_matching(seek):
     auto_matches.sort(key=lambda s: s.when_posted)
     return (auto_matches, manual_matches)
 
+_seekinfo_titles_map = {
+    'unregistered': 0x1,
+    'computer': 0x2,
+    'GM': 0x4,
+    'IM': 0x8,
+    'FM': 0x10,
+    'WGM': 0x20,
+    'WIM': 0x40,
+    'WFM': 0x80,
+}
+def _seekinfo_titles(u):
+    """ Convert a user's title into the weird bitfield format used
+    by original FICS. """
+    ret = 0
+    for t in u.get_titles():
+        if t in _seekinfo_titles_map:
+            ret |= _seekinfo_titles_map[t]
+    return ret
+
 class Seek(MatchStringParser):
     def __init__(self, user, args):
         """ Create a new seek.  Raises a MatchError if given an invalid
@@ -198,22 +217,41 @@ class Seek(MatchStringParser):
                 rated_str, speed_name, variant_str, clock_str,
                 side_str, mf_str, self.num)
 
+        # original FICS example:
+        # <s> 47 w=GuestWWPQ ti=01 rt=0P t=2 i=12 r=u tp=blitz c=W rr=0-9999 a=f f=f
+        rated_char = 'r' if self.tags['rated'] else 'u'
+        if self.side is None:
+            color_char = '?'
+        else:
+            color_char = 'W' if self.side == WHITE else 'B'
+        auto_char = 'f' if self.manual else 't' # ugh
+        formula_char = 't' if self.formula else 'f'
+        seekinfo_str = '<s> %d w=%s ti=%02d rt=%d%s t=%d i=%d r=%s tp=%s c=%s rr=%d-%d a=%s f=%s\n' % (
+            self.num, self.a.name, _seekinfo_titles(self.a), int(self.rating),
+            ' ', self.tags['time'], self.tags['inc'], rated_char,
+            self.speed_variant.variant.name, color_char, 0, 9999, auto_char,
+            formula_char)
+
         count = 0
         for u in online.online:
-            if u.vars['seek'] and not u.session.game:
-                # showownseek is both a variable and an ivariable
-                if u == self.a and not (u.vars['showownseek']
-                        and u.session.ivars['showownseek']):
-                    continue
-                if not self.meets_formula_for(u):
-                    continue
-                if not self.check_formula(u):
-                    continue
-                if u.censor_or_noplay(self.a):
-                    continue
-                # TODO: check formula for both players
-                count += 1
-                u.write(seek_str)
+            if not u.session.game:
+                # seekinfo
+                if u.session.ivars['seekinfo']:
+                    u.write(seekinfo_str)
+
+                if u.vars['seek']:
+                    # showownseek is both a variable and an ivariable
+                    if u == self.a and not (u.vars['showownseek']
+                            and u.session.ivars['showownseek']):
+                        continue
+                    if not self.meets_formula_for(u):
+                        continue
+                    if not self.check_formula(u):
+                        continue
+                    if u.censor_or_noplay(self.a):
+                        continue
+                    count += 1
+                    u.write(seek_str)
 
         # set the string for use in the "sought" display
         self._str = '%3d %4s %-17s %3d %3d %-7s %s%s%s%s\n' % (
@@ -264,6 +302,11 @@ class Seek(MatchStringParser):
         self.expired = True
         self.a.session.seeks.remove(self)
         self.expired_time = time.time()
+
+        # seekremove
+        for u in online.online:
+            if u.session.ivars['seekremove'] and not u.session.game:
+                u.write('<sr> %d\n' % self.num)
 
     def __str__(self):
         return self._str

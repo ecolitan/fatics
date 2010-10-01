@@ -117,6 +117,10 @@ class BaseUser(object):
         assert(self._titles is not None)
         return title in self._titles
 
+    def get_titles(self):
+        assert(self._titles is not None)
+        return self._titles
+
     def set_var(self, v, val):
         if val is not None:
             self.vars[v.name] = val
@@ -466,6 +470,11 @@ class User(BaseUser):
         if self._titles is None:
             self._load_titles()
         return BaseUser.has_title(self, title)
+
+    def get_titles(self):
+        if self._titles is None:
+            self._load_titles()
+        return BaseUser.get_titles(self)
 
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
