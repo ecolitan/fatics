@@ -78,11 +78,20 @@ class Game(object):
 
     def send_boards(self):
         for p in self.players:
-            p.send_board(self)
+            self.send_board(p)
             if p.has_timeseal():
                 p.session.ping(for_move=True)
         for u in self.observers:
-            u.send_board(self)
+            self.send_board(u)
+
+    def send_board(self, u, isolated=False):
+        if (self.gtype == PLAYED and self.variant.name == 'chess' and
+                u.session.ivars['compressmove'] and
+                self.variant.pos.get_last_move() is not None and
+                not isolated):
+            u.write(self.variant.to_deltaboard(u))
+        else:
+            u.write(self.variant.to_style12(u))
 
     def __eq__(self, other):
         return self.number == other.number
@@ -129,7 +138,7 @@ class Game(object):
         u.session.observed.add(self)
         self.observers.add(u)
         u.write(_('You are now observing game %d.\n') % self.number)
-        u.send_board(self)
+        self.send_board(u)
 
     def unobserve(self, u):
         """Remove the given user as an observer and notify the user."""
@@ -431,6 +440,8 @@ class PlayedGame(Game):
                         conn.session.move_sent_timestamp) / 1000.0
                     time = self.clock.got_move(moved_side,
                         self.variant.pos.ply, elapsed)
+                    mv.lag = (int(round(1000.0 * self.clock.real_elapsed))
+                        - elapsed)
                 else:
                     time = self.clock.got_move(moved_side,
                         self.variant.pos.ply)

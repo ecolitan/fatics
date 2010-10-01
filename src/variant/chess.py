@@ -153,6 +153,7 @@ class Move(object):
         self.time = None
         self._san = None
         self._verbose_alg = None
+        self.lag = 0
 
         # if a promotion piece is not given, assume queen
         if not self.prom:
@@ -326,6 +327,23 @@ class Move(object):
             if self.prom:
                 ret += '=' + self.prom.upper()
         return ret
+
+    def to_smith(self):
+        """ Convert to Smith notation. """
+        ret = []
+        ret.append(sq_to_str(self.fr))
+        ret.append(sq_to_str(self.to))
+        if self.is_capture:
+            ret.append(self.capture.lower())
+        if self.prom:
+            ret.append(self.prom.upper())
+        if self.is_oo:
+            ret.append('c')
+        elif self.is_ooo:
+            ret.append('C')
+        elif self.is_ep:
+            ret.append('E')
+        return ''.join(ret)
 
     def is_legal(self):
         try:
@@ -1272,14 +1290,15 @@ class Chess(object):
             last_move_time_str = timer.hms(0.0, user)
             last_move_san = 'none'
             last_move_verbose = 'none'
+            last_move_lag = 0
         else:
             assert(last_mv.time is not None)
             last_move_time_str = timer.hms(last_mv.time, user)
             last_move_san = last_mv.to_san()
             last_move_verbose = last_mv.to_verbose_alg()
+            last_move_lag = last_mv.lag
 
         # board_str begins with a space
-        # XXX whose lag should we use?
         s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, white_name,
@@ -1287,7 +1306,26 @@ class Chess(object):
             self.game.inc, self.pos.material[1], self.pos.material[0],
             white_clock, black_clock, full_moves, last_move_verbose,
             last_move_time_str, last_move_san, flip,
-            clock_is_ticking, int(user.session.lag))
+            clock_is_ticking, last_move_lag)
+        return s
+
+    def to_deltaboard(self, user):
+        """ Get the last move in the shortened format used by clients that
+        set the "compressmove" ivar. """
+        last_mv = self.pos.get_last_move()
+        # delta boards should not be sent before the first move
+        assert(last_mv is not None)
+        assert(last_mv.time is not None)
+        last_mv_time = int(round(1000 * last_mv.time))
+        if self.pos.wtm:
+            clock = int(round(1000 * self.game.clock.get_black_time()))
+        else:
+            clock = int(round(1000 * self.game.clock.get_white_time()))
+        # <d1> 399 10 O-O e8g8c 922 168890 207
+        s = '\n<d1> %d %d %s %s %d %d %d\n' % (
+            self.game.number, self.pos.ply, last_mv.to_san(),
+            last_mv.to_smith(), last_mv_time, clock, last_mv.lag)
+
         return s
 
 def init_direction_table():

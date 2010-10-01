@@ -205,9 +205,6 @@ class BaseUser(object):
         return (a.name in b.censor or a.name in b.noplay
             or b.name in a.censor or b.name in a.noplay)
 
-    def send_board(self, game):
-        self.write(game.variant.to_style12(self))
-
     def save_history(self, game_id, result_char, user_rating, color_char,
             opp_name, opp_rating, eco, flags, initial_time, inc,
             result_reason, when_ended, movetext, idn):

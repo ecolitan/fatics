@@ -185,4 +185,30 @@ class TestGameinfo(Test):
         self.close(t)
         self.close(t2)
 
+# <d1> 314 5 e3 e2e3 100 59800 563
+class TestCompressMove(Test):
+    def test_compressmove(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        t.write("match admin 2 12 u white\n")
+        t.write('set style 12\n')
+        t.write('iset compressmove 1\n')
+        self.expect('compressmove set.', t)
+        self.expect("Challenge:", t2)
+        t2.write('a\n')
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCD admin 1 2 12 39 39 120 120 1 none (0:00) none 0 0 0\r\n', t)
+        n = 1
+
+        t.write('e4\n')
+        self.expect('<d1> %d 1 e4 e2e4 0 120000 0\r\n' % n, t)
+        t2.write('d5\n')
+        self.expect('<d1> %d 2 d5 d7d5 0 120000 0\r\n' % n, t)
+
+        t.write('abort\n')
+        t2.write('abort\n')
+        self.expect('aborted by agreement', t)
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

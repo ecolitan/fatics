@@ -54,9 +54,10 @@ class Clock(object):
         assert(self._side_ticking == side)
 
         self.stop()
+        self.real_elapsed = time.time() - self.started_time
         if elapsed is None:
             # no timeseal, so use our own timer
-            elapsed = time.time() - self.started_time
+            elapsed = self.real_elapsed
 
         if side == WHITE:
             self._white_time -= elapsed

@@ -140,7 +140,7 @@ class Refresh(Command, GameMixin):
     def run(self, args, conn):
         g = self._game_param(args[0], conn)
         if g:
-            conn.user.send_board(g)
+            g.send_board(conn.user, isolated=True)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
 
