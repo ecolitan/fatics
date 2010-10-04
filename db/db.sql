@@ -224,7 +224,7 @@ CREATE TABLE `noplay` (
   UNIQUE INDEX(`noplayer`, `noplayed`)
 );
 
--- user aliases  
+-- user aliases
 DROP TABLE IF EXISTS `user_alias`;
 CREATE TABLE user_alias (
   `alias_id` int(8) NOT NULL AUTO_INCREMENT,
@@ -317,6 +317,18 @@ CREATE TABLE `game_idn` (
   `game_id` int(8) NOT NULL,
   `idn` INT(4) NOT NULL,
   UNIQUE KEY(`game_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- comments
+DROP TABLE IF EXISTS `user_comment`;
+CREATE TABLE `user_comment` (
+  `comment_id` int(8) NOT NULL AUTO_INCREMENT,
+  `admin_id` int(8) NOT NULL,
+  `user_id` int(8) NOT NULL,
+  `txt` VARCHAR(1023) NOT NULL COMMENT 'full text of comment',
+  `when_added` TIMESTAMP NOT NULL,
+  PRIMARY KEY(`comment_id`),
+  INDEX(`user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- data

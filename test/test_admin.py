@@ -203,6 +203,33 @@ class PermissionsTest(Test):
         self.expect('asetpass: Command not found', t)
         self.close(t)
 
+class CommentTest(Test):
+    @with_player('TestPlayer', 'testpass')
+    def test_comment(self):
+        t = self.connect_as_admin()
+
+        t.write('showcomment testplayer\n')
+        self.expect('There are no comments for TestPlayer.', t)
+
+        t.write('addcomment testplay This is a test comment.\n')
+        self.expect('Comment added for TestPlayer.', t)
+
+        t.write('showcomment testplayer\n')
+        self.expect_re('admin at .*: This is a test comment.', t)
+
+        self.close(t)
+
+    def test_comment_bad(self):
+        t = self.connect_as_admin()
+        t.write('addcomment nosuchplayer test\n')
+        self.expect('There is no player matching the name "nosuchplayer".', t)
+        t.write('showcomment nosuchplayer\n')
+        self.expect('There is no player matching the name "nosuchplayer".', t)
+
+        t.write('addcomment admin\n')
+        self.expect('Usage:', t)
+        self.close(t)
+
 
 class AreloadTest(Test):
         def runTest(self):

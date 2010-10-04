@@ -24,6 +24,7 @@ import command_parser
 import online
 import admin
 import speed_variant
+from db import db
 
 from command import Command, ics_command
 
@@ -190,6 +191,30 @@ class Remplayer(Command):
                 u.remove()
                 conn.write(A_("Player %s removed.\n") % name)
 
+@ics_command('addcomment', 'wS', admin.Level.admin)
+class Addcomment(Command):
+    def run(self, args, conn):
+        u = user.find.by_prefix_for_user(args[0], conn)
+        if u:
+            if u.is_guest:
+                conn.write(A_('Unregistered players cannot have comments.\n'))
+            else:
+                db.add_comment(conn.user.id, u.id, args[1])
+                conn.write(A_('Comment added for %s.\n') % u.name)
 
+@ics_command('showcomment', 'w', admin.Level.admin)
+class Showcomment(Command):
+    def run(self, args, conn):
+        u = user.find.by_prefix_for_user(args[0], conn)
+        if u:
+            if u.is_guest:
+                conn.write(A_('Unregistered players cannot have comments.\n'))
+            else:
+                comments = db.get_comments(u.id)
+                if not comments:
+                    conn.write(A_('There are no comments for %s.\n') % u.name)
+                else:
+                    for c in comments:
+                        conn.write(A_('%s at %s: %s\n') % (c['admin_name'], c['when_added'], c['txt']))
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

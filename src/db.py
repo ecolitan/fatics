@@ -142,13 +142,46 @@ class DB(object):
         cursor.close()
 
     def user_delete(self, id):
+        """ Permanently delete a user from the database.  In normal use
+        this shouldn't be used, but it's useful for testing. """
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM user WHERE user_id=%s""", (id,))
         if cursor.rowcount != 1:
             cursor.close()
             raise DeleteError()
+        cursor.execute("""DELETE FROM user_comment WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM user_title WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM user_notify
+            WHERE notifier=%s OR notified=%s""", (id,id))
+        cursor.execute("""DELETE FROM censor WHERE censorer=%s OR censored=%s""", (id,id))
+        cursor.execute("""DELETE FROM noplay WHERE noplayer=%s OR noplayed=%s""", (id,id))
+        cursor.execute("""DELETE FROM formula WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM note WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM channel_user WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM history WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM rating WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM message WHERE to_user_id=%s""", (id,))
         cursor.close()
 
+    # comments
+    def add_comment(self, admin_id, user_id, txt):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO user_comment
+            SET admin_id=%s,user_id=%s,when_added=NOW(),txt=%s""",
+                (admin_id, user_id, txt))
+        cursor.close()
+
+    def get_comments(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""
+            SELECT user_name AS admin_name,when_added,txt FROM user_comment
+                LEFT JOIN user ON (user.user_id=user_comment.admin_id)
+                WHERE user_comment.user_id=%s""", (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    # channels
     def user_get_channels(self, id):
         cursor = self.db.cursor() #cursors.DictCursor)
         cursor.execute("""SELECT channel_id FROM channel_user WHERE user_id=%s""", (id,))
@@ -242,7 +275,7 @@ class DB(object):
         cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notifier) WHERE notified=%s""", (user_id,))
         rows = cursor.fetchall()
         return rows
-    
+
     # censor
     def user_add_censor(self, censorer, censored):
         cursor = self.db.cursor()
@@ -252,7 +285,7 @@ class DB(object):
             raise DuplicateKeyError()
         finally:
             cursor.close()
-    
+
     def user_del_censor(self, censorer, censored):
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM censor WHERE censored=%s AND censorer=%s""", (censored,censorer))
@@ -277,7 +310,7 @@ class DB(object):
             raise DuplicateKeyError()
         finally:
             cursor.close()
-    
+
     def user_del_noplay(self, noplayer, noplayed):
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM noplay WHERE noplayed=%s AND noplayer=%s""", (noplayed,noplayer))
@@ -285,7 +318,7 @@ class DB(object):
             cursor.close()
             raise DeleteError()
         cursor.close()
-    
+
     def user_get_noplayed(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT user_name FROM user LEFT JOIN noplay ON (user.user_id=noplay.noplayed) WHERE noplayer=%s""", (user_id,))
@@ -491,7 +524,6 @@ class DB(object):
         rows = cursor.fetchall()
         cursor.close()
         return rows
-
 
     def send_message(self, from_user_id, to_user_id, txt):
         cursor = self.db.cursor()
