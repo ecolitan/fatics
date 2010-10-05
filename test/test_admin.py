@@ -141,6 +141,50 @@ class CommandTest(Test):
         self.deluser('testplayer')
         self.deluser('testtwo')
 
+    def test_asetemail(self):
+        t = self.connect_as_admin()
+        t.write('addplayer TestPlayer nobody@example.com Foo Bar\n')
+        m = self.expect_re('Added: >TestPlayer< >Foo Bar< >nobody@example.com< >(.*)<\r\n', t)
+        t2 = self.connect_as('testplayer', m.group(1))
+
+        t.write('f testplayer\n')
+        self.expect('nobody@example.com', t)
+
+        t.write('asetemail testplayer new@example.org\n')
+        self.expect('Email address of TestPlayer changed to "new@example.org".', t)
+        self.expect('admin has changed your email address to "new@example.org".', t2)
+
+        t.write('showcomment testplayer\n')
+        self.expect_re('admin at .*: Changed email address from "nobody@example.com" to "new@example.org".', t)
+
+        t.write('f testplayer\n')
+        self.expect('new@example.org', t)
+
+        self.close(t2)
+
+        # check again to be sure the change was committed to the DB
+        t.write('f testplayer\n')
+        self.expect('new@example.org', t)
+        t.write('remplayer testplayer\n')
+        self.expect('Player TestPlayer removed.', t)
+
+        self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_asetemail_bad(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+
+        t.write('asetemail guestabcd nobody@example.org\n')
+        self.expect('You can only set the email for registered', t)
+        t.write('asetemail admin test@example.com\n')
+        self.expect('You need a higher adminlevel', t)
+        t.write('asetemail testplayer test\n')
+        self.expect('That does not look like an email address.', t)
+
+        self.close(t)
+        self.close(t2)
+
     def test_asetrating(self):
         t = self.connect_as_admin()
         t.write('asetrating admin blitz chess 2000 200 .005 100 75 35\n')

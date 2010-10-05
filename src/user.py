@@ -515,6 +515,10 @@ class User(BaseUser):
                 row['win'], row['loss'], row['draw'], row['best'],
                 row['when_best'])
 
+    def set_email(self, email):
+        db.user_set_email(self.id, email)
+        self.email = email
+
 class GuestUser(BaseUser):
     def __init__(self, name):
         BaseUser.__init__(self)

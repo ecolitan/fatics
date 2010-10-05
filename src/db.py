@@ -444,6 +444,12 @@ class DB(object):
         cursor.execute("""DELETE FROM rating WHERE user_id = %s AND speed_id = %s and variant_id = %s""", (user_id, speed_id, variant_id))
         cursor.close()
 
+    def user_set_email(self, user_id, email):
+        cursor = self.db.cursor()
+        cursor.execute("""UPDATE user
+            SET user_email=%s WHERE user_id=%s""", (email, user_id))
+        cursor.close()
+
     def get_variants(self):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT variant_id,variant_name,variant_abbrev FROM variant""")

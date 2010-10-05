@@ -152,6 +152,37 @@ class Asetrating(Command):
                 (speed_name, variant_name, u.name)))
         # XXX notify the user?
 
+@ics_command('asetemail', 'ww', admin.Level.admin)
+class Asetemail(Command):
+    def run(self, args, conn):
+        u = user.find.by_prefix_for_user(args[0], conn)
+        if u:
+            if not admin.checker.check_user_operation(conn.user, u):
+                conn.write("You need a higher adminlevel to change the email address of %s.\n" % u.name)
+                return
+            if u.is_guest:
+                conn.write(A_('You can only set the email for registered players.\n'))
+                return
+
+            email = args[1]
+            if email is None:
+                # TODO?
+                assert(False)
+            else:
+                if '@' not in email:
+                    conn.write(A_('That does not look like an email address.\n'))
+                    return
+                old_email = u.email
+                u.set_email(email)
+                db.add_comment(conn.user.id, u.id,
+                    'Changed email address from "%s" to "%s".' % (
+                        old_email, email))
+                if u.is_online:
+                    u.write_('%(aname)s has changed your email address to "%(email)s".\n',
+                        {'aname': conn.user.name, 'email': email})
+                conn.write(A_('Email address of %(uname)s changed to "%(email)s".\n') %
+                    {'uname': u.name, 'email': email})
+
 @ics_command('nuke', 'w', admin.Level.admin)
 class Nuke(Command):
     def run(self, args, conn):
