@@ -19,18 +19,14 @@
 from test import *
 
 class CommandTest(Test):
-    def test_addplayer(self):
+    def test_addplayer_and_remplayer(self):
         t = self.connect_as_admin()
-        # try removing, in case the player still exists from an aborted
-        # run of the tests
+        t.write('addplayer TestPlayer nobody@example.com Foo Bar\n')
+        self.expect('Added: >TestPlayer< >Foo Bar< >nobody@example.com<', t)
+        t.write('addplayer testplayer nobody@example.com Foo Bar\n')
+        self.expect('already registered', t)
         t.write('remplayer testplayer\n')
-        try:
-            t.write('addplayer testplayer nobody@example.com Foo Bar\n')
-            self.expect('Added:', t)
-            t.write('addplayer testplayer nobody@example.com Foo Bar\n')
-            self.expect('already registered', t)
-        finally:
-            t.write('remplayer testplayer\n')
+        self.expect('Player TestPlayer removed.', t)
         self.close(t)
 
     def test_announce(self):
@@ -82,6 +78,21 @@ class CommandTest(Test):
         self.close(t2)
 
         self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_nuke_registered(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t.write('nuke testplayer\n')
+        self.expect('You have been kicked out', t2)
+        self.expect('Nuked: TestPlayer', t)
+
+        t.write('showcomment testplayer\n')
+        self.expect_re('admin at .*: Nuked', t)
+
+        self.close(t)
+        self.close(t2)
 
     def test_asetpass(self):
         self.adduser('testplayer', 'passwd')
@@ -228,15 +239,23 @@ class CommentTest(Test):
 
         t.write('addcomment admin\n')
         self.expect('Usage:', t)
+
+        t2 = self.connect_as('GuestABCD', '')
+        t.write('addcomment  guestabcd test\n')
+        self.expect('Unregistered players cannot have comments.', t)
+        t.write('showcomment guestabcd\n')
+        self.expect('Unregistered players cannot have comments.', t)
+        self.close(t2)
+
         self.close(t)
 
 
 class AreloadTest(Test):
-        def runTest(self):
-                self.skip('not stable')
-                t = self.connect()
-                t.write('areload\n')
-                self.expect('reloaded online', t, "server reload")
-                t.close()
+    def runTest(self):
+        self.skip('not stable')
+        t = self.connect()
+        t.write('areload\n')
+        self.expect('reloaded online', t, "server reload")
+        t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

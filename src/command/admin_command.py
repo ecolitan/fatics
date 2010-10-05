@@ -31,8 +31,7 @@ from command import Command, ics_command
 @ics_command('aclearhistory', 'w', admin.Level.admin)
 class Aclearhistory(Command):
     def run(self, args, conn):
-        name = args[0]
-        u = user.find.by_name_exact_for_user(name, conn)
+        u = user.find.by_name_exact_for_user(args[0], conn)
         if u:
             # disallow clearing history for higher adminlevels?
             u.clear_history()
@@ -48,10 +47,13 @@ class Addplayer(Command):
             conn.write(e.reason + '\n')
         else:
             if u:
-                conn.write(A_('A player named %s is already registered.\n') % name)
+                conn.write(A_('A player named %s is already registered.\n') % u.name)
             else:
-                passwd = user.create.passwd()
-                user.create.new(name, email, passwd, real_name)
+                passwd = user.make_passwd()
+                user.add_user(name, email, passwd, real_name)
+                # Not sure if this is useful info.
+                #db.add_comment(conn.user.id, user_id,
+                #    'Player added by addplayer.')
                 conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
 
 @ics_command('announce', 'S', admin.Level.admin)
@@ -98,7 +100,8 @@ class Asetadmin(Command):
                 conn.write('''You can't promote someone to or above your adminlevel.\n''')
             else:
                 u.set_admin_level(level)
-                conn.write('''Admin level of %s set to %d.\n''' % (name, level))
+                conn.write('''Admin level of %s set to %d.\n''' %
+                    (u.name, level))
                 if u.is_online:
                     u.write(A_('''\n\n%s has set your admin level to %d.\n\n''') % (conn.user.name, level))
 #Asetadmin('asetadmin', 'wd', admin.Level.admin)
@@ -117,7 +120,7 @@ class Asetpasswd(Command):
                 conn.write('"%s" is not a valid password.\n' % passwd)
             else:
                 u.set_passwd(passwd)
-                conn.write('Password of %s changed to %s.\n' % (name, '*' * len(passwd)))
+                conn.write('Password of %s changed to %s.\n' % (u.name, '*' * len(passwd)))
                 if u.is_online:
                     u.write_('\n%s has changed your password.\n', (conn.user.name,))
 
@@ -141,12 +144,12 @@ class Asetrating(Command):
         if urating == 0:
             u.del_rating(sv)
             conn.write(A_('Cleared %s %s rating for %s.\n' %
-                (speed_name, variant_name, name)))
+                (speed_name, variant_name, u.name)))
         else:
             u.set_rating(sv, urating, rd, volatility, win, loss, draw,
                 datetime.datetime.utcnow())
             conn.write(A_('Set %s %s rating for %s.\n' %
-                (speed_name, variant_name, name)))
+                (speed_name, variant_name, u.name)))
         # XXX notify the user?
 
 @ics_command('nuke', 'w', admin.Level.admin)
@@ -161,6 +164,8 @@ class Nuke(Command):
             else:
                 u.write_('\n\n**** You have been kicked out by %s! ****\n\n', (conn.user.name,))
                 u.session.conn.loseConnection('nuked')
+                if not u.is_guest:
+                    db.add_comment(conn.user.id, u.id, 'Nuked.')
                 conn.write('Nuked: %s\n' % u.name)
 
 @ics_command('pose', 'wS', admin.Level.admin)
@@ -180,8 +185,7 @@ class Pose(Command):
 @ics_command('remplayer', 'w', admin.Level.admin)
 class Remplayer(Command):
     def run(self, args, conn):
-        name = args[0]
-        u = user.find.by_name_exact_for_user(name, conn)
+        u = user.find.by_name_exact_for_user(args[0], conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
                 conn.write(A_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
@@ -189,7 +193,7 @@ class Remplayer(Command):
                 conn.write(A_("%s is logged in.\n") % u.name)
             else:
                 u.remove()
-                conn.write(A_("Player %s removed.\n") % name)
+                conn.write(A_("Player %s removed.\n") % u.name)
 
 @ics_command('addcomment', 'wS', admin.Level.admin)
 class Addcomment(Command):

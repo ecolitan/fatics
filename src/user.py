@@ -654,18 +654,17 @@ def is_legal_passwd(passwd):
         return False
     return True
 
-class Create(object):
-    def passwd(self):
-        chars = string.letters + string.digits
-        passlen = random.choice(range(5, 8))
-        ret = ''
-        for i in range(passlen):
-            ret = ret + random.choice(chars)
-        return ret
+def make_passwd():
+    chars = string.letters + string.digits
+    passlen = random.choice(range(5, 8))
+    ret = ''
+    for i in range(passlen):
+        ret = ret + random.choice(chars)
+    return ret
 
-    def new(self, name, email, passwd, real_name):
-        hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
-        db.user_add(name, email, hash, real_name, admin.Level.user)
-create = Create()
+def add_user(name, email, passwd, real_name):
+    pwhash = bcrypt.hashpw(passwd, bcrypt.gensalt())
+    user_id = db.user_add(name, email, pwhash, real_name, admin.Level.user)
+    return user_id
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

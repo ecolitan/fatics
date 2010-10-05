@@ -123,8 +123,13 @@ class DB(object):
 
     def user_add(self, name, email, passwd, real_name, admin_level):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO user SET user_name=%s,user_email=%s,user_passwd=%s,user_real_name=%s,user_admin_level=%s""", (name,email,passwd,real_name,admin_level))
+        cursor.execute("""INSERT INTO user
+            SET user_name=%s,user_email=%s,user_passwd=%s,user_real_name=%s,
+                user_admin_level=%s""",
+            (name,email,passwd,real_name,admin_level))
+        user_id = cursor.lastrowid
         cursor.close()
+        return user_id
 
     def user_set_passwd(self, id, passwd):
         cursor = self.db.cursor()

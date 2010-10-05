@@ -53,7 +53,6 @@ class Checker(object):
         else:
             return by_level > to_level
 
-
 checker = Checker()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
