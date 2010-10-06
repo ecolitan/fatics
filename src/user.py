@@ -334,6 +334,10 @@ class User(BaseUser):
             self._titles.add(t['title_name'])
         self._title_str = ''.join(disp_list)
 
+    def toggle_light(self, title_id):
+        db.toggle_title_light(self.id, title_id)
+        self._load_titles()
+
     def log_on(self, conn):
         if online.is_online(self.name):
             conn.write(_("**** %s is already logged in; closing the other connection. ****\n" % self.name))

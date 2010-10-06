@@ -21,9 +21,9 @@ import re
 
 import user
 import email
-from command import *
 from db import db
 
+from command import Command, ics_command, requires_registration
 # maximum line length is 1024, but leave some room for the date and
 # user names
 #MAX_LEN = 950

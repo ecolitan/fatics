@@ -251,6 +251,24 @@ class CommandTest(Test):
         self.close(t)
         self.close(t2)
 
+    def test_admin(self):
+        t = self.connect_as_admin()
+        t.write('admin\n')
+        self.expect('(*) is now not shown', t)
+        t.write('f admin\n')
+        self.expect('Finger of admin:', t)
+        self.close(t)
+
+        t = self.connect_as_admin()
+        t.write('f admin\n')
+        self.expect('Finger of admin:', t)
+        t.write('admin\n')
+        self.expect('(*) is now shown', t)
+        t.write('f admin\n')
+        self.expect('Finger of admin(*):', t)
+
+        self.close(t)
+
 class PermissionsTest(Test):
     def test_permissions(self):
         t = self.connect_as_guest()

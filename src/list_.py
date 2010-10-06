@@ -234,18 +234,17 @@ class NoplayList(MyList):
         conn.write(ngettext('-- noplay list: %d name --\n', '-- noplay list: %d names --\n', len(noplist)) % len(noplist))
         conn.write('%s\n' % ' '.join(noplist))
 
-"""a list of lists"""
-class ListList(object):
-    def __init__(self):
-        ChannelList("channel")
-        NotifyList("notify")
-        IdlenotifyList("idlenotify")
-        CensorList("censor")
-        NoplayList("noplay")
+""" initialize lists """
+def _init_lists():
+    ChannelList("channel")
+    NotifyList("notify")
+    IdlenotifyList("idlenotify")
+    CensorList("censor")
+    NoplayList("noplay")
 
-        for title in db.title_get_all():
-            TitleList(title['title_id'], title['title_name'], title['title_descr'], title['title_public'])
-ListList()
+    for title in db.title_get_all():
+        TitleList(title['title_id'], title['title_name'], title['title_descr'], title['title_public'])
+_init_lists()
 
 #  removedcom filter muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle, c50muzzle, c51muzzle,
 # censor, gnotify, noplay, channel, follow, remote, idlenotify

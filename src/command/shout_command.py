@@ -32,7 +32,7 @@ class Shout(Command):
             for u in online.online:
                 if u.vars['shout'] and not u.in_silence():
                     if name not in u.censor:
-                        u.write(_("%s shouts: %s\n") % (name, args[0]))
+                        u.write(_("%s shouts: %s\n") % (dname, args[0]))
                         count += 1
             conn.write(ngettext("(shouted to %d player)\n", "(shouted to %d players)\n", count) % count)
 

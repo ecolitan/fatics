@@ -250,6 +250,13 @@ class DB(object):
         cursor.close()
         return rows
 
+    def toggle_title_light(self, user_id, title_id):
+        cursor = self.db.cursor()
+        cursor.execute("""UPDATE user_title
+            SET title_light=NOT title_light
+            WHERE title_id=%s AND user_id=%s""", (title_id,user_id))
+        cursor.close()
+
     # notifications
     def user_add_notification(self, notified, notifier):
         cursor = self.db.cursor()

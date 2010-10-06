@@ -32,8 +32,8 @@ class TestShout(Test):
         t3.read_until('fics%', 2)
 
         t.write('shout test shout\n')
-        self.expect("shouts: test shout", t)
-        self.expect("shouts: test shout", t2)
+        self.expect("admin(*) shouts: test shout", t)
+        self.expect("admin(*) shouts: test shout", t2)
         self.expect("(shouted to 2 players)", t)
         self.close(t)
         self.close(t2)
@@ -67,8 +67,8 @@ class TestCshout(Test):
         t3.read_until('fics%', 2)
 
         t.write('cshout test cshout\n')
-        self.expect("c-shouts: test cshout", t)
-        self.expect("c-shouts: test cshout", t2)
+        self.expect("admin(*) c-shouts: test cshout", t)
+        self.expect("admin(*) c-shouts: test cshout", t2)
         self.expect("(c-shouted to 2 players)", t)
         self.close(t)
         self.close(t2)
