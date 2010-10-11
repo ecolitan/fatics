@@ -19,6 +19,7 @@
 import random
 import time
 import datetime
+import cPickle as pickle
 
 import user
 import rating
@@ -509,12 +510,22 @@ class PlayedGame(Game):
 
     def leave(self, user):
         side = self.get_user_side(user)
-        if user.is_guest: # or is an abuser
+        opp = self.get_opp(user)
+        if user.is_guest or user.has_title('abuser') or
+                (user.vars['noescape'] and opp.vars['noescape']):
             res = '0-1' if side == WHITE else '1-0'
             self.result('%s forfeits by disconnection' % user.name, res)
-        else:
-            # TODO: store games between registered players
+        elif opp.is_guest or self.variant.pos.ply <= 10:
+            # registered player quits while playing a guest, or
+            # game too short to adjourn: abort
             self.result('%s aborts by disconnection' % user.name, '*')
+        else:
+            # two registered players; adjourn game
+            self.result('%s ' % user.name, '*')
+            self._adjourn()
+
+    def _adjourn(self):
+
 
     def free(self):
         super(PlayedGame, self).free()

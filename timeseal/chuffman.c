@@ -375,6 +375,7 @@ static int ReadHeader(canonical_list_t *cl)
     return TRUE;
 }
 
+#if 0
 static int encode(struct CHuffman *ch, char *inBuf, int inBytes)
 {
 	char outBuf[1024];
@@ -410,7 +411,6 @@ static int decode(struct CHuffman *ch, char *inBuf, int inSize)
 	return 0;
 }
 
-#if 0
 int main(int argc, char *argv[])
 {
 	if (argc == 2 && !strcmp(argv[1], "encode")) {
