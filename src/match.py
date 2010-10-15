@@ -27,6 +27,7 @@ import formula
 
 from offer import Offer
 from game_constants import *
+from db import db
 
 
 shortcuts = {
@@ -274,6 +275,22 @@ class MatchStringParser(object):
         self.speed_variant = speed_variant.from_names(self.speed_name,
             self.variant_name)
 
+def check_censor_noplay(a, b):
+    """ Test whether a user can play a given opponent. """
+    if a.name in b.censor:
+        a.write(_("%s is censoring you.\n") % b.name)
+        return False
+    if a.name in b.noplay:
+        a.write(_("You are on %s's noplay list.\n") % b.name)
+        return False
+    if b.name in a.censor:
+        a.write(_("You are censoring %s.\n") % b.name)
+        return False
+    if b.name in a.noplay:
+        a.write(_("You have %s on your noplay list.\n") % b.name)
+        return False
+    return True
+
 class Challenge(Offer, MatchStringParser):
     """ represents a match offer from one player to another """
     def __init__(self, a, b, args=None, tags=None):
@@ -283,6 +300,22 @@ class Challenge(Offer, MatchStringParser):
 
         self.a = a
         self.b = b
+
+        if a.is_guest or b.is_guest:
+            self.adjourned = None
+        else:
+            self.adjourned = db.get_adjourned_between(a.id, b.id)
+        if self.adjourned:
+            if tags or args:
+                a.write_('You have an adjourned game with %s.  You cannot start a new game until you finish it.\n' % b.name)
+                return
+            tags = self.adjourned.copy()
+            tags.update({
+                'side': None
+            })
+        else:
+            if not check_censor_noplay(a, b):
+                return
 
         if tags:
             # copy match parameters
@@ -332,7 +365,9 @@ class Challenge(Offer, MatchStringParser):
             time_str = ' %d %d' % (self.time, self.inc)
 
         # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
-        challenge_str = '%s (%s)%s %s (%s) %s %s%s' % (self.a.name, self.a_rating, side_str, self.b.name, self.b_rating, rated_str, self.speed_variant, time_str)
+        challenge_str = '%s (%s)%s %s (%s) %s %s%s' % (self.a.name,
+            self.a_rating, side_str, self.b.name, self.b_rating, rated_str,
+            self.speed_variant, time_str)
         if self.idn is not None:
             challenge_str = '%s idn=%d' % (challenge_str, self.idn)
         if self.clock_name not in ['fischer', 'untimed']:
@@ -341,6 +376,8 @@ class Challenge(Offer, MatchStringParser):
             challenge_str = '%s %d/%d,SD/%d+%d' % (challenge_str,
                 self.overtime_move_num, self.time, self.overtime_bonus,
                 self.inc)
+        if self.adjourned:
+            challenge_str = '%s (adjourned)' % challenge_str
 
         #if self.board is not None:
         #    challenge_str = 'Loaded from a board'
@@ -392,7 +429,6 @@ class Challenge(Offer, MatchStringParser):
         """ Parse the arguments, including parsing specific to match
         requests (as opposed to seeks). """
         self._parse_args_common(args, a)
-        self.speed_variant
 
         # match-specific parsing
         if self.formula is not None or self.manual is not None:

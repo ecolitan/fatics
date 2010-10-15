@@ -19,7 +19,6 @@
 import random
 import time
 import datetime
-import cPickle as pickle
 
 import user
 import rating
@@ -67,6 +66,8 @@ def from_name_or_number(arg, conn):
 
 class Game(object):
     def __init__(self):
+        """ Common setup for examined and played games.  Assumes
+        self.players is already set. """
         self.number = find_free_slot()
         games[self.number] = self
         self.observers = set()
@@ -285,60 +286,38 @@ class Game(object):
 
 class PlayedGame(Game):
     def __init__(self, chal):
-        side = chal.side
-        if side is None:
-            side = self._pick_color(chal.a, chal.b)
-        if side == WHITE:
-            self.white = chal.a
-            self.black = chal.b
-        else:
-            assert(side == BLACK)
-            self.white = chal.b
-            self.black = chal.a
-
         self.gtype = PLAYED
+
+        if chal.adjourned:
+            self._resume(chal.adjourned, chal.a, chal.b)
+            creating = 'Continuing'
+        else:
+            self._init_new(chal)
+            creating = 'Creating'
+        # XXX is this property necessary?
+        self.is_active = True
+
         self.players = [self.white, self.black]
         super(PlayedGame, self).__init__()
 
-
-        self.speed_variant = chal.speed_variant
-        self.white_rating = self.white.get_rating(self.speed_variant)
-        self.black_rating = self.black.get_rating(self.speed_variant)
-        self.white_time = chal.time
-        self.black_time = chal.time
-        self.inc = chal.inc
-        if chal.idn is not None:
-            self.idn = chal.idn
-        elif chal.idn == -1:
-            # special value for "always random"
-            self.idn = random.randint(0, 959)
-        else:
-            self.idn = self._pick_idn(chal.a, chal.b)
-        if chal.clock_name == 'overtime':
-            self.overtime_move_num = chal.overtime_move_num
-            self.overtime_bonus = chal.overtime_bonus
-
-        self.white.session.is_white = True
-        self.black.session.is_white = False
-
-        self.rated = chal.rated
-        self.rated_str = 'rated' if self.rated else 'unrated'
-
         self.flip = False
         self.private = False
-        self.start_time = time.time()
-        self.is_active = True
-
-        self.clock = clock.clock_names[chal.clock_name](self)
-        self.when_started = datetime.datetime.utcnow()
+        self.rated_str = 'rated' if self.rated else 'unrated'
 
         # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
-        create_str = _('Creating: %s (%s) %s (%s) %s %s %d %d\n') % (self.white.name, self.white_rating, self.black.name, self.black_rating, self.rated_str, self.speed_variant, self.white_time, self.inc)
+        # it seems original FICS uses "creating" here even for
+        # adjourned games
+        create_str = 'Creating: %s (%s) %s (%s) %s %s %d %d\n' % (
+            self.white.name, self.white_rating, self.black.name,
+            self.black_rating, self.rated_str, self.speed_variant,
+            self.white_time, self.inc)
 
         self.white.write(create_str)
         self.black.write(create_str)
 
-        create_str_2 = '\n{Game %d (%s vs. %s) Creating %s %s match.}\n' % (self.number, self.white.name, self.black.name, self.rated_str, self.speed_variant)
+        create_str_2 = '\n{Game %d (%s vs. %s) %s %s %s match.}\n' % (
+            self.number, self.white.name, self.black.name, creating,
+            self.rated_str, self.speed_variant)
         self.white.write(create_str_2)
         self.black.write(create_str_2)
 
@@ -358,6 +337,14 @@ class PlayedGame(Game):
 
         self.variant = variant_factory.get(self.speed_variant.variant.name,
             self)
+        # play the stored moves for an adjourned game
+        if chal.adjourned:
+            moves = chal.adjourned['movetext'].split(' ')
+            assert(len(moves) == chal.adjourned['ply_count'])
+            for san_mv in moves:
+                mv = self.variant.pos.move_from_san(san_mv)
+                mv.time = 0.0 # XXX
+                self.variant.do_move(mv)
 
         assert(self.white.session.game is None)
         assert(self.black.session.game is None)
@@ -368,6 +355,92 @@ class PlayedGame(Game):
         self.black.session.last_opp = self.white
 
         self.send_boards()
+
+    def _resume(self, adj, a, b):
+        """ Resume an adjourned game. """
+        if adj['white_user_id'] == a.id:
+            assert(adj['black_user_id'] == b.id)
+            self.white = a
+            self.black = b
+        else:
+            assert(adj['white_user_id'] == b.id)
+            assert(adj['black_user_id'] == a.id)
+            self.white = b
+            self.black = a
+
+        self.speed_variant = speed_variant.from_names(adj['speed_name'],
+            adj['variant_name'])
+        self.white_time = adj['time']
+        self.black_time = adj['time']
+        # XXX use a stored rating?
+        self.white_rating = self.white.get_rating(self.speed_variant)
+        self.black_rating = self.black.get_rating(self.speed_variant)
+        self.inc = adj['inc']
+        self.rated = adj['rated']
+        self.tags = {
+            'time': adj['time'],
+            'inc': adj['inc']
+        }
+        self.clock_name = adj['clock_name']
+        self.clock = clock.clock_names[self.clock_name](self,
+            adj['white_clock'], adj['black_clock'])
+        self.idn = adj['idn'] # for chess960
+        if self.clock_name == 'overtime':
+            self.overtime_move_num = adj['overtime_move_num']
+            self.overtime_bonus = adj['overtime_bonus']
+        self.when_started = adj['when_started']
+
+        # clear the game in the database
+        db.delete_adjourned(adj['adjourn_id'])
+
+    def _init_new(self, chal):
+        side = chal.side
+        if side is None:
+            side = self._pick_color(chal.a, chal.b)
+        if side == WHITE:
+            self.white = chal.a
+            self.black = chal.b
+        else:
+            assert(side == BLACK)
+            self.white = chal.b
+            self.black = chal.a
+
+        self.speed_variant = chal.speed_variant
+        self.white_rating = self.white.get_rating(self.speed_variant)
+        self.black_rating = self.black.get_rating(self.speed_variant)
+        self.white_time = chal.time
+        self.black_time = chal.time
+        self.inc = chal.inc
+        self.tags = {
+            'time': chal.time,
+            'inc': chal.inc
+        }
+        if self.speed_variant.variant.name == 'chess960':
+            if chal.idn is not None:
+                if chal.idn == -1:
+                    # special value to force a random choice
+                    self.idn = random.randint(0, 959)
+                else:
+                    self.idn = chal.idn
+            else:
+                self.idn = self._pick_idn(chal.a, chal.b)
+        else:
+            self.idn = None
+        if chal.clock_name == 'overtime':
+            self.overtime_move_num = chal.overtime_move_num
+            self.overtime_bonus = chal.overtime_bonus
+
+        self.white.session.is_white = True
+        self.black.session.is_white = False
+
+        self.rated = chal.rated
+
+        self.start_time = time.time()
+
+        self.clock_name = chal.clock_name
+        self.clock = clock.clock_names[chal.clock_name](self,
+            60.0 * self.white_time, 60.0 * self.black_time)
+        self.when_started = datetime.datetime.utcnow()
 
     def _pick_color(self, a, b):
         """ Choose the color allocation for two players by comparing the
@@ -511,21 +584,53 @@ class PlayedGame(Game):
     def leave(self, user):
         side = self.get_user_side(user)
         opp = self.get_opp(user)
-        if user.is_guest or user.has_title('abuser') or
-                (user.vars['noescape'] and opp.vars['noescape']):
+        opp.write_('Your opponent has lost contact or quit.\n')
+        if (user.is_guest or user.has_title('abuser') or
+                (user.vars['noescape'] and opp.vars['noescape'])):
             res = '0-1' if side == WHITE else '1-0'
             self.result('%s forfeits by disconnection' % user.name, res)
-        elif opp.is_guest or self.variant.pos.ply <= 10:
+        elif opp.is_guest or self.variant.pos.ply < 10:
             # registered player quits while playing a guest, or
             # game too short to adjourn: abort
             self.result('%s aborts by disconnection' % user.name, '*')
         else:
             # two registered players; adjourn game
-            self.result('%s ' % user.name, '*')
-            self._adjourn()
+            self.adjourn('%s lost connection; game adjourned' % user.name)
 
-    def _adjourn(self):
-
+    def adjourn(self, reason):
+        """ Adjourn this game by saviing it to the database and notifying
+        the players and observers. """
+        data = self.tags.copy()
+        data.update({
+            'white_user_id': self.white.id,
+            #'white_rating': int(self.white_rating),
+            'white_clock': self.clock.get_white_time(),
+            'black_user_id': self.black.id,
+            #'black_rating': int(self.black_rating),
+            'black_clock': self.clock.get_black_time(),
+            'movetext': self.get_movetext(),
+            'eco': self.get_eco()[1],
+            'ply_count': self.get_ply_count(),
+            'variant_id': self.speed_variant.variant.id,
+            'speed_id': self.speed_variant.speed.id,
+            'rated': self.rated,
+            'when_started': self.when_started,
+            'when_adjourned': datetime.datetime.utcnow()
+        })
+        if self.clock_name == 'overtime':
+            data.update({
+                'overtime_move_num': self.overtime_move_num,
+                'overtime_bonus': self.overtime_bonus
+            })
+        if 'connect' in reason:
+            data['adjourn_reason'] = 'Dis'
+        elif 'by agreement' in reason:
+            data['adjourn_reason'] = 'Agr'
+        else:
+            raise RuntimeError('unable to abbreviate adjournment reason: %s' %
+                reason)
+        db.adjourned_game_add(data)
+        self.result(reason, '*')
 
     def free(self):
         super(PlayedGame, self).free()
@@ -533,5 +638,15 @@ class PlayedGame(Game):
         assert(self.black.session.game == self)
         self.white.session.game = None
         self.black.session.game = None
+
+    '''def __getitem__(self, key):
+        """ Used to make game objects subscriptable, so they can
+        be passed directly to MySQLdb methods """
+        #assert(key in self._keys)
+        return self.__dict__[key]'''
+
+    #_keys = ['white_id', 'black_id', 'movetext']
+    #def keys(self):
+    #    return self._keys
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

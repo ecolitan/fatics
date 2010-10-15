@@ -152,16 +152,20 @@ CREATE TABLE `history` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- game
+-- TODO: store overtime_move_num and overtime_bonus in a separate table,
+-- so we have a record of that information?
 DROP TABLE IF EXISTS `game`;
 CREATE TABLE `game` (
   `game_id` int(8) NOT NULL AUTO_INCREMENT,
   `white_name` varchar(17) NOT NULL,
-  `white_rating` char(4),
+  `white_rating` char(4) NOT NULL COMMENT '0 for no rating', -- TODO: use smallint instead
   `black_name` varchar(17) NOT NULL,
-  `black_rating` char(4),
+  `black_rating` char(4) NOT NULL COMMENT '0 for no rating',
   `eco` char(5) NOT NULL,
   `speed_id` TINYINT NOT NULL,
   `variant_id` TINYINT NOT NULL,
+  `clock` ENUM('fischer', 'bronstein', 'hourglass', 'overtime', 'untimed')
+    DEFAULT 'fischer',
   -- `private` BOOLEAN NOT NULL DEFAULT 0,
   `time` int(3) COMMENT 'initial time',
   `inc` int(3) COMMENT 'increment',
@@ -257,7 +261,7 @@ CREATE TABLE `rating` (
   `user_id` int(8) NOT NULL,
   `variant_id` int(8) NOT NULL,
   `speed_id` int(8) NOT NULL,
-  `rating` int(4) NOT NULL,
+  `rating` smallint(4) NOT NULL,
   `rd` float NOT NULL,
   `volatility` float NOT NULL,
   `win` int(7) NOT NULL,
@@ -266,7 +270,7 @@ CREATE TABLE `rating` (
   `total` int(7) NOT NULL COMMENT 'equals win + loss + draw, but included for efficiency',
   `best` int(4) COMMENT 'best active rating',
   `when_best` date COMMENT 'when best rating was achieved',
-  `ltime` timestamp NOT NULL DEFAULT 0,
+  `ltime` timestamp NOT NULL DEFAULT 0 COMMENT 'when RD was last updated',
   UNIQUE KEY (`user_id`, `variant_id`, `speed_id`),
   INDEX(`user_id`),
   PRIMARY KEY(`rating_id`)
@@ -329,6 +333,44 @@ CREATE TABLE `user_comment` (
   `when_added` TIMESTAMP NOT NULL,
   PRIMARY KEY(`comment_id`),
   INDEX(`user_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- adjourned (stored) games
+-- this is similar to the `games` table, but uses player IDs instead
+-- of names (since it only stores games between registered players),
+-- stores the clocks for both players, and does not store a result.
+DROP TABLE IF EXISTS `adjourned_game`;
+CREATE TABLE `adjourned_game` (
+  `adjourn_id` int(8) NOT NULL AUTO_INCREMENT,
+  `white_user_id` int(8) NOT NULL,
+  -- `white_rating` smallint(4),
+  `white_clock` float NOT NULL,
+  `black_user_id` int(8) NOT NULL,
+  -- `black_rating` smallint(4),
+  `black_clock` float NOT NULL,
+  `eco` char(5) NOT NULL,
+  `speed_id` TINYINT NOT NULL,
+  `variant_id` TINYINT NOT NULL,
+  `clock_name` ENUM('fischer', 'bronstein', 'hourglass', 'overtime', 'untimed')
+    DEFAULT 'fischer',
+  `time` int(3) COMMENT 'initial time',
+  `inc` int(3) COMMENT 'increment',
+  `rated` BOOLEAN NOT NULL,
+  `adjourn_reason` ENUM('Agr', 'Dis'),
+  `ply_count` SMALLINT NOT NULL,
+  `movetext` TEXT,
+  `when_started` TIMESTAMP NOT NULL,
+  `when_adjourned` TIMESTAMP NOT NULL,
+  `idn` INT(4) DEFAULT NULL COMMENT 'chess960 position ID, if any',
+  `overtime_move_num` INT(4) DEFAULT NULL COMMENT 'time control for overtime clocks',
+  `overtime_bonus` INT(4) DEFAULT NULL COMMENT 'minutes added at time control for overtime clocks',
+  PRIMARY KEY (`adjourn_id`),
+  INDEX(`white_user_id`),
+  INDEX(`black_user_id`),
+  -- really we want the index to be unique ignoring the color assignments
+  -- (if there is a game A vs. B, don't allow B vs. A), but I don't know of
+  -- a way to enforce this constraint with MySQL
+  UNIQUE INDEX(`white_user_id`,`black_user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- data

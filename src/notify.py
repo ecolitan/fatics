@@ -17,17 +17,40 @@
 #
 
 from online import online
+from db import db
 
 def notify_users(user, arrived):
     """ Send a message to all users notified about the given user. """
+
+    assert(not user.is_guest)
     name = user.name
+    # notify of adjourned games
+    adjourned_opps = []
+    if arrived:
+        for adj in db.get_adjourned(user.id):
+            if adj['white_user_id'] == user.id:
+                opp_name = adj['black_name']
+            else:
+                assert(adj['black_user_id'] == user.id)
+                opp_name = adj['white_name']
+            assert(opp_name)
+            opp = online.find_exact(opp_name)
+            if opp:
+                opp.write_('Notification: %s, who has an adjourned game with you, has arrived.\n', (name,))
+                adjourned_opps.append(opp_name)
+        if adjourned_opps:
+            user.nwrite_('%d player who has an adjourned game with you is online: %s\n',
+            '%d players who have an adjourned game with you are online: %s\n',
+            len(adjourned_opps), (len(adjourned_opps), ' '.join(adjourned_opps)))
+
     nlist = []
     for nname in user.notified:
         u = online.find_exact(nname)
         if u:
             if arrived:
-                u.write_("Notification: %s has arrived.\n", name)
-                nlist.append(u.name)
+                if u.name not in adjourned_opps:
+                    u.write_("Notification: %s has arrived.\n", name)
+                    nlist.append(u.name)
             else:
                 u.write_("Notification: %s has departed.\n", name)
                 nlist.append(u.name)

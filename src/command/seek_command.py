@@ -137,8 +137,7 @@ class Play(Command, MatchMixin):
                 conn.write(_('That seek is not available.\n'))
 
         if ad:
-            # check censor and noplay
-            if not self._check_opp(conn, ad.a):
+            if not match.check_censor_noplay(conn.user, ad.a):
                 ad = None
             # check formula
             elif not ad.check_formula(conn.user):

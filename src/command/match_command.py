@@ -28,22 +28,6 @@ from command import Command, ics_command
 from online import online
 
 class MatchMixin(object):
-    def _check_opp(self, conn, opp):
-        """ Test whether a user can play a given opponent. """
-        if conn.user.name in opp.censor:
-            conn.write(_("%s is censoring you.\n") % opp.name)
-            return False
-        if conn.user.name in opp.noplay:
-            conn.write(_("You are on %s's noplay list.\n") % opp.name)
-            return False
-        if opp.name in conn.user.censor:
-            conn.write(_("You are censoring %s.\n") % opp.name)
-            return False
-        if opp.name in conn.user.noplay:
-            conn.write(_("You have %s on your noplay list.\n") % opp.name)
-            return False
-        return True
-
     def _check_open(self, conn, opp):
         """ Test whether an opponent is open to match requests, and
         open the challenging player to match requests if necessary. """
@@ -78,8 +62,6 @@ class Match(Command, MatchMixin):
             conn.write(_("You can't match yourself.\n"))
             return
 
-        if not self._check_opp(conn, u):
-            return
         if not self._check_open(conn, u):
             return
 
@@ -99,8 +81,6 @@ class Rematch(Command, MatchMixin):
         opp = online.find_exact(h['opp_name'])
         if not opp:
             conn.write(_('Your last opponent, %s, is not logged in.\n') % h['opp_name'])
-            return
-        if not self._check_opp(conn, opp):
             return
         if not self._check_open(conn, opp):
             return

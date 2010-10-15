@@ -29,9 +29,9 @@ running_clocks = []
 clock_names = {}
 
 class Clock(object):
-    def __init__(self, g):
-        self._white_time = 60.0 * g.white_time
-        self._black_time = 60.0 * g.black_time
+    def __init__(self, g, white_time, black_time):
+        self._white_time = white_time
+        self._black_time = black_time
         self.inc = g.inc
         self.is_ticking = False
         running_clocks.append(self)
@@ -110,8 +110,8 @@ class FischerClock(Clock):
 clock_names['fischer'] = FischerClock
 
 class BronsteinClock(Clock):
-    def __init__(self, g):
-        super(BronsteinClock, self).__init__(g)
+    def __init__(self, g, white_time, black_time):
+        super(BronsteinClock, self).__init__(g, white_time, black_time)
         self.last_elapsed = None
 
     def got_move(self, side, ply, elapsed=None):
@@ -130,8 +130,8 @@ class BronsteinClock(Clock):
 clock_names['bronstein'] = BronsteinClock
 
 class HourglassClock(Clock):
-    def __init__(self, g):
-        super(HourglassClock, self).__init__(g)
+    def __init__(self, g, white_time, black_time):
+        super(HourglassClock, self).__init__(g, white_time, black_time)
         assert(not g.inc)
 
     def got_move(self, side, ply, elapsed=None):
@@ -150,8 +150,8 @@ class HourglassClock(Clock):
 clock_names['hourglass'] = HourglassClock
 
 class OvertimeClock(Clock):
-    def __init__(self, g):
-        super(OvertimeClock, self).__init__(g)
+    def __init__(self, g, white_time, black_time):
+        super(OvertimeClock, self).__init__(g, white_time, black_time)
         self.overtime_move_num = g.overtime_move_num
         self.overtime_bonus = 60.0 * g.overtime_bonus
 
@@ -177,7 +177,7 @@ class OvertimeClock(Clock):
 clock_names['overtime'] = OvertimeClock
 
 class UntimedClock(Clock):
-    def __init__(self, g):
+    def __init__(self, g, white_time, black_time):
         self.is_ticking = False
         self._white_time = 0
         self._black_time = 0

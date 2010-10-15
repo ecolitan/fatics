@@ -166,6 +166,7 @@ class DB(object):
         cursor.execute("""DELETE FROM history WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM rating WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM message WHERE to_user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM adjourned_game WHERE white_user_id=%s OR black_user_id=%s""", (id,id))
         cursor.close()
 
     # comments
@@ -397,6 +398,62 @@ class DB(object):
         cursor.close()
         return game_id
 
+    # adjourned games
+    def adjourned_game_add(self, g):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO adjourned_game
+            SET white_user_id=%(white_user_id)s,
+                white_clock=%(white_clock)s,
+                black_user_id=%(black_user_id)s,
+                black_clock=%(black_clock)s,
+                eco=%(eco)s,variant_id=%(variant_id)s,speed_id=%(speed_id)s,
+                time=%(time)s,inc=%(inc)s,rated=%(rated)s,
+                adjourn_reason=%(adjourn_reason)s,ply_count=%(ply_count)s,
+                movetext=%(movetext)s,when_started=%(when_started)s,
+                when_adjourned=%(when_adjourned)s""", g)
+                #% g) # XXX why doesn't this work as an extra parameter?
+        adjourn_id = cursor.lastrowid
+        cursor.close()
+        return adjourn_id
+
+    def get_adjourned(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT adjourn_id,white_user_id,black_user_id,
+                white.user_name as white_name, black.user_name as black_name
+            FROM adjourned_game
+                LEFT JOIN user AS white
+                    ON (white.user_id = white_user_id)
+                LEFT JOIN user AS black
+                    ON (black.user_id = black_user_id)
+            WHERE white_user_id=%s or black_user_id=%s""",
+            (user_id,user_id))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def get_adjourned_between(self, id1, id2):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT adjourn_id,white_user_id,
+                white_clock,black_user_id,black_clock,
+                eco,speed_name,variant_name,
+                clock_name,time,inc,rated,adjourn_reason,ply_count,movetext,
+                when_started,when_adjourned,idn,overtime_move_num,
+                overtime_bonus
+            FROM adjourned_game LEFT JOIN variant USING(variant_id)
+                LEFT JOIN speed USING(speed_id)
+            WHERE (white_user_id=%s AND black_user_id=%s)
+                OR (white_user_id=%s AND black_user_id=%s)""",
+            (id1,id2,id2,id1))
+        row = cursor.fetchone()
+        cursor.close()
+        return row
+
+    def delete_adjourned(self, adjourn_id):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM adjourned_game WHERE adjourn_id=%s""",
+            adjourn_id)
+        cursor.close()
+
     def user_get_history(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT game_id, num, result_char, user_rating,
@@ -406,7 +463,7 @@ class DB(object):
                 LEFT JOIN game_idn USING (game_id)
             WHERE user_id=%s
             ORDER BY when_ended ASC
-            LIMIT 10""", user_id)
+            LIMIT 10""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows

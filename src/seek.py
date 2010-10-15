@@ -95,6 +95,7 @@ class Seek(MatchStringParser):
         self.a = user
         self.b = None
         self.expired = False
+        self.adjourned = None
 
         # may raise MatchError
         self._parse_args(args)

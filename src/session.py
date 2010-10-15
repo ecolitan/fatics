@@ -80,8 +80,6 @@ class Session(object):
             v.a.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
 
         if self.game:
-            if self.game.gtype == game.PLAYED:
-                self.conn.write('Your game will be lost because adjourning is not implemented.\n') # TODO
             self.game.leave(self.user)
             assert(self.game == None)
         del self.offers_received[:]
