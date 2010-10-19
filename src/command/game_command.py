@@ -62,6 +62,16 @@ class Abort(Command, GameMixin):
         else:
             offer.Abort(g, conn.user)
 
+@ics_command('adjourn', '')
+class Adjourn(Command, GameMixin):
+    def run(self, args, conn):
+        g = self._get_played_game(conn)
+        if not g:
+            return
+        g = conn.user.session.game
+        #if g.variant.pos.ply < 5:
+        offer.Adjourn(g, conn.user)
+
 @ics_command('draw', 'o', admin.Level.user)
 class Draw(Command, GameMixin):
     def run(self, args, conn):

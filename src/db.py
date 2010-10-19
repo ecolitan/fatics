@@ -411,7 +411,6 @@ class DB(object):
                 adjourn_reason=%(adjourn_reason)s,ply_count=%(ply_count)s,
                 movetext=%(movetext)s,when_started=%(when_started)s,
                 when_adjourned=%(when_adjourned)s""", g)
-                #% g) # XXX why doesn't this work as an extra parameter?
         adjourn_id = cursor.lastrowid
         cursor.close()
         return adjourn_id

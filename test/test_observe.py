@@ -64,6 +64,7 @@ class TestObserve(Test):
 
         t.write('o 1\n')
         self.expect('You are now observing game 1.', t)
+        self.expect('Game 1: GuestEFGH (++++) GuestIJKL (++++) unrated lightning 1 0', t)
         self.expect('<12> ', t)
         t.write('o guestefgh\n')
         self.expect('You are already observing game 1.', t)
@@ -96,6 +97,7 @@ class TestObserve(Test):
         self.expect('Starting a game', t)
         t2.write('o guestabcd\n')
         self.expect('You are now observing game 1.', t2)
+        self.expect('Game 1: GuestABCD (0) GuestABCD (0) unrated untimed 0 0', t2)
         self.expect('<12> ', t2)
 
         t.write('e4\n')

@@ -34,6 +34,8 @@ class ExaminedGame(Game):
         self.black_time = 0
         self.inc = 0
         self.rated_str = 'unrated'
+        self.info_str = '%s (0) %s (0) unrated untimed 0 0' % (
+            user, user)
         assert(user.session.game is None)
         user.session.game = self
         self.start_time = time.time()

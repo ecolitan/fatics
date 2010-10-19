@@ -114,8 +114,8 @@ class TestAbort(Test):
         self.expect('GuestABCD requests to abort game 1', t2)
 
         t2.write('decline\n')
-        self.expect('Declining the abort offer from GuestABCD', t2)
-        self.expect('admin declines your abort offer', t)
+        self.expect('Declining the abort request from GuestABCD.', t2)
+        self.expect('admin declines your abort request.', t)
 
         t.write('resign\n')
         self.expect('GuestABCD resigns} 0-1', t)
@@ -143,8 +143,8 @@ class TestAbort(Test):
         self.expect('admin requests to abort game 1', t)
 
         t.write('f4\n')
-        self.expect('Declining the abort offer from admin', t)
-        self.expect('GuestABCD declines your abort offer', t2)
+        self.expect('Declining the abort request from admin.', t)
+        self.expect('GuestABCD declines your abort request.', t2)
 
         self.close(t)
         self.close(t2)
@@ -172,8 +172,8 @@ class TestAbort(Test):
         self.expect('GuestABCD requests to abort game 1', t2)
 
         t2.write('accept\n')
-        self.expect('Accepting the abort offer from GuestABCD', t2)
-        self.expect('admin accepts your abort offer', t)
+        self.expect('Accepting the abort request from GuestABCD.', t2)
+        self.expect('admin accepts your abort request.', t)
         self.expect('Game aborted by agreement', t)
         self.expect('Game aborted by agreement', t2)
 
@@ -197,11 +197,51 @@ class TestAbort(Test):
         self.expect('GuestABCD requests to abort game 1', t2)
 
         t.write('withdraw\n')
-        self.expect('Withdrawing your abort offer to admin', t)
-        self.expect('GuestABCD withdraws the abort offer', t2)
+        self.expect('Withdrawing your abort request to admin.', t)
+        self.expect('GuestABCD withdraws the abort request.', t2)
 
         self.close(t)
         self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_observer_sees_abort(self):
+        t = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as_admin()
+        t3 = self.connect_as_guest()
+
+        t.write('match admin white 1+0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t3.write('obs admin\n')
+        self.expect('Game 1: TestPlayer (----) admin (----) rated lightning 1 0', t3)
+
+        t.write('e4\n')
+        self.expect('e4', t2)
+        t2.write('e5\n')
+        self.expect('e5', t)
+
+        t2.write('abo\n')
+        self.expect('admin requests to abort game 1.', t)
+        self.expect('admin requests to abort game 1.', t3)
+        t.write('f4\n')
+        self.expect('TestPlayer declines your abort request.', t2)
+        self.expect('TestPlayer declines the abort request.', t3)
+
+        t.write('abo\n')
+        self.expect('TestPlayer requests to abort game 1.', t3)
+        t2.write('abo\n')
+        self.expect('admin accepts your abort request.', t)
+        self.expect('admin accepts the abort request.', t3)
+        self.expect('aborted by agreement} *', t)
+        self.expect('aborted by agreement} *', t2)
+        self.expect('aborted by agreement} *', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
 
 class TestDraw(Test):
     def test_agree_draw(self):
@@ -335,6 +375,42 @@ class TestDraw(Test):
 
         self.close(t)
         self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_observer_sees_draw(self):
+        t = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as_admin()
+        t3 = self.connect_as_guest()
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t3.write('obs admin\n')
+        self.expect('Game 1: TestPlayer (----) admin (----) rated lightning 1 0', t3)
+
+        t2.write('draw\n')
+        self.expect('admin offers a draw.', t)
+        self.expect('admin offers a draw.', t3)
+        t.write('e4\n')
+        self.expect('TestPlayer declines your draw offer.', t2)
+        self.expect('TestPlayer declines the draw offer.', t3)
+
+        t.write('draw\n')
+        self.expect('TestPlayer offers a draw.', t3)
+        t2.write('draw\n')
+        self.expect('admin accepts your draw offer.', t)
+        self.expect('admin accepts the draw offer.', t3)
+        self.expect('drawn by agreement} 1/2-1/2', t3)
+
+        t2.write('asetrating admin lightning chess 0 0 0 0 0 0\n')
+        self.expect('Cleared lightning chess rating for admin.\r\n', t2)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
 

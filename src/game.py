@@ -140,6 +140,7 @@ class Game(object):
         u.session.observed.add(self)
         self.observers.add(u)
         u.write(_('You are now observing game %d.\n') % self.number)
+        u.write('Game %d: %s\n' % (self.number, self.info_str))
         self.send_board(u)
 
     def unobserve(self, u):
@@ -150,8 +151,9 @@ class Game(object):
         self.observers.remove(u)
 
     def free(self):
-        for o in self.pending_offers:
+        for o in self.pending_offers[:]:
             o.decline(notify=False)
+        assert(not self.pending_offers)
         del games[self.number]
         for u in self.observers.copy():
             self.unobserve(u)
@@ -304,14 +306,14 @@ class PlayedGame(Game):
         self.private = False
         self.rated_str = 'rated' if self.rated else 'unrated'
 
-        # Creating: GuestBEZD (0) admin (0) unrated blitz 2 12
-        # it seems original FICS uses "creating" here even for
-        # adjourned games
-        create_str = 'Creating: %s (%s) %s (%s) %s %s %d %d\n' % (
+        # GuestBEZD (0) admin (0) unrated blitz 2 12
+        self.info_str = '%s (%s) %s (%s) %s %s %d %d\n' % (
             self.white.name, self.white_rating, self.black.name,
             self.black_rating, self.rated_str, self.speed_variant,
             self.white_time, self.inc)
-
+        # it seems original FICS uses "creating" here even for
+        # adjourned games
+        create_str = 'Creating: %s' % self.info_str
         self.white.write(create_str)
         self.black.write(create_str)
 
@@ -598,7 +600,7 @@ class PlayedGame(Game):
             self.adjourn('%s lost connection; game adjourned' % user.name)
 
     def adjourn(self, reason):
-        """ Adjourn this game by saviing it to the database and notifying
+        """ Adjourn this game by saving it to the database and notifying
         the players and observers. """
         data = self.tags.copy()
         data.update({

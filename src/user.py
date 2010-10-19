@@ -113,6 +113,9 @@ class BaseUser(object):
         assert(self._title_str is not None)
         return '%s%s' % (self.name, self._title_str)
 
+    def __str__(self):
+        return self.name
+
     def has_title(self, title):
         assert(self._titles is not None)
         return title in self._titles
