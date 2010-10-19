@@ -531,7 +531,7 @@ class DB(object):
     def add_news(self, title, user, is_admin):
         is_admin = '1' if is_admin else '0'
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO news_index SET news_title=%s,news_poster=%s,news_date=UTC_DATE(),news_is_admin=%s""", (title,user.name,is_admin))
+        cursor.execute("""INSERT INTO news_index SET news_title=%s,news_poster=%s,news_when=NOW(),news_is_admin=%s""", (title,user.name,is_admin))
         news_id = cursor.lastrowid
         cursor.close()
         return news_id
@@ -549,10 +549,71 @@ class DB(object):
     def get_recent_news(self, is_admin):
         is_admin = '1' if is_admin else '0'
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT news_id,news_title,news_date,news_poster FROM news_index WHERE news_is_admin=%s ORDER BY news_id DESC LIMIT 10""", (is_admin,))
+        cursor.execute("""
+            SELECT news_id,news_title,DATE(news_when) AS news_date,news_poster
+            FROM news_index WHERE news_is_admin=%s
+            ORDER BY news_id DESC LIMIT 10""", (is_admin,))
         rows = cursor.fetchall()
         cursor.close()
         return rows
+
+    def get_news_since(self, last_login, is_admin):
+        is_admin = '1' if is_admin else '0'
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""
+            SELECT news_id,news_title,DATE(news_when) as news_date,news_poster
+            FROM news_index WHERE news_is_admin=%s AND news_when > %s
+            ORDER BY news_id DESC LIMIT 10""", (is_admin,last_login))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def get_news_item(self, news_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""
+            SELECT news_id,news_title,DATE(news_when) AS news_date,news_poster
+            FROM news_index WHERE news_id=%s""", (news_id,))
+        row = cursor.fetchone()
+        if not row:
+            return None
+
+        cursor.execute("""SELECT txt FROM news_line
+            WHERE news_id=%s
+            ORDER BY num ASC""", (news_id,))
+        lines = cursor.fetchall()
+        row['text'] = '\n'.join([line['txt'] for line in lines])
+        cursor.close()
+        return row
+
+    def add_news_line(self, news_id, text):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT MAX(num) FROM news_line WHERE news_id=%s""",
+            (news_id,))
+        row = cursor.fetchone()
+        if row[0] is None:
+            num = 1
+        else:
+            num = row[0] + 1
+        cursor.execute("""INSERT INTO news_line
+            SET news_id=%s,num=%s,txt=%s""", (news_id,num,text))
+        cursor.close()
+
+    def del_last_news_line(self, news_id):
+        """ Delete the last line of a news item.  Returns False if there
+        is no such item, and raises DeleteError if the item exists
+        but has no lines. """
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT MAX(num) FROM news_line WHERE news_id=%s""",
+            (news_id,))
+        num = cursor.fetchone()[0]
+        try:
+            if num is None:
+                raise DeleteError
+            cursor.execute("""DELETE FROM news_line
+                WHERE news_id=%s AND num=%s""", (news_id,num))
+            assert(cursor.rowcount == 1)
+        finally:
+            cursor.close()
 
     # messages
     # Use user variables to simulate enumerating messages for each user,

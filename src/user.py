@@ -351,6 +351,15 @@ class User(BaseUser):
 
         BaseUser.log_on(self, conn)
 
+        news = db.get_news_since(self.last_logout, is_admin=False)
+        if news:
+            conn.write(ngettext('There is %d new news item since your last login:\n',
+                'There are %d new news items since your last login:\n', len(news))
+                % len(news))
+            for item in reversed(news):
+                conn.write('%4d (%s) %s\n' % (item['news_id'],
+                    item['news_date'], item['news_title']))
+
         for dbu in db.user_get_notified(self.id):
             name = dbu['user_name']
             self.notified.add(name)
@@ -395,9 +404,6 @@ class User(BaseUser):
         if not is_legal_passwd(passwd):
             return False
         return bcrypt.hashpw(passwd, self.passwd_hash) == self.passwd_hash
-
-    def get_last_logout(self):
-        return db.user_get_last_logout(self.id)
 
     def remove(self):
         return db.user_delete(self.id)

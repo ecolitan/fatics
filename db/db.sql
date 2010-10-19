@@ -281,7 +281,7 @@ DROP TABLE IF EXISTS `news_index`;
 CREATE TABLE `news_index` (
   `news_id` int(4) NOT NULL AUTO_INCREMENT,
   `news_title` VARCHAR(45) NOT NULL,
-  `news_date` date NOT NULL COMMENT 'when posted',
+  `news_when` TIMESTAMP NOT NULL COMMENT 'when posted',
   `news_poster` VARCHAR(17) NOT NULL,
   `news_is_admin` BOOLEAN NOT NULL COMMENT 'normal or admin news item',
   PRIMARY KEY(`news_id`)
@@ -290,8 +290,9 @@ CREATE TABLE `news_index` (
 DROP TABLE IF EXISTS `news_line`;
 CREATE TABLE `news_line` (
   `news_id` int(8) NOT NULL,
-  `num` tinyint UNSIGNED NOT NULL COMMENT 'line number',
-  `txt` VARCHAR(1023) NOT NULL COMMENT 'news line text'
+  `num` tinyint UNSIGNED NOT NULL DEFAULT 1 COMMENT 'line number',
+  `txt` VARCHAR(1023) NOT NULL COMMENT 'news line text',
+  UNIQUE KEY(`news_id`,`num`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- messages
