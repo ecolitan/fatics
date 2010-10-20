@@ -100,6 +100,15 @@ CREATE TABLE `channel` (
   PRIMARY KEY (`channel_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+-- A list of owners for each channel.
+DROP TABLE IF EXISTS `channel_owner`;
+CREATE TABLE `channel_owner` (
+  `channel_id` int(8) NOT NULL,
+  `user_id` int(8) NOT NULL,
+  KEY (`channel_id`),
+  KEY (`user_id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `channel_user`;
 CREATE TABLE `channel_user` (
   `channel_id` int(8) NOT NULL,

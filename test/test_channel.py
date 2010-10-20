@@ -108,23 +108,127 @@ class TestChannel(Test):
         t = self.connect_as_guest()
         t2 = self.connect_as_guest()
 
-        t.write('+ch 2000\n')
-        self.expect('[2000] added to your channel list.', t)
-        t2.write('+ch 2000\n')
-        self.expect('[2000] added to your channel list.', t2)
+        t.write('+ch 1000\n')
+        self.expect('[1000] added to your channel list.', t)
+        t2.write('+ch 1000\n')
+        self.expect('[1000] added to your channel list.', t2)
 
-        t.write('t 2000 test 1\n')
+        t.write('t 1000 test 1\n')
         self.expect('test 1', t2)
 
         t2.write('set chanoff 1\n')
         self.expect('You will not hear channel tells.', t2)
-        t.write('t 2000 test 2\n')
+        t.write('t 1000 test 2\n')
         self.expect_not('test 2', t2)
 
         t2.write('set chanoff 0\n')
         self.expect('You will now hear channel tells.', t2)
-        t.write('t 2000 test 3\n')
+        t.write('t 1000 test 3\n')
         self.expect('test 3', t2)
+
+        self.close(t)
+        self.close(t2)
+
+class TestChannelOwnership(Test):
+    def test_channel_owner(self):
+        t = self.connect_as_admin()
+        t.write('+ch 1024\n')
+        self.expect('You are now the owner of channel 1024.', t)
+        self.expect('[1024] added to your channel list.', t)
+        t.write('-ch 1024\n')
+        self.expect('You are no longer an owner of channel 1024.', t)
+        self.expect('[1024] removed from your channel list.', t)
+        self.close(t)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_channel_ownership_limit(self):
+        t = self.connect_as('TestPlayer', 'testpass')
+        for i in range(5000, 5008):
+            t.write('+ch %d\n' % i)
+            self.expect('You are now the owner of channel %d.' % i, t)
+            self.expect('[%d] added to your channel list.' % i, t)
+
+        t.write('+ch 5008\n')
+        self.expect('You cannot own more than 8 channels.', t)
+
+        for i in range(5000, 5008):
+            t.write('-ch %d\n' % i)
+            self.expect('You are no longer an owner of channel %d.' % i, t)
+            self.expect('[%d] removed from your channel list.' % i, t)
+
+        self.close(t)
+
+    def test_channel_owner_guests(self):
+        t = self.connect_as_guest()
+        t.write('+ch 1024\n')
+        self.expect('Only registered players can join channels 1024 and above.', t)
+        self.close(t)
+
+class TestChannelKick(Test):
+    @with_player('TestPlayer', 'testpass')
+    def test_channel_kick(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t.write('=ch\n')
+        t.write('+ch 1024\n')
+        self.expect('You are now the owner of channel 1024.', t)
+        self.expect('[1024] added to your channel list.', t)
+        t.write('chkick 1024 testplayer\n')
+        self.expect('TestPlayer is not in channel 1024.', t)
+
+        t2.write('+ch 1024\n')
+        self.expect('[1024] added to your channel list.', t2)
+        t.write('chkick 1024 testplayer\n')
+        self.expect('admin(*)(1024): *** Kicked out TestPlayer. ***', t)
+        self.expect('*** You have been kicked out of channel 1024 by admin. ***', t2)
+
+        t.write('-ch 1024\n')
+        self.expect('You are no longer an owner of channel 1024.', t)
+        self.expect('[1024] removed from your channel list.', t)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_channel_kick_admin(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'testpass')
+
+        t2.write('+ch 5000\n')
+        self.expect('You are now the owner of channel 5000.', t2)
+        t.write('+ch 5000\n')
+        self.expect('[5000] added', t)
+
+        t2.write('chkick 5000 admin\n')
+        self.expect('You cannot kick out an admin.', t2)
+        t.write('chkick 5000 testplayer\n')
+        self.expect('admin(*)(5000): *** Kicked out TestPlayer. ***', t)
+        self.expect('*** You have been kicked out of channel 5000 by admin. ***', t2)
+        t.write('-ch 5000\n')
+        self.expect('[5000] removed from your channel list.', t)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('testone', 'testpass')
+    @with_player('testtwo', 'testpass')
+    def test_channel_kick_bad(self):
+        t = self.connect_as('testone', 'testpass')
+        t2 = self.connect_as('testtwo', 'testpass')
+        t.write('+ch 2000\n')
+        self.expect('You are now the owner of channel 2000.', t)
+        self.expect('[2000] added to your channel list.', t)
+        t2.write('+ch 2000\n')
+        self.expect('[2000] added to your channel list.', t2)
+        t2.write('chkick 2000 testone\n')
+        self.expect("You don't have permission to do that.", t2)
+        t.write('chkick 2000 testtwo\n')
+        self.expect('*** You have been kicked out of channel 2000 by testone. ***', t2)
+        self.expect('testone(2000): *** Kicked out testtwo. ***', t)
+
+        t.write('-ch 2000\n')
+        self.expect('You are no longer an owner of channel 2000.', t)
+        self.expect('[2000] removed from your channel list.', t)
 
         self.close(t)
         self.close(t2)

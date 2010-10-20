@@ -163,6 +163,7 @@ class DB(object):
         cursor.execute("""DELETE FROM formula WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM note WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM channel_user WHERE user_id=%s""", (id,))
+        cursor.execute("""DELETE FROM channel_owner WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM history WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM rating WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM message WHERE to_user_id=%s""", (id,))
@@ -220,12 +221,62 @@ class DB(object):
         cursor.close()
         return rows
 
-    def channel_get_members(self, id):
+    '''def channel_get_members(self, id):
         cursor = self.db.cursor()
-        cursor.execute("""SELECT user_name FROM channel_user LEFT JOIN user USING (user_id) WHERE channel_id=%s""", (id,))
+        cursor.execute("""SELECT user_name FROM channel_user
+            LEFT JOIN user USING (user_id)
+            WHERE channel_id=%s""", (id,))
         rows = cursor.fetchall()
         cursor.close()
-        return [r[0] for r in rows]
+        return [r[0] for r in rows]'''
+
+    def user_in_channel(self, user_id, chid):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT COUNT(*) FROM channel_user
+            WHERE channel_id=%s AND user_id=%s""", (chid, user_id))
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0] != 0
+
+    def channel_user_count(self, chid):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT COUNT(*) FROM channel_user
+            WHERE channel_id=%s""", (chid,))
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0]
+
+    def channel_is_owner(self, chid, user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT COUNT(*) FROM channel_owner
+            WHERE channel_id=%s AND user_id=%s""", (chid,user_id))
+        row = cursor.fetchone()
+        cursor.close()
+        assert(row[0] in [0, 1])
+        return row[0] != 0
+
+    def channel_add_owner(self, chid, user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO channel_owner
+            SET channel_id=%s,user_id=%s""", (chid,user_id))
+        cursor.close()
+
+    def channel_del_owner(self, chid, user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM channel_owner
+            WHERE channel_id=%s AND user_id=%s""", (chid,user_id))
+        if cursor.rowcount != 1:
+            cursor.close()
+            raise DeleteError()
+        cursor.close()
+
+    def user_channels_owned(self, user_id):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT COUNT(*) FROM channel_owner
+            WHERE user_id=%s""", (user_id,))
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0]
 
     def user_add_title(self, user_id, title_id):
         cursor = self.db.cursor()

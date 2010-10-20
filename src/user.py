@@ -425,9 +425,9 @@ class User(BaseUser):
         BaseUser.set_alias(self, name, val)
         db.user_set_alias(self.id, name, val)
 
-    def add_channel(self, id):
-        BaseUser.add_channel(self, id)
-        db.channel_add_user(id, self.id)
+    def add_channel(self, chid):
+        BaseUser.add_channel(self, chid)
+        db.channel_add_user(chid, self.id)
 
     def remove_channel(self, id):
         BaseUser.remove_channel(self, id)

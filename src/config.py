@@ -31,6 +31,9 @@ class Config(object):
     # max idle time in seconds
     idle_timeout = 60 * 60
 
+    # limit on number of channels one user can own
+    max_channels_owned = 8
+
     # Silly Babas requires freechess.org to be in the welcome message,
     # so work it into a disclaimer.
     welcome_msg = '''Welcome to / Bienvenue à / Bienvenido a / Willkommen auf\n\n                   ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟\n\nThis server is not endorsed by freechess.org.\n\n'''

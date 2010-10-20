@@ -17,9 +17,11 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
+from command import ics_command, Command, requires_registration
 
+import admin
 import channel
+import user
 
 @ics_command('inchannel', 'n', admin.Level.user)
 class Inchannel(Command):
@@ -43,5 +45,21 @@ class Inchannel(Command):
                 on = ch.get_online()
                 if len(on) > 0:
                     conn.write("%s: %s\n" % (ch.get_display_name(), ' '.join(on)))
+
+@ics_command('chkick', 'dw', admin.Level.user)
+class Chkick(Command):
+    """ Kick a user from a channel. """
+    @requires_registration
+    def run(self, args, conn):
+        (chid, name) = args
+        u = user.find.by_prefix_for_user(name, conn)
+        if not u:
+            return
+        try:
+            ch = channel.chlist[chid]
+        except KeyError:
+            conn.write(_('Invalid channel number.\n'))
+            return
+        ch.kick(u, conn.user)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
