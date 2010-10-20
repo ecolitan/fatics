@@ -136,6 +136,7 @@ class TestAdjourn(Test):
         self.expect('TestPlayer requests to adjourn game 1.', t)
         self.expect('TestPlayer requests to adjourn game 1.', t3)
 
+        # adjourn using "accept"
         t.write('accept\n')
         self.expect('admin accepts your adjourn request.', t2)
         self.expect('admin accepts the adjourn request.', t3)
@@ -165,9 +166,28 @@ class TestAdjourn(Test):
         self.expect('{Game 1 (admin vs. TestPlayer) Continuing rated blitz match.}', t2)
 
         t2.write('e5\n')
-        self.expect('P/e7-e5', t2)
+        self.expect('P/e7-e5', t)
 
-        # XXX adjourn using the "adjourn" command
+        # adjourn using the "adjourn" command
+        t.write('adj\n')
+        self.expect('Requesting to adjourn game 1.', t)
+        self.expect('admin requests to adjourn game 1.', t2)
+        t2.write('adj\n')
+        self.expect('{Game 1 (admin vs. TestPlayer) Game adjourned by agreement} *', t)
+        self.expect('{Game 1 (admin vs. TestPlayer) Game adjourned by agreement} *', t2)
+
+        t2.write('match admin\n')
+        self.expect('Issuing: TestPlayer (----) admin (----) rated blitz 3 4 (adjourned)', t2)
+        self.expect('Challenge: TestPlayer (----) admin (----) rated blitz 3 4 (adjourned)', t)
+        t.write('match testplayer\n')
+        self.expect('Creating: admin (----) TestPlayer (----) rated blitz 3 4', t)
+        self.expect('Creating: admin (----) TestPlayer (----) rated blitz 3 4', t2)
+        self.expect('{Game 1 (admin vs. TestPlayer) Continuing rated blitz match.}', t)
+        self.expect('{Game 1 (admin vs. TestPlayer) Continuing rated blitz match.}', t2)
+
+        t.write('Nb3\n')
+        self.expect('N/d4-b3', t2)
+
         t.write('abo\n')
         t2.write('abo\n')
         self.expect('aborted by agreement', t)

@@ -101,12 +101,12 @@ class TestNews(Test):
             news_id, datetime.utcnow().date()), t)
 
         t.write('cnewse %d\n' % news_id)
-        self.expect('Deleted news item %d' % news_id, t)
+        self.expect('Deleted news item %d.' % news_id, t)
 
         self.close(t)
 
     @with_player('TestPlayer', 'testpass')
-    def test_news_notifcation(self):
+    def test_news_notification(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('TestPlayer', 'testpass')
         today = datetime.utcnow().date()
@@ -144,7 +144,7 @@ class TestNews(Test):
 
         for news_id in [news_id1, news_id2, news_id3, news_id4]:
             t.write('cnewse %d\n' % news_id)
-            self.expect('Deleted news item %d' % news_id, t)
+            self.expect('Deleted news item %d.' % news_id, t)
 
         self.close(t)
 

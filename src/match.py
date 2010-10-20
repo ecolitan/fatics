@@ -465,6 +465,12 @@ class Challenge(Offer, MatchStringParser):
         return hash((self.a, self.b, self.time, self.inc, self.side))
 
     def equivalent_to(self, other):
+        """ Check whether a player B has already offered an identical
+        match to A, so that the challenges intercept. """
+        if self.adjourned and self.a == other.b and self.b == other.a:
+            assert(other.adjourned)
+            return True
+
         if self.speed_variant.variant != other.speed_variant.variant:
             return False
 
