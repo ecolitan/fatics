@@ -17,7 +17,7 @@
 #
 
 import sys
-import copy
+from datetime import datetime
 
 import list_
 import admin
@@ -31,11 +31,17 @@ class ChannelError(Exception):
     pass
 
 class Channel(object):
-    def __init__(self, id, name, desc):
-        assert(type(id) == type(1) or type(id) == type(1L))
-        self.id = id
-        self.name = name
-        self.desc = desc
+    def __init__(self, params):
+        self.id = params['channel_id']
+        assert(type(self.id) == type(1) or type(self.id) == type(1L))
+        self.name = params['name']
+        self.desc = params['descr']
+        if params['topic'] is None:
+            self.topic = None
+        else:
+            self.topic = params['topic']
+            self.topic_who_name = params['topic_who_name']
+            self.topic_when = params['topic_when']
         self.online = []
 
     def tell(self, msg, user):
@@ -61,6 +67,59 @@ class Channel(object):
 
     def log_on(self, user):
         self.online.append(user)
+        if self.topic:
+            if user.last_logout is None or self.topic_when > user.last_logout:
+                self.show_topic(user)
+
+    def show_topic(self, user):
+        if self.topic:
+            user.write_('TOPIC(%d): *** %s (%s at %s) ***\n',
+                (self.id, self.topic, self.topic_who_name,
+                user.format_datetime(self.topic_when)))
+        else:
+            user.write_('There is no topic for channel %d.\n', (self.id,))
+
+    def check_owner(self, user):
+        """ Check whether a user is an owner of the channel allowed to
+        perform operations on it, and if not, send an error message. """
+        if not user.is_admin():
+            if not db.channel_is_owner(self.id, user.id):
+                user.write(_("You don't have permission to do that.\n"))
+                return False
+
+        if not self.has_member(user):
+            user.write(_("You are not in channel %d.\n") % (self.id,))
+            return False
+
+        if not user.hears_channels():
+            user.write(_('You are not listening to channels.\n'))
+            return False
+
+        return True
+
+    def set_topic(self, topic, owner):
+        if not self.check_owner(owner):
+            return
+
+        if topic in ['-', '.']:
+            # clear the topic
+            self.topic = None
+            db.channel_del_topic(self.id)
+            for u in self.online:
+                if u.hears_channels():
+                    u.write_('%s(%d): *** Cleared topic. ***\n',
+                        (owner.get_display_name(), self.id))
+        else:
+            # set a new topic
+            self.topic = topic
+            self.topic_who_name = owner.name
+            self.topic_when = datetime.utcnow()
+            db.channel_set_topic({'channel_id': self.id,
+                'topic': topic, 'topic_who': owner.id,
+                'topic_when': self.topic_when})
+            for u in self.online:
+                if u.hears_channels():
+                    self.show_topic(u)
 
     def log_off(self, user):
         self.online.remove(user)
@@ -68,7 +127,7 @@ class Channel(object):
     def is_user_owned(self):
         return self.id >= USER_CHANNEL_START
 
-    def user_is_member(self, user):
+    def has_member(self, user):
         if user.is_online:
             return user in self.online
         else:
@@ -94,6 +153,8 @@ class Channel(object):
 
         self.online.append(user)
         user.add_channel(self.id)
+        if self.topic:
+            self.show_topic(user)
 
     def remove(self, user):
         if user not in self.online:
@@ -115,15 +176,16 @@ class Channel(object):
                 # TODO? what if channel no longer has an owner?
 
     def kick(self, u, owner):
-        if not self.user_is_member(u):
+        if not self.check_owner(owner):
+            return
+
+        if not self.has_member(u):
             owner.write(_("%(name)s is not in channel %(chid)d.\n") % {
                 'name': u.name, 'chid': self.id
                 })
             return
+
         if not owner.is_admin():
-            if not db.channel_is_owner(self.id, owner.id):
-                owner.write(_("You don't have permission to do that.\n"))
-                return
             if db.channel_is_owner(self.id, u.id):
                 owner.write(_("You cannot kick out a channel owner.\n"))
                 return
@@ -144,9 +206,10 @@ class Channel(object):
             u.write_('*** You have been kicked out of channel %(chid)d by %(owner)s. ***\n' %
                 {'owner': owner.name, 'chid': self.id})
 
-        # not translated, at least for now
-        self.tell('*** Kicked out %s. ***\n' % u.name, owner)
-
+        for p in self.online:
+            if p.hears_channels():
+                p.write_('%s(%d): *** Kicked out %s. ***\n',
+                    (owner.get_display_name(), self.id, u.name))
 
     def get_display_name(self):
         if self.name is not None:
@@ -165,7 +228,7 @@ class ChannelList(object):
     def __init__(self):
         for ch in db.channel_list():
             id = ch['channel_id']
-            self.all[id] = Channel(id, ch['name'], ch['descr'])
+            self.all[id] = Channel(ch)
 
     def __getitem__(self, key):
         assert(type(key) == type(1) or type(key) == type(1L))
@@ -180,10 +243,14 @@ class ChannelList(object):
     def make_ch(self, key):
         name = None
         db.channel_new(key, name)
-        return Channel(key, name, None)
+        return Channel({'channel_id': key, 'name': None, 'descr': None,
+            'topic': None})
+
+    def get_default_channels(self):
+        return [1]
 
     def get_default_guest_channels(self):
-        return copy.copy([4, 53])
+        return [4, 53][:]
 chlist = ChannelList()
 
 

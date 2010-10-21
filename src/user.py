@@ -64,11 +64,11 @@ class BaseUser(object):
         self.noplay = set()
         self.session = conn.session
         self.session.set_user(self)
+        self.is_online = True
+        online.add(self)
+        self.write(server.get_copyright_notice())
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
-        online.add(self)
-        self.is_online = True
-        self.write(_(server.get_copyright_notice()))
 
     def log_off(self):
         assert(self.is_online)
@@ -291,6 +291,9 @@ class BaseUser(object):
 
     def hears_channels(self):
         return not self.vars['chanoff'] and not self.in_silence()
+
+    def format_datetime(self, date):
+        return date.strftime("%Y-%m-%d %H:%M %Z")
 
 # a registered user
 class User(BaseUser):
@@ -682,6 +685,8 @@ def make_passwd():
 def add_user(name, email, passwd, real_name):
     pwhash = bcrypt.hashpw(passwd, bcrypt.gensalt())
     user_id = db.user_add(name, email, pwhash, real_name, admin.Level.user)
+    for chid in channel.chlist.get_default_channels():
+        db.channel_add_user(chid, user_id)
     return user_id
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -100,8 +100,8 @@ class Test(unittest.TestCase):
     def close(self, t):
         t.write('quit\n')
         t.read_until('Thank you for using')
-        t.close()
         t.read_all()
+        t.close()
 
     def adduser(self, name, passwd, lists=None):
         t = self.connect_as_admin()

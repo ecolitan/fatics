@@ -16,6 +16,9 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import time
+from datetime import datetime
+
 from test import *
 
 class TestChannel(Test):
@@ -164,7 +167,7 @@ class TestChannelOwnership(Test):
         self.expect('Only registered players can join channels 1024 and above.', t)
         self.close(t)
 
-class TestChannelKick(Test):
+class TestKick(Test):
     @with_player('TestPlayer', 'testpass')
     def test_channel_kick(self):
         t = self.connect_as_admin()
@@ -222,6 +225,10 @@ class TestChannelKick(Test):
         self.expect('[2000] added to your channel list.', t2)
         t2.write('chkick 2000 testone\n')
         self.expect("You don't have permission to do that.", t2)
+
+        t.write('chkick 2000\n')
+        self.expect('Usage:', t)
+
         t.write('chkick 2000 testtwo\n')
         self.expect('*** You have been kicked out of channel 2000 by testone. ***', t2)
         self.expect('testone(2000): *** Kicked out testtwo. ***', t)
@@ -281,5 +288,80 @@ class TestCtellVar(Test):
 
         self.close(t2)
         self.close(t)
+
+class TestTopic(Test):
+    @with_player('TestPlayer', 'testpass')
+    def test_topic(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'testpass')
+        today = datetime.utcnow().date()
+
+        t.write('chtopic\n')
+        self.expect('Usage:', t)
+        t.write('chtopic 10 test\n')
+        self.expect('You are not in channel 10.', t)
+
+        t.write('+ch 10\n')
+        self.expect('[10] added to your channel list.', t)
+        t2.write('+ch 10\n')
+        self.expect('[10] added to your channel list.', t2)
+
+        t.write('chtopic 10\n')
+        self.expect('There is no topic for channel 10.', t)
+        t.write('chtopic 10 This is an example topic.\n')
+        self.expect('TOPIC(10): *** This is an example topic. (admin at %s' % today, t)
+        self.expect(') ***', t)
+        self.expect('TOPIC(10): *** This is an example topic. (admin at %s' % today, t2)
+        self.expect(') ***', t2)
+
+        t2.write('chtopic 10\n')
+        self.expect('TOPIC(10): *** This is an example topic. (admin at %s' % today, t2)
+        self.expect(') ***', t2)
+
+        # joining channel displays topic
+        t2.write('-ch 10\n')
+        self.expect('[10] removed from your channel list.', t2)
+        t2.write('+ch 10\n')
+        self.expect('TOPIC(10): *** This is an example topic. (admin at %s' % today, t2)
+        self.expect(') ***', t2)
+        self.expect('[10] added to your channel list.', t2)
+
+        # Leaving and rejoining does not display the topic...
+        time.sleep(1)
+        self.close(t2)
+        t2 = self.connect()
+        t2.write('testplayer\ntestpass\n')
+        self.expect('**** Starting FICS session as TestPlayer ****', t2)
+        self.expect_not('TOPIC', t2)
+        self.close(t2)
+
+        # ...unless it has been modified.
+        t.write('chtopic 10 A new topic.\n')
+        self.expect('TOPIC(10): *** A new topic. (admin at %s' % today, t)
+        time.sleep(1)
+        t2 = self.connect()
+        t2.write('testplayer\ntestpass\n')
+        self.expect('TOPIC(10): *** A new topic. (admin at %s' % today, t2)
+
+        # clear topic
+        t.write('chtopic 10 -\n')
+        self.expect('admin(*)(10): *** Cleared topic. ***', t)
+        self.expect('admin(*)(10): *** Cleared topic. ***', t2)
+
+        t2.write('chtopic 10\n')
+        self.expect('There is no topic for channel 10.', t2)
+
+        t.write('-ch 10\n')
+        self.expect('[10] removed from your channel list.', t)
+        t2.write('-ch 10\n')
+        self.expect('[10] removed from your channel list.', t2)
+
+        t2.write('chtopic 10\n')
+        self.expect('There is no topic for channel 10.', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    #def test_topic_userchannel(self):
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -31,9 +31,13 @@ from command import Command, ics_command, requires_registration
 class FormatMessage(object):
     def _format_msg(self, msg, u):
         if msg['forwarder_name']:
-            txt = u.translate('%s forwarded: %s at %s: %s\n', (msg['forwarder_name'], msg['sender_name'], msg['when_sent'], msg['txt']))
+            txt = u.translate('%s forwarded: %s at %s: %s\n',
+                (msg['forwarder_name'], msg['sender_name'],
+                u.format_datetime(msg['when_sent']), msg['txt']))
         else:
-            txt = u.translate('%s at %s: %s\n', (msg['sender_name'], msg['when_sent'], msg['txt']))
+            txt = u.translate('%s at %s: %s\n',
+                (msg['sender_name'], u.format_datetime(msg['when_sent']),
+                msg['txt']))
         return txt
 
     def _write_msg(self, msg, u):

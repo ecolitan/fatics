@@ -191,24 +191,51 @@ class DB(object):
     # channels
     def user_get_channels(self, id):
         cursor = self.db.cursor() #cursors.DictCursor)
-        cursor.execute("""SELECT channel_id FROM channel_user WHERE user_id=%s""", (id,))
+        cursor.execute("""SELECT channel_id FROM channel_user
+            WHERE user_id=%s""", (id,))
         rows = cursor.fetchall()
         cursor.close()
         return [r[0] for r in rows]
 
     def channel_new(self, id, name):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO channel SET channel_id=%s,name=%s,descr=NULL""", (id, name,))
+        cursor.execute("""INSERT INTO channel SET channel_id=%s,name=%s""",
+            (id, name,))
         cursor.close()
 
-    def channel_add_user(self, ch_id, user_id):
+    def channel_add_user(self, chid, user_id):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO channel_user SET user_id=%s,channel_id=%s""", (user_id,ch_id))
+        cursor.execute("""INSERT INTO channel_user
+            SET user_id=%s,channel_id=%s""", (user_id,chid))
+        cursor.close()
+
+    def channel_set_topic(self, args):
+        cursor = self.db.cursor()
+        '''cursor.execute("""INSERT INTO channel
+            SET channel_id=%(channel_id)s,topic=%(topic)s,
+                topic_who=%(topic_who)s,topic_when=%(topic_when)s
+            ON DUPLICATE KEY UPDATE topic=%(topic)s,topic_who=%(topic_who)s,
+                topic_when=%(topic_when)s""", args)
+        # does not work with ON DUPLICATE KEY UPDATE
+                '''
+        cursor.execute("""UPDATE channel
+            SET topic=%(topic)s,topic_who=%(topic_who)s,
+                topic_when=%(topic_when)s
+            WHERE channel_id=%(channel_id)s""", args)
+        assert(cursor.rowcount == 1)
+        cursor.close()
+
+    def channel_del_topic(self, chid):
+        cursor = self.db.cursor()
+        cursor.execute("""UPDATE channel SET topic=NULL
+            WHERE channel_id=%s""", chid)
+        assert(cursor.rowcount == 1)
         cursor.close()
 
     def channel_del_user(self, ch_id, user_id):
         cursor = self.db.cursor()
-        cursor.execute("""DELETE FROM channel_user WHERE user_id=%s AND channel_id=%s""", (user_id,ch_id))
+        cursor.execute("""DELETE FROM channel_user
+            WHERE user_id=%s AND channel_id=%s""", (user_id,ch_id))
         if cursor.rowcount != 1:
             cursor.close()
             raise DeleteError()
@@ -216,7 +243,9 @@ class DB(object):
 
     def channel_list(self):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT channel_id,name,descr FROM channel""")
+        cursor.execute("""SELECT channel_id,name,descr,
+            topic,user_name AS topic_who_name,topic_when
+            FROM channel LEFT JOIN user ON(channel.topic_who=user.user_id)""")
         rows = cursor.fetchall()
         cursor.close()
         return rows

@@ -62,4 +62,19 @@ class Chkick(Command):
             return
         ch.kick(u, conn.user)
 
+@ics_command('chtopic', 'dT', admin.Level.user)
+class Chtopic(Command):
+    """ Set or view a channel topic. """
+    def run(self, args, conn):
+        (chid, topic) = args
+        try:
+            ch = channel.chlist[chid]
+        except KeyError:
+            conn.write(_('Invalid channel number.\n'))
+            return
+        if topic is None:
+            ch.show_topic(conn.user)
+        else:
+            ch.set_topic(topic, conn.user)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

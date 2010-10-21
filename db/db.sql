@@ -6,6 +6,7 @@
 -- USE chess
 -- CREATE USER 'chess'@'localhost' IDENTIFIED BY 'thepassword';
 -- GRANT ALL ON chess.* TO 'chess'@'localhost';
+SET time_zone='+00:00';
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
@@ -95,8 +96,11 @@ CREATE TABLE `note` (
 DROP TABLE IF EXISTS `channel`;
 CREATE TABLE `channel` (
   `channel_id` int(8) NOT NULL AUTO_INCREMENT,
-  `name` varchar(32) DEFAULT NULL,
-  `descr` varchar(255) DEFAULT NULL,
+  `name` varchar(32) DEFAULT NULL COMMENT 'brief channel name',
+  `descr` varchar(255) DEFAULT NULL COMMENT 'long channel desciption',
+  `topic` varchar(1024) DEFAULT NULL COMMENT 'topic text, if any',
+  `topic_who` int(8) DEFAULT NULL COMMENT 'who posted the topic',
+  `topic_when` timestamp COMMENT 'when the topic was posted',
   PRIMARY KEY (`channel_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
@@ -390,7 +394,7 @@ INSERT INTO `user` SET user_id=1,user_name='admin',user_passwd='$2a$12$vUOlVpT6H
 UNLOCK TABLES;
 
 LOCK TABLES `channel` WRITE;
-INSERT INTO `channel` VALUES (1,'help','Help for new (and not-so-new) users. :-)');
+INSERT INTO `channel` VALUES (1,'help','Help for new (and not-so-new) users. :-)','This is the help channel.  You can get help by asking a question here; use "tell 1 My question is...".',1,NULL);
 UNLOCK TABLES;
 
 LOCK TABLES `title` WRITE;
