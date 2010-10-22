@@ -22,11 +22,23 @@ import user
 
 from db import db, DuplicateKeyError, DeleteError
 
-lists = trie.Trie()
+""" The list design is intentionally kept simple, at the cost of
+some repeated code, for example in the messages displayed to users.
+Trying to factor out the common code only created a bigger mess.
+The lists of original FICS were implemented a bit more concisely, but
+it made some English-specific assumptions I don't want to
+repeat (e.g. that system-wide lists use the same messages as personal
+lists, with "your list" replaced by "the list").  Also original FICS
+used a linear search to find entries, so my implementation should
+be more efficient for large lists. """
 
-"""A list as operated on by addlist, sublist, and showlist.  Subclasses
-should implement add, sub, and show methods."""
+class ListError(Exception):
+    def __init__(self, reason):
+        self.reason = reason
+
 class MyList(object):
+    """ A list as operated on by addlist, sublist, and showlist.  Subclasses
+    should implement add, sub, and show methods. """
     def __init__(self, name):
         self.name = name
         lists[name.lower()] = self
@@ -34,10 +46,6 @@ class MyList(object):
     def _require_admin(self, user):
         if not user.is_admin():
             raise ListError(_("You don't have permission to do that.\n"))
-
-class ListError(Exception):
-    def __init__(self, reason):
-        self.reason = reason
 
 class TitleList(MyList):
     def __init__(self, id, name, descr, public):
@@ -47,8 +55,7 @@ class TitleList(MyList):
         self.public = public
 
     def add(self, item, conn):
-        if not conn.user.is_admin():
-            raise ListError(_("You don't have permission to do that.\n"))
+        self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
@@ -85,7 +92,8 @@ class TitleList(MyList):
         if not self.public:
             self._require_admin(conn.user)
         tlist = db.title_get_users(self.id)
-        conn.write(ngettext('-- %s list: %d name --\n', '-- %s list: %d names --\n', len(tlist)) % (self.name,len(tlist)))
+        conn.write(ngettext('-- %s list: %d name --\n',
+            '-- %s list: %d names --\n', len(tlist)) % (self.name,len(tlist)))
         conn.write('%s\n' % ' '.join(tlist))
 
 class NotifyList(MyList):
@@ -123,7 +131,8 @@ class NotifyList(MyList):
         if conn.user.is_guest:
             raise ListError(_('Only registered players can have notify lists.\n'))
         notlist = conn.user.notifiers
-        conn.write(ngettext('-- notify list: %d name --\n', '-- notify list: %d names --\n', len(notlist)) % len(notlist))
+        conn.write(ngettext('-- notify list: %d name --\n',
+            '-- notify list: %d names --\n', len(notlist)) % len(notlist))
         conn.write('%s\n' % ' '.join(notlist))
 
 class IdlenotifyList(MyList):
@@ -148,7 +157,8 @@ class IdlenotifyList(MyList):
 
     def show(self, conn):
         notlist = conn.user.idlenotifiers
-        conn.write(ngettext('-- idlenotify list: %d name --\n', '-- idlenotify list: %d names --\n', len(notlist)) % len(notlist))
+        conn.write(ngettext('-- idlenotify list: %d name --\n',
+            '-- idlenotify list: %d names --\n', len(notlist)) % len(notlist))
         conn.write('%s\n' % ' '.join([u.name for u in notlist]))
 
 class ChannelList(MyList):
@@ -185,7 +195,8 @@ class ChannelList(MyList):
 
     def show(self, conn):
         chlist = conn.user.channels
-        conn.write(ngettext('-- channel list: %d channel --\n', '-- channel list: %d channels --\n', len(chlist)) % len(chlist))
+        conn.write(ngettext('-- channel list: %d channel --\n',
+            '-- channel list: %d channels --\n', len(chlist)) % len(chlist))
         for ch in chlist:
             conn.write('%s ' % ch)
         conn.write('\n')
@@ -209,7 +220,8 @@ class CensorList(MyList):
 
     def show(self, conn):
         cenlist = conn.user.censor
-        conn.write(ngettext('-- censor list: %d name --\n', '-- censor list: %d names --\n', len(cenlist)) % len(cenlist))
+        conn.write(ngettext('-- censor list: %d name --\n',
+            '-- censor list: %d names --\n', len(cenlist)) % len(cenlist))
         conn.write('%s\n' % ' '.join(cenlist))
 
 class NoplayList(MyList):
@@ -231,18 +243,19 @@ class NoplayList(MyList):
 
     def show(self, conn):
         noplist = conn.user.noplay
-        conn.write(ngettext('-- noplay list: %d name --\n', '-- noplay list: %d names --\n', len(noplist)) % len(noplist))
+        conn.write(ngettext('-- noplay list: %d name --\n',
+            '-- noplay list: %d names --\n', len(noplist)) % len(noplist))
         conn.write('%s\n' % ' '.join(noplist))
 
 class BanList(MyList):
     def add(self, item, conn):
         self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
-        if u.is_guest:
-            raise ListError(A_('Only registered players can be banned.\n'))
-        if u.is_admin():
-            raise ListError(A_('Admins cannot be banned.\n'))
         if u:
+            if u.is_guest:
+                raise ListError(A_('Only registered players can be banned.\n'))
+            if u.is_admin():
+                raise ListError(A_('Admins cannot be banned.\n'))
             if u.is_banned:
                 raise ListError(_('%s is already on the ban list.\n') % u.name)
             db.user_set_banned(u.id, 1)
@@ -255,9 +268,9 @@ class BanList(MyList):
     def sub(self, item, conn):
         self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
-        if u.is_guest:
-            raise ListError(A_('Only registered players can be banned.\n'))
         if u:
+            if u.is_guest:
+                raise ListError(A_('Only registered players can be banned.\n'))
             if not u.is_banned:
                 raise ListError(_('%s is not on the ban list.\n') % u.name)
             db.user_set_banned(u.id, 0)
@@ -282,6 +295,7 @@ def _init_lists():
 
     for title in db.title_get_all():
         TitleList(title['title_id'], title['title_name'], title['title_descr'], title['title_public'])
+lists = trie.Trie()
 _init_lists()
 
 #  removedcom filter muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle, c50muzzle, c51muzzle,

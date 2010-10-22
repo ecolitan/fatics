@@ -358,6 +358,8 @@ class BanTest(Test):
     def test_ban_bad(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('GuestABCD', '')
+        t.write('+ban nosuchplayer\n')
+        self.expect('no player matching the name "nosuchplayer"', t)
         t.write('+ban admin\n')
         self.expect('Admins cannot be banned.', t)
         t.write('+ban guestabcd\n')
