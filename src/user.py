@@ -306,6 +306,7 @@ class User(BaseUser):
         self.real_name = u['user_real_name']
         self.last_logout = u['user_last_logout']
         self.admin_level = u['user_admin_level']
+        self.is_banned = u['user_banned']
         self.is_guest = False
         self.channels = db.user_get_channels(self.id)
         self.vars = db.user_get_vars(self.id,

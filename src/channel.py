@@ -247,7 +247,7 @@ class ChannelList(object):
             'topic': None})
 
     def get_default_channels(self):
-        return [1]
+        return [1][:]
 
     def get_default_guest_channels(self):
         return [4, 53][:]

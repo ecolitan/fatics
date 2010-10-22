@@ -18,6 +18,7 @@ CREATE TABLE `user` (
   `user_admin_level` smallint(4) unsigned NOT NULL,
   `user_fics_name` varchar(18) DEFAULT NULL,
   `user_last_logout` timestamp NULL DEFAULT NULL,
+  `user_banned` BOOLEAN NOT NULL DEFAULT 0,
 
   -- vars
   `time` SMALLINT(4) NOT NULL DEFAULT 2 COMMENT 'default seek time',

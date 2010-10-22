@@ -197,7 +197,7 @@ class CensorList(MyList):
             if u.name in conn.user.censor:
                 raise ListError(_('%s is already on your censor list.\n') % u.name)
             conn.user.add_censor(u)
-            conn.write(_('%s added to your censor list.\n') % (u.name))
+            conn.write(_('%s added to your censor list.\n') % u.name)
 
     def sub(self, item, conn):
         u = user.find.by_prefix_for_user(item, conn)
@@ -219,7 +219,7 @@ class NoplayList(MyList):
             if u.name in conn.user.noplay:
                 raise ListError(_('%s is already on your noplay list.\n') % u.name)
             conn.user.add_noplay(u)
-            conn.write(_('%s added to your noplay list.\n') % (u.name))
+            conn.write(_('%s added to your noplay list.\n') % u.name)
 
     def sub(self, item, conn):
         u = user.find.by_prefix_for_user(item, conn)
@@ -234,6 +234,43 @@ class NoplayList(MyList):
         conn.write(ngettext('-- noplay list: %d name --\n', '-- noplay list: %d names --\n', len(noplist)) % len(noplist))
         conn.write('%s\n' % ' '.join(noplist))
 
+class BanList(MyList):
+    def add(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u.is_guest:
+            raise ListError(A_('Only registered players can be banned.\n'))
+        if u.is_admin():
+            raise ListError(A_('Admins cannot be banned.\n'))
+        if u:
+            if u.is_banned:
+                raise ListError(_('%s is already on the ban list.\n') % u.name)
+            db.user_set_banned(u.id, 1)
+            u.is_banned = True
+            db.add_comment(conn.user.id, u.id, 'Banned.')
+            conn.write(_('%s added to the ban list.\n') % u.name)
+            if u.is_online:
+                conn.write('Note: %s is online.\n' % u.name)
+
+    def sub(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u.is_guest:
+            raise ListError(A_('Only registered players can be banned.\n'))
+        if u:
+            if not u.is_banned:
+                raise ListError(_('%s is not on the ban list.\n') % u.name)
+            db.user_set_banned(u.id, 0)
+            u.is_banned = False
+            conn.write(_('%s removed from the ban list.\n') % (u.name))
+
+    def show(self, conn):
+        self._require_admin(conn.user)
+        banlist = db.get_banned_user_names()
+        conn.write(ngettext('-- ban list: %d name --\n',
+            '-- ban list: %d names --\n', len(banlist)) % len(banlist))
+        conn.write('%s\n' % ' '.join(banlist))
+
 """ initialize lists """
 def _init_lists():
     ChannelList("channel")
@@ -241,6 +278,7 @@ def _init_lists():
     IdlenotifyList("idlenotify")
     CensorList("censor")
     NoplayList("noplay")
+    BanList("ban")
 
     for title in db.title_get_all():
         TitleList(title['title_id'], title['title_name'], title['title_descr'], title['title_public'])

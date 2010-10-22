@@ -22,8 +22,9 @@ class TelnetTest(Test):
     def test_telnet(self):
         t = self.connect()
         t.read_until('fics%', 2)
+        # IAC Interrupt Process should break connection
         os.write(t.fileno(), chr(255) + chr(244))
-        self.expect_EOF(t, "interrupt connection")
+        self.expect_EOF(t)
         t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

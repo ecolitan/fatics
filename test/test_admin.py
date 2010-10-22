@@ -311,6 +311,59 @@ class CommentTest(Test):
 
         self.close(t)
 
+class BanTest(Test):
+    @with_player('TestPlayer', 'passwd')
+    def test_ban(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'passwd')
+
+        t.write('+ban testplayer\n')
+        self.expect('TestPlayer added to the ban list.', t)
+        self.expect('Note: TestPlayer is online.', t)
+        t.write('+ban testplayer\n')
+        self.expect('TestPlayer is already on the ban list.', t)
+        t.write('nuke testplayer\n')
+        self.expect('Nuked: TestPlayer', t)
+
+        self.expect('You have been kicked out by admin', t2)
+        t2.close()
+
+        t.write('=ban\n')
+        self.expect('-- ban list: 1 name --\r\nTestPlayer\r\n', t)
+
+        t.write('showcomment testplayer\n')
+        self.expect_re('admin at .*: Banned', t)
+
+        t2 = self.connect()
+        t2.write('testplayer\n')
+        self.expect('Player "TestPlayer" is banned.', t2)
+        self.expect_EOF(t2)
+
+        t.write('-ban testplayer\n')
+        self.expect('TestPlayer removed from the ban list.', t)
+
+        t2 = self.connect_as('testplayer', 'passwd')
+
+        t.write('-ban testplayer\n')
+        self.expect('TestPlayer is not on the ban list.', t)
+
+        t2.write('+ban admin\n')
+        self.expect("You don't have permission to do that.", t2)
+        t2.write('=ban\n')
+        self.expect("You don't have permission to do that.", t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_ban_bad(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+        t.write('+ban admin\n')
+        self.expect('Admins cannot be banned.', t)
+        t.write('+ban guestabcd\n')
+        self.expect('Only registered players can be banned.', t)
+        self.close(t)
+
 
 class AreloadTest(Test):
     def runTest(self):

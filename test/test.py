@@ -68,11 +68,11 @@ class Test(unittest.TestCase):
             print "got {{%s}}" % (ret + t.read_lazy())
         self.assert_(not str in ret)
 
-    def expect_EOF(self, t, msg):
-        def read_some(unused):
+    def expect_EOF(self, t):
+        def read_some():
             t.read_very_eager()
             t.read_until('not-seen', 2)
-        self.assertRaises(EOFError, read_some, msg)
+        self.assertRaises(EOFError, read_some)
 
     def connect(self):
         return connect()

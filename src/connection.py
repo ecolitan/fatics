@@ -116,6 +116,10 @@ class Connection(basic.LineReceiver):
         self.transport.will(telnet.ECHO)
         self.user = login.get_user(name, self)
         if self.user:
+            if not self.user.is_guest and self.user.is_banned:
+                # not translated, since the player hasn't logged on
+                self.write('Player "%s" is banned.\n' % self.user.name)
+                return self.transport.loseConnection()
             self.state = 'passwd'
         else:
             self.transport.wont(telnet.ECHO)

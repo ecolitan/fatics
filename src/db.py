@@ -34,7 +34,10 @@ class DB(object):
 
     def user_get(self, name):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout,user_admin_level,user_email,user_real_name FROM user WHERE user_name=%s""", (name,))
+        cursor.execute("""SELECT
+                user_id,user_name,user_passwd,user_last_logout,
+                user_admin_level, user_email,user_real_name,user_banned
+            FROM user WHERE user_name=%s""", (name,))
         row = cursor.fetchone()
         cursor.close()
         return row
@@ -116,7 +119,10 @@ class DB(object):
 
     def user_get_matching(self, prefix):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_id,user_name,user_passwd,user_last_logout,user_admin_level,user_email,user_real_name FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
+        cursor.execute("""SELECT user_id,user_name,user_passwd,
+                user_last_logout,user_admin_level,user_email,user_real_name,
+                user_banned
+            FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
         rows = cursor.fetchall()
         cursor.close()
         return rows
@@ -131,20 +137,38 @@ class DB(object):
         cursor.close()
         return user_id
 
-    def user_set_passwd(self, id, passwd):
+    def user_set_passwd(self, uid, passwd):
         cursor = self.db.cursor()
-        cursor.execute("""UPDATE user SET user_passwd=%s WHERE user_id=%s""", (passwd, id))
+        cursor.execute("""UPDATE user SET user_passwd=%s
+            WHERE user_id=%s""", (passwd, uid))
         cursor.close()
 
-    def user_set_admin_level(self, id, level):
+    def user_set_admin_level(self, uid, level):
         cursor = self.db.cursor()
-        cursor.execute("""UPDATE user SET user_admin_level=%s WHERE user_id=%s""", (str(level), id))
+        cursor.execute("""UPDATE user
+            SET user_admin_level=%s WHERE user_id=%s""", (str(level), uid))
         cursor.close()
 
-    def user_set_last_logout(self, id):
+    def user_set_last_logout(self, uid):
         cursor = self.db.cursor()
-        cursor.execute("""UPDATE user SET user_last_logout=NOW() WHERE user_id='%s'""", (id,))
+        cursor.execute("""UPDATE user
+            SET user_last_logout=NOW() WHERE user_id='%s'""", (uid,))
         cursor.close()
+
+    def user_set_banned(self, uid, val):
+        cursor = self.db.cursor()
+        assert(val in [0, 1])
+        cursor.execute("""UPDATE user
+            SET user_banned=%s WHERE user_id='%s'""", (val,uid))
+        cursor.close()
+
+    def get_banned_user_names(self):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT user_name FROM user
+            WHERE user_banned=1 LIMIT 500""")
+        ret = [r[0] for r in cursor.fetchall()]
+        cursor.close()
+        return ret
 
     def user_delete(self, id):
         """ Permanently delete a user from the database.  In normal use
