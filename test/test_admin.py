@@ -366,6 +366,63 @@ class BanTest(Test):
         self.expect('Only registered players can be banned.', t)
         self.close(t)
 
+class FilterTest(Test):
+    def test_filter_ip(self):
+        t = self.connect_as_admin()
+        t.write('+filter foobar\n')
+        self.expect('Invalid filter pattern.', t)
+
+        t.write('+filter 127.0.0.1\n')
+        self.expect('127.0.0.1 added to the filter list.', t)
+        t.write('+filter 127.0.0.1\n')
+        self.expect('127.0.0.1 is already on the filter list.', t)
+
+        t2 = self.connect()
+        t2.write('g\n')
+        self.expect('guest logins are blocked', t2)
+        self.expect_EOF(t2)
+
+        t.write('-filter 127.0.0.1\n')
+        self.expect('127.0.0.1 removed from the filter list.', t)
+        t.write('-filter 127.0.0.1\n')
+        self.expect('127.0.0.1 is not on the filter list.', t)
+
+        self.connect_as_guest()
+
+        self.close(t)
+
+    def test_filter_cidr(self):
+        t = self.connect_as_admin()
+
+        t.write('+filter 127.0.0.0/16\n')
+        self.expect('127.0.0.0/16 added to the filter list.', t)
+        t.write('-filter 127.0.0.1\n')
+        self.expect('127.0.0.1 is not on the filter list.', t)
+
+        t2 = self.connect()
+        t2.write('g\n')
+        self.expect('guest logins are blocked', t2)
+        self.expect_EOF(t2)
+
+        t.write('-filter 127.0.0.0/16\n')
+        self.expect('127.0.0.0/16 removed from the filter list.', t)
+
+        self.connect_as_guest()
+
+        self.close(t)
+
+    '''def test_implicit_prefix(self):
+        t = self.connect_as_admin()
+
+        t.write('+filter 127.0\n')
+        self.expect('127.0 added to the filter list.', t)
+        t.write('+filter 127.0.0.0/16\n')
+        self.expect('127.0.0.0/16 is already on the filter list.', t)
+        t.write('-filter 127.0.')
+        self.expect('127.0. removed from the filter list.', t)
+
+        self.close(t)'''
+
 
 class AreloadTest(Test):
     def runTest(self):

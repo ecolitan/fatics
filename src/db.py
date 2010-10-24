@@ -194,6 +194,29 @@ class DB(object):
         cursor.execute("""DELETE FROM adjourned_game WHERE white_user_id=%s OR black_user_id=%s""", (id,id))
         cursor.close()
 
+    # filtered ips
+    def get_filtered_ips(self):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT filter_pattern FROM ip_filter LIMIT 8192""")
+        ret = [r[0] for r in cursor.fetchall()]
+        cursor.close()
+        return ret
+
+    def add_filtered_ip(self, filter_pattern):
+        cursor = self.db.cursor()
+        cursor.execute("""INSERT INTO ip_filter SET filter_pattern=%s""",
+            (filter_pattern,))
+        cursor.close()
+
+    def del_filtered_ip(self, filter_pattern):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM ip_filter WHERE filter_pattern=%s""",
+            (filter_pattern,))
+        if cursor.rowcount != 1:
+            cursor.close()
+            raise DeleteError()
+        cursor.close()
+
     # comments
     def add_comment(self, admin_id, user_id, txt):
         cursor = self.db.cursor()
@@ -285,11 +308,11 @@ class DB(object):
 
     def user_in_channel(self, user_id, chid):
         cursor = self.db.cursor()
-        cursor.execute("""SELECT COUNT(*) FROM channel_user
-            WHERE channel_id=%s AND user_id=%s""", (chid, user_id))
+        cursor.execute("""SELECT 1 FROM channel_user
+            WHERE channel_id=%s AND user_id=%s LIMIT 1""", (chid, user_id))
         row = cursor.fetchone()
         cursor.close()
-        return row[0] != 0
+        return bool(row)
 
     def channel_user_count(self, chid):
         cursor = self.db.cursor()
@@ -301,12 +324,11 @@ class DB(object):
 
     def channel_is_owner(self, chid, user_id):
         cursor = self.db.cursor()
-        cursor.execute("""SELECT COUNT(*) FROM channel_owner
-            WHERE channel_id=%s AND user_id=%s""", (chid,user_id))
+        cursor.execute("""SELECT 1 FROM channel_owner
+            WHERE channel_id=%s AND user_id=%s LIMIT 1""", (chid,user_id))
         row = cursor.fetchone()
         cursor.close()
-        assert(row[0] in [0, 1])
-        return row[0] != 0
+        return bool(row)
 
     def channel_add_owner(self, chid, user_id):
         cursor = self.db.cursor()

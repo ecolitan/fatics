@@ -26,6 +26,7 @@ from zope.interface import implements
 import telnet
 import command_parser
 import lang
+import filter_
 from config import config
 from timeseal import timeseal, REPLY as TIMESEAL_REPLY
 from session import Session
@@ -116,10 +117,16 @@ class Connection(basic.LineReceiver):
         self.transport.will(telnet.ECHO)
         self.user = login.get_user(name, self)
         if self.user:
-            if not self.user.is_guest and self.user.is_banned:
-                # not translated, since the player hasn't logged on
-                self.write('Player "%s" is banned.\n' % self.user.name)
-                return self.transport.loseConnection()
+            if self.user.is_guest:
+                if filter_.check_filter(self.ip):
+                    # not translated, since the player hasn't logged on
+                    self.write('Due to abuse, guest logins are blocked from your address.\n')
+                    return self.transport.loseConnection()
+            else:
+                if self.user.is_banned:
+                    # not translated, since the player hasn't logged on
+                    self.write('Player "%s" is banned.\n' % self.user.name)
+                    return self.transport.loseConnection()
             self.state = 'passwd'
         else:
             self.transport.wont(telnet.ECHO)

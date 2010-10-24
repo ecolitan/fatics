@@ -16,9 +16,12 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import re
+
 import trie
 import channel
 import user
+import filter_
 
 from db import db, DuplicateKeyError, DeleteError
 
@@ -48,11 +51,11 @@ class MyList(object):
             raise ListError(_("You don't have permission to do that.\n"))
 
 class TitleList(MyList):
-    def __init__(self, id, name, descr, public):
-        MyList.__init__(self, name)
-        self.id = id
-        self.descr = descr
-        self.public = public
+    def __init__(self, params):
+        MyList.__init__(self, params['title_name'])
+        self.id = params['title_id']
+        self.descr = params['title_descr']
+        self.public = params['title_public']
 
     def add(self, item, conn):
         self._require_admin(conn.user)
@@ -284,6 +287,24 @@ class BanList(MyList):
             '-- ban list: %d names --\n', len(banlist)) % len(banlist))
         conn.write('%s\n' % ' '.join(banlist))
 
+class FilterList(MyList):
+    def add(self, item, conn):
+        self._require_admin(conn.user)
+        filter_.add_filter(item)
+        conn.write(_('%s added to the filter list.\n') % item)
+
+    def sub(self, item, conn):
+        self._require_admin(conn.user)
+        filter_.remove_filter(item)
+        conn.write(_('%s removed from the filter list.\n') % item)
+
+    def show(self, conn):
+        self._require_admin(conn.user)
+        filterlist = db.get_filtered_ips()
+        conn.write(ngettext('-- filter list: %d IP --\n',
+            '-- filter list: %d IPs --\n', len(filterlist)) % len(filterlist))
+        conn.write('%s\n' % ' '.join(filterlist))
+
 """ initialize lists """
 def _init_lists():
     ChannelList("channel")
@@ -292,13 +313,16 @@ def _init_lists():
     CensorList("censor")
     NoplayList("noplay")
     BanList("ban")
+    FilterList("filter")
 
     for title in db.title_get_all():
-        TitleList(title['title_id'], title['title_name'], title['title_descr'], title['title_public'])
+        TitleList(title)
 lists = trie.Trie()
 _init_lists()
 
-#  removedcom filter muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle, c50muzzle, c51muzzle,
-# censor, gnotify, noplay, channel, follow, remote, idlenotify
+# TODO:
+# removedcom muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle,
+# c50muzzle, c51muzzle,
+# gnotify, follow, remote
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

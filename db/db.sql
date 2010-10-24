@@ -111,13 +111,16 @@ CREATE TABLE `channel_owner` (
   `channel_id` int(8) NOT NULL,
   `user_id` int(8) NOT NULL,
   KEY (`channel_id`),
-  KEY (`user_id`)
+  KEY (`user_id`),
+  UNIQUE KEY (`user_id`,`channel_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `channel_user`;
 CREATE TABLE `channel_user` (
   `channel_id` int(8) NOT NULL,
   `user_id` int(8) NOT NULL,
+  KEY (`channel_id`),
+  KEY (`user_id`),
   UNIQUE KEY (`user_id`,`channel_id`)
 ) ENGINE=MyISAM;
 
@@ -163,6 +166,15 @@ CREATE TABLE `history` (
   INDEX(`user_id`),
   UNIQUE INDEX(`user_id`, `num`),
   PRIMARY KEY (`history_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- IP address filter for guests
+DROP TABLE IF EXISTS `ip_filter`;
+CREATE TABLE `ip_filter` (
+  `filter_id` int(8) NOT NULL AUTO_INCREMENT,
+  `filter_pattern` VARCHAR(43) NOT NULL,
+  PRIMARY KEY (`filter_id`),
+  UNIQUE KEY (`filter_pattern`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 -- game

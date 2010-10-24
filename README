@@ -17,6 +17,7 @@ System requirements
 * MySQL 5.0 or later
 * The MySQLdb Python module
 * The python-bcrypt module
+* The netaddr module
 * GNU gettext
 * (optional) The pexpect module, for timeseal/zipseal tests
 
@@ -58,8 +59,8 @@ password = your_password_here
 # end .my.cnf
 
 Next, you can create the tables FatICS needs using the schema in db/db.sql.
-I typically do this by by running "mysql chess" from the top of the source
-directory, and then typing "source db/db.sql" at the mysql> prompt.
+For example, from the top of the source directory:
+"mysql chess < db/db.sql".
 
 
 You can import the ECO codes into the database now using
