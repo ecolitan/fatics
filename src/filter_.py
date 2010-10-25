@@ -23,29 +23,31 @@ import list_
 
 from db import db
 
-def add_filter(pattern):
+def add_filter(pattern, conn):
     # Don't check whether this filter is a subset of any existing filter,
     # because it could be reasonable to block overlapping ranges, such as
     # when expiring filters are implemented.
     try:
-        net = IPNetwork(pattern)
+        net = IPNetwork(pattern, implicit_prefix=False).cidr
     except:
-        raise list_.ListError(A_('Invalid filter pattern.'))
+        raise list_.ListError(A_('Invalid filter pattern.\n'))
     if net in filters:
-        raise list_.ListError(_('%s is already on the filter list.\n') % pattern)
+        raise list_.ListError(_('%s is already on the filter list.\n') % net)
     filters.add(net)
-    db.add_filtered_ip(pattern)
+    db.add_filtered_ip(str(net))
+    conn.write(_('%s added to the filter list.\n') % net)
 
-def remove_filter(pattern):
+def remove_filter(pattern, conn):
     try:
-        net = IPNetwork(pattern)
+        net = IPNetwork(pattern, implicit_prefix=False).cidr
     except:
-        raise list_.ListError(A_('Invalid filter pattern.'))
+        raise list_.ListError(A_('Invalid filter pattern.\n'))
     try:
         filters.remove(net)
     except KeyError:
-        raise list_.ListError(_('%s is not on the filter list.\n') % pattern)
-    db.del_filtered_ip(pattern)
+        raise list_.ListError(_('%s is not on the filter list.\n') % net)
+    db.del_filtered_ip(str(net))
+    conn.write(_('%s removed from the filter list.\n') % net)
 
 def check_filter(addr):
     ip = IPAddress(addr)

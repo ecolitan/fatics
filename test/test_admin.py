@@ -373,9 +373,9 @@ class FilterTest(Test):
         self.expect('Invalid filter pattern.', t)
 
         t.write('+filter 127.0.0.1\n')
-        self.expect('127.0.0.1 added to the filter list.', t)
+        self.expect('127.0.0.1/32 added to the filter list.', t)
         t.write('+filter 127.0.0.1\n')
-        self.expect('127.0.0.1 is already on the filter list.', t)
+        self.expect('127.0.0.1/32 is already on the filter list.', t)
 
         t2 = self.connect()
         t2.write('g\n')
@@ -383,9 +383,9 @@ class FilterTest(Test):
         self.expect_EOF(t2)
 
         t.write('-filter 127.0.0.1\n')
-        self.expect('127.0.0.1 removed from the filter list.', t)
+        self.expect('127.0.0.1/32 removed from the filter list.', t)
         t.write('-filter 127.0.0.1\n')
-        self.expect('127.0.0.1 is not on the filter list.', t)
+        self.expect('127.0.0.1/32 is not on the filter list.', t)
 
         self.connect_as_guest()
 
@@ -394,10 +394,10 @@ class FilterTest(Test):
     def test_filter_cidr(self):
         t = self.connect_as_admin()
 
-        t.write('+filter 127.0.0.0/16\n')
+        t.write('+filter 127.0.7.7/16\n')
         self.expect('127.0.0.0/16 added to the filter list.', t)
         t.write('-filter 127.0.0.1\n')
-        self.expect('127.0.0.1 is not on the filter list.', t)
+        self.expect('127.0.0.1/32 is not on the filter list.', t)
 
         t2 = self.connect()
         t2.write('g\n')
@@ -414,15 +414,19 @@ class FilterTest(Test):
     '''def test_implicit_prefix(self):
         t = self.connect_as_admin()
 
-        t.write('+filter 127.0\n')
-        self.expect('127.0 added to the filter list.', t)
-        t.write('+filter 127.0.0.0/16\n')
-        self.expect('127.0.0.0/16 is already on the filter list.', t)
-        t.write('-filter 127.0.')
-        self.expect('127.0. removed from the filter list.', t)
+        t.write('+filter 168.50\n')
+        self.expect('168.50.0.0/16 added to the filter list.', t)
+        t.write('+filter 168.50.3.1/16\n')
+        self.expect('168.50.0.0/16 is already on the filter list.', t)
+        t.write('-filter 168.50/16\n')
+        self.expect('168.50.0.0/16 removed from the filter list.', t)
+
+        t.write('+filter 192.168.2\n')
+        self.expect('192.168.2.0/24 added to the filter list.', t)
+        t.write('-filter 192.168.2.0/24\n')
+        self.expect('192.168.2.0/24 removed from the filter list.', t)
 
         self.close(t)'''
-
 
 class AreloadTest(Test):
     def runTest(self):

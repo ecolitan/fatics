@@ -290,13 +290,11 @@ class BanList(MyList):
 class FilterList(MyList):
     def add(self, item, conn):
         self._require_admin(conn.user)
-        filter_.add_filter(item)
-        conn.write(_('%s added to the filter list.\n') % item)
+        filter_.add_filter(item, conn)
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
-        filter_.remove_filter(item)
-        conn.write(_('%s removed from the filter list.\n') % item)
+        filter_.remove_filter(item, conn)
 
     def show(self, conn):
         self._require_admin(conn.user)
