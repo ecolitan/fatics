@@ -36,7 +36,8 @@ class DB(object):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT
                 user_id,user_name,user_passwd,user_last_logout,
-                user_admin_level, user_email,user_real_name,user_banned
+                user_admin_level, user_email,user_real_name,user_banned,
+                user_muzzled,user_muted
             FROM user WHERE user_name=%s""", (name,))
         row = cursor.fetchone()
         cursor.close()
@@ -121,7 +122,7 @@ class DB(object):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT user_id,user_name,user_passwd,
                 user_last_logout,user_admin_level,user_email,user_real_name,
-                user_banned
+                user_banned,user_muzzled,user_muted
             FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
         rows = cursor.fetchall()
         cursor.close()
@@ -152,20 +153,50 @@ class DB(object):
     def user_set_last_logout(self, uid):
         cursor = self.db.cursor()
         cursor.execute("""UPDATE user
-            SET user_last_logout=NOW() WHERE user_id='%s'""", (uid,))
+            SET user_last_logout=NOW() WHERE user_id=%s""", (uid,))
         cursor.close()
 
     def user_set_banned(self, uid, val):
         cursor = self.db.cursor()
         assert(val in [0, 1])
         cursor.execute("""UPDATE user
-            SET user_banned=%s WHERE user_id='%s'""", (val,uid))
+            SET user_banned=%s WHERE user_id=%s""", (val,uid))
         cursor.close()
 
     def get_banned_user_names(self):
         cursor = self.db.cursor()
         cursor.execute("""SELECT user_name FROM user
             WHERE user_banned=1 LIMIT 500""")
+        ret = [r[0] for r in cursor.fetchall()]
+        cursor.close()
+        return ret
+
+    def user_set_muzzled(self, uid, val):
+        cursor = self.db.cursor()
+        assert(val in [0, 1])
+        cursor.execute("""UPDATE user
+            SET user_muzzled=%s WHERE user_id=%s""", (val,uid))
+        cursor.close()
+
+    def get_muzzled_user_names(self):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT user_name FROM user
+            WHERE user_muzzled=1 LIMIT 500""")
+        ret = [r[0] for r in cursor.fetchall()]
+        cursor.close()
+        return ret
+
+    def user_set_muted(self, uid, val):
+        cursor = self.db.cursor()
+        assert(val in [0, 1])
+        cursor.execute("""UPDATE user
+            SET user_muted=%s WHERE user_id=%s""", (val,uid))
+        cursor.close()
+
+    def get_muted_user_names(self):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT user_name FROM user
+            WHERE user_muted=1 LIMIT 500""")
         ret = [r[0] for r in cursor.fetchall()]
         cursor.close()
         return ret

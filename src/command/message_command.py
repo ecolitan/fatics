@@ -89,8 +89,14 @@ class Clearmessages(Command):
 class Fmessage(Command, FormatMessage):
     @requires_registration
     def run(self, args, conn):
+        if conn.user.is_muted:
+            conn.write(_('You are muted.\n'))
+            return
         u2 = user.find.by_prefix_for_user(args[0], conn)
         if u2:
+            if conn.user.name in u2.censor and not conn.user.is_admin:
+                conn.write(_('%s is censoring you.\n') % u2.name)
+                return
             msgs = db.get_messages_range(conn.user.id, args[1], args[1])
             if msgs:
                 msg = msgs[0]
@@ -171,8 +177,14 @@ class Messages(Command, FormatMessage):
             differently for the sender and receiver. """
             to = user.find.by_prefix_for_user(args[0], conn)
             if to:
+                if conn.user.is_muted:
+                    conn.write(_('You are muted.\n'))
+                    return
                 if to.is_guest:
                     conn.write(_('Only registered players can have messages.\n'))
+                    return
+                if conn.user.name in to.censor and not conn.user.is_admin():
+                    conn.write(_('%s is censoring you.\n') % to.name)
                     return
                 message_id = db.send_message(conn.user.id, to.id, args[1])
                 msg = db.get_message_id(message_id)

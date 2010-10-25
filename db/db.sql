@@ -19,6 +19,8 @@ CREATE TABLE `user` (
   `user_fics_name` varchar(18) DEFAULT NULL,
   `user_last_logout` timestamp NULL DEFAULT NULL,
   `user_banned` BOOLEAN NOT NULL DEFAULT 0,
+  `user_muzzled` BOOLEAN NOT NULL DEFAULT 0,
+  `user_muted` BOOLEAN NOT NULL DEFAULT 0,
 
   -- vars
   `time` SMALLINT(4) NOT NULL DEFAULT 2 COMMENT 'default seek time',
@@ -59,7 +61,7 @@ CREATE TABLE `user` (
   `silence` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'hide shouts and tells while playing',
   `autoflag` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'automatically flag opp',
   `unobserve` TINYINT NOT NULL DEFAULT 0 COMMENT 'automatically unobserve games',
-  `echo` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'receive a copy of own communications',
+  -- `echo` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'receive a copy of own communications',
   `examine` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'automatically examine after a game',
   `minmovetime` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'use minimum move time in games',
   -- `tolerance`

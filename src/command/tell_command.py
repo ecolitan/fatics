@@ -26,6 +26,10 @@ import admin
 
 class TellCommand(Command):
     def _do_tell(self, args, conn):
+        if conn.user.is_muted:
+            # mute now prevents *all* tells
+            conn.write(_('You are muted.\n'))
+            return (None, None)
         u = None
         ch = None
         if args[0] == '.':
@@ -61,8 +65,7 @@ class TellCommand(Command):
             count = ch.tell(args[1], conn.user)
             conn.write(ngettext('(told %d player in channel %d)\n', '(told %d players in channel %d)\n', count) % (count, ch.id))
         elif u:
-            if conn.user.name in u.censor and conn.user.admin_level <= \
-                    admin.level.user:
+            if conn.user.name in u.censor and not conn.user.is_admin():
                 conn.write(_("%s is censoring you.\n") % u.name)
             elif conn.user.is_guest and not u.vars['tell']:
                 conn.write(_('''Player "%s" isn't listening to unregistered users' tells.\n''' % u.name))
@@ -119,6 +122,10 @@ class Qtell(Command):
 @ics_command('say', 'S')
 class Say(Command):
     def run(self, args, conn):
+        if conn.user.is_muted:
+            # mute now prevents *all* tells
+            conn.write(_('You are muted.\n'))
+            return
         if conn.user.session.game:
             g = conn.user.session.game
             opp = g.get_opp(conn.user)

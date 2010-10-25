@@ -169,7 +169,7 @@ class TestChannelOwnership(Test):
 
 class TestKick(Test):
     @with_player('TestPlayer', 'testpass')
-    def test_channel_kick(self):
+    def test_kick(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
         t.write('=ch\n')
@@ -193,12 +193,15 @@ class TestKick(Test):
         self.close(t2)
 
     @with_player('TestPlayer', 'testpass')
-    def test_channel_kick_admin(self):
+    def test_kick_admin(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('TestPlayer', 'testpass')
 
         t2.write('+ch 5000\n')
         self.expect('You are now the owner of channel 5000.', t2)
+
+        t.write('chkick 5000 testplayer\n')
+        self.expect('You are not in channel 5000.', t)
         t.write('+ch 5000\n')
         self.expect('[5000] added', t)
 
@@ -213,9 +216,33 @@ class TestKick(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('TestPlayer', 'testpass')
+    def test_kick_offline(self):
+        t2 = self.connect_as('testplayer', 'testpass')
+        t2.write('+ch 1024\n')
+        self.expect('You are now the owner of channel 1024.', t2)
+        self.expect('[1024] added to your channel list.', t2)
+        self.close(t2)
+
+        t = self.connect_as_admin()
+        t.write('+ch 1024\n')
+        self.expect('[1024] added to your channel list.', t)
+        t.write('chkick 1024 testplayer\n')
+        self.expect('admin(*)(1024): *** Kicked out TestPlayer. ***', t)
+        t.write('-ch 1024\n')
+        self.expect('[1024] removed from your channel list.', t)
+        self.close(t)
+
+        t2 = self.connect_as('testplayer', 'testpass')
+        t2.write('=ch\n')
+        self.expect('-- channel list: 1 channel --\r\n1\r\n', t2)
+        t2.write('inch 1024\n')
+        self.expect('0 players', t2)
+        self.close(t2)
+
     @with_player('testone', 'testpass')
     @with_player('testtwo', 'testpass')
-    def test_channel_kick_bad(self):
+    def test_kick_bad(self):
         t = self.connect_as('testone', 'testpass')
         t2 = self.connect_as('testtwo', 'testpass')
         t.write('+ch 2000\n')

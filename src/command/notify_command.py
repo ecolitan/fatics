@@ -33,7 +33,7 @@ class Summon(Command):
             return
         if u == conn.user:
             conn.write(_("You can't summon yourself.\n"))
-        if conn.user.admin_level <= admin.level.user:
+        if not conn.user.is_admin():
             if conn.user.name in u.censor:
                 conn.write(_("%s is censoring you.\n") % u.name)
                 return

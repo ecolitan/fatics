@@ -428,6 +428,134 @@ class FilterTest(Test):
 
         self.close(t)'''
 
+class MuzzleTest(Test):
+    @with_player('TestPlayer', 'passwd')
+    def test_muzzle(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'passwd')
+
+        t.write('+muzzle testplayer\n')
+        self.expect('TestPlayer added to the muzzle list.', t)
+        self.expect('admin has added you to the muzzle list.', t2)
+        t.write('+muzzle testplayer\n')
+        self.expect('TestPlayer is already on the muzzle list.', t)
+        t2.write('shout test\n')
+        self.expect('You are muzzled.', t2)
+        t2.write('cshout test\n')
+        self.expect('You are muzzled.', t2)
+        t2.write('it test\n')
+        self.expect('You are muzzled.', t2)
+        t2.close()
+
+        t.write('=muzzle\n')
+        self.expect('-- muzzle list: 1 name --\r\nTestPlayer\r\n', t)
+
+        t.write('showcomment testplayer\n')
+        self.expect_re('admin at .*: Muzzled', t)
+
+        t2 = self.connect_as('TestPlayer', 'passwd')
+        t2.write('shout test\n')
+        self.expect('You are muzzled.', t2)
+        t.write('-muzzle testplayer\n')
+        self.expect('TestPlayer removed from the muzzle list.', t)
+        self.expect('admin has removed you from the muzzle list.', t2)
+        t2.write('shout test\n')
+        self.expect('TestPlayer shouts: test', t)
+        self.expect('TestPlayer shouts: test', t2)
+
+        t.write('-muzzle testplayer\n')
+        self.expect('TestPlayer is not on the muzzle list.', t)
+
+        t2.write('+muzzle admin\n')
+        self.expect("You don't have permission to do that.", t2)
+        t2.write('=muzzle\n')
+        self.expect("You don't have permission to do that.", t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_muzzle_bad(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+        t.write('+muzzle nosuchplayer\n')
+        self.expect('no player matching the name "nosuchplayer"', t)
+        t.write('+muzzle admin\n')
+        self.expect('Admins cannot be muzzled.', t)
+        t.write('+muzzle guestabcd\n')
+        self.expect('Only registered players can be muzzled.', t)
+        self.close(t)
+        self.close(t2)
+
+class MuteTest(Test):
+    @with_player('TestPlayer', 'passwd')
+    def test_mute(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'passwd')
+
+        t.write('+mute testplayer\n')
+        self.expect('TestPlayer added to the mute list.', t)
+        self.expect('admin has added you to the mute list.', t2)
+        t.write('+mute testplayer\n')
+        self.expect('TestPlayer is already on the mute list.', t)
+
+        t2.write('t 1 test\n')
+        self.expect('You are muted.', t2)
+        t2.write('t testplayer test\n')
+        self.expect('You are muted.', t2)
+        t2.write('shout test\n')
+        self.expect('You are muted.', t2)
+        t2.write('mess testplayer test\n')
+        self.expect('You are muted.', t2)
+
+        t2.close()
+
+        t.write('=mute\n')
+        self.expect('-- mute list: 1 name --\r\nTestPlayer\r\n', t)
+
+        t.write('showcomment testplayer\n')
+        self.expect_re('admin at .*: Muted', t)
+
+        t2 = self.connect_as('TestPlayer', 'passwd')
+        t2.write('t 1 test\n')
+        self.expect('You are muted.', t2)
+        t.write('-mute testplayer\n')
+        self.expect('TestPlayer removed from the mute list.', t)
+        self.expect('admin has removed you from the mute list.', t2)
+
+        t2 = self.connect_as('testplayer', 'passwd')
+
+        t.write('-mute testplayer\n')
+        self.expect('TestPlayer is not on the mute list.', t)
+
+        t2.write('+mute admin\n')
+        self.expect("You don't have permission to do that.", t2)
+        t2.write('=mute\n')
+        self.expect("You don't have permission to do that.", t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_mute_guest(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+        t.write('+mute GuestABCD\n')
+        self.expect('GuestABCD added to the mute list.', t)
+        self.expect('admin has added you to the mute list.', t2)
+        t2.write('t 4 test\n')
+        self.expect('You are muted.', t2)
+        t2.write('t guestabcd test\n')
+        self.expect('You are muted.', t2)
+        self.close(t)
+        self.close(t2)
+
+    def test_mute_bad(self):
+        t = self.connect_as_admin()
+        t.write('+mute nosuchplayer\n')
+        self.expect('no player matching the name "nosuchplayer"', t)
+        t.write('+mute admin\n')
+        self.expect('Admins cannot be muted.', t)
+        self.close(t)
+
 class AreloadTest(Test):
     def runTest(self):
         self.skip('not stable')

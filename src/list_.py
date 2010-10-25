@@ -50,7 +50,24 @@ class MyList(object):
         if not user.is_admin():
             raise ListError(_("You don't have permission to do that.\n"))
 
-class TitleList(MyList):
+class SystemUserList(MyList):
+    def _notify_added(self, conn, u):
+        """ When a user is added to a list, notify the adding and
+        added users. """
+        conn.write(_('%(uname)s added to the %(lname)s list.\n') %
+            {'uname': u.name, 'lname': self.name})
+        if u.is_online:
+            u.write_('%(aname)s has added you to the %(lname)s list.\n',
+                {'aname': conn.user.name, 'lname': self.name})
+
+    def _notify_removed(self, conn, u):
+        conn.write(_('%(uname)s removed from the %(lname)s list.\n') %
+            {'uname': u.name, 'lname': self.name})
+        if u.is_online:
+            u.write_('%(aname)s has removed you from the %(lname)s list.\n',
+                {'aname': conn.user.name, 'lname': self.name})
+
+class TitleList(SystemUserList):
     def __init__(self, params):
         MyList.__init__(self, params['title_name'])
         self.id = params['title_id']
@@ -69,11 +86,7 @@ class TitleList(MyList):
             except DuplicateKeyError:
                 raise ListError(_('%(uname)s is already on the %(lname)s list.\n') %
                     {'uname': u.name, 'lname': self.name })
-            conn.write(_('%s added to the %s list.\n') %
-                (u.name, self.name))
-            if u.is_online:
-                u.write_('%(aname)s has added you to the %(lname)s list.\n',
-                    {'aname': conn.user.name, 'lname': self.name})
+            self._notify_added(conn, u)
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
@@ -86,10 +99,7 @@ class TitleList(MyList):
             except DeleteError:
                 raise ListError(_('%(uname)s is not on the %(lname)s list.\n') %
                     {'uname': u.name, 'lname': self.name })
-            conn.write(_('%s removed from the %s list.\n') % (u.name, self.name))
-            if u.is_online:
-                u.write_('%(aname)s has removed you from the %(lname)s list.\n',
-                    {'aname': conn.user.name, 'lname': self.name})
+            self._notify_removed(conn, u)
 
     def show(self, conn):
         if not self.public:
@@ -200,9 +210,7 @@ class ChannelList(MyList):
         chlist = conn.user.channels
         conn.write(ngettext('-- channel list: %d channel --\n',
             '-- channel list: %d channels --\n', len(chlist)) % len(chlist))
-        for ch in chlist:
-            conn.write('%s ' % ch)
-        conn.write('\n')
+        conn.write('%s\n' % ' '.join([str(ch) for ch in chlist]))
 
 class CensorList(MyList):
     def add(self, item, conn):
@@ -250,7 +258,7 @@ class NoplayList(MyList):
             '-- noplay list: %d names --\n', len(noplist)) % len(noplist))
         conn.write('%s\n' % ' '.join(noplist))
 
-class BanList(MyList):
+class BanList(SystemUserList):
     def add(self, item, conn):
         self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
@@ -261,10 +269,9 @@ class BanList(MyList):
                 raise ListError(A_('Admins cannot be banned.\n'))
             if u.is_banned:
                 raise ListError(_('%s is already on the ban list.\n') % u.name)
-            db.user_set_banned(u.id, 1)
-            u.is_banned = True
+            u.set_banned(True)
             db.add_comment(conn.user.id, u.id, 'Banned.')
-            conn.write(_('%s added to the ban list.\n') % u.name)
+            self._notify_added(conn, u)
             if u.is_online:
                 conn.write('Note: %s is online.\n' % u.name)
 
@@ -276,9 +283,9 @@ class BanList(MyList):
                 raise ListError(A_('Only registered players can be banned.\n'))
             if not u.is_banned:
                 raise ListError(_('%s is not on the ban list.\n') % u.name)
-            db.user_set_banned(u.id, 0)
-            u.is_banned = False
-            conn.write(_('%s removed from the ban list.\n') % (u.name))
+            u.set_banned(False)
+            db.add_comment(conn.user.id, u.id, 'Unbanned.')
+            self._notify_removed(conn, u)
 
     def show(self, conn):
         self._require_admin(conn.user)
@@ -286,6 +293,72 @@ class BanList(MyList):
         conn.write(ngettext('-- ban list: %d name --\n',
             '-- ban list: %d names --\n', len(banlist)) % len(banlist))
         conn.write('%s\n' % ' '.join(banlist))
+
+class MuzzleList(SystemUserList):
+    def add(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if u.is_guest:
+                raise ListError(A_('Only registered players can be muzzled.\n'))
+            if u.is_admin():
+                raise ListError(A_('Admins cannot be muzzled.\n'))
+            if u.is_muzzled:
+                raise ListError(_('%s is already on the muzzle list.\n') % u.name)
+            u.set_muzzled(True)
+            db.add_comment(conn.user.id, u.id, 'Muzzled.')
+            self._notify_added(conn, u)
+
+    def sub(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if u.is_guest:
+                raise ListError(A_('Only registered players can be muzzled.\n'))
+            if not u.is_muzzled:
+                raise ListError(_('%s is not on the muzzle list.\n') % u.name)
+            u.set_muzzled(False)
+            db.add_comment(conn.user.id, u.id, 'Unmuzzled.')
+            self._notify_removed(conn, u)
+
+    def show(self, conn):
+        self._require_admin(conn.user)
+        muzlist = db.get_muzzled_user_names()
+        conn.write(ngettext('-- muzzle list: %d name --\n',
+            '-- muzzle list: %d names --\n', len(muzlist)) % len(muzlist))
+        conn.write('%s\n' % ' '.join(muzlist))
+
+class MuteList(SystemUserList):
+    def add(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if u.is_admin():
+                raise ListError(A_('Admins cannot be muted.\n'))
+            if u.is_muted:
+                raise ListError(_('%s is already on the mute list.\n') % u.name)
+            u.set_muted(True)
+            if not u.is_guest:
+                db.add_comment(conn.user.id, u.id, 'Muted.')
+            self._notify_added(conn, u)
+
+    def sub(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if not u.is_muted:
+                raise ListError(_('%s is not on the mute list.\n') % u.name)
+            u.set_muted(False)
+            if not u.is_guest:
+                db.add_comment(conn.user.id, u.id, 'Unmuted.')
+            self._notify_removed(conn, u)
+
+    def show(self, conn):
+        self._require_admin(conn.user)
+        mutelist = db.get_muted_user_names()
+        conn.write(ngettext('-- mute list: %d name --\n',
+            '-- mute list: %d names --\n', len(mutelist)) % len(mutelist))
+        conn.write('%s\n' % ' '.join(mutelist))
 
 class FilterList(MyList):
     def add(self, item, conn):
@@ -312,6 +385,8 @@ def _init_lists():
     NoplayList("noplay")
     BanList("ban")
     FilterList("filter")
+    MuzzleList("muzzle")
+    MuteList("mute")
 
     for title in db.title_get_all():
         TitleList(title)

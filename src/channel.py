@@ -45,6 +45,8 @@ class Channel(object):
         self.online = []
 
     def tell(self, msg, user):
+        #if user.is_chmuzzled:
+        #    user.write(_('You are muzzled in all channels.\n'))
         msg = '%s(%d): %s\n' % (user.get_display_name(), self.id, msg)
         is_guest = user.is_guest
         count = 0

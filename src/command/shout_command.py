@@ -23,6 +23,12 @@ from command import *
 class Shout(Command):
     @requires_registration
     def run(self, args, conn):
+        if conn.user.is_muzzled:
+            conn.write(_('You are muzzled.\n'))
+            return
+        if conn.user.is_muted:
+            conn.write(_('You are muted.\n'))
+            return
         if not conn.user.vars['shout'] or conn.user.in_silence():
             conn.write(_("(Did not shout because you are not listening to shouts)\n"))
         else:
@@ -40,6 +46,12 @@ class Shout(Command):
 class It(Command):
     @requires_registration
     def run(self, args, conn):
+        if conn.user.is_muzzled:
+            conn.write(_('You are muzzled.\n'))
+            return
+        if conn.user.is_muted:
+            conn.write(_('You are muted.\n'))
+            return
         if not conn.user.vars['shout'] or conn.user.in_silence():
             conn.write(_("(Did not it-shout because you are not listening to shouts)\n"))
         else:
@@ -58,6 +70,12 @@ class It(Command):
 class Cshout(Command):
     @requires_registration
     def run(self, args, conn):
+        if conn.user.is_muzzled:
+            conn.write(_('You are muzzled.\n'))
+            return
+        if conn.user.is_muted:
+            conn.write(_('You are muted.\n'))
+            return
         if not conn.user.vars['cshout'] or conn.user.in_silence():
             conn.write(_("(Did not c-shout because you are not listening to c-shouts)\n"))
         else:

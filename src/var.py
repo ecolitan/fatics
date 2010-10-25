@@ -246,7 +246,7 @@ class VarList(object):
         BoolVar("minmovetime", True, N_("You will request minimum move time when games start.\n"), N_("You will not request minimum move time when games start.\n")).persist().add_as_var()
         BoolVar("noescape", True, N_("You will request noescape when games start..\n"), N_("You will not request noescape when games start.\n")).persist().add_as_var()
         BoolVar("seek", True, N_("You will now see seek ads.\n"), N_("You will not see seek ads.\n")).persist().add_as_var()
-        BoolVar("echo", True, N_("You will not hear communications echoed.\n"), N_("You will now not hear communications echoed.\n")).persist().add_as_var()
+        #BoolVar("echo", True, N_("You will not hear communications echoed.\n"), N_("You will now not hear communications echoed.\n")).persist().add_as_var()
         BoolVar("examine", False, N_("You will now enter examine mode after a game.\n"), N_("You will now not enter examine mode after a game.\n")).persist().add_as_var()
         BoolVar("mailmess", False, N_("Your messages will be mailed to you.\n"), N_("Your messages will not be mailed to you.\n")).persist().add_as_var()
         BoolVar("showownseek", False, N_("You will now see your own seeks.\n"), N_("You will not see your own seeks.\n")).persist().add_as_var()

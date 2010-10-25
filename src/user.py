@@ -60,7 +60,6 @@ class BaseUser(object):
         self.notified = set()
         self.idlenotifiers = set()
         self.idlenotified = set()
-        self.censor = set()
         self.noplay = set()
         self.session = conn.session
         self.session.set_user(self)
@@ -295,8 +294,18 @@ class BaseUser(object):
     def format_datetime(self, date):
         return date.strftime("%Y-%m-%d %H:%M %Z")
 
+    def set_muzzled(self, val):
+        """ Muzzle or unmuzzle the user (affects shouts). """
+        self.is_muzzled = val
+
+    def set_muted(self, val):
+        """ Mute or unmute the user (affects all communications). """
+        self.is_muted = val
+
+
 # a registered user
 class User(BaseUser):
+
     def __init__(self, u):
         BaseUser.__init__(self)
         self.id = u['user_id']
@@ -307,6 +316,8 @@ class User(BaseUser):
         self.last_logout = u['user_last_logout']
         self.admin_level = u['user_admin_level']
         self.is_banned = u['user_banned']
+        self.is_muzzled = u['user_muzzled']
+        self.is_muted = u['user_muted']
         self.is_guest = False
         self.channels = db.user_get_channels(self.id)
         self.vars = db.user_get_vars(self.id,
@@ -325,6 +336,14 @@ class User(BaseUser):
         for note in db.user_get_notes(self.id):
             self.notes[note['num']] = note['txt']
         self._rating = None
+
+    def _get_censor(self):
+        if self._censor is None:
+            self._censor = set([dbu['user_name'] for dbu in
+                db.user_get_censored(self.id)])
+        return self._censor
+    _censor = None
+    censor = property(fget=_get_censor)
 
     def get_display_name(self):
         """Get the name displayed for other users, e.g. admin(*)(SR)"""
@@ -382,8 +401,8 @@ class User(BaseUser):
         for a in db.user_get_aliases(self.id):
             self.aliases[a['name']] = a['val']
 
-        for dbu in db.user_get_censored(self.id):
-            self.censor.add(dbu['user_name'])
+        #for dbu in db.user_get_censored(self.id):
+        #    self.censor.add(dbu['user_name'])
         for dbu in db.user_get_noplayed(self.id):
             self.noplay.add(dbu['user_name'])
 
@@ -536,6 +555,19 @@ class User(BaseUser):
         db.user_set_email(self.id, email)
         self.email = email
 
+    def set_banned(self, val):
+        """ Ban or unban this user. """
+        self.is_banned = val
+        db.user_set_banned(self.id, 1 if val else 0)
+
+    def set_muzzled(self, val):
+        BaseUser.set_muzzled(self, val)
+        db.user_set_muzzled(self.id, 1 if val else 0)
+
+    def set_muted(self, val):
+        BaseUser.set_muted(self, val)
+        db.user_set_muted(self.id, 1 if val else 0)
+
 class GuestUser(BaseUser):
     def __init__(self, name):
         BaseUser.__init__(self)
@@ -559,6 +591,9 @@ class GuestUser(BaseUser):
         self.admin_level = admin.Level.user
         self.channels = channel.chlist.get_default_guest_channels()
         self.vars = var.varlist.get_default_vars()
+        self.censor = set()
+        self.is_muzzled = False
+        self.is_muted = False
 
     def log_on(self, conn):
         self._titles = set(['unregistered'])

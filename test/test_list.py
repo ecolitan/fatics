@@ -32,7 +32,7 @@ class TestList(Test):
         self.expect("You don't have permission", t)
 
         self.close(t)
-    
+
     def test_list_persistence(self):
         # see also test_title; this tests persistence
         t = self.connect_as_admin()
@@ -78,7 +78,7 @@ class TestTitle(Test):
 
         t.write('+gm admin\n')
         self.expect("admin added to the GM list", t)
-        
+
         t.write('=gm\n')
         self.expect("GM list:", t)
         self.expect("admin", t)
@@ -160,13 +160,13 @@ class TestCensor(Test):
 
         t2.write('t guestABCD hi\n')
         self.expect('GuestABCD is censoring you.', t2)
-        
+
         t2.write('m guestabcd\n')
         self.expect('GuestABCD is censoring you.', t2)
-        
+
         t.write('-cen guestdefg\n')
         self.expect('GuestDEFG removed from your censor list.', t)
-        
+
         t2.write('t guestabcd hi again\n')
         self.expect('(told GuestABCD)', t2)
         self.expect('GuestDEFG(U) tells you: hi again', t)
@@ -181,72 +181,87 @@ class TestCensor(Test):
 
         self.close(t2)
         self.close(t)
-    
+
+    @with_player('TestPlayer', 'test')
     def test_censor_user(self):
-        self.adduser('TestPlayer', 'test')
+        t = self.connect_as_admin()
+        t.write('+cen nosuchplayer\n')
+        self.expect('no player matching the name "nosuchplayer"', t)
 
-        try:
-            t = self.connect_as_admin()
-            t.write('+cen nosuchplayer\n')
-            self.expect('no player matching the name "nosuchplayer"', t)
+        t.write('+cen TestPlayer\n')
+        self.expect('TestPlayer added to your censor list.', t)
 
-            t.write('+cen TestPlayer\n')
-            self.expect('TestPlayer added to your censor list.', t)
-            
-            t.write('+cen TestPlayer\n')
-            self.expect('TestPlayer is already on your censor list.', t)
-        
-            t.write("=cen\n")
-            self.expect('censor list: 1 name', t)
-            self.expect('TestPlayer', t)
-            self.close(t)
+        t.write('+cen TestPlayer\n')
+        self.expect('TestPlayer is already on your censor list.', t)
 
-            t = self.connect_as_admin()
-            t2 = self.connect_as('TestPlayer', 'test')
-            t.write('+ch 1\n')
-            t2.write('+ch 1\n')
+        t.write("=cen\n")
+        self.expect('censor list: 1 name', t)
+        self.expect('TestPlayer', t)
+        self.close(t)
 
-            t2.write('t Admin hey there!\n')
-            self.expect("admin is censoring you.", t2)
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'test')
+        t.write('+ch 5\n')
+        t2.write('+ch 5\n')
 
-            t2.write('shout anybody there?\n')
-            self.expect("shouted to 1 player", t2)
+        t2.write('t Admin hey there!\n')
+        self.expect("admin is censoring you.", t2)
 
-            t2.write('cshout or there?\n')
-            self.expect("c-shouted to 1 player", t2)
-            
-            t2.write('tell 1 or in ch 1\n')
-            self.expect("(told 1 player in channel 1)", t2)
+        t2.write('mess admin test\n')
+        self.expect("admin is censoring you.", t2)
 
-            t.write('-cen testplayer\n')
-            self.expect('TestPlayer removed from your censor list.', t)
-            
-            t.write('-cen testplayer\n')
-            self.expect('TestPlayer is not on your censor list.', t)
-            
-            t2.write('shout test 123\n')
-            self.expect("(shouted to 2 players)", t2)
-            self.expect('test 123', t)
-            
-            t2.write('tell 1 456 789\n')
-            self.expect("(told 2 players in channel 1)", t2)
-            self.expect('TestPlayer(1): 456 789', t)
+        t2.write('shout anybody there?\n')
+        self.expect("shouted to 1 player", t2)
 
-            self.close(t)
+        t2.write('cshout or there?\n')
+        self.expect("c-shouted to 1 player", t2)
 
-            t = self.connect_as_admin()
-            t2.write('t admin test 123\n')
-            self.expect('test 123', t)
+        t2.write('tell 5 or in ch 1\n')
+        self.expect("(told 1 player in channel 5)", t2)
 
+        t.write('-cen testplayer\n')
+        self.expect('TestPlayer removed from your censor list.', t)
 
-        finally:
-            t.write('-ch 1\n')
-            t2.write('-ch 1\n')
-            t.write('-cen testplayer\n')
-            self.close(t)
-            self.close(t2)
+        t.write('-cen testplayer\n')
+        self.expect('TestPlayer is not on your censor list.', t)
 
-            self.deluser('TestPlayer')
+        t2.write('shout test 123\n')
+        self.expect("(shouted to 2 players)", t2)
+        self.expect('test 123', t)
+
+        t2.write('tell 5 456 789\n')
+        self.expect("(told 2 players in channel 5)", t2)
+        self.expect('TestPlayer(5): 456 789', t)
+
+        self.close(t)
+
+        t = self.connect_as_admin()
+        t2.write('t admin test 123\n')
+        self.expect('test 123', t)
+
+        t.write('-ch 5\n')
+        t2.write('-ch 5\n')
+        t.write('-cen testplayer\n')
+        self.close(t)
+        self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_censor_persistence(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t.write('+cen testplayer\n')
+        self.expect('TestPlayer added to your censor list.', t)
+        self.close(t)
+        self.close(t2)
+
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t2.write('t admin hi\n')
+        self.expect('admin is censoring you.', t2)
+        t.write('-cen testplayer\n')
+        self.expect('TestPlayer removed from your censor list.', t)
+        self.close(t)
+        self.close(t2)
 
 class TestNoplay(Test):
     def test_noplay_guest(self):
@@ -273,52 +288,47 @@ class TestNoplay(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('TestPlayer', 'test')
     def test_noplay_user(self):
-        self.adduser('TestPlayer', 'test')
+        t = self.connect_as_admin()
+        t.write('+noplay nosuchplayer\n')
+        self.expect('no player matching the name "nosuchplayer"', t)
 
-        try:
-            t = self.connect_as_admin()
-            t.write('+noplay nosuchplayer\n')
-            self.expect('no player matching the name "nosuchplayer"', t)
+        t.write('+noplay TestPlayer\n')
+        self.expect('TestPlayer added to your noplay list.', t)
 
-            t.write('+noplay TestPlayer\n')
-            self.expect('TestPlayer added to your noplay list.', t)
+        t.write('+noplay TestPlayer\n')
+        self.expect('TestPlayer is already on your noplay list.', t)
 
-            t.write('+noplay TestPlayer\n')
-            self.expect('TestPlayer is already on your noplay list.', t)
+        t.write("=noplay\n")
+        self.expect('noplay list: 1 name', t)
+        self.expect('TestPlayer', t)
+        self.close(t)
 
-            t.write("=noplay\n")
-            self.expect('noplay list: 1 name', t)
-            self.expect('TestPlayer', t)
-            self.close(t)
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'test')
 
-            t = self.connect_as_admin()
-            t2 = self.connect_as('TestPlayer', 'test')
+        t2.write('match admin\n')
+        self.expect("You are on admin's noplay list", t2)
 
-            t2.write('match admin\n')
-            self.expect("You are on admin's noplay list", t2)
+        t.write('-noplay testplayer\n')
+        self.expect('TestPlayer removed from your noplay list.', t)
 
-            t.write('-noplay testplayer\n')
-            self.expect('TestPlayer removed from your noplay list.', t)
+        t.write('-noplay testplayer\n')
+        self.expect('TestPlayer is not on your noplay list.', t)
 
-            t.write('-noplay testplayer\n')
-            self.expect('TestPlayer is not on your noplay list.', t)
+        t2.write('match admin\n')
+        self.expect("Issuing:", t2)
+        self.expect("Challenge:", t)
 
-            t2.write('match admin\n')
-            self.expect("Issuing:", t2)
-            self.expect("Challenge:", t)
+        self.close(t)
 
-            self.close(t)
+        t = self.connect_as_admin()
+        t2.write('match admin\n')
+        self.expect("Issuing:", t2)
+        self.expect("Challenge:", t)
 
-            t = self.connect_as_admin()
-            t2.write('match admin\n')
-            self.expect("Issuing:", t2)
-            self.expect("Challenge:", t)
-
-            self.close(t)
-            self.close(t2)
-
-        finally:
-            self.deluser('TestPlayer')
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
