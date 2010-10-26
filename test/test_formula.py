@@ -113,5 +113,9 @@ class TestFormula(Test):
         self.close(t)
         self.close(t2)
 
+    '''def test_formula_1(self):
+        t = self.connect_as('GuestABCD', '')
+        t.write('set formula inc=0 && time=3 && !private && rating>1500 && 1850>rating\n')
+        self.close(t)'''
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

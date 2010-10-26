@@ -1404,8 +1404,8 @@ class Crazyhouse(object):
                 relation = -3
             white_clock = 0
             black_clock = 0
-            white_name = self.game.players[0].name
-            black_name = self.game.players[0].name
+            white_name = list(self.game.players)[0].name
+            black_name = list(self.game.players)[0].name
             clock_is_ticking = 0
         elif self.game.gtype == PLAYED:
             if self.game.white == user:

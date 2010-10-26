@@ -27,7 +27,7 @@ from variant.variant_factory import variant_factory
 class ExaminedGame(Game):
     def __init__(self, user, hist_game=None):
         self.gtype = EXAMINED
-        self.players = [user]
+        self.players = set([user])
         super(ExaminedGame, self).__init__()
 
         self.white_time = 0
@@ -67,7 +67,7 @@ class ExaminedGame(Game):
         if self.variant.pos.ply >= len(self.moves):
             conn.write(_("You're at the end of the game.\n"))
             return
-        for p in self.players + list(self.observers):
+        for p in self.players | self.observers:
             p.nwrite_('Game %d: %s goes forward %d move.\n',
                 'Game %d: %s goes forward %d moves.\n', n,
                 (self.number, conn.user.name, n))
@@ -127,7 +127,7 @@ class ExaminedGame(Game):
         if self.variant.pos.ply <= 0:
             conn.write(_("You're at the beginning of the game.\n"))
             return
-        for p in self.players + list(self.observers):
+        for p in self.players | self.observers:
             p.nwrite_('Game %d: %s backs up %d move.\n',
                 'Game %d: %s backs up %d moves.\n', n,
                 (self.number, conn.user.name, n))
@@ -152,7 +152,7 @@ class ExaminedGame(Game):
         assert(self.variant.pos.get_last_move() == mv)
         mv.time = 0.0
         super(ExaminedGame, self).next_move(mv, conn)
-        for p in self.players + list(self.observers):
+        for p in self.players | self.observers:
             p.write_('Game %d: %s moves: %s\n', (self.number, conn.user.name, mv.to_san()))
         self._check_result()
 
@@ -163,7 +163,7 @@ class ExaminedGame(Game):
         # user may be offline if he or she disconnected unexpectedly
         if user.is_online:
             user.write_('You are no longer examining game %d.\n', self.number)
-        for p in self.players + list(self.observers):
+        for p in self.players | self.observers:
             p.write_('%s has stopped examining game %d.\n', (user.name, self.number))
         if not self.players:
             for p in self.observers:
@@ -171,7 +171,7 @@ class ExaminedGame(Game):
             self.free()
 
     def result(self, msg, result_code):
-        for p in self.players + list(self.observers):
+        for p in self.players | self.observers:
             p.write_('Game %d: %s %s\n', (self.number, msg, result_code))
 
     def free(self):

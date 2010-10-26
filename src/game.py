@@ -221,9 +221,9 @@ class Game(object):
             white_time = self.white_time
         else:
             assert(self.gtype == EXAMINED)
-            white_name = self.players[0].name
+            white_name = list(self.players)[0].name
             black_name = white_name
-            white_rating = self.players[0].get_rating(self.speed_variant)
+            white_rating = list(self.players)[0].get_rating(self.speed_variant)
             black_rating = white_rating
 
         conn.write("%s (%s) vs. %s (%s) --- %s\n" % (white_name,
@@ -256,8 +256,8 @@ class Game(object):
         if self.observers:
             olist = [u.get_display_name() for u in self.observers]
             if self.gtype == EXAMINED:
-                white_name = self.players[0].name
-                black_name = self.players[0].name
+                white_name = list(self.players)[0].name
+                black_name = list(self.players)[0].name
             else:
                 white_name = self.white.name
                 black_name = self.black.name
@@ -299,7 +299,7 @@ class PlayedGame(Game):
         # XXX is this property necessary?
         self.is_active = True
 
-        self.players = [self.white, self.black]
+        self.players = set([self.white, self.black])
         super(PlayedGame, self).__init__()
 
         self.flip = False

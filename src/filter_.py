@@ -58,7 +58,7 @@ def _init_filters():
     IPNetwork('127.0.0.1')
     IPNetwork('127.0.0.1/16')
 
-    global filters, networks
+    global filters
     filters = set([IPNetwork(pat) for pat in db.get_filtered_ips()])
 _init_filters()
 

@@ -70,8 +70,9 @@ class TellCommand(Command):
             elif conn.user.is_guest and not u.vars['tell']:
                 conn.write(_('''Player "%s" isn't listening to unregistered users' tells.\n''' % u.name))
             else:
-                u.write('\n' + _("%s tells you: ") % conn.user.get_display_name() + args[1] + '\n')
-                conn.write(_("(told %s)") % u.name + '\n')
+                u.write_('%s tells you: %s\n',
+                    (conn.user.get_display_name(), args[1]))
+                conn.write(_("(told %s)\n") % u.name)
 
         return (u, ch)
 
@@ -130,10 +131,13 @@ class Say(Command):
             g = conn.user.session.game
             opp = g.get_opp(conn.user)
             assert(opp.is_online)
+            if conn.user.name in opp.censor and not conn.user.is_admin():
+                conn.write(_("%s is censoring you.\n") % opp.name)
+                return
             opp.write_("%s[%d] says: %s\n", (conn.user.get_display_name(),
                 g.number, args[0]))
             # TODO ", who is playing"; ", who is examining a game"
-            conn.write(_('(told %s)') % opp.name)
+            conn.write(_('(told %s)\n') % opp.name)
         else:
             opp = conn.user.session.last_opp
             if opp:
@@ -143,9 +147,13 @@ class Say(Command):
                     if not opp:
                         conn.write(_('%s is no longer online.\n') % name)
                 if opp:
+                    if conn.user.name in opp.censor and (
+                            not conn.user.is_admin()):
+                        conn.write(_("%s is censoring you.\n") % opp.name)
+                        return
                     opp.write_("%s says: %s\n", (conn.user.get_display_name(),
                         args[0]))
-                    conn.write(_('(told %s)') % opp.name)
+                    conn.write(_('(told %s)\n') % opp.name)
             else:
                 conn.write(_("I don't know whom to say that to.\n"))
 

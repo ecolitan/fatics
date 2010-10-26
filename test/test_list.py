@@ -246,6 +246,45 @@ class TestCensor(Test):
         self.close(t2)
 
     @with_player('TestPlayer', 'testpass')
+    def test_censor_game(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t2.write('match admin white 1+0\n')
+        self.expect('Challenge:', t)
+        t.write('accept\n')
+        self.expect('Creating: TestPlayer (----) admin (----) rated lightning 1 0', t)
+        self.expect('Creating: TestPlayer (----) admin (----) rated lightning 1 0', t2)
+
+        t.write('+cen testplayer\n')
+        self.expect('TestPlayer added to your censor list.', t)
+        t2.write('+cen admin\n')
+        self.expect('admin added to your censor list.', t2)
+
+        t.write('say foo\n')
+        self.expect('says: foo', t2)
+        t2.write('say bar\n')
+        self.expect('admin is censoring you', t2)
+        self.expect_not('says: bar', t)
+
+        t.write('ki aaa\n')
+        self.expect('kibitzes: aaa', t2)
+        t2.write('ki bbb\n')
+        self.expect_not('kibitzes: bbb', t)
+
+        t3 = self.connect_as_guest()
+        t3.write('o admin\n')
+        self.expect('now observing game 1', t3)
+        t3.write('+cen testplayer\n')
+        self.expect('TestPlayer added to your censor list.', t3)
+        t2.write('whi whisper test 123\n')
+        self.expect_not('whisper test 123', t3)
+        self.close(t3)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
     def test_censor_persistence(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')

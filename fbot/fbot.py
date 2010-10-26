@@ -60,7 +60,7 @@ known_titles = [
 """ transient or obsolete vars """
 ignored_vars = [
     'rated', 'availinfo', 'availmin', 'availmax',
-    'pgn', 'tourney', 'tolerance', 'kiblevel', 'flip'
+    'pgn', 'tourney', 'tolerance', 'kiblevel', 'flip', 'echo'
 ]
 
 # convert the languages FICS knows about into ISO 639-1 codes
@@ -293,9 +293,9 @@ class FBot(icsbot.IcsBot):
         if not interface:
             self.tell(usr, "It looks like you aren't using an interface.  You can log in to FatICS using telnet.")
         elif good_interface_re.match(interface):
-            self.tell(usr, '''I see that you're using "%s".  This interface is fully supported on FatICS.''')
+            self.tell(usr, '''I see that you're using "%s".  This interface is fully supported on FatICS.''' % interface)
         elif bad_interface_re.match(interface):
-            self.tell(usr, '''I see that you're using "%s".  This interface is not yet supported on FatICS.  Please connect using telnet or a supported interface.''')
+            self.tell(usr, '''I see that you're using "%s".  This interface is not yet supported on FatICS.  Please connect using telnet or a supported interface.''' % interface)
         else:
             self.tell(usr, '''I don't recognize your interface, "%s".  It may not be supported on FatICS.  You are welcome to try it, but if you have problems, please connect using telnet or a supported interface.''' % interface)
 
@@ -303,7 +303,7 @@ class FBot(icsbot.IcsBot):
 
     def continue_register(self, *args, **kwargs):
         (data, usr, tags) = args
-        if 'does not receive tells' in data:
+        if 'does not receive tells' in data or "isn't listening" in data:
             # there's nothing we can do
             return
         print 'data %s' % data
@@ -311,6 +311,8 @@ class FBot(icsbot.IcsBot):
 
         passwd = self._make_passwd()
         user_id = self.create_user(usr, tags, passwd)
+        if user_id is None:
+            return
         print 'created user %d(%s)' % (user_id, usr)
         if user_id is not None:
             print('vars %s' % usr)

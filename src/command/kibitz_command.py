@@ -24,33 +24,47 @@ from command import *
 class KibitzCommand(Command):
     def _do_kibitz(self, g, msg, conn):
         name = conn.user.get_display_name()
-        all = g.players + list(g.observers)
-        assert(len(all) > 0)
+        plist = g.players | g.observers
+        assert(len(plist) > 0)
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
-        for u in all:
-            if u.vars['kibitz'] and (u.vars['kiblevel'] == 0 or
-                    int(rat) >= u.vars['kiblevel'] or
-                    conn.user.admin_level > admin.Level.admin):
-                if u != conn.user:
-                    count += 1
-                # XXX localize for each user
-                u.write(_('%s(%s)[%d] kibitzes: %s\n') % (name, rat, g.number, msg))
-        conn.write(ngettext('(kibitzed to %d player)\n', '(kibitzed to %d players)\n', count) % count)
+        for u in plist:
+            if not u.vars['kibitz']:
+                continue
+            if (u.vars['kiblevel'] and int(rat) < u.vars['kiblevel']
+                    and not conn.user.is_admin()):
+                continue
+            if (conn.user.name in u.censor
+                    and not conn.user.is_admin()):
+                continue
+            if u != conn.user:
+                count += 1
+            u.write_('%s(%s)[%d] kibitzes: %s\n',
+                (name, rat, g.number, msg))
+        conn.write(ngettext('(kibitzed to %d player)\n',
+            '(kibitzed to %d players)\n', count) % count)
 
 class WhisperCommand(Command):
     def _do_whisper(self, g, msg, conn):
         name = conn.user.get_display_name()
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
-        for u in g.observers:
-            if (u.vars['kiblevel'] == 0 or int(rat) >= u.vars['kiblevel']
-                    or conn.user.admin_level >= admin.Level.admin):
-                if u != conn.user:
-                    count += 1
-                # XXX localize for each user
-                u.write(_('%s(%s)[%d] whispers: %s\n') % (name, rat, g.number, msg))
-        conn.write(ngettext('(whispered to %d player)\n', '(whispered to %d players)\n', count) % count)
+        plist = g.observers
+        if g.gtype == game.EXAMINED:
+            plist |= g.players
+        for u in plist:
+            if (u.vars['kiblevel'] and int(rat) < u.vars['kiblevel']
+                    and not conn.user.is_admin()):
+                continue
+            if (conn.user.name in u.censor
+                    and not conn.user.is_admin()):
+                continue
+            if u != conn.user:
+                count += 1
+            u.write_('%s(%s)[%d] whispers: %s\n',
+                (name, rat, g.number, msg))
+        conn.write(ngettext('(whispered to %d player)\n',
+            '(whispered to %d players)\n', count) % count)
 
 @ics_command('kibitz', 'S', admin.Level.user)
 class Kibitz(KibitzCommand, GameMixin):

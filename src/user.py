@@ -294,10 +294,6 @@ class BaseUser(object):
     def format_datetime(self, date):
         return date.strftime("%Y-%m-%d %H:%M %Z")
 
-    def set_muzzled(self, val):
-        """ Muzzle or unmuzzle the user (affects shouts). """
-        self.is_muzzled = val
-
     def set_muted(self, val):
         """ Mute or unmute the user (affects all communications). """
         self.is_muted = val
@@ -561,7 +557,8 @@ class User(BaseUser):
         db.user_set_banned(self.id, 1 if val else 0)
 
     def set_muzzled(self, val):
-        BaseUser.set_muzzled(self, val)
+        """ Muzzle or unmuzzle the user (affects shouts). """
+        self.is_muzzled = val
         db.user_set_muzzled(self.id, 1 if val else 0)
 
     def set_muted(self, val):
@@ -592,7 +589,6 @@ class GuestUser(BaseUser):
         self.channels = channel.chlist.get_default_guest_channels()
         self.vars = var.varlist.get_default_vars()
         self.censor = set()
-        self.is_muzzled = False
         self.is_muted = False
 
     def log_on(self, conn):
