@@ -28,6 +28,7 @@ host = '127.0.0.1'
 #host = 'sheila'
 port = '5000'
 admin_passwd = 'admin'
+LOCAL_IP = '127.0.0.1'
 
 sys.path.append('src/')
 

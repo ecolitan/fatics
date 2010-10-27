@@ -20,6 +20,8 @@ import re
 import bcrypt
 import random
 import string
+import datetime
+import pytz
 
 import admin
 import var
@@ -293,6 +295,7 @@ class BaseUser(object):
 
     def format_datetime(self, date):
         return date.strftime("%Y-%m-%d %H:%M %Z")
+        #return date.strftime("%a %b %e, %H:%M %Z %Y")
 
     def set_muted(self, val):
         """ Mute or unmute the user (affects all communications). """
@@ -370,6 +373,7 @@ class User(BaseUser):
 
         BaseUser.log_on(self, conn)
 
+        db.user_log(self.id, login=True, ip=conn.ip)
         news = db.get_news_since(self.last_logout, is_admin=False)
         if news:
             conn.write(ngettext('There is %d new news item since your last login:\n',
@@ -408,6 +412,10 @@ class User(BaseUser):
         notify.notify_users(self, arrived=False)
         BaseUser.log_off(self)
         db.user_set_last_logout(self.id)
+        db.user_log(self.id, login=False, ip=self.session.conn.ip)
+
+    def get_log(self):
+        return db.user_get_log(self.id)
 
     def set_passwd(self, passwd):
         self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
@@ -596,6 +604,14 @@ class GuestUser(BaseUser):
         self._title_str = '(U)'
         BaseUser.log_on(self, conn)
         self._history = []
+
+    def get_log(self):
+        """ The log for a guest has just one entry: the login """
+        return [{'log_who_name': self.name,
+            'log_when': datetime.datetime.fromtimestamp(self.session.login_time,
+                tz=pytz.utc),
+            'log_which': 'login', 'log_ip': self.session.conn.ip}]
+        db.user_get_log(self.id)
 
     def get_history(self):
         assert(self._history is not None)

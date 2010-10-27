@@ -18,6 +18,7 @@ System requirements
 * The MySQLdb Python module
 * The python-bcrypt module
 * The netaddr module
+* The pytz module
 * GNU gettext
 * (optional) The pexpect module, for timeseal/zipseal tests
 

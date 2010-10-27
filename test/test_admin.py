@@ -365,6 +365,7 @@ class BanTest(Test):
         t.write('+ban guestabcd\n')
         self.expect('Only registered players can be banned.', t)
         self.close(t)
+        self.close(t2)
 
 class FilterTest(Test):
     def test_filter_ip(self):

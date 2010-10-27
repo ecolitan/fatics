@@ -24,7 +24,6 @@ import trie
 import admin
 import game
 import history
-import rating
 import speed_variant
 import online
 
@@ -136,74 +135,6 @@ class Date(Command):
         #conn.write(_("Local time     - %s\n") % )
         conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(t)))
         conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
-
-@ics_command('finger', 'ooo', admin.Level.user)
-class Finger(Command):
-    def run(self, args, conn):
-        if args[0] is not None:
-            u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
-        else:
-            u = conn.user
-        if u:
-            conn.write(_('Finger of %s:\n\n') % u.get_display_name())
-
-            if u.is_online:
-                conn.write(_('On for: %s   Idle: %s\n') % (u.session.get_online_time(), u.session.get_idle_time()))
-                if u.vars['silence']:
-                    conn.write(_('%s is in silence mode.\n') % u.name)
-
-                if u.session.game:
-                    g = u.session.game
-                    if g.gtype == game.PLAYED:
-                        conn.write(_('(playing game %d: %s vs. %s)\n') % (g.number, g.white.name, g.black.name))
-                    elif g.gtype == game.EXAMINED:
-                        conn.write(_('(examining game %d)\n') % (g.number))
-                    else:
-                        assert(False)
-            else:
-                if u.last_logout is None:
-                    conn.write(_('%s has never connected.\n') % u.name)
-                else:
-                    conn.write(_('Last disconnected: %s\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
-
-            conn.write('\n')
-
-            #if u.is_guest:
-            #    conn.write(_('%s is NOT a registered player.\n') % u.name)
-            if not u.is_guest:
-                rating.show_ratings(u, conn)
-            if u.admin_level > admin.Level.user:
-                conn.write(A_('Admin level: %s\n') % admin.level.to_str(u.admin_level))
-            if conn.user.admin_level > admin.Level.user:
-                if not u.is_guest:
-                    conn.write(A_('Email:       %s\n') % u.email)
-                    conn.write(A_('Real name:   %s\n') % u.real_name)
-                if u.is_online:
-                    conn.write(A_('Host:        %s\n') % u.session.conn.ip)
-
-            if u.is_online:
-                if u.session.use_timeseal:
-                    conn.write(_('Timeseal:    On\n'))
-                elif u.session.use_zipseal:
-                    conn.write(_('Zipseal:     On\n'))
-                else:
-                    conn.write(_('Zipseal:     Off\n'))
-
-            notes = u.notes
-            if len(notes) > 0:
-                conn.write('\n')
-                prev_max = 0
-                for (num, txt) in sorted(notes.iteritems()):
-                    num = int(num)
-                    assert(num >= prev_max + 1)
-                    assert(num <= 10)
-                    if num > prev_max + 1:
-                        # fill in blank lines
-                        for j in range(prev_max + 1, num):
-                            conn.write(_("%2d: %s\n") % (j, ''))
-                    conn.write(_("%2d: %s\n") % (num, txt))
-                    prev_max = num
-                conn.write('\n')
 
 @ics_command('flag', '', admin.Level.user)
 class Flag(Command):

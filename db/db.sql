@@ -76,6 +76,16 @@ CREATE TABLE `user` (
   UNIQUE KEY `user_name` (`user_name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `user_log`;
+CREATE TABLE `user_log` (
+  `log_who` int(8) NOT NULL,
+  `log_when` timestamp NULL DEFAULT NULL,
+  `log_which` enum('login', 'logout') NOT NULL,
+  `log_ip` varchar(57) NOT NULL,
+  KEY (`log_who`),
+  KEY (`log_when`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+
 DROP TABLE IF EXISTS `formula`;
 CREATE TABLE `formula` (
   `formula_id` int(8) NOT NULL AUTO_INCREMENT,
@@ -174,7 +184,7 @@ CREATE TABLE `history` (
 DROP TABLE IF EXISTS `ip_filter`;
 CREATE TABLE `ip_filter` (
   `filter_id` int(8) NOT NULL AUTO_INCREMENT,
-  `filter_pattern` VARCHAR(43) NOT NULL,
+  `filter_pattern` VARCHAR(61) NOT NULL,
   PRIMARY KEY (`filter_id`),
   UNIQUE KEY (`filter_pattern`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;

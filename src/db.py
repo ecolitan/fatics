@@ -16,6 +16,8 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import pytz
+
 from MySQLdb import connect, cursors, IntegrityError
 from config import config
 
@@ -41,6 +43,9 @@ class DB(object):
             FROM user WHERE user_name=%s""", (name,))
         row = cursor.fetchone()
         cursor.close()
+        if row and row['user_last_logout']:
+            row['user_last_logout'] = row['user_last_logout'].replace(
+                tzinfo=pytz.utc)
         return row
 
     def user_get_vars(self, user_id, vnames):
@@ -126,6 +131,10 @@ class DB(object):
             FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
         rows = cursor.fetchall()
         cursor.close()
+        for r in rows:
+            if r['user_last_logout']:
+                r['user_last_logout'] = r['user_last_logout'].replace(
+                    tzinfo=pytz.utc)
         return rows
 
     def user_add(self, name, email, passwd, real_name, admin_level):
@@ -155,6 +164,53 @@ class DB(object):
         cursor.execute("""UPDATE user
             SET user_last_logout=NOW() WHERE user_id=%s""", (uid,))
         cursor.close()
+
+    def user_log(self, uid, login, ip):
+        cursor = self.db.cursor()
+
+        # delete old log entry, if necessary
+        cursor.execute("""SELECT COUNT(*) FROM user_log
+            WHERE log_who=%s""", (uid,))
+        count = cursor.fetchone()[0]
+        if count >= 10:
+            assert(count == 10)
+            cursor.execute("""DELETE FROM user_log
+                WHERE log_who=%s ORDER BY log_when DESC LIMIT 1""", (uid,))
+        cursor.close()
+        cursor = self.db.cursor()
+
+        which = 'login' if login else 'logout'
+        cursor.execute("""INSERT INTO user_log
+            SET log_who=%s,log_which=%s,log_ip=%s,log_when=NOW()""",
+                (uid, which, ip))
+
+        cursor.close()
+
+    def user_get_log(self, uid):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT user_name AS log_who_name,log_when,
+                log_which,log_ip
+            FROM user_log LEFT JOIN user ON(log_who=user_id)
+            WHERE log_who=%s
+            ORDER BY log_when ASC""", (uid,))
+        rows = cursor.fetchall()
+        cursor.close()
+        for r in rows:
+            r['log_when'] = r['log_when'].replace(tzinfo=pytz.utc)
+        return rows
+
+    def get_log_all(self, limit):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT user_name AS log_who_name,log_when,
+                log_which,log_ip
+            FROM user_log LEFT JOIN user ON(log_who=user_id)
+            ORDER BY log_when ASC
+            LIMIT %s""", (limit,))
+        rows = cursor.fetchall()
+        for r in rows:
+            r['log_when'] = r['log_when'].replace(tzinfo=pytz.utc)
+        cursor.close()
+        return rows
 
     def user_set_banned(self, uid, val):
         cursor = self.db.cursor()
@@ -213,6 +269,7 @@ class DB(object):
         cursor.execute("""DELETE FROM user_title WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM user_notify
             WHERE notifier=%s OR notified=%s""", (id,id))
+        cursor.execute("""DELETE FROM user_log WHERE log_who=%s""", (id,))
         cursor.execute("""DELETE FROM censor WHERE censorer=%s OR censored=%s""", (id,id))
         cursor.execute("""DELETE FROM noplay WHERE noplayer=%s OR noplayed=%s""", (id,id))
         cursor.execute("""DELETE FROM formula WHERE user_id=%s""", (id,))
@@ -264,6 +321,8 @@ class DB(object):
                 WHERE user_comment.user_id=%s""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
+        for r in rows:
+            r['when_added'] = r['when_added'].replace(tzinfo=pytz.utc)
         return rows
 
     # channels
@@ -289,13 +348,6 @@ class DB(object):
 
     def channel_set_topic(self, args):
         cursor = self.db.cursor()
-        '''cursor.execute("""INSERT INTO channel
-            SET channel_id=%(channel_id)s,topic=%(topic)s,
-                topic_who=%(topic_who)s,topic_when=%(topic_when)s
-            ON DUPLICATE KEY UPDATE topic=%(topic)s,topic_who=%(topic_who)s,
-                topic_when=%(topic_when)s""", args)
-        # does not work with ON DUPLICATE KEY UPDATE
-                '''
         cursor.execute("""UPDATE channel
             SET topic=%(topic)s,topic_who=%(topic_who)s,
                 topic_when=%(topic_when)s
@@ -326,6 +378,9 @@ class DB(object):
             FROM channel LEFT JOIN user ON(channel.topic_who=user.user_id)""")
         rows = cursor.fetchall()
         cursor.close()
+        for r in rows:
+            if r['topic_when']:
+                r['topic_when'] = r['topic_when'].replace(tzinfo=pytz.utc)
         return rows
 
     '''def channel_get_members(self, id):
@@ -633,19 +688,19 @@ class DB(object):
 
     def user_del_history(self, user_id):
         cursor = self.db.cursor()
-        cursor.execute("""DELETE FROM history WHERE user_id=%s""", user_id)
+        cursor.execute("""DELETE FROM history WHERE user_id=%s""", (user_id,))
         cursor.close()
 
     def user_get_ratings(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT * FROM (SELECT rating.variant_id as variant_id,rating.speed_id as speed_id,variant_name,speed_name,rating,rd,volatility,win,loss,draw,total,best,when_best,ltime FROM rating LEFT JOIN variant USING (variant_id) LEFT JOIN speed USING (speed_id) WHERE user_id=%s ORDER BY total DESC LIMIT 5) as tmp ORDER BY variant_id,speed_id""", user_id)
+        cursor.execute("""SELECT * FROM (SELECT rating.variant_id as variant_id,rating.speed_id as speed_id,variant_name,speed_name,rating,rd,volatility,win,loss,draw,total,best,when_best,ltime FROM rating LEFT JOIN variant USING (variant_id) LEFT JOIN speed USING (speed_id) WHERE user_id=%s ORDER BY total DESC LIMIT 5) as tmp ORDER BY variant_id,speed_id""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows
 
     def user_get_all_ratings(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT variant_id,speed_id,rating,rd,volatility,win,loss,draw,total,best,when_best,ltime FROM rating WHERE user_id=%s""", user_id)
+        cursor.execute("""SELECT variant_id,speed_id,rating,rd,volatility,win,loss,draw,total,best,when_best,ltime FROM rating WHERE user_id=%s""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows
@@ -714,13 +769,13 @@ class DB(object):
         cursor.close()
         return rows
 
-    def get_news_since(self, last_login, is_admin):
+    def get_news_since(self, when, is_admin):
         is_admin = '1' if is_admin else '0'
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""
             SELECT news_id,news_title,DATE(news_when) as news_date,news_poster
             FROM news_index WHERE news_is_admin=%s AND news_when > %s
-            ORDER BY news_id DESC LIMIT 10""", (is_admin,last_login))
+            ORDER BY news_id DESC LIMIT 10""", (is_admin,when))
         rows = cursor.fetchall()
         cursor.close()
         return rows
