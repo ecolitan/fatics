@@ -78,11 +78,11 @@ CREATE TABLE `user` (
 
 DROP TABLE IF EXISTS `user_log`;
 CREATE TABLE `user_log` (
-  `log_who` int(8) NOT NULL,
+  `log_who_name` varchar(17) NOT NULL,
   `log_when` timestamp NULL DEFAULT NULL,
   `log_which` enum('login', 'logout') NOT NULL,
   `log_ip` varchar(57) NOT NULL,
-  KEY (`log_who`),
+  KEY (`log_who_name`),
   KEY (`log_when`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 

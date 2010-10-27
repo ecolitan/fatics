@@ -16,8 +16,6 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import pytz
-
 from MySQLdb import connect, cursors, IntegrityError
 from config import config
 
@@ -43,9 +41,6 @@ class DB(object):
             FROM user WHERE user_name=%s""", (name,))
         row = cursor.fetchone()
         cursor.close()
-        if row and row['user_last_logout']:
-            row['user_last_logout'] = row['user_last_logout'].replace(
-                tzinfo=pytz.utc)
         return row
 
     def user_get_vars(self, user_id, vnames):
@@ -131,10 +126,6 @@ class DB(object):
             FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
         rows = cursor.fetchall()
         cursor.close()
-        for r in rows:
-            if r['user_last_logout']:
-                r['user_last_logout'] = r['user_last_logout'].replace(
-                    tzinfo=pytz.utc)
         return rows
 
     def user_add(self, name, email, passwd, real_name, admin_level):
@@ -165,50 +156,47 @@ class DB(object):
             SET user_last_logout=NOW() WHERE user_id=%s""", (uid,))
         cursor.close()
 
-    def user_log(self, uid, login, ip):
+    def user_log(self, user_name, login, ip):
         cursor = self.db.cursor()
 
         # delete old log entry, if necessary
         cursor.execute("""SELECT COUNT(*) FROM user_log
-            WHERE log_who=%s""", (uid,))
+            WHERE log_who_name=%s""", (user_name,))
         count = cursor.fetchone()[0]
         if count >= 10:
             assert(count == 10)
             cursor.execute("""DELETE FROM user_log
-                WHERE log_who=%s ORDER BY log_when DESC LIMIT 1""", (uid,))
+                WHERE log_who_name=%s ORDER BY log_when DESC LIMIT 1""",
+                    (user_name,))
         cursor.close()
         cursor = self.db.cursor()
 
         which = 'login' if login else 'logout'
         cursor.execute("""INSERT INTO user_log
-            SET log_who=%s,log_which=%s,log_ip=%s,log_when=NOW()""",
-                (uid, which, ip))
+            SET log_who_name=%s,log_which=%s,log_ip=%s,log_when=NOW()""",
+                (user_name, which, ip))
 
         cursor.close()
 
-    def user_get_log(self, uid):
+    def user_get_log(self, user_name):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_name AS log_who_name,log_when,
+        cursor.execute("""SELECT log_who_name,log_when,
                 log_which,log_ip
-            FROM user_log LEFT JOIN user ON(log_who=user_id)
-            WHERE log_who=%s
-            ORDER BY log_when ASC""", (uid,))
+            FROM user_log
+            WHERE log_who_name=%s
+            ORDER BY log_when DESC""", (user_name,))
         rows = cursor.fetchall()
         cursor.close()
-        for r in rows:
-            r['log_when'] = r['log_when'].replace(tzinfo=pytz.utc)
         return rows
 
     def get_log_all(self, limit):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT user_name AS log_who_name,log_when,
+        cursor.execute("""SELECT log_who_name,log_when,
                 log_which,log_ip
-            FROM user_log LEFT JOIN user ON(log_who=user_id)
-            ORDER BY log_when ASC
+            FROM user_log
+            ORDER BY log_when DESC
             LIMIT %s""", (limit,))
         rows = cursor.fetchall()
-        for r in rows:
-            r['log_when'] = r['log_when'].replace(tzinfo=pytz.utc)
         cursor.close()
         return rows
 
@@ -261,6 +249,7 @@ class DB(object):
         """ Permanently delete a user from the database.  In normal use
         this shouldn't be used, but it's useful for testing. """
         cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM user_log WHERE log_who_name=(SELECT user_name FROM user WHERE user_id=%s)""", (id,))
         cursor.execute("""DELETE FROM user WHERE user_id=%s""", (id,))
         if cursor.rowcount != 1:
             cursor.close()
@@ -269,7 +258,6 @@ class DB(object):
         cursor.execute("""DELETE FROM user_title WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM user_notify
             WHERE notifier=%s OR notified=%s""", (id,id))
-        cursor.execute("""DELETE FROM user_log WHERE log_who=%s""", (id,))
         cursor.execute("""DELETE FROM censor WHERE censorer=%s OR censored=%s""", (id,id))
         cursor.execute("""DELETE FROM noplay WHERE noplayer=%s OR noplayed=%s""", (id,id))
         cursor.execute("""DELETE FROM formula WHERE user_id=%s""", (id,))
@@ -321,8 +309,6 @@ class DB(object):
                 WHERE user_comment.user_id=%s""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
-        for r in rows:
-            r['when_added'] = r['when_added'].replace(tzinfo=pytz.utc)
         return rows
 
     # channels
@@ -378,9 +364,6 @@ class DB(object):
             FROM channel LEFT JOIN user ON(channel.topic_who=user.user_id)""")
         rows = cursor.fetchall()
         cursor.close()
-        for r in rows:
-            if r['topic_when']:
-                r['topic_when'] = r['topic_when'].replace(tzinfo=pytz.utc)
         return rows
 
     '''def channel_get_members(self, id):

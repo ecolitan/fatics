@@ -17,7 +17,6 @@
 #
 
 import sys
-import pytz
 
 from datetime import datetime
 
@@ -117,7 +116,7 @@ class Channel(object):
             # set a new topic
             self.topic = topic
             self.topic_who_name = owner.name
-            self.topic_when = datetime.utcnow().replace(tzinfo=pytz.utc)
+            self.topic_when = datetime.utcnow()
             db.channel_set_topic({'channel_id': self.id,
                 'topic': topic, 'topic_who': owner.id,
                 'topic_when': self.topic_when})

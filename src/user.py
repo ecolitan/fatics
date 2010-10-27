@@ -65,6 +65,7 @@ class BaseUser(object):
         self.noplay = set()
         self.session = conn.session
         self.session.set_user(self)
+        db.user_log(self.name, login=True, ip=conn.ip)
         self.is_online = True
         online.add(self)
         self.write(server.get_copyright_notice())
@@ -77,6 +78,8 @@ class BaseUser(object):
             u.write_("Notification: %s, whom you were idlenotifying, has departed.\n", (self.name,))
             u.idlenotifiers.remove(self)
         self.idlenotified.clear()
+
+        db.user_log(self.name, login=False, ip=self.session.conn.ip)
 
         for ch in self.channels:
             channel.chlist[ch].log_off(self)
@@ -293,9 +296,9 @@ class BaseUser(object):
     def hears_channels(self):
         return not self.vars['chanoff'] and not self.in_silence()
 
-    def format_datetime(self, date):
-        return date.strftime("%Y-%m-%d %H:%M %Z")
-        #return date.strftime("%a %b %e, %H:%M %Z %Y")
+    def format_datetime(self, dt):
+        return dt.replace(tzinfo=pytz.utc).strftime("%Y-%m-%d %H:%M %Z")
+        #return dt.strftime("%a %b %e, %H:%M %Z %Y")
 
     def set_muted(self, val):
         """ Mute or unmute the user (affects all communications). """
@@ -373,7 +376,6 @@ class User(BaseUser):
 
         BaseUser.log_on(self, conn)
 
-        db.user_log(self.id, login=True, ip=conn.ip)
         news = db.get_news_since(self.last_logout, is_admin=False)
         if news:
             conn.write(ngettext('There is %d new news item since your last login:\n',
@@ -412,10 +414,9 @@ class User(BaseUser):
         notify.notify_users(self, arrived=False)
         BaseUser.log_off(self)
         db.user_set_last_logout(self.id)
-        db.user_log(self.id, login=False, ip=self.session.conn.ip)
 
     def get_log(self):
-        return db.user_get_log(self.id)
+        return db.user_get_log(self.name)
 
     def set_passwd(self, passwd):
         self.passwd_hash = bcrypt.hashpw(passwd, bcrypt.gensalt())
@@ -608,8 +609,7 @@ class GuestUser(BaseUser):
     def get_log(self):
         """ The log for a guest has just one entry: the login """
         return [{'log_who_name': self.name,
-            'log_when': datetime.datetime.fromtimestamp(self.session.login_time,
-                tz=pytz.utc),
+            'log_when': datetime.datetime.fromtimestamp(self.session.login_time),
             'log_which': 'login', 'log_ip': self.session.conn.ip}]
         db.user_get_log(self.id)
 

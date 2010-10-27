@@ -30,7 +30,7 @@ from db import db
 
 class LogMixin(object):
     def _display_log(self, log, conn):
-        for a in log:
+        for a in reversed(log):
             if conn.user.is_admin():
                 ip = _(' from %s') % a['log_ip']
             else:

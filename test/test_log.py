@@ -68,10 +68,20 @@ class TestLogons(Test):
 class TestLlogons(Test):
     def test_llogons(self):
         t = self.connect_as_admin()
+        t.write('llogons -1\n')
+        self.expect('Usage:', t)
         t.write('llogons\n')
         self.expect(': admin                login  from %s\r\n' % LOCAL_IP, t)
         t.write('llogons 1\n')
         self.expect(': admin                login  from %s\r\n' % LOCAL_IP, t)
+
+        t2 = self.connect_as('GuestABCD', '')
+        t.write('llogons 1\n')
+        self.expect(': GuestABCD            login  from %s\r\n' % LOCAL_IP, t)
+        self.close(t2)
+        t.write('llogons 1\n')
+        self.expect(': GuestABCD            logout from %s\r\n' % LOCAL_IP, t)
+
         self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
