@@ -549,4 +549,59 @@ class TestDisconnect(Test):
         t2.close()
         self.close(t)
 
+class TestMoretime(Test):
+    @with_player('TestPlayer', 'testpass')
+    def test_moretime(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+        t3 = self.connect_as_guest()
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
+        t.write('match testp white 6+10\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        t3.write('o admin\n')
+        self.expect('admin (----) TestPlayer (----)', t3)
+
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 1 6 10 39 39 360 360 1 none (0:00) none 0 0 0', t)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer -1 6 10 39 39 360 360 1 none (0:00) none 1 0 0', t2)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 0 6 10 39 39 360 360 1 none (0:00) none 0 0 0', t3)
+
+        t.write('moretime 40\n')
+        self.expect("You have added 40 seconds to TestPlayer's clock.", t)
+        self.expect("admin has added 40 seconds to your clock.", t2)
+        self.expect("admin has added 40 seconds to TestPlayer's clock.", t3)
+
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 1 6 10 39 39 360 400 1 none (0:00) none 0 0 0', t)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer -1 6 10 39 39 360 400 1 none (0:00) none 1 0 0', t2)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 0 6 10 39 39 360 400 1 none (0:00) none 0 0 0', t3)
+
+        t2.write('moretime 5\n')
+        self.expect("You have added 5 seconds to admin's clock.", t2)
+        self.expect("TestPlayer has added 5 seconds to your clock.", t)
+        self.expect("TestPlayer has added 5 seconds to admin's clock.", t3)
+
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 1 6 10 39 39 365 400 1 none (0:00) none 0 0 0', t)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer -1 6 10 39 39 365 400 1 none (0:00) none 1 0 0', t2)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 0 6 10 39 39 365 400 1 none (0:00) none 0 0 0', t3)
+
+        t.write('moretime 40000\n')
+        self.expect('Invalid number of seconds.', t)
+        t.write('moretime 0\n')
+        self.expect('Invalid number of seconds.', t)
+        t3.write('moretime 5\n')
+        self.expect('You are not playing a game.', t3)
+
+        t.write('abo\n')
+        self.expect('aborted on move 1', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -17,11 +17,15 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
+import re
 
 import offer
+import game
 
 from command_parser import BadCommandError
+from command import ics_command, Command
+from db import db
+
 
 class GameMixin(object):
     def _get_played_game(self, conn):
@@ -47,7 +51,7 @@ class GameMixin(object):
         return g
 
 
-@ics_command('abort', 'n', admin.Level.user)
+@ics_command('abort', 'n')
 class Abort(Command, GameMixin):
     def run(self, args, conn):
         g = self._get_played_game(conn)
@@ -72,7 +76,7 @@ class Adjourn(Command, GameMixin):
         #if g.variant.pos.ply < 5:
         offer.Adjourn(g, conn.user)
 
-@ics_command('draw', 'o', admin.Level.user)
+@ics_command('draw', 'o')
 class Draw(Command, GameMixin):
     def run(self, args, conn):
         if args[0] is None:
@@ -83,7 +87,7 @@ class Draw(Command, GameMixin):
         else:
             conn.write('TODO: DRAW PARAM\n')
 
-@ics_command('resign', 'o', admin.Level.user)
+@ics_command('resign', 'o')
 class Resign(Command, GameMixin):
     def run(self, args, conn):
         if args[0] is not None:
@@ -93,7 +97,7 @@ class Resign(Command, GameMixin):
         if g:
             g.resign(conn.user)
 
-@ics_command('eco', 'oo', admin.Level.user)
+@ics_command('eco', 'oo')
 class Eco(Command, GameMixin):
     eco_pat = re.compile(r'[a-z][0-9][0-9][a-z]?')
     nic_pat = re.compile(r'[a-z][a-z]\.[0-9][0-9]')
@@ -138,14 +142,25 @@ class Eco(Command, GameMixin):
             conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
 
-@ics_command('moves', 'n', admin.Level.user)
+@ics_command('moves', 'n')
 class Moves(Command, GameMixin):
     def run(self, args, conn):
         g = self._game_param(args[0], conn)
         if g:
             g.write_moves(conn)
 
-@ics_command('refresh', 'n', admin.Level.user)
+@ics_command('moretime', 'd')
+class Moretime(Command, GameMixin):
+    def run(self, args, conn):
+        g = self._get_played_game(conn)
+        if g:
+            secs = args[0]
+            if secs < 1 or secs > 36000:
+                conn.write(_('Invalid number of seconds.\n'))
+            else:
+                g.moretime(secs, conn.user)
+
+@ics_command('refresh', 'n')
 class Refresh(Command, GameMixin):
     def run(self, args, conn):
         g = self._game_param(args[0], conn)

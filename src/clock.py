@@ -45,6 +45,13 @@ class Clock(object):
     def stop(self):
         self.is_ticking = False
 
+    def moretime(self, side, secs):
+        """ Add more time to the clock of the player on SIDE. """
+        if side == WHITE:
+            self._white_time += secs
+        else:
+            self._black_time += secs
+
     def got_move(self, side, ply, elapsed=None):
         """ Stop the clock, and record the time remaining for the player
         whose clock was ticking.  Returns the time taken for the move.

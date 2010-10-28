@@ -575,6 +575,21 @@ class PlayedGame(Game):
                 rating.update_ratings(self, white_score, black_score)
         self.free()
 
+    def moretime(self, secs, u):
+        """ Player "u" adds more time to the clock of his or her
+        opponent. """
+        assert(u in self.players)
+        opp = self.get_opp(u)
+        self.clock.moretime(self.get_user_side(opp), secs)
+        u.write(_("You have added %(secs)d seconds to %(oname)s's clock.\n") %
+            {'oname': opp.name, 'secs': secs})
+        opp.write_("%(uname)s has added %(secs)d seconds to your clock.\n",
+            {'uname': u.name, 'secs': secs})
+        for p in self.observers:
+            p.write_("%(uname)s has added %(secs)d seconds to %(oname)s's clock.\n",
+                {'uname': u.name, 'secs': secs, 'oname': opp.name})
+        self.send_boards()
+
     def resign(self, user):
         side = self.get_user_side(user)
         if side == WHITE:
