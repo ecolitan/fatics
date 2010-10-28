@@ -67,6 +67,14 @@ class SystemUserList(MyList):
             u.write_('%(aname)s has removed you from the %(lname)s list.\n',
                 {'aname': conn.user.name, 'lname': self.name})
 
+    def show(self, conn):
+        if not self.public:
+            self._require_admin(conn.user)
+        names = self._get_names()
+        conn.write(ngettext('-- %s list: %d name --\n',
+            '-- %s list: %d names --\n', len(names)) % (self.name,len(names)))
+        conn.write('%s\n' % ' '.join(names))
+
 class TitleList(SystemUserList):
     def __init__(self, params):
         MyList.__init__(self, params['title_name'])
@@ -101,13 +109,8 @@ class TitleList(SystemUserList):
                     {'uname': u.name, 'lname': self.name })
             self._notify_removed(conn, u)
 
-    def show(self, conn):
-        if not self.public:
-            self._require_admin(conn.user)
-        tlist = db.title_get_users(self.id)
-        conn.write(ngettext('-- %s list: %d name --\n',
-            '-- %s list: %d names --\n', len(tlist)) % (self.name,len(tlist)))
-        conn.write('%s\n' % ' '.join(tlist))
+    def _get_names(self):
+        return db.title_get_users(self.id)
 
 class NotifyList(MyList):
     def add(self, item, conn):
@@ -259,6 +262,10 @@ class NoplayList(MyList):
         conn.write('%s\n' % ' '.join(noplist))
 
 class BanList(SystemUserList):
+    def __init__(self, name):
+        super(BanList, self).__init__(name)
+        self.public = False
+
     def add(self, item, conn):
         self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
@@ -273,7 +280,7 @@ class BanList(SystemUserList):
             db.add_comment(conn.user.id, u.id, 'Banned.')
             self._notify_added(conn, u)
             if u.is_online:
-                conn.write('Note: %s is online.\n' % u.name)
+                conn.write(_('Note: %s is online.\n') % u.name)
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
@@ -287,14 +294,14 @@ class BanList(SystemUserList):
             db.add_comment(conn.user.id, u.id, 'Unbanned.')
             self._notify_removed(conn, u)
 
-    def show(self, conn):
-        self._require_admin(conn.user)
-        banlist = db.get_banned_user_names()
-        conn.write(ngettext('-- ban list: %d name --\n',
-            '-- ban list: %d names --\n', len(banlist)) % len(banlist))
-        conn.write('%s\n' % ' '.join(banlist))
+    def _get_names(self):
+        return db.get_banned_user_names()
 
 class MuzzleList(SystemUserList):
+    def __init__(self, name):
+        super(MuzzleList, self).__init__(name)
+        self.public = False
+
     def add(self, item, conn):
         self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
@@ -321,14 +328,14 @@ class MuzzleList(SystemUserList):
             db.add_comment(conn.user.id, u.id, 'Unmuzzled.')
             self._notify_removed(conn, u)
 
-    def show(self, conn):
-        self._require_admin(conn.user)
-        muzlist = db.get_muzzled_user_names()
-        conn.write(ngettext('-- muzzle list: %d name --\n',
-            '-- muzzle list: %d names --\n', len(muzlist)) % len(muzlist))
-        conn.write('%s\n' % ' '.join(muzlist))
+    def _get_names(self):
+        return db.get_muzzled_user_names()
 
 class MuteList(SystemUserList):
+    def __init__(self, name):
+        super(MuteList, self).__init__(name)
+        self.public = False
+
     def add(self, item, conn):
         self._require_admin(conn.user)
         u = user.find.by_prefix_for_user(item, conn)
@@ -353,12 +360,8 @@ class MuteList(SystemUserList):
                 db.add_comment(conn.user.id, u.id, 'Unmuted.')
             self._notify_removed(conn, u)
 
-    def show(self, conn):
-        self._require_admin(conn.user)
-        mutelist = db.get_muted_user_names()
-        conn.write(ngettext('-- mute list: %d name --\n',
-            '-- mute list: %d names --\n', len(mutelist)) % len(mutelist))
-        conn.write('%s\n' % ' '.join(mutelist))
+    def _get_names(self):
+        return db.get_muted_user_names()
 
 class FilterList(MyList):
     def add(self, item, conn):
