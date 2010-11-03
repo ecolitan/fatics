@@ -334,6 +334,9 @@ class TestRematch(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as('GuestABCD', '')
 
+        t2.write('rematch\n')
+        self.expect('You have no previous opponent.', t2)
+
         t.write('match guestabcd 1 0 unrated white\n')
         self.expect('Challenge: ', t2)
         t2.write('a\n')

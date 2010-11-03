@@ -167,5 +167,15 @@ class Refresh(Command, GameMixin):
         if g:
             g.send_board(conn.user, isolated=True)
 
+@ics_command('time', 'n')
+class Time(Command, GameMixin):
+    def run(self, args, conn):
+        g = self._game_param(args[0], conn)
+        if g:
+            (white_clock, black_clock) = g.clock.as_str()
+            g.send_info_str(conn.user)
+            conn.write(_('White Clock : %s\n') % white_clock)
+            conn.write(_('Black Clock : %s\n') % black_clock)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
 

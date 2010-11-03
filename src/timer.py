@@ -26,13 +26,9 @@ from config import config
 
 class Timer(object):
     def hms_words(self, secs):
-        secs = int(secs)
-        days = int(secs // 86400)
-        secs = secs % 86400 #- 86400 * days
-        hours = int(secs // 3600)
-        secs = secs % 3600 #secs - 3600 * hours
-        mins = int(secs // 60)
-        secs = secs % 60 #secs - 60 * mins
+        (days, secs) = divmod(secs, 86400)
+        (hours, secs) = divmod(secs, 3600)
+        (mins, secs) = divmod(secs, 60)
         ret = ''
         if days != 0:
             ret = ret + ngettext("%d day", "%d days", days) % days + " "
@@ -43,13 +39,11 @@ class Timer(object):
         ret = ret + ngettext("%d second", "%d seconds", secs) % secs
         return ret
 
-    def hms(self, secs, user):
-        hours = int(secs // 3600)
-        secs = secs % 3600
-        mins = int(secs // 60)
-        secs = secs % 60
+    def hms(self, secs, user=None):
+        (hours, secs) = divmod(secs, 3600)
+        (mins, secs) = divmod(secs, 60)
 
-        if user.session.ivars['ms']:
+        if not user or user.session.ivars['ms']:
             if hours != 0:
                 ret = '%d:%02d:%06.3f' % (hours, mins, secs)
             else:

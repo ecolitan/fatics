@@ -77,6 +77,7 @@ class Rematch(Command, MatchMixin):
         hist = conn.user.get_history()
         if not hist:
             conn.write(_('You have no previous opponent.\n'))
+            return
         h = hist[-1]
         opp = online.find_exact(h['opp_name'])
         if not opp:

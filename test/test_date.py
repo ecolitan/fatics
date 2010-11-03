@@ -22,8 +22,8 @@ class TestDate(Test):
     def test_date(self):
         t = self.connect_as_guest()
         t.write('date\n')
-        self.expect('Server time', t, "date")
-        self.expect('GMT', t, "date")
+        self.expect_re('Server time    - \w+ \w+\s+\d+, \d{2}:\d{2} UTC \d{4}',
+            t)
         t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

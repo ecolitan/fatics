@@ -23,12 +23,13 @@ import time
 class TestLogons(Test):
     @with_player('TestPlayer', 'testpass')
     def test_logons_user_admin(self):
+        time.sleep(1.0)
         t = self.connect_as_admin()
         t.write('log testplayer\n')
         self.expect('TestPlayer has not logged on.', t)
 
         t2 = self.connect_as('TestPlayer', 'testpass')
-        time.sleep(2.0)
+        time.sleep(1.0)
 
         t.write('log testplayer\n')
         self.expect(': TestPlayer           login  from %s\r\n' % LOCAL_IP, t)
@@ -47,7 +48,7 @@ class TestLogons(Test):
         self.expect('TestPlayer has not logged on.', t)
 
         t2 = self.connect_as('TestPlayer', 'testpass')
-        time.sleep(2.0)
+        time.sleep(1.0)
 
         t.write('log testplayer\n')
         self.expect(': TestPlayer           login \r\n', t)
@@ -67,6 +68,9 @@ class TestLogons(Test):
 
 class TestLlogons(Test):
     def test_llogons(self):
+        # in case a previous test logged out in the past second, we make
+        # sure this login is clearly ordered after it
+        time.sleep(1.0)
         t = self.connect_as_admin()
         t.write('llogons -1\n')
         self.expect('Usage:', t)

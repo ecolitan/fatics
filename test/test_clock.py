@@ -61,6 +61,7 @@ class TestBronstein(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('testplayer', 'testpass')
     def test_bronstein(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')

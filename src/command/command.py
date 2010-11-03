@@ -133,7 +133,7 @@ class Date(Command):
     def run(self, args, conn):
         t = time.time()
         #conn.write(_("Local time     - %s\n") % )
-        conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(t)))
+        conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M UTC %Y", time.gmtime(t)))
         conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
 
 @ics_command('flag', '', admin.Level.user)

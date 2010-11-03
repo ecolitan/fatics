@@ -16,6 +16,7 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import datetime
 import time
 
 import timer
@@ -44,6 +45,19 @@ class Clock(object):
 
     def stop(self):
         self.is_ticking = False
+
+    def _time_to_str(self, secs):
+        if secs < 0:
+            secs = 0
+        td = datetime.timedelta(seconds=secs)
+        oldstr = str(td)
+        # round to the nearest millisecond
+        ret = timer.timer.hms(secs)
+        return ret
+
+    def as_str(self):
+        return (self._time_to_str(self.get_white_time()),
+           self._time_to_str(self.get_black_time()))
 
     def moretime(self, side, secs):
         """ Add more time to the clock of the player on SIDE. """
@@ -184,13 +198,16 @@ class OvertimeClock(Clock):
 clock_names['overtime'] = OvertimeClock
 
 class UntimedClock(Clock):
-    def __init__(self, g, white_time, black_time):
+    def __init__(self, g=None, white_time=None, black_time=None):
         self.is_ticking = False
         self._white_time = 0
         self._black_time = 0
 
     def got_move(self, side, ply, elapsed=None):
         pass
+
+    def as_str(self):
+        return ('0:00.000', '0:00.000')
 
     def check_flag(self, game, side):
         return False

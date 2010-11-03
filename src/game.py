@@ -140,8 +140,11 @@ class Game(object):
         u.session.observed.add(self)
         self.observers.add(u)
         u.write(_('You are now observing game %d.\n') % self.number)
-        u.write('Game %d: %s\n' % (self.number, self.info_str))
+        self.send_info_str(u)
         self.send_board(u)
+
+    def send_info_str(self, u):
+        u.write('Game %d: %s\n' % (self.number, self.info_str))
 
     def unobserve(self, u):
         """Remove the given user as an observer and notify the user."""
@@ -331,7 +334,7 @@ class PlayedGame(Game):
         # with FICS is more important than being logical.
         # not sure about the m and n; maybe they are a version number?
         # TODO: add info about clock style, variant/speed to gameinfo string
-        self.gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, 60 * self.white_time, self.inc, 60 * self.black_time, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
+        self.gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, self.initial_secs, self.inc, self.initial_secs, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
         if self.white.session.ivars['gameinfo']:
             self.white.write(self.gameinfo_str)
         if self.black.session.ivars['gameinfo']:
@@ -374,6 +377,12 @@ class PlayedGame(Game):
             adj['variant_name'])
         self.white_time = adj['time']
         self.black_time = adj['time']
+        # XXX is this correct, or should we use the actual time
+        # remaining for the gameinfo string?
+        if self.white_time == 0:
+            self.initial_secs = 10.0
+        else:
+            self.initial_secs = 60.0 * self.white_time
         # XXX use a stored rating?
         self.white_rating = self.white.get_rating(self.speed_variant)
         self.black_rating = self.black.get_rating(self.speed_variant)
@@ -439,9 +448,14 @@ class PlayedGame(Game):
 
         self.start_time = time.time()
 
+        if self.white_time == 0:
+            self.initial_secs = 10.0
+        else:
+            self.initial_secs = 60.0 * self.white_time
+
         self.clock_name = chal.clock_name
         self.clock = clock.clock_names[chal.clock_name](self,
-            60.0 * self.white_time, 60.0 * self.black_time)
+            self.initial_secs, self.initial_secs)
         self.when_started = datetime.datetime.utcnow()
 
     def _pick_color(self, a, b):

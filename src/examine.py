@@ -20,6 +20,8 @@
 import time
 
 import speed_variant
+import clock
+
 from game import Game
 from game_constants import *
 from variant.variant_factory import variant_factory
@@ -32,6 +34,7 @@ class ExaminedGame(Game):
 
         self.white_time = 0
         self.black_time = 0
+        self.clock = clock.UntimedClock()
         self.inc = 0
         self.rated_str = 'unrated'
         self.info_str = '%s (0) %s (0) unrated untimed 0 0' % (
