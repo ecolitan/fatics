@@ -340,10 +340,13 @@ CREATE TABLE `message` (
   `from_user_id` int(8) NOT NULL COMMENT 'sender ID',
   `forwarder_user_id` int(8) DEFAULT NULL,
   `to_user_id` int(8) NOT NULL COMMENT 'receiver ID',
+  `num` smallint(2) NOT NULL COMMENT 'number of message for receiver',
   `txt` VARCHAR(1023) NOT NULL COMMENT 'full text of message',
   `when_sent` TIMESTAMP NOT NULL,
   `unread` BOOLEAN NOT NULL DEFAULT 1,
-  INDEX(`from_user_id`,`to_user_id`),
+  KEY(`to_user_id`),
+  KEY(`from_user_id`,`to_user_id`),
+  KEY(`to_user_id`,`num`), -- UNIQUEness violated when renumbering
   PRIMARY KEY(`message_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

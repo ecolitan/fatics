@@ -56,11 +56,8 @@ class Clearmessages(Command):
             count = db.clear_messages_all(conn.user.id)
         elif type(args[0]) == type(1):
             i = int(args[0])
-            msgs = db.get_messages_range(conn.user.id, i, i)
-            if msgs:
-                ids = [str(msg['message_id']) for msg in msgs]
-                count = db.clear_messages_list(ids)
-            else:
+            count = db.clear_messages_range(conn.user.id, i, i)
+            if count == 0:
                 conn.write(_('There is no such message.\n'))
                 return
         else:
@@ -71,19 +68,15 @@ class Clearmessages(Command):
                 if start < 1 or start > end or end > 9999:
                     conn.write(_('Invalid message range.\n'))
                     return
-                msgs = db.get_messages_range(conn.user.id, start, end)
-                if msgs:
-                    ids = [str(msg['message_id']) for msg in msgs]
-                    count = db.clear_messages_list(ids)
-                else:
-                    count = 0
+                count = db.clear_messages_range(conn.user.id, start, end)
             else:
                 sender = user.find.by_prefix_for_user(args[0], conn)
                 if not sender:
                     return
                 count = db.clear_messages_from_to(sender.id, conn.user.id)
 
-        conn.write(ngettext('Cleared %d message.\n', 'Cleared %d messages.\n', count) % count)
+        conn.write(ngettext('Cleared %d message.\n',
+            'Cleared %d messages.\n', count) % count)
 
 @ics_command('fmessage', 'wd')
 class Fmessage(Command, FormatMessage):
@@ -132,6 +125,19 @@ class Messages(Command, FormatMessage):
                 for msg in msgs:
                     conn.write(_('%d. ') % (msg['num']))
                     self._write_msg(msg, conn.user)
+                db.set_messages_read_all(conn.user.id)
+        elif args[0] == 'u':
+            if args[1] is not None:
+                raise BadCommandError
+            msgs = db.get_messages_unread(conn.user.id)
+            if not msgs:
+                conn.write(_('You have no unread messages.\n'))
+            else:
+                conn.write(_('Unread messages:\n'))
+                for msg in msgs:
+                    conn.write(_('%d. ') % (msg['num']))
+                    self._write_msg(msg, conn.user)
+                db.set_messages_read_all(conn.user.id)
         elif args[1] is None:
             # display some messages
             if type(args[0]) == type(1):
@@ -165,13 +171,15 @@ class Messages(Command, FormatMessage):
                     msgs = db.get_messages_from_to(u2.id, conn.user.id)
                     if not msgs:
                         conn.write(_('You have no messages from %s.\n') % u2.name)
+                        return
                     else:
                         conn.write(_('Messages from %s:\n') % u2.name)
-                        for msg in msgs:
-                            self._write_msg(msg, conn.user)
+
             for msg in msgs:
                 conn.write(_('%d. ') % (msg['num']))
                 self._write_msg(msg, conn.user)
+                if msg['unread']:
+                    db.set_message_read(msg['message_id'])
         else:
             """ Send a message.  Note that the message may be localized
             differently for the sender and receiver. """
@@ -187,7 +195,7 @@ class Messages(Command, FormatMessage):
                     conn.write(_('%s is censoring you.\n') % to.name)
                     return
                 message_id = db.send_message(conn.user.id, to.id, args[1])
-                msg = db.get_message_id(message_id)
+                msg = db.get_message(message_id)
                 msg_str_to = self._format_msg(msg, to) # localized for receiver
 
                 if to.vars['mailmess']:

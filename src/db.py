@@ -811,20 +811,80 @@ class DB(object):
             cursor.close()
 
     # messages
-    # Use user variables to simulate enumerating messages for each user,
-    # although no such numbers are actually stored in the table.
-    def get_message_id(self, message_id):
+    def _get_next_message_id(self, cursor, uid):
+        cursor.execute("""SELECT MAX(num)
+            FROM message
+            WHERE to_user_id=%s""", (uid,))
+        row = cursor.fetchone()
+        return (row[0] + 1) if row[0] is not None else 1
+
+    def _renumber_messages(self, cursor, uid):
+        """ Renumber the messages for a given user, which is necessary
+        when messages are deleted, possibly leaving a gap in the
+        existing enumeration. """
+        cursor.execute("""SET @i=0""")
+        cursor.execute("""UPDATE message
+            SET num=(@i := @i + 1)
+            WHERE to_user_id=%s
+            ORDER BY when_sent ASC,message_id ASC""",
+            (uid,))
+
+    def get_message(self, message_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT message_id,sender.user_name AS sender_name,forwarder.user_name AS forwarder_name,when_sent,txt FROM message LEFT JOIN user AS sender ON (message.from_user_id = sender.user_id) LEFT JOIN user AS forwarder ON (message.forwarder_user_id = forwarder.user_id) WHERE message_id=%s""",
+        cursor.execute("""SELECT
+                message_id,num,sender.user_name AS sender_name,
+                forwarder.user_name AS forwarder_name,
+                when_sent,txt,unread
+            FROM message LEFT JOIN user AS sender ON
+                (message.from_user_id = sender.user_id)
+            LEFT JOIN user AS forwarder ON
+                (message.forwarder_user_id = forwarder.user_id)
+            WHERE message_id=%s""",
             (message_id,))
         row = cursor.fetchone()
         cursor.close()
         return row
 
+    def get_message_count(self, uid):
+        """ Get counts of total and unread messages for a given user. """
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT COUNT(*),SUM(unread)
+            FROM message
+            WHERE to_user_id=%s""",
+            (uid,))
+        ret = cursor.fetchone()
+        if ret[0] == 0:
+            ret = (0, 0)
+        cursor.close()
+        return ret
+
     def get_messages_all(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SET @i=0""")
-        cursor.execute("""SELECT message_id,@i := @i + 1 AS num,sender.user_name AS sender_name,forwarder.user_name AS forwarder_name,when_sent,txt FROM message LEFT JOIN user AS sender ON (message.from_user_id = sender.user_id) LEFT JOIN user AS forwarder ON (message.forwarder_user_id = forwarder.user_id) WHERE to_user_id=%s ORDER BY message_id""",
+        cursor.execute("""SELECT
+                message_id,num,sender.user_name AS sender_name,
+                forwarder.user_name AS forwarder_name,when_sent,txt,unread
+            FROM message LEFT JOIN user AS sender
+                ON (message.from_user_id = sender.user_id)
+            LEFT JOIN user AS forwarder ON
+                (message.forwarder_user_id = forwarder.user_id)
+            WHERE to_user_id=%s
+            ORDER BY num ASC""",
+            (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def get_messages_unread(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT
+                message_id,num,sender.user_name AS sender_name,
+                forwarder.user_name AS forwarder_name,when_sent,txt,unread
+            FROM message LEFT JOIN user AS sender
+                ON (message.from_user_id = sender.user_id)
+            LEFT JOIN user AS forwarder ON
+                (message.forwarder_user_id = forwarder.user_id)
+            WHERE to_user_id=%s AND unread=1
+            ORDER BY num ASC""",
             (user_id,))
         rows = cursor.fetchall()
         cursor.close()
@@ -832,46 +892,73 @@ class DB(object):
 
     def get_messages_range(self, user_id, start, end):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SET @i=0""")
-        cursor.execute("""SELECT * FROM (
-                SELECT message_id,@i := @i + 1 AS num,from_user_id,sender.user_name AS sender_name,forwarder.user_name AS forwarder_name,when_sent,txt
-                FROM message
-                    LEFT JOIN user AS sender ON (message.from_user_id = sender.user_id)
-                    LEFT JOIN user AS forwarder ON (message.forwarder_user_id = forwarder.user_id)
-                WHERE to_user_id=%s ORDER BY message_id) AS t1
-            WHERE num BETWEEN %s AND %s""", (user_id, start, end))
-            #(user_id, start - 1, end - start + 1))
+        cursor.execute("""SELECT
+                message_id,num,from_user_id,
+                sender.user_name AS sender_name,
+                forwarder.user_name AS forwarder_name,when_sent,txt,unread
+            FROM message LEFT JOIN user AS sender ON
+                (message.from_user_id = sender.user_id)
+            LEFT JOIN user AS forwarder ON
+                (message.forwarder_user_id = forwarder.user_id)
+            WHERE to_user_id=%s AND num BETWEEN %s AND %s
+            ORDER BY num ASC""",
+            (user_id, start, end))
         rows = cursor.fetchall()
         cursor.close()
         return rows
 
     def get_messages_from_to(self, from_user_id, to_user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SET @i=0""")
-        cursor.execute("""SELECT * FROM (SELECT message_id,@i := @i + 1 AS num,from_user_id,sender.user_name AS sender_name,forwarder.user_name AS forwarder_name,when_sent,txt FROM message LEFT JOIN user AS sender ON (message.from_user_id = sender.user_id) LEFT JOIN user AS forwarder ON (message.forwarder_user_id = forwarder.user_id) WHERE to_user_id=%s ORDER BY message_id) AS t1 WHERE from_user_id=%s""",
+        cursor.execute("""SELECT
+                message_id,num,from_user_id,sender.user_name AS sender_name,
+                forwarder.user_name AS forwarder_name,when_sent,txt,unread
+            FROM message LEFT JOIN user AS sender ON
+                (message.from_user_id = sender.user_id)
+            LEFT JOIN user AS forwarder ON
+                (message.forwarder_user_id = forwarder.user_id)
+            WHERE to_user_id=%s AND from_user_id=%s
+            ORDER BY num ASC""",
             (to_user_id, from_user_id))
-
         rows = cursor.fetchall()
         cursor.close()
         return rows
 
     def send_message(self, from_user_id, to_user_id, txt):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO message SET from_user_id=%s,to_user_id=%s,txt=%s,when_sent=NOW(),unread=1""",
-            (from_user_id, to_user_id, txt))
+        num = self._get_next_message_id(cursor, to_user_id)
+        cursor.execute("""INSERT INTO message
+            SET from_user_id=%s,to_user_id=%s,num=%s,txt=%s,when_sent=NOW(),
+                unread=1""",
+            (from_user_id, to_user_id, num, txt))
         message_id = cursor.lastrowid
         cursor.close()
         return message_id
 
     def forward_message(self, forwarder_user_id, to_user_id, message_id):
         cursor = self.db.cursor()
-        cursor.execute("""INSERT INTO message (from_user_id,forwarder_user_id,to_user_id,txt,when_sent,unread)
-            (SELECT from_user_id,%s,%s,txt,when_sent,1 FROM message
+        num = self._get_next_message_id(cursor, to_user_id)
+        cursor.execute("""INSERT INTO message
+            (from_user_id,forwarder_user_id,to_user_id,num,txt,when_sent,unread)
+            (SELECT from_user_id,%s,%s,%s,txt,when_sent,1 FROM message
                 WHERE message_id=%s)""",
-            (forwarder_user_id,to_user_id,message_id))
+            (forwarder_user_id,to_user_id,num,message_id))
         message_id = cursor.lastrowid
         cursor.close()
         return message_id
+
+    def set_messages_read_all(self, uid):
+        cursor = self.db.cursor()
+        cursor.execute("""UPDATE message
+            SET unread=0
+            WHERE to_user_id=%s""", (uid))
+        cursor.close()
+
+    def set_message_read(self, message_id):
+        cursor = self.db.cursor()
+        cursor.execute("""UPDATE message
+            SET unread=0
+            WHERE message_id=%s""", (message_id))
+        cursor.close()
 
     def clear_messages_all(self, user_id):
         cursor = self.db.cursor()
@@ -881,21 +968,23 @@ class DB(object):
         cursor.close()
         return ret
 
-    def clear_messages_list(self, lst):
-        if not lst:
-            return 0
+    def clear_messages_range(self, uid, start, end):
         cursor = self.db.cursor()
-        cursor.execute("""DELETE FROM message WHERE message_id IN (%s)""" %
-            (','.join(lst),))
+        cursor.execute("""DELETE FROM message
+            WHERE to_user_id=%s AND num BETWEEN %s AND %s""",
+            (uid, start, end))
         ret = cursor.rowcount
+        self._renumber_messages(cursor, uid)
         cursor.close()
         return ret
 
     def clear_messages_from_to(self, from_user_id, to_user_id):
         cursor = self.db.cursor()
-        cursor.execute("""DELETE FROM message WHERE from_user_id=%s AND to_user_id=%s""",
+        cursor.execute("""DELETE FROM message
+            WHERE from_user_id=%s AND to_user_id=%s""",
             (from_user_id, to_user_id))
         ret = cursor.rowcount
+        self._renumber_messages(cursor, to_user_id)
         cursor.close()
         return ret
 

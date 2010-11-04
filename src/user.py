@@ -384,6 +384,17 @@ class User(BaseUser):
             for item in reversed(news):
                 conn.write('%4d (%s) %s\n' % (item['news_id'],
                     item['news_date'], item['news_title']))
+        else:
+            conn.write(_('There are no new news items.\n'))
+        conn.write('\n')
+
+        (mcount, ucount) = db.get_message_count(self.id)
+        assert(mcount >= 0)
+        assert(ucount >= 0)
+        conn.write(ngettext('You have %(mcount)d message (%(ucount)d unread).\n',
+            'You have %(mcount)d messages (%(ucount)d unread).\n', mcount) %
+            {'mcount': mcount, 'ucount': ucount})
+        conn.write(_('Use "messages u" to view unread messages and "clearmessages *" to clear all.\n'))
 
         for dbu in db.user_get_notified(self.id):
             name = dbu['user_name']

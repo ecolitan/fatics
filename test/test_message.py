@@ -60,7 +60,11 @@ class TestMessage(Test):
         t.write('mess testplayer mess 4!\n')
         self.expect('mess 4!', t)
 
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect()
+        t2.write('testplayer\ntestpass\n')
+        self.expect('You have 4 messages (4 unread).', t2)
+        self.expect('fics%', t2)
+
         t2.write('message 3\n')
         self.expect(': mess 3!', t2)
 
@@ -85,12 +89,16 @@ class TestMessage(Test):
         self.expect('2. admin at', t2)
         self.expect('3. admin at', t2)
         self.expect('4. admin at', t2)
+
+        t2.write('clearmessage 5\n')
+        self.expect('There is no such message.', t2)
+
         t2.write('clearmessages *\n')
         self.expect('Cleared 4 messages.', t2)
 
-        t2.write('mess admin Too many messages\n')
-        self.expect(': Too many messages', t)
-        self.expect(': Too many messages', t2)
+        t2.write('mess admin Even more messages\n')
+        self.expect(': Even more messages', t)
+        self.expect(': Even more messages', t2)
         t2.write('mess admin\n')
         self.expect('Messages to admin:', t2)
         self.expect('testplayer at ', t2)
@@ -110,6 +118,42 @@ class TestMessage(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('TestPlayer', 'testpass')
+    def test_messages_unread(self):
+        t = self.connect_as_admin()
+        t.write('mess testplayer message #1\n')
+        t.write('mess testplayer message #2\n')
+        t.write('mess testplayer message #3\n')
+        self.expect('message #3', t)
+
+        t2 = self.connect()
+        t2.write('testplayer\ntestpass\n')
+        self.expect('You have 3 messages (3 unread).', t2)
+        self.expect('fics%', t2)
+
+        t2.write('mess 3\n')
+        self.expect('message #3', t2)
+
+        t2.write('mess u\n')
+        self.expect('Unread messages:', t2)
+        self.expect('message #1', t2)
+        self.expect('message #2', t2)
+        self.expect_not('message #3', t2)
+
+        t2.write('mess u\n')
+        self.expect('You have no unread messages.', t2)
+        self.close(t2)
+
+        t.write('mess testplayer message #4\n')
+        self.expect('message #4', t)
+        self.close(t)
+
+        t2 = self.connect()
+        t2.write('testplayer\ntestpass\n')
+        self.expect('You have 4 messages (1 unread).', t2)
+        self.expect('fics%', t2)
+        self.close(t2)
+
     @with_player('testplayer', 'testpass')
     def test_clearmessages(self):
         t = self.connect_as_admin()
@@ -123,7 +167,11 @@ class TestMessage(Test):
         t.write('mess testplayer message #4\n')
         self.expect('message #4', t)
 
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect()
+        t2.write('testplayer\ntestpass\n')
+        self.expect('You have 4 messages (4 unread).', t2)
+        self.expect('fics%', t2)
+
         t2.write('clearmess 5\n')
         self.expect('There is no such message.', t2)
         t2.write('clearmess 3\n')
@@ -152,6 +200,12 @@ class TestMessage(Test):
         self.expect('Cleared 4 messages.', t2)
 
         self.close(t)
+        self.close(t2)
+
+        t2 = self.connect()
+        t2.write('testplayer\ntestpass\n')
+        self.expect('You have 0 messages (0 unread).', t2)
+        self.expect('fics%', t2)
         self.close(t2)
 
     @with_player('testplayer', 'testpass')
