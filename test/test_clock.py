@@ -16,6 +16,8 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import random
+
 import time
 
 from test import *
@@ -98,11 +100,14 @@ class TestTime(Test):
         t.write('unex\n')
         self.close(t)
 
-class TestForfeitTime(Test):
+class TestFlag(Test):
     @with_player('TestPlayer', 'testpass')
     def test_flag(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
+
+        t.write('set autoflag 0\n')
+        self.expect('Auto-flagging disabled.', t)
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -125,7 +130,7 @@ class TestForfeitTime(Test):
         self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----PP-- -------- PPPP--PP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer -1 0 1 39 39 11 10 2 P/f2-f4 (0:00) f4 0 1 0', t)
         self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----PP-- -------- PPPP--PP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer 1 0 1 39 39 11 10 2 P/f2-f4 (0:00) f4 1 1 0', t2)
 
-        time.sleep(11)
+        time.sleep(15)
         self.expect_not('forfeits', t)
 
         t.write('time\n')
@@ -134,6 +139,54 @@ class TestForfeitTime(Test):
         t.write('flag\n')
         self.expect('TestPlayer forfeits on time} 1-0', t)
         self.expect('TestPlayer forfeits on time} 1-0', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_flag_both(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t.write('set autoflag 0\n')
+        self.expect('Auto-flagging disabled.', t)
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
+        t.write('match testplayer white 0+1 u\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 1 0 1 39 39 10 10 1 none (0:00) none 0 0 0', t)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer -1 0 1 39 39 10 10 1 none (0:00) none 1 0 0', t2)
+
+        t.write('e4\n')
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- ----P--- -------- PPPP-PPP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer -1 0 1 39 39 10 10 1 P/e2-e4 (0:00) e4 0 0 0', t)
+        self.expect('<12> rnbqkbnr pppppppp -------- -------- ----P--- -------- PPPP-PPP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer 1 0 1 39 39 10 10 1 P/e2-e4 (0:00) e4 1 0 0', t2)
+
+        t2.write('e5\n')
+        self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----P--- -------- PPPP-PPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer 1 0 1 39 39 10 10 2 P/e7-e5 (0:00) e5 0 1 0', t)
+        self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----P--- -------- PPPP-PPP RNBQKBNR W -1 1 1 1 1 0 1 admin TestPlayer -1 0 1 39 39 10 10 2 P/e7-e5 (0:00) e5 1 1 0', t2)
+        t.write('f4\n')
+        self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----PP-- -------- PPPP--PP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer -1 0 1 39 39 11 10 2 P/f2-f4 (0:00) f4 0 1 0', t)
+        self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----PP-- -------- PPPP--PP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer 1 0 1 39 39 11 10 2 P/f2-f4 (0:00) f4 1 1 0', t2)
+
+        time.sleep(15)
+        self.expect_not('forfeits', t)
+
+        t.write('time\n')
+        self.expect('Black Clock : 0:00.000', t)
+
+        t2.write('exf4\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        time.sleep(15)
+        #self.expect_not('forfeits', t)
+
+        random.choice([t, t2]).write('flag\n')
+        self.expect('(admin vs. TestPlayer) Both players ran out of time} 1/2-1/2', t)
+        self.expect('(admin vs. TestPlayer) Both players ran out of time} 1/2-1/2', t2)
 
         self.close(t)
         self.close(t2)
@@ -208,12 +261,53 @@ class TestForfeitTime(Test):
         self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----PP-- -------- PPPP--PP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer -1 0 1 39 39 11 10 2 P/f2-f4 (0:00) f4 0 1 0', t)
         self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----PP-- -------- PPPP--PP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer 1 0 1 39 39 11 10 2 P/f2-f4 (0:00) f4 1 1 0', t2)
 
-        time.sleep(10.1)
+        time.sleep(11)
         t2.write('exf4\n')
         self.expect('TestPlayer forfeits on time} 1-0', t)
         self.expect('TestPlayer forfeits on time} 1-0', t2)
 
         self.close(t)
         self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_autoflag_nomaterial(self):
+        """ Test when a player runs out of time but the opponent
+        has no mating material. """
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'testpass')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
+        t.write('set autoflag 1\n')
+        self.expect('Auto-flagging enabled.', t)
+
+        t.write('match testplayer white 0+1 u\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+
+        moves = ['e4', 'e5', 'Nc3', 'Bc5', 'f4', 'exf4', 'Nf3', 'Qf6', 'd4', 'Bb4', 'e5', 'Bxc3+', 'bxc3', 'Qf5', 'Bd3', 'Qg4', 'O-O', 'g5', 'g3', 'fxg3', 'Nxg5', 'gxh2+', 'Kxh2', 'Qh4+', 'Kg2', 'Nh6', 'Rh1', 'Qg4+', 'Qxg4', 'Nxg4', 'Nxh7', 'Rxh7', 'Rxh7', 'd5', 'exd6', 'Be6', 'dxc7', 'Na6', 'Bg5', 'Kd7', 'Bd8', 'Rxd8', 'cxd8=Q+', 'Kxd8', 'Re1', 'Nf6', 'Rxe6', 'fxe6', 'Rxb7', 'Nc7', 'Rxa7', 'Nfd5', 'c4', 'Nf4+', 'Kf3', 'Nxd3', 'cxd3', 'Kd7', 'Rxc7+', 'Kd6', 'Ke4', 'Kxc7', 'Ke5', 'Kd7', 'd5', 'exd5', 'cxd5', 'Kc7', 'd6+', 'Kd7']
+
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm
+
+        assert(wtm)
+        time.sleep(45)
+
+        t.write('time\n')
+
+        self.expect('{Game 1 (admin vs. TestPlayer) admin ran out of time and TestPlayer lacks mating material} 1/2-1/2', t, timeout=10)
+        self.expect('{Game 1 (admin vs. TestPlayer) admin ran out of time and TestPlayer lacks mating material} 1/2-1/2', t2)
+
+        self.close(t)
+        self.close(t2)
+
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
