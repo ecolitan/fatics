@@ -19,14 +19,12 @@
 import datetime
 import time
 
-import timer
+import time_format
 import online
 
 from game_constants import *
 from config import config
 
-
-running_clocks = []
 clock_names = {}
 
 class Clock(object):
@@ -35,7 +33,6 @@ class Clock(object):
         self._black_time = black_time
         self.inc = g.inc
         self.is_ticking = False
-        running_clocks.append(self)
         self.started_time = None
 
     def start(self, side):
@@ -52,7 +49,7 @@ class Clock(object):
         td = datetime.timedelta(seconds=secs)
         oldstr = str(td)
         # round to the nearest millisecond
-        ret = timer.timer.hms(secs)
+        ret = time_format.hms(secs)
         return ret
 
     def as_str(self):

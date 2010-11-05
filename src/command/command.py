@@ -26,9 +26,8 @@ import game
 import history
 import speed_variant
 import online
+import time_format
 
-from timer import timer
-from reload import reload
 from server import server
 from db import db, DeleteError
 
@@ -136,16 +135,6 @@ class Date(Command):
         conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M UTC %Y", time.gmtime(t)))
         conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
 
-@ics_command('flag', '', admin.Level.user)
-class Flag(Command):
-    def run(self, args, conn):
-        if not conn.user.session.game:
-            conn.write(_("You are not playing a game.\n"))
-            return
-        g = conn.user.session.game
-        if not g.clock.check_flag(g, g.get_user_opp_side(conn.user)):
-            conn.write(_('Your opponent is not out of time.\n'))
-
 @ics_command('follow', 'w', admin.Level.user)
 class Follow(Command):
     def run(self, args, conn):
@@ -224,7 +213,7 @@ class Uptime(Command):
     def run(self, args, conn):
         conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
         conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
-        conn.write(_("Up for: %s\n") % timer.hms_words(time.time() -
+        conn.write(_("Up for: %s\n") % time_format.hms_words(time.time() -
             server.start_time))
 
 @ics_command('who', 'T', admin.Level.user)

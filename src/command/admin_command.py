@@ -25,6 +25,7 @@ import online
 import admin
 import speed_variant
 import list_
+from reload import reload
 
 from db import db
 from command import Command, ics_command, requires_registration

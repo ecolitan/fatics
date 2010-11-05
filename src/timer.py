@@ -20,42 +20,9 @@ import time
 from gettext import ngettext
 
 import online
+import game
 
 from config import config
-
-
-class Timer(object):
-    def hms_words(self, secs):
-        (days, secs) = divmod(secs, 86400)
-        (hours, secs) = divmod(secs, 3600)
-        (mins, secs) = divmod(secs, 60)
-        ret = ''
-        if days != 0:
-            ret = ret + ngettext("%d day", "%d days", days) % days + " "
-        if days != 0 or hours != 0:
-            ret = ret + ngettext("%d hour", "%d hours", hours) % hours + " "
-        if days != 0 or hours != 0 or mins != 0:
-            ret = ret + ngettext("%d minute", "%d minutes", mins) % mins + " "
-        ret = ret + ngettext("%d second", "%d seconds", secs) % secs
-        return ret
-
-    def hms(self, secs, user=None):
-        (hours, secs) = divmod(secs, 3600)
-        (mins, secs) = divmod(secs, 60)
-
-        if not user or user.session.ivars['ms']:
-            if hours != 0:
-                ret = '%d:%02d:%06.3f' % (hours, mins, secs)
-            else:
-                ret = '%d:%06.3f' % (mins, secs)
-        else:
-            if hours != 0:
-                ret = '%d:%02d:%02d' % (hours, mins, secs)
-            else:
-                ret = '%d:%02d' % (mins, secs)
-        return ret
-
-timer = Timer()
 
 heartbeat_timeout = 5
 def heartbeat():
@@ -76,5 +43,13 @@ def heartbeat():
     for u in online.online:
         if u.session.use_zipseal:
             u.session.ping()
+
+    # forfeit games on time
+    for g in game.games.values():
+        if g.gtype == game.PLAYED and g.clock.is_ticking:
+            u = g.get_user_to_move()
+            opp = g.get_opp(u)
+            if opp.vars['autoflag']:
+                g.clock.check_flag(g, g.get_user_side(u))
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -24,6 +24,7 @@ import game
 
 from command_parser import BadCommandError
 from command import ics_command, Command
+from game_constants import *
 from db import db
 
 
@@ -159,6 +160,16 @@ class Moretime(Command, GameMixin):
                 conn.write(_('Invalid number of seconds.\n'))
             else:
                 g.moretime(secs, conn.user)
+
+@ics_command('flag', '')
+class Flag(Command):
+    def run(self, args, conn):
+        if not conn.user.session.game:
+            conn.write(_("You are not playing a game.\n"))
+            return
+        g = conn.user.session.game
+        if not g.clock.check_flag(g, opp(g.get_user_side(conn.user))):
+            conn.write(_('Your opponent is not out of time.\n'))
 
 @ics_command('refresh', 'n')
 class Refresh(Command, GameMixin):

@@ -22,8 +22,9 @@ import copy
 import var
 import game
 import timeseal
+import time_format
+
 from game_list import GameList
-from timer import timer
 
 # user state that is per-session and not saved to persistent storage
 class Session(object):
@@ -56,12 +57,12 @@ class Session(object):
     """returns a human-readable string"""
     def get_idle_time(self):
         assert(self.last_command_time is not None)
-        return timer.hms_words(time.time() - self.last_command_time)
+        return time_format.hms_words(time.time() - self.last_command_time)
 
     """returns a human-readable string"""
     def get_online_time(self):
         assert(self.login_time is not None)
-        return timer.hms_words(time.time() - self.login_time)
+        return time_format.hms_words(time.time() - self.login_time)
 
     def close(self):
         assert(not self.closed)

@@ -26,7 +26,8 @@ import timeseal
 import speed_variant
 import clock
 import history
-from timer import timer
+import time_format
+
 from db import db
 from game_constants import *
 
@@ -111,14 +112,6 @@ class Game(object):
             return BLACK
         else:
             raise RuntimeError('Game.get_side(): got a non-player')
-
-    def get_user_opp_side(self, user):
-        if user == self.white:
-            return BLACK
-        elif user == self.black:
-            return WHITE
-        else:
-            raise RuntimeError('Game.get_opp_side(): got a non-player')
 
     def get_side_user(self, side):
         if side == WHITE:
@@ -242,7 +235,8 @@ class Game(object):
                 move_str = '...'
             else:
                 mv = self.variant.pos.history.get_move(i)
-                move_str = '%-7s (%s)' % (mv.to_san(), timer.hms(mv.time, conn.user))
+                move_str = '%-7s (%s)' % (mv.to_san(),
+                    time_format.hms(mv.time, conn.user))
             if i % 2 == 0:
                 conn.write('%3d.  %-23s ' % (int((i + 3) / 2),move_str))
             else:
@@ -299,6 +293,7 @@ class PlayedGame(Game):
         else:
             self._init_new(chal)
             creating = 'Creating'
+        assert(self.clock)
         # XXX is this property necessary?
         self.is_active = True
 

@@ -21,8 +21,9 @@ import copy
 import random
 from array import array
 
+import time_format
+
 from game_constants import *
-from timer import timer
 from speed_variant import IllegalMoveError
 
 """
@@ -1434,12 +1435,12 @@ class Crazyhouse(object):
         full_moves = self.pos.ply // 2 + 1
         last_mv = self.pos.get_last_move()
         if last_mv is None:
-            last_move_time_str = timer.hms(0.0, user)
+            last_move_time_str = time_format.hms(0.0, user)
             last_move_san = 'none'
             last_move_verbose = 'none'
         else:
             assert(last_mv.time is not None)
-            last_move_time_str = timer.hms(last_mv.time, user)
+            last_move_time_str = time_format.hms(last_mv.time, user)
             last_move_san = last_mv.to_san()
             last_move_verbose = last_mv.to_verbose_alg()
             if last_mv.is_capture:
