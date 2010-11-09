@@ -345,8 +345,8 @@ class Challenge(Offer, MatchStringParser):
             o.name == self.name and o.equivalent_to(self)), None)
         if o:
             # a already received an identical offer, so just accept it
-            a.write_("Your challenge intercepts %s's challenge.\n", (o.a.name))
-            b.write_("%s's challenge intercepts your challenge.\n", (a.name))
+            a.write_("Your challenge intercepts %s's challenge.\n", (o.a.name,))
+            b.write_("%s's challenge intercepts your challenge.\n", (a.name,))
             # XXX don't send "Accepting" and "USER accepts" messages?
             o.accept()
             return
@@ -397,21 +397,22 @@ class Challenge(Offer, MatchStringParser):
             b.write_('Ignoring (formula): %s\n', challenge_str)
             return
 
-        o = next((o for o in b_sent if o.name == self.name), None)
+        o = next((o for o in b_sent if o.name == self.name and
+            o.b == a), None)
         if o:
             a.write_('Declining the offer from %s and proposing a counteroffer.\n', (b.name,))
             b.write_('%s declines your offer and proposes a counteroffer.\n', (a.name,))
             o.decline(notify=False)
 
-        o = next((o for o in a_sent if o.name == self.name), None)
+        o = next((o for o in a_sent if o.name == self.name and
+            o.b == b), None)
         if o:
             a.write_('Updating the offer already made to %s.\n', (b.name,))
             b.write_('%s updates the offer.\n', (a.name,))
             a_sent.remove(o)
             b_received.remove(o)
 
-        a_sent.append(self)
-        b_received.append(self)
+        self._register()
 
         a.write('Issuing: %s\n' % challenge_str)
         b.write('Challenge: %s\n' % challenge_str)
@@ -491,5 +492,19 @@ class Challenge(Offer, MatchStringParser):
         Offer.accept(self)
 
         g = game.PlayedGame(self)
+
+    def withdraw_logout(self):
+        Offer.withdraw_logout(self)
+        self.a.write_('Withdrawing your match offer to %s.\n',
+            (self.b.name,))
+        self.b.write_('%s, who was challenging you, has departed.\n',
+            (self.a.name,))
+
+    def decline_logout(self):
+        Offer.decline_logout(self)
+        self.b.write_('Declining the match offer from %s.\n',
+            (self.a.name,))
+        self.a.write_('%s, whom you were challenging, has departed.\n',
+            (self.b.name,))
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -237,6 +237,7 @@ class VarList(object):
         BoolVar("chanoff", False, N_("You will not hear channel tells.\n"), N_("You will now hear channel tells.\n")).persist().add_as_var()
 
         BoolVar("open", True, N_("You are now open to receive match requests.\n"), N_("You are no longer open to receive match requests.\n")).persist().add_as_var()
+        BoolVar("bugopen", False, N_("You are now open for bughouse.\n"), N_("You are not open for bughouse.\n")).persist().add_as_var()
         BoolVar("silence", False, N_("You will now play games in silence.\n"), N_("You will not play games in silence.\n")).persist().add_as_var()
         BoolVar("bell", True, N_("You will now hear beeps.\n"), N_("You will not hear beeps.\n")).persist().add_as_var()
         BoolVar("autoflag", True, N_("Auto-flagging enabled.\n"), N_("Auto-flagging disabled.\n")).persist().add_as_var()

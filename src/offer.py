@@ -26,6 +26,11 @@ class Offer(object):
         self.name = name
         self.game = None
 
+    def _register(self):
+        """ Store the offer as being made for both users. """
+        self.a.session.offers_sent.append(self)
+        self.b.session.offers_received.append(self)
+
     def accept(self):
         """player b accepts"""
         self.a.session.offers_sent.remove(self)
@@ -43,10 +48,10 @@ class Offer(object):
     def decline(self, notify=True):
         """player b declines"""
         if notify:
-            self.a.write(_("%s declines your %s.\n") % (self.b.name,
-                self.name))
-            self.b.write(_("Declining the %s from %s.\n") % (self.name,
-                self.a.name))
+            self.b.write(_("Declining the %(offer)s from %(name)s.\n") %
+                {'offer': self.name, 'name': self.a.name})
+            self.a.write(_("%(name)s declines your %(offer)s.\n") %
+                {'name': self.b.name, 'offer': self.name})
             if self.game:
                 for p in self.game.observers:
                     p.write(_("%(name)s declines the %(offer)s.\n") % {
@@ -67,6 +72,14 @@ class Offer(object):
                         'name': self.a.name, 'offer': self.name})
         self.a.session.offers_sent.remove(self)
         self.b.session.offers_received.remove(self)
+
+    def withdraw_logout(self):
+        """ Player a withdraws the offer by logging out. """
+        self.withdraw(notify=False)
+
+    def decline_logout(self):
+        """ Player b declines the offer by logging out. """
+        self.decline(notify=False)
 
 class Abort(Offer):
     def __init__(self, game, user):
@@ -93,10 +106,7 @@ class Abort(Offer):
             for p in game.observers:
                 p.write_('%(name)s requests to abort game %(num)d.\n', {
                     'name': user.name, 'num': game.number})
-            a_sent = user.session.offers_sent
-            b_received = self.b.session.offers_received
-            a_sent.append(self)
-            b_received.append(self)
+            self._register()
 
     def decline(self, notify=True):
         Offer.decline(self, notify)
@@ -136,10 +146,7 @@ class Adjourn(Offer):
             self.b.write_('%s requests to adjourn game %d.\n', (user.name, game.number))
             for p in game.observers:
                 p.write_('%s requests to adjourn game %d.\n', (user.name, game.number))
-            a_sent = user.session.offers_sent
-            b_received = self.b.session.offers_received
-            a_sent.append(self)
-            b_received.append(self)
+            self._register()
 
     def decline(self, notify=True):
         Offer.decline(self, notify)
@@ -189,10 +196,7 @@ class Draw(Offer):
             for p in self.game.observers:
                 p.write_('%s offers a draw.\n', (user.name,))
 
-            a_sent = user.session.offers_sent
-            b_received = self.b.session.offers_received
-            a_sent.append(self)
-            b_received.append(self)
+            self._register()
 
     def accept(self):
         Offer.accept(self)

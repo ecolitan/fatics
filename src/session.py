@@ -23,6 +23,7 @@ import var
 import game
 import timeseal
 import time_format
+import partner
 
 from game_list import GameList
 
@@ -49,6 +50,7 @@ class Session(object):
         self.observed = GameList()
         self.closed = False
         self.seeks = []
+        self.partner = None
 
     def set_user(self, user):
         self.user = user
@@ -68,17 +70,17 @@ class Session(object):
         assert(not self.closed)
         self.closed = True
         for v in self.offers_sent[:]:
-            if v.name not in ['match offer', 'pause request']:
-                continue
-            v.withdraw(notify=False)
-            v.a.write(_('Withdrawing your match offer to %s.\n') % v.b.name)
-            v.b.write(_('%s, who was challenging you, has departed.\n') % self.user.name)
+            assert(v.a == self.user)
+            v.withdraw_logout()
         for v in self.offers_received[:]:
-            if v.name not in ['match offer', 'pause request']:
-                continue
-            v.decline(notify=False)
-            v.b.write(_('Declining the match offer from %s.\n') % v.a.name)
-            v.a.write(_('%s, whom you were challenging, has departed.\n') % self.user.name)
+            assert(v.b == self.user)
+            v.decline_logout()
+        if self.partner:
+            #self.conn.write(_('Removing partnership with %s.\n') %
+            #    partner.name)
+            self.partner.write_('Your partner, %s, has departed.\n',
+                self.user.name)
+            partner.end_partnership(self.partner, self.user)
 
         if self.game:
             self.game.leave(self.user)

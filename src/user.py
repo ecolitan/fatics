@@ -94,6 +94,7 @@ class BaseUser(object):
 
     # Like write(), but localizes for this user.
     def write_(self, s, args={}):
+        #assert(isinstance(args, (list, dict, tuple)))
         connection.written_users.add(self)
         self.session.conn.write(lang.langs[self.vars['lang']].gettext(s) %
             args)

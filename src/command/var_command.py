@@ -83,6 +83,8 @@ class Variables(Command):
                 v = var.vars[vname]
                 if val is not None and v.display_in_vars:
                     conn.write("%s\n" % v.get_display_str(val))
+            if u.is_online and u.session.partner:
+                conn.write(_('Bughouse partner: %s\n') % u.session.partner.name)
             conn.write("\n")
 
             if u.vars['formula']:
