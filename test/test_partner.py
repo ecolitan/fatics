@@ -186,4 +186,20 @@ class TestPartner(Test):
         self.expect('No player named "nosuchuser" is online.', t)
         self.close(t)
 
+    def test_partner_censor(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t2.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t2)
+
+        t2.write('+cen guestabcd\n')
+        self.expect('GuestABCD added to your censor list.', t2)
+
+        t.write('part guestefgh\n')
+        self.expect('GuestEFGH is censoring you.', t)
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -40,6 +40,10 @@ class Partner(Command):
             if not u:
                 return
 
+            if conn.user.name in u.censor:
+                conn.write(_('%s is censoring you.\n') % u.name)
+                return
+
             if u == conn.user:
                 conn.write(_("You can't be your own bughouse partner.\n"))
                 return
