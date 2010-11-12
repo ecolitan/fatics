@@ -22,6 +22,7 @@ import trie
 import channel
 import user
 import filter_
+import online
 
 from db import db, DuplicateKeyError, DeleteError
 
@@ -361,7 +362,10 @@ class MuteList(SystemUserList):
             self._notify_removed(conn, u)
 
     def _get_names(self):
-        return db.get_muted_user_names()
+        # this is slow, but only admins can do it
+        muted_guests = [u.name for u in online.online
+            if u.is_muted and u.is_guest]
+        return db.get_muted_user_names() + muted_guests
 
 class FilterList(MyList):
     def add(self, item, conn):
@@ -379,6 +383,75 @@ class FilterList(MyList):
             '-- filter list: %d IPs --\n', len(filterlist)) % len(filterlist))
         conn.write('%s\n' % ' '.join(filterlist))
 
+class RatedbanList(SystemUserList):
+    def __init__(self, name):
+        super(RatedbanList, self).__init__(name)
+        self.public = False
+
+    def add(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if u.is_guest:
+                raise ListError(A_('Only registered players can be ratedbanned.\n'))
+            if u.is_admin():
+                raise ListError(A_('Admins cannot be ratedbanned.\n'))
+            if u.is_ratedbanned:
+                raise ListError(_('%s is already on the ratedban list.\n') % u.name)
+            u.set_ratedbanned(True)
+            db.add_comment(conn.user.id, u.id, 'Ratedbanned.')
+            self._notify_added(conn, u)
+
+    def sub(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if u.is_guest:
+                raise ListError(A_('Only registered players can be ratedbanned.\n'))
+            if not u.is_ratedbanned:
+                raise ListError(_('%s is not on the ratedban list.\n') % u.name)
+            u.set_ratedbanned(False)
+            db.add_comment(conn.user.id, u.id, 'Removed from the ratedbanned list.')
+            self._notify_removed(conn, u)
+
+    def _get_names(self):
+        return db.get_ratedbanned_user_names()
+
+class PlaybanList(SystemUserList):
+    def __init__(self, name):
+        super(PlaybanList, self).__init__(name)
+        self.public = False
+
+    def add(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if u.is_admin():
+                raise ListError(A_('Admins cannot be playbanned.\n'))
+            if u.is_playbanned:
+                raise ListError(_('%s is already on the playban list.\n') % u.name)
+            u.set_playbanned(True)
+            if not u.is_guest:
+                db.add_comment(conn.user.id, u.id, 'Playbanned.')
+            self._notify_added(conn, u)
+
+    def sub(self, item, conn):
+        self._require_admin(conn.user)
+        u = user.find.by_prefix_for_user(item, conn)
+        if u:
+            if not u.is_playbanned:
+                raise ListError(_('%s is not on the playban list.\n') % u.name)
+            u.set_playbanned(False)
+            if not u.is_guest:
+                db.add_comment(conn.user.id, u.id, 'Removed from the playbanned list.')
+            self._notify_removed(conn, u)
+
+    def _get_names(self):
+        # this is slow, but only admins can do it
+        playbanned_guests = [u.name for u in online.online
+            if u.is_playbanned and u.is_guest]
+        return db.get_playbanned_user_names() + playbanned_guests
+
 """ initialize lists """
 def _init_lists():
     ChannelList("channel")
@@ -390,6 +463,8 @@ def _init_lists():
     FilterList("filter")
     MuzzleList("muzzle")
     MuteList("mute")
+    RatedbanList("ratedban")
+    PlaybanList("playban")
 
     for title in db.title_get_all():
         TitleList(title)

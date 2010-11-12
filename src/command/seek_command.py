@@ -137,7 +137,16 @@ class Play(Command, MatchMixin):
                 conn.write(_('That seek is not available.\n'))
 
         if ad:
-            if not match.check_censor_noplay(conn.user, ad.a):
+            if conn.user.is_playbanned:
+                conn.write(_('You may not play games.\n'))
+                ad = None
+            elif ad.rated and conn.user.is_guest:
+                conn.write(_('Only registered players can play rated games.\n'))
+                ad = None
+            elif ad.rated and conn.user.is_ratedbanned:
+                conn.write(_('You may not play rated games.\n'))
+                ad = None
+            elif not match.check_censor_noplay(conn.user, ad.a):
                 ad = None
             # check formula
             elif not ad.check_formula(conn.user):

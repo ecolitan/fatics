@@ -21,6 +21,8 @@ CREATE TABLE `user` (
   `user_banned` BOOLEAN NOT NULL DEFAULT 0,
   `user_muzzled` BOOLEAN NOT NULL DEFAULT 0,
   `user_muted` BOOLEAN NOT NULL DEFAULT 0,
+  `user_ratedbanned` BOOLEAN NOT NULL DEFAULT 0,
+  `user_playbanned` BOOLEAN NOT NULL DEFAULT 0,
 
   -- vars
   `time` SMALLINT(4) NOT NULL DEFAULT 2 COMMENT 'default seek time',

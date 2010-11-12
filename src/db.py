@@ -37,7 +37,7 @@ class DB(object):
         cursor.execute("""SELECT
                 user_id,user_name,user_passwd,user_last_logout,
                 user_admin_level, user_email,user_real_name,user_banned,
-                user_muzzled,user_muted
+                user_muzzled,user_muted,user_ratedbanned,user_playbanned
             FROM user WHERE user_name=%s""", (name,))
         row = cursor.fetchone()
         cursor.close()
@@ -122,7 +122,8 @@ class DB(object):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT user_id,user_name,user_passwd,
                 user_last_logout,user_admin_level,user_email,user_real_name,
-                user_banned,user_muzzled,user_muted
+                user_banned,user_muzzled,user_muted,user_ratedbanned,
+                user_playbanned
             FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
         rows = cursor.fetchall()
         cursor.close()
@@ -200,6 +201,14 @@ class DB(object):
         cursor.close()
         return rows
 
+    def get_muted_user_names(self):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT user_name FROM user
+            WHERE user_muted=1 LIMIT 500""")
+        ret = [r[0] for r in cursor.fetchall()]
+        cursor.close()
+        return ret
+
     def user_set_banned(self, uid, val):
         cursor = self.db.cursor()
         assert(val in [0, 1])
@@ -237,10 +246,32 @@ class DB(object):
             SET user_muted=%s WHERE user_id=%s""", (val,uid))
         cursor.close()
 
-    def get_muted_user_names(self):
+    def user_set_ratedbanned(self, uid, val):
+        cursor = self.db.cursor()
+        assert(val in [0, 1])
+        cursor.execute("""UPDATE user
+            SET user_ratedbanned=%s WHERE user_id=%s""", (val,uid))
+        cursor.close()
+
+    def get_ratedbanned_user_names(self):
         cursor = self.db.cursor()
         cursor.execute("""SELECT user_name FROM user
-            WHERE user_muted=1 LIMIT 500""")
+            WHERE user_ratedbanned=1 LIMIT 500""")
+        ret = [r[0] for r in cursor.fetchall()]
+        cursor.close()
+        return ret
+
+    def user_set_playbanned(self, uid, val):
+        cursor = self.db.cursor()
+        assert(val in [0, 1])
+        cursor.execute("""UPDATE user
+            SET user_playbanned=%s WHERE user_id=%s""", (val,uid))
+        cursor.close()
+
+    def get_playbanned_user_names(self):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT user_name FROM user
+            WHERE user_playbanned=1 LIMIT 500""")
         ret = [r[0] for r in cursor.fetchall()]
         cursor.close()
         return ret

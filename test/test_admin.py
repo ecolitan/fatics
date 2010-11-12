@@ -539,13 +539,24 @@ class MuteTest(Test):
     def test_mute_guest(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('GuestABCD', '')
+
         t.write('+mute GuestABCD\n')
         self.expect('GuestABCD added to the mute list.', t)
         self.expect('admin has added you to the mute list.', t2)
         t2.write('t 4 test\n')
+        # try tell to self, but could be any non-admin
         self.expect('You are muted.', t2)
         t2.write('t guestabcd test\n')
         self.expect('You are muted.', t2)
+
+        t.write('=mute\n')
+        self.expect('-- mute list: 1 name --', t)
+        self.expect('GuestABCD', t)
+
+        t.write('-mute guestabcd\n')
+        self.expect('GuestABCD removed from the mute list.', t)
+        self.expect('admin has removed you from the mute list.', t2)
+
         self.close(t)
         self.close(t2)
 
@@ -555,6 +566,158 @@ class MuteTest(Test):
         self.expect('no player matching the name "nosuchplayer"', t)
         t.write('+mute admin\n')
         self.expect('Admins cannot be muted.', t)
+        self.close(t)
+
+class TestPlayban(Test):
+    def test_playban_guest(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('GuestABCD', '')
+
+        t.write('+playban guestabcd\n')
+        self.expect('GuestABCD added to the playban list.', t)
+        self.expect('admin has added you to the playban list.', t2)
+        t.write('+playban guestabcd\n')
+        self.expect('GuestABCD is already on the playban list.', t)
+
+        t.write('=playban\n')
+        self.expect('-- playban list: 1 name --\r\nGuestABCD', t)
+
+        t2.write('see 3+0\n')
+        self.expect('You may not play games.', t2)
+        t2.write('match admin 5+0\n')
+        self.expect('You may not play games.', t2)
+
+        t.write('match guestabcd\n')
+        self.expect('GuestABCD may not play games.', t)
+
+        t.write('see 1+0 u\n')
+        m = self.expect_re(r'Your seek has been posted with index (\d+)\.', t)
+        n = int(m.group(1))
+        t2.write('play %d\n' % n)
+        self.expect('You may not play games.', t2)
+
+        t.write('-playban guestabcd\n')
+        self.expect('GuestABCD removed from the playban list.', t)
+        self.expect('admin has removed you from the playban list.', t2)
+        t.write('-playban guestabcd\n')
+        self.expect('GuestABCD is not on the playban list.', t)
+        t2.write('=playban\n')
+        self.expect("You don't have permission to do that.", t2)
+        t2.write('match admin 1+0\n')
+        self.expect('Issuing:', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_playban(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'testpass')
+
+        t.write('+playban testplayer\n')
+        self.expect('TestPlayer added to the playban list.', t)
+        self.expect('admin has added you to the playban list.', t2)
+        t.write('+playban testplayer\n')
+        self.expect('TestPlayer is already on the playban list.', t)
+        self.close(t2)
+
+        t.write('=playban\n')
+        self.expect('-- playban list: 1 name --\r\nTestPlayer', t)
+
+        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2.write('see 3+0\n')
+        self.expect('You may not play games.', t2)
+        t2.write('match admin 5+0\n')
+        self.expect('You may not play games.', t2)
+
+        t.write('match TestPlayer\n')
+        self.expect('TestPlayer may not play games.', t)
+
+        t.write('see 1+0\n')
+        m = self.expect_re(r'Your seek has been posted with index (\d+)\.', t)
+        n = int(m.group(1))
+        t2.write('play %d\n' % n)
+        self.expect('You may not play games.', t2)
+
+        t.write('-playban TestPlayer\n')
+        self.expect('TestPlayer removed from the playban list.', t)
+        self.expect('admin has removed you from the playban list.', t2)
+        t.write('-playban TestPlayer\n')
+        self.expect('TestPlayer is not on the playban list.', t)
+        t2.write('=ratedban\n')
+        self.expect("You don't have permission to do that.", t2)
+        t2.write('see 3+0\n')
+        self.expect_re(r'Your seek has been posted with index (\d+)\.', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_playban_bad(self):
+        t = self.connect_as_admin()
+        t.write('+playban nosuchplayer\n')
+        self.expect('no player matching the name "nosuchplayer"', t)
+        t.write('+playban admin\n')
+        self.expect('Admins cannot be playbanned.', t)
+        self.close(t)
+
+class TestRatedban(Test):
+    @with_player('TestPlayer', 'testpass')
+    def test_ratedban(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'testpass')
+
+        t.write('+ratedban testplayer\n')
+        self.expect('TestPlayer added to the ratedban list.', t)
+        self.expect('admin has added you to the ratedban list.', t2)
+        t.write('+ratedban testplayer\n')
+        self.expect('TestPlayer is already on the ratedban list.', t)
+        self.close(t2)
+
+        t.write('=ratedban\n')
+        self.expect('-- ratedban list: 1 name --\r\nTestPlayer', t)
+
+        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2.write('see 3+0\n')
+        self.expect('You may not play rated games.', t2)
+        t2.write('match admin 5+0\n')
+        self.expect('You may not play rated games.', t2)
+        t2.write('see 3+0 u\n')
+        self.expect('Your seek has been posted', t2)
+        t2.write('match admin 5+0 u\n')
+        self.expect('Issuing:', t2)
+
+        t.write('match TestPlayer\n')
+        self.expect('TestPlayer may not play rated games.', t)
+
+        t.write('see 1+0\n')
+        m = self.expect_re(r'Your seek has been posted with index (\d+)\.', t)
+        n = int(m.group(1))
+        t2.write('play %d\n' % n)
+        self.expect('You may not play rated games.', t2)
+
+        t.write('-ratedban TestPlayer\n')
+        self.expect('TestPlayer removed from the ratedban list.', t)
+        self.expect('admin has removed you from the ratedban list.', t2)
+        t.write('-ratedban TestPlayer\n')
+        self.expect('TestPlayer is not on the ratedban list.', t)
+        t2.write('=ratedban\n')
+        self.expect("You don't have permission to do that.", t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_ratedban_bad(self):
+        t = self.connect_as_admin()
+        t.write('+ratedban nosuchplayer\n')
+        self.expect('no player matching the name "nosuchplayer"', t)
+        t.write('+ratedban admin\n')
+        self.expect('Admins cannot be ratedbanned.', t)
+
+        t2 = self.connect_as('GuestABCD', '')
+        t.write('+ratedban guestabcd\n')
+        self.expect('Only registered players can be ratedbanned.', t)
+        self.close(t2)
+
         self.close(t)
 
 class AreloadTest(Test):

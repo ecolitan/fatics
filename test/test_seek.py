@@ -365,12 +365,18 @@ class TestPlay(Test):
     def test_play(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
+        t3 = self.connect_as_guest()
+
         t2.write('set style 12\n')
 
         t2.write('seek 3 0 white\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t2)
         n = int(m.group(1))
         self.expect('(1 player saw the seek.)', t2)
+
+        t3.write('play %d\n' % n)
+        self.expect('Only registered players can play rated games.', t3)
+        self.close(t3)
 
         t.write('play %d\n' % n)
         self.expect('admin accepts your seek.', t2)

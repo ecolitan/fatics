@@ -305,10 +305,11 @@ class BaseUser(object):
         """ Mute or unmute the user (affects all communications). """
         self.is_muted = val
 
+    def set_playbanned(self, val):
+        self.is_playbanned = val
 
 # a registered user
 class User(BaseUser):
-
     def __init__(self, u):
         BaseUser.__init__(self)
         self.id = u['user_id']
@@ -319,6 +320,8 @@ class User(BaseUser):
         self.last_logout = u['user_last_logout']
         self.admin_level = u['user_admin_level']
         self.is_banned = u['user_banned']
+        self.is_ratedbanned = u['user_ratedbanned']
+        self.is_playbanned = u['user_playbanned']
         self.is_muzzled = u['user_muzzled']
         self.is_muted = u['user_muted']
         self.is_guest = False
@@ -586,6 +589,16 @@ class User(BaseUser):
         BaseUser.set_muted(self, val)
         db.user_set_muted(self.id, 1 if val else 0)
 
+    def set_ratedbanned(self, val):
+        """ Add or remove this user from the ratedban list. """
+        self.is_ratedbanned = val
+        db.user_set_ratedbanned(self.id, 1 if val else 0)
+
+    def set_playbanned(self, val):
+        """ Add or remove this user from the ratedban list. """
+        BaseUser.set_playbanned(self, val)
+        db.user_set_playbanned(self.id, 1 if val else 0)
+
 class GuestUser(BaseUser):
     def __init__(self, name):
         BaseUser.__init__(self)
@@ -611,6 +624,7 @@ class GuestUser(BaseUser):
         self.vars = var.varlist.get_default_vars()
         self.censor = set()
         self.is_muted = False
+        self.is_playbanned = False
 
     def log_on(self, conn):
         self._titles = set(['unregistered'])

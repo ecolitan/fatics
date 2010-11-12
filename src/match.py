@@ -442,9 +442,18 @@ class Challenge(Offer, MatchStringParser):
             else:
                 # Original FICS uses the 'rated' var, but we default to True
                 self.rated = True
-        elif self.rated and (a.is_guest or b.is_guest):
+        if self.rated and (a.is_guest or b.is_guest):
             raise MatchError(_('Only registered players can play rated games.\n'))
-            return
+
+        if a.is_playbanned:
+            raise MatchError(_('You may not play games.\n'))
+        if b.is_playbanned:
+            raise MatchError(_('%s may not play games.\n') % b.name)
+        if self.rated:
+            if a.is_ratedbanned:
+                raise MatchError(_('You may not play rated games.\n'))
+            if b.is_ratedbanned:
+                raise MatchError(_('%s may not play rated games.\n') % b.name)
 
         self.a_rating = a.get_rating(self.speed_variant)
         self.b_rating = b.get_rating(self.speed_variant)

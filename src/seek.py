@@ -151,6 +151,11 @@ class Seek(MatchStringParser):
         elif self.rated and self.a.is_guest:
             raise MatchError(_('Only registered players can play rated games.\n'))
 
+        if self.a.is_playbanned:
+            raise MatchError(_('You may not play games.\n'))
+        if self.rated and self.a.is_ratedbanned:
+            raise MatchError(_('You may not play rated games.\n'))
+
         self.rating = self.a.get_rating(self.speed_variant)
 
     def __eq__(self, other):
@@ -242,14 +247,16 @@ class Seek(MatchStringParser):
 
                 if u.vars['seek']:
                     # showownseek is both a variable and an ivariable
-                    if u == self.a and not (u.vars['showownseek']
-                            and u.session.ivars['showownseek']):
+                    if self.rated and (u.is_guest or u.is_ratedbanned):
                         continue
                     if not self.meets_formula_for(u):
                         continue
                     if not self.check_formula(u):
                         continue
                     if u.censor_or_noplay(self.a):
+                        continue
+                    if u == self.a and not (u.vars['showownseek']
+                            and u.session.ivars['showownseek']):
                         continue
                     count += 1
                     u.write(seek_str)
