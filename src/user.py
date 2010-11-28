@@ -595,7 +595,6 @@ class User(BaseUser):
         db.user_set_ratedbanned(self.id, 1 if val else 0)
 
     def set_playbanned(self, val):
-        """ Add or remove this user from the ratedban list. """
         BaseUser.set_playbanned(self, val)
         db.user_set_playbanned(self.id, 1 if val else 0)
 

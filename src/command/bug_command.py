@@ -20,6 +20,9 @@
 import var
 import user
 import partner
+import online
+import speed_variant
+import game
 
 from command import Command, ics_command
 
@@ -63,5 +66,38 @@ class Partner(Command):
                 var.vars['bugopen'].set(conn.user, '1')
 
             partner.Partner(conn.user, u)
+
+
+@ics_command('bugwho', 'o')
+class Bugwho(Command):
+    def run(self, args, conn):
+        if args[0] not in [Non, 'g', 'p', 'u']:
+            raise BadCommandError
+        if args[0] is None or args[0] == 'g':
+            # bughouse games
+            conn.write(_('Bughouse games in progress\n'))
+            count = 0
+            for g in game.games.values():
+                if game.variant.name == 'bughouse':
+                    count += 1
+            conn.write(ngettext('%d game displayed.\n', '  %d games displayed.\n', count) % count)
+        if args[0] is None or args[0] == 'p':
+            conn.write(_('Partnerships not playing bughouse\n'))
+            for p in partner.partners:
+                [p1, p2] = list(p)
+                conn.write('%s %s / %s %s\n' %
+                    (p1.get_rating(speed_variant.from_names('blitz',
+                        'bughouse')), p1.get_display_name(),
+                        p2.get_rating(speed_variant.from_names('blitz',
+                        'bughouse')), p2.get_display_name()))
+
+        if args[0] is None or args[0] == 'u':
+            conn.write(_('Unpartnered players with bugopen on\n'))
+            ulist = [u for u in online.online if u.vars['bugopen'] and
+                not u.session.partner]
+            for u in ulist:
+                conn.write('%s %s\n' %
+                    (u.get_rating(speed_variant.from_names('blitz',
+                        'bughouse')), u.get_display_name()))
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

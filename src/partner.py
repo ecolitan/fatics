@@ -19,6 +19,8 @@
 
 from offer import Offer
 
+partners = []
+
 class Partner(Offer):
     def __init__(self, a, b):
         Offer.__init__(self, 'partnership request')
@@ -51,6 +53,7 @@ class Partner(Offer):
         self.b.write_("%s agrees to be your partner.\n", (self.a.name,))
         self.a.session.partner = self.b
         self.b.session.partner = self.a
+        partners.append(set([self.a, self.b]))
 
     def withdraw_logout(self):
         Offer.withdraw_logout(self)
