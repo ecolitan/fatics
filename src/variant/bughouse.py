@@ -31,12 +31,6 @@ from speed_variant import IllegalMoveError
 the same as FEN. A blank square is '-'.
 """
 
-""" FICSgames.com indicates there are a few crazyhouse draws by
-stalemate per year. There is no evidence of draws by 50-move
-rule occurring, and it would be difficult to implement because
-captures are reversible moves.  Draw by insufficient material is
-not checked, of course. """
-
 class BadFenError(Exception):
     def __init__(self, reason=None):
         self.reason = reason
@@ -394,7 +388,7 @@ class Position(object):
             self.holding[pc] = 0 # works with Python 2.6
         self.history = PositionHistory()
         self.set_pos(fen)
-        self.is_draw_nomaterial = False # never happens in zh
+        self.is_draw_nomaterial = False # never happens in bughouse
         self._check_material()
 
     set_pos_re = re.compile(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''')
@@ -485,7 +479,7 @@ class Position(object):
                 self.castle_flags = to_castle_flags(w_oo, w_ooo,
                     b_oo, b_ooo)
             self.hash ^= zobrist.castle_hash(self.castle_flags)
-            self.fifty_count = 0 # ignored in zh
+            self.fifty_count = 0 # ignored in bughouse
             self.ply = 2 * (int(full_moves, 10) - 1) + int(not self.wtm)
             self.start_ply = self.ply
 
@@ -1204,7 +1198,7 @@ class Position(object):
         return ret
 
     def is_draw_fifty(self):
-        # never in crazyhouse
+        # never in bughouse
         return False
 
     def is_draw_repetition(self, side):
@@ -1322,11 +1316,11 @@ class Position(object):
             holding_black += pc * self.holding[pc.lower()]
         return (holding_white, holding_black)
 
-class Crazyhouse(object):
+class Bughouse(object):
     def __init__(self, game):
         self.game = game
         self.pos = copy.deepcopy(initial_pos)
-        self.name = 'crazyhouse'
+        self.name = 'bughouse'
 
     def parse_move(self, s, conn):
         """Try to parse a move.  If it looks like a move but
@@ -1366,8 +1360,6 @@ class Crazyhouse(object):
     def get_turn(self):
         return WHITE if self.pos.wtm else BLACK
 
-    # I think printing b1 lines is completely unnecessary for zh, but
-    # current FICS does it and some clients seem to depend on it.
     def get_b1(self, passed=None):
         (holding_white, holding_black) = self.pos.get_holding_str()
 

@@ -24,7 +24,6 @@ import clock
 
 from game import Game
 from game_constants import *
-from variant.variant_factory import variant_factory
 
 class ExaminedGame(Game):
     def __init__(self, user, hist_game=None):
@@ -44,8 +43,7 @@ class ExaminedGame(Game):
         self.start_time = time.time()
         if hist_game is None:
             self.speed_variant = speed_variant.from_names('untimed', 'chess')
-            self.variant = variant_factory.get(self.speed_variant.variant.name,
-                self)
+            self.variant = speed_variant.variant_class[self.speed_variant.variant.name](self)
             self.moves = []
             self.white_name = 'White'
             self.black_name = 'Black'
@@ -56,8 +54,7 @@ class ExaminedGame(Game):
             # XXX use the speed from history
             self.speed_variant = speed_variant.from_names('untimed',
                 variant_name)
-            self.variant = variant_factory.get(self.speed_variant.variant.name,
-                self)
+            self.variant = speed_variant.variant_class[self.speed_variant.variant.name](self)
             self.moves = hist_game['movetext'].split(' ')
             self.white_name = hist_game['white_name']
             self.black_name = hist_game['black_name']

@@ -140,6 +140,9 @@ class TestFlag(Test):
         self.expect('TestPlayer forfeits on time} 1-0', t)
         self.expect('TestPlayer forfeits on time} 1-0', t2)
 
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
+
         self.close(t)
         self.close(t2)
 
@@ -188,6 +191,9 @@ class TestFlag(Test):
         self.expect('(admin vs. TestPlayer) Both players ran out of time} 1/2-1/2', t)
         self.expect('(admin vs. TestPlayer) Both players ran out of time} 1/2-1/2', t2)
 
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
+
         self.close(t)
         self.close(t2)
 
@@ -226,6 +232,9 @@ class TestFlag(Test):
         time.sleep(10)
         self.expect('TestPlayer forfeits on time} 1-0', t, timeout=10)
         self.expect('TestPlayer forfeits on time} 1-0', t2, timeout=10)
+
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
 
         self.close(t)
         self.close(t2)
@@ -266,6 +275,9 @@ class TestFlag(Test):
         self.expect('TestPlayer forfeits on time} 1-0', t)
         self.expect('TestPlayer forfeits on time} 1-0', t2)
 
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
+
         self.close(t)
         self.close(t2)
 
@@ -305,6 +317,9 @@ class TestFlag(Test):
 
         self.expect('{Game 1 (admin vs. TestPlayer) admin ran out of time and TestPlayer lacks mating material} 1/2-1/2', t, timeout=10)
         self.expect('{Game 1 (admin vs. TestPlayer) admin ran out of time and TestPlayer lacks mating material} 1/2-1/2', t2)
+
+        t.write('aclearhist admin\n')
+        self.expect('History of admin cleared.', t)
 
         self.close(t)
         self.close(t2)

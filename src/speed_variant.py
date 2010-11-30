@@ -90,4 +90,18 @@ def from_ids(speed_id, variant_id):
     return SpeedAndVariant(speed_ids[speed_id],
         variant_ids[variant_id])
 
+variant_class = {}
+def _init():
+    import variant.chess
+    import variant.chess960
+    import variant.crazyhouse
+    import variant.bughouse
+
+    global variant_class
+    variant_class['chess'] = variant.chess.Chess
+    variant_class['crazyhouse'] = variant.crazyhouse.Crazyhouse
+    variant_class['chess960'] = variant.chess960.Chess960
+    variant_class['bughouse'] = variant.bughouse.Bughouse
+_init()
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

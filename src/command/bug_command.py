@@ -81,32 +81,32 @@ class Bugwho(Command):
             for g in game.games.values():
                 if game.variant.name == 'bughouse':
                     count += 1
-            conn.write(ngettext('%d game displayed.\n',
-                '  %d games displayed.\n', count) % count)
+            conn.write(ngettext(' %d game displayed.\n',
+                ' %d games displayed.\n', count) % count)
         if args[0] is None or args[0] == 'p':
             conn.write(_('Partnerships not playing bughouse\n'))
             for p in partner.partners:
-                [p1, p2] = list(p)
+                [p1, p2] = sorted(list(p), key=lambda p: p.name)
                 conn.write('%s %s / %s %s\n' %
                     (p1.get_rating(speed_variant.from_names('blitz',
                         'bughouse')), p1.get_display_name(),
                         p2.get_rating(speed_variant.from_names('blitz',
                         'bughouse')), p2.get_display_name()))
             count = len(partner.partners)
-            conn.write(ngettext('%d partnership displayed.\n',
+            conn.write(ngettext(' %d partnership displayed.\n',
                 '  %d partnerships displayed.\n', count) % count)
 
         if args[0] is None or args[0] == 'u':
             conn.write(_('Unpartnered players with bugopen on\n'))
-            ulist = [u for u in online.online if u.vars['bugopen'] and
-                not u.session.partner]
+            ulist = sorted([u for u in online.online if u.vars['bugopen'] and
+                not u.session.partner], key=lambda u: u.name)
             for u in ulist:
                 conn.write('%s %s\n' %
                     (u.get_rating(speed_variant.from_names('blitz',
                         'bughouse')), u.get_display_name()))
             total = len(online.online)
             count = len(ulist)
-            conn.write(ngettext('%(count)d player displayed (of %(total)d).\n',
+            conn.write(ngettext(' %(count)d player displayed (of %(total)d).\n',
                 '  %(count)d players displayed (of %(total)d).\n', count)
                 % {'count': count, 'total': total})
 

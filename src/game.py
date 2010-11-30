@@ -31,8 +31,6 @@ import time_format
 from db import db
 from game_constants import *
 
-from variant.variant_factory import variant_factory
-
 games = {}
 
 def find_free_slot():
@@ -335,8 +333,7 @@ class PlayedGame(Game):
         if self.black.session.ivars['gameinfo']:
             self.black.write(self.gameinfo_str)
 
-        self.variant = variant_factory.get(self.speed_variant.variant.name,
-            self)
+        self.variant = speed_variant.variant_class[self.speed_variant.variant.name](self)
         # play the stored moves for an adjourned game
         if chal.adjourned:
             moves = chal.adjourned['movetext'].split(' ')

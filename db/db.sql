@@ -463,6 +463,7 @@ LOCK TABLES `variant` WRITE;
 INSERT INTO `variant` VALUES (NULL,'chess','n');
 INSERT INTO `variant` VALUES (NULL,'crazyhouse','z');
 INSERT INTO `variant` VALUES (NULL,'chess960','9');
+INSERT INTO `variant` VALUES (NULL,'bughouse','B');
 UNLOCK TABLES;
 
 SOURCE db/chess960.sql

@@ -19,7 +19,7 @@
 from test import *
 
 class TestBugwho(Test):
-    def test_bugwho(self):
+    def test_bugwho_none(self):
         t = self.connect_as_guest()
 
         t.write('bugwho foo\n')
@@ -38,5 +38,40 @@ class TestBugwho(Test):
         self.expect('0 players displayed (of 1).', t)
 
         self.close(t)
+
+    def test_bugwho(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+
+        t.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t)
+        t2.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t2)
+        t3.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t3)
+        t4.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t4)
+
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers to be your bughouse partner.', t2)
+        t2.write('a\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t.write('bugwho\n')
+        self.expect('Bughouse games in progress', t)
+        self.expect(' 0 games displayed.', t)
+        self.expect('Partnerships not playing bughouse', t)
+        self.expect('++++ GuestABCD(U) / ++++ GuestEFGH(U)', t)
+        self.expect(' 1 partnership displayed.', t)
+        self.expect('Unpartnered players with bugopen on', t)
+        self.expect('++++ GuestIJKL(U)\r\n++++ GuestMNOP(U)', t)
+        self.expect('2 players displayed (of 4).', t)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

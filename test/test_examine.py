@@ -155,6 +155,55 @@ class TestExamine(Test):
 
         self.close(t)
 
+    def test_examine_history_last(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
+        t2.write('match guestabcd 3 0 black\n')
+        self.expect('Challenge:', t)
+        t.write('a\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        moves = ['e4', 'f5', 'h4', 'g5', 'Qh5#']
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm
+
+        self.expect('GuestEFGH checkmated} 1-0', t)
+        self.expect('GuestEFGH checkmated} 1-0', t2)
+
+        t.write('rem\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        t2.write('Nf3\n')
+        self.expect('<12>', t)
+        self.expect('<12>', t2)
+        t2.write('res\n')
+        self.expect('GuestEFGH resigns} 0-1', t)
+        self.expect('GuestEFGH resigns} 0-1', t2)
+
+        t.write('exl\n')
+        # TODO self.expect_re('Game \d+: GuestEFGH vs. GuestABCD', t)
+        t.write('fo\n')
+        self.expect('GuestABCD goes forward 1 move.', t)
+        self.expect('Nf3', t)
+        t.write('unex\n')
+
+        self.close(t)
+        self.close(t2)
+
     def test_examine_moves(self):
         t = self.connect_as('GuestABCD', '')
 
@@ -234,5 +283,12 @@ class TestUnexamine(Test):
         self.expect('Usage: ', t)
 
         self.close(t)
+
+    def test_unexamine_logout(self):
+        t = self.connect_as_guest()
+        t.write('ex\n')
+        t.write('quit\n')
+        self.expect('You are no longer examining game 1.', t)
+        t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

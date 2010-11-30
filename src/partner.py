@@ -69,9 +69,10 @@ class Partner(Offer):
 def end_partnership(p1, p2):
     assert(p1.session.partner == p2)
     assert(p2.session.partner == p1)
-    p1.write_('You no longer have a bughouse partner.\n')
-    p2.write_('You no longer have a bughouse partner.\n')
+    partners.remove(set([p1, p2]))
     p1.session.partner = None
     p2.session.partner = None
+    p1.write_('You no longer have a bughouse partner.\n')
+    p2.write_('You no longer have a bughouse partner.\n')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -66,6 +66,9 @@ class TestPartner(Test):
         self.expect("GuestEFGH accepts your partnership request.", t)
         self.expect("Accepting the partnership request from GuestABCD.", t2)
 
+        t.write('bugwho p\n')
+        self.expect('1 partnership displayed.', t)
+
         t.write('var\n')
         self.expect('Bughouse partner: GuestEFGH\r\n', t)
         t.write('var guestefgh\n')
@@ -84,6 +87,9 @@ class TestPartner(Test):
         t.write('partner\n')
         self.expect('You no longer have a bughouse partner.', t)
         self.expect('GuestABCD has left the partnership.', t2)
+
+        t.write('bugwho p\n')
+        self.expect('0 partnerships displayed.', t)
 
         self.close(t)
         self.close(t2)
