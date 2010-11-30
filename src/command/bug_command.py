@@ -24,6 +24,7 @@ import online
 import speed_variant
 import game
 
+from command_parser import BadCommandError
 from command import Command, ics_command
 
 @ics_command('partner', 'o')
@@ -71,7 +72,7 @@ class Partner(Command):
 @ics_command('bugwho', 'o')
 class Bugwho(Command):
     def run(self, args, conn):
-        if args[0] not in [Non, 'g', 'p', 'u']:
+        if args[0] not in [None, 'g', 'p', 'u']:
             raise BadCommandError
         if args[0] is None or args[0] == 'g':
             # bughouse games
@@ -80,7 +81,8 @@ class Bugwho(Command):
             for g in game.games.values():
                 if game.variant.name == 'bughouse':
                     count += 1
-            conn.write(ngettext('%d game displayed.\n', '  %d games displayed.\n', count) % count)
+            conn.write(ngettext('%d game displayed.\n',
+                '  %d games displayed.\n', count) % count)
         if args[0] is None or args[0] == 'p':
             conn.write(_('Partnerships not playing bughouse\n'))
             for p in partner.partners:
@@ -90,6 +92,9 @@ class Bugwho(Command):
                         'bughouse')), p1.get_display_name(),
                         p2.get_rating(speed_variant.from_names('blitz',
                         'bughouse')), p2.get_display_name()))
+            count = len(partner.partners)
+            conn.write(ngettext('%d partnership displayed.\n',
+                '  %d partnerships displayed.\n', count) % count)
 
         if args[0] is None or args[0] == 'u':
             conn.write(_('Unpartnered players with bugopen on\n'))
@@ -99,5 +104,10 @@ class Bugwho(Command):
                 conn.write('%s %s\n' %
                     (u.get_rating(speed_variant.from_names('blitz',
                         'bughouse')), u.get_display_name()))
+            total = len(online.online)
+            count = len(ulist)
+            conn.write(ngettext('%(count)d player displayed (of %(total)d).\n',
+                '  %(count)d players displayed (of %(total)d).\n', count)
+                % {'count': count, 'total': total})
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

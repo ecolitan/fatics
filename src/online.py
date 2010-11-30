@@ -62,6 +62,9 @@ class Online(object):
     def __iter__(self):
         return iter(self.online_names.values())
 
+    def __len__(self):
+        return len(self.online_names)
+
 online = Online()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

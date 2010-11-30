@@ -18,7 +18,7 @@
 
 import random
 
-from test import *
+from test.test import *
 
 from pgn import Pgn
 
@@ -30,8 +30,7 @@ class TestPgn(Test):
         t.write('set style 12\n')
         t2.write('set style 12\n')
 
-        f = open('../data/test.pgn', 'r')
-        #f = open('../data/draw.pgn', 'r')
+        f = open('../data/chess.pgn', 'r')
         #f = open('/home/wmahan/chess/fics-2009-12.pgn', 'r')
 
         pgn = Pgn(f)
