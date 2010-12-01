@@ -23,7 +23,6 @@ import match
 import game
 import user
 
-from .match_command import MatchMixin
 from command_parser import BadCommandError
 from game_constants import *
 from command import Command, ics_command
@@ -104,7 +103,7 @@ class Unseek(Command):
                 conn.write(_('You have no active seeks.\n'))
 
 @ics_command('play', 'i')
-class Play(Command, MatchMixin):
+class Play(Command):
     def run(self, args, conn):
         if conn.user.session.game:
             if conn.user.session.game.gtype == game.EXAMINED:

@@ -24,6 +24,7 @@ import speed_variant
 import clock
 import command_parser
 import formula
+import var
 
 from offer import Offer
 from game_constants import *
@@ -96,7 +97,6 @@ class MatchStringParser(object):
             raise command_parser.BadCommandError()
         self.formula = val
 
-    _wild_re = re.compile(r'w(\d+)')
     _idn_re = re.compile(r'idn=(\d+)')
     _plus_re = re.compile(r'(\d+)\+(\d+)')
     # e.g. 40/90,sd/30+30
@@ -159,11 +159,6 @@ class MatchStringParser(object):
                 self._set_clock_name(w)
 
             else:
-                m = re.match(self._wild_re, w)
-                if m:
-                    self._set_variant_name(m.group(1))
-                    continue
-
                 m = re.match(self._idn_re, w)
                 if m:
                     # TODO: self._set_idn
@@ -335,6 +330,7 @@ class Challenge(Offer, MatchStringParser):
         else:
             # get match parameters from a string or use defaults
             try:
+                self._check_open()
                 self._parse_args(args, a, b)
             except MatchError as e:
                 a.write(e[0])
@@ -444,6 +440,35 @@ class Challenge(Offer, MatchStringParser):
                 self.rated = True
         if self.rated and (a.is_guest or b.is_guest):
             raise MatchError(_('Only registered players can play rated games.\n'))
+        if self.variant_name == 'bughouse':
+            if not a.session.partner:
+                raise MatchError(_('You have no partner for bughouse.\n'))
+            if not b.session.partner:
+                raise MatchError(_('Your opponent has no partner for bughouse.\n'))
+            apart = a.session.partner
+            bpart = b.session.partner
+            assert(a.vars['bugopen'])
+            assert(b.vars['bugopen'])
+            assert(apart.vars['bugopen'])
+            assert(bpart.vars['bugopen'])
+            if a == bpart:
+                raise MatchError(_('You cannot challenge your own partner for bughouse.\n'))
+            if not apart.vars['open'] or apart.session.game:
+                raise MatchError(_('Your partner is not available to play right now.\n'))
+            if bpart.vars['open'] or bpart.session.game:
+                raise MatchError(_("Your opponent's partner is not available to play right now.\n"))
+            assert(b != apart)
+            assert(apart != bpart)
+
+            if apart.is_playbanned:
+                raise MatchError(_('Your partner may not play games.\n'))
+            if bpart.is_playbanned:
+                raise MatchError(_("Your opponent's partner may not play games.\n"))
+            if self.rated:
+                if apart.is_ratedbanned:
+                    raise MatchError(_('Your partner may not play rated games.\n'))
+                if bpart.is_ratedbanned:
+                    raise MatchError(_("Your opponent's partner may not play rated games.\n"))
 
         if a.is_playbanned:
             raise MatchError(_('You may not play games.\n'))
@@ -457,6 +482,21 @@ class Challenge(Offer, MatchStringParser):
 
         self.a_rating = a.get_rating(self.speed_variant)
         self.b_rating = b.get_rating(self.speed_variant)
+
+    def _check_open(self):
+        """ Test whether an opponent is open to match requests, and
+        open the challenging player to match requests if necessary. """
+        [a, b] = [self.a, self.b]
+        if not b.vars['open']:
+            raise MatchError(_("%s is not open to match requests.\n") % b.name)
+        if b.session.game:
+            if b.session.game.gtype == game.EXAMINED:
+                raise MatchError(_("%s is examining a game.\n") % b.name)
+            else:
+                raise MatchError(_("%s is playing a game.\n") % b.name)
+
+        if not a.vars['open']:
+            var.vars['open'].set(a, '1')
 
     def __eq__(self, other):
         if (self.name == other.name and

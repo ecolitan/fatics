@@ -16,7 +16,7 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from test import *
+from test.test import *
 
 class TestFoo(Test):
     def test_foo(self):

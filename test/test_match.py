@@ -194,6 +194,37 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
 
+    def test_is_playing(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+        t3 = self.connect_as_guest()
+
+        t2.write('match admin\n')
+        self.expect('Challenge:', t)
+        t.write('accept\n')
+        self.expect('Accepting the match offer', t)
+        self.expect('accepts your match offer', t2)
+
+        t3.write('match admin\n')
+        self.expect('admin is playing a game.', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+    def test_is_examining(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+
+        t.write('ex\n')
+        self.expect('Starting a game in examine (scratch) mode', t)
+
+        t2.write('match admin\n')
+        self.expect('admin is examining a game.', t2)
+
+        self.close(t)
+        self.close(t2)
+
     def test_counteroffer(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()

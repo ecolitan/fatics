@@ -38,7 +38,7 @@ db_db = 'chess'
 pass_min = 4
 pass_max = 6
 
-server_address = 'fatics.dyndns.org port 5000'
+server_address = 'test.fatics.org port 5000'
 
 notes = [
     "This bot helps you try FatICS, an experimental chess server.",

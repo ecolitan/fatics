@@ -19,7 +19,6 @@
 
 import game
 import match
-import var
 import admin
 import user
 import speed_variant
@@ -27,27 +26,8 @@ import speed_variant
 from command import Command, ics_command
 from online import online
 
-class MatchMixin(object):
-    def _check_open(self, conn, opp):
-        """ Test whether an opponent is open to match requests, and
-        open the challenging player to match requests if necessary. """
-        if not opp.vars['open']:
-            conn.write(_("%s is not open to match requests.\n") % opp.name)
-            return False
-        if opp.session.game:
-            if opp.session.game.gtype == game.EXAMINED:
-                conn.write(_("%s is examining a game.\n") % opp.name)
-            else:
-                conn.write(_("%s is playing a game.\n") % opp.name)
-            return False
-
-        if not conn.user.vars['open']:
-            var.vars['open'].set(conn.user, '1')
-
-        return True
-
 @ics_command('match', 'wt', admin.Level.user)
-class Match(Command, MatchMixin):
+class Match(Command):
     def run(self, args, conn):
         if conn.user.session.game:
             if conn.user.session.game.gtype == game.EXAMINED:
@@ -62,14 +42,11 @@ class Match(Command, MatchMixin):
             conn.write(_("You can't match yourself.\n"))
             return
 
-        if not self._check_open(conn, u):
-            return
-
         match.Challenge(conn.user, u, args[1])
 
 # TODO: parameters?
 @ics_command('rematch', '')
-class Rematch(Command, MatchMixin):
+class Rematch(Command):
     def run(self, args, conn):
         # note that rematch uses history to determine the previous opp,
         # so unlike "say", it works after logging out and back in, and
@@ -82,8 +59,6 @@ class Rematch(Command, MatchMixin):
         opp = online.find_exact(h['opp_name'])
         if not opp:
             conn.write(_('Your last opponent, %s, is not logged in.\n') % h['opp_name'])
-            return
-        if not self._check_open(conn, opp):
             return
         variant_name = speed_variant.variant_abbrevs[h['flags'][1]]
         assert(h['flags'][2] in ['r', 'u'])
