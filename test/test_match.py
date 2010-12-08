@@ -113,15 +113,15 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_withdraw_logout(self):
-        t = self.connect_as_guest()
+        t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as_admin()
         t2.write('match guest\n')
         t2.write('quit\n')
-        self.expect('Withdrawing your match offer to Guest', t2)
+        self.expect('Challenge to GuestABCD withdrawn.', t2)
         self.expect('Thank you for using', t2)
         t2.close()
 
-        self.expect('admin, who was challenging you, has departed', t)
+        self.expect('admin, who was challenging you, has departed.', t)
         self.close(t)
 
     def test_decline_logout(self):
@@ -131,7 +131,7 @@ class TestMatch(Test):
         t.write('match admin\n')
         self.expect('Challenge:', t2)
         t2.write('quit\n')
-        self.expect('Declining the match offer from Guest', t2)
+        self.expect('Challenge from GuestABCD removed.', t2)
         t2.close()
 
         self.expect('admin, whom you were challenging, has departed', t)
@@ -147,6 +147,58 @@ class TestMatch(Test):
 
         self.expect('admin, whom you were challenging, has departed', t)
         self.close(t)
+
+    def test_withdraw_play(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        t3 = self.connect_as('GuestEFGH', '')
+        t2.write('match guestabcd\n')
+        t2.write('match guestefgh\n')
+        self.expect('Challenge:', t)
+        self.expect('Challenge:', t3)
+        t3.write('a\n')
+        self.expect('admin, who was challenging you, has joined a game with GuestEFGH.', t)
+        self.expect('Challenge to GuestABCD withdrawn.', t2)
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+    def test_decline_play(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        t3 = self.connect_as('GuestEFGH', '')
+        t2.write('match guestabcd\n')
+        self.expect('Issuing:', t2)
+        t.write('match guestefgh\n')
+        self.expect('Challenge:', t3)
+        t3.write('a\n')
+        self.expect('GuestABCD, whom you were challenging, has joined a game with GuestEFGH.', t2)
+        self.expect('Challenge from admin removed.', t)
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+    def test_withdraw_examine(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        t2.write('match guestabcd\n')
+        t2.write('ex\n')
+        self.expect('Challenge to GuestABCD withdrawn.', t2)
+
+        self.expect('admin, who was challenging you, has started examining a game.', t)
+        self.close(t)
+        self.close(t2)
+
+    def test_decline_examine(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_admin()
+        t2.write('match guestabcd\n')
+        self.expect('Challenge:', t)
+        t.write('ex\n')
+        self.expect('Challenge from admin removed.', t)
+        self.expect('GuestABCD, whom you were challenging, has started examining a game.', t2)
+        self.close(t)
+        self.close(t2)
 
     def test_accept(self):
         t = self.connect_as_guest()

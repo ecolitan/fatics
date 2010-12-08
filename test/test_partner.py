@@ -163,6 +163,54 @@ class TestPartner(Test):
 
         self.close(t2)
 
+    def test_partner_decline_other_partner(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+
+        t2.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t2)
+        t3.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t3)
+
+        t.write('partner guestefgh\n')
+        self.expect('GuestABCD offers to be your bughouse partner.', t2)
+        t2.write('part guestijkl\n')
+        self.expect('GuestEFGH offers to be your bughouse partner.', t3)
+
+        t3.write('a\n')
+        self.expect('GuestEFGH, whom you were offering a partnership with, has accepted a partnership with GuestIJKL.', t)
+        t.write('wi\n')
+        self.expect('You have no pending offers to other players.', t)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+    def test_partner_withdraw_other_partner(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+
+        t2.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t2)
+        t3.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t3)
+
+        t.write('partner guestefgh\n')
+        self.expect('GuestABCD offers to be your bughouse partner.', t2)
+        t.write('part guestijkl\n')
+        self.expect('GuestABCD offers to be your bughouse partner.', t3)
+
+        t3.write('a\n')
+        self.expect('GuestABCD, who was offering a partnership with you, has accepted a partnership with GuestIJKL.', t2)
+        t2.write('a\n')
+        self.expect('You have no pending offers from other players.', t2)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
     def test_partner_leave(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as('GuestEFGH', '')

@@ -77,6 +77,56 @@ class Game(object):
             for s in p.session.seeks:
                 s.remove()
 
+        # remove offers to and from each player
+        for p in self.players:
+            for off in p.session.offers_sent[:]:
+                if off.name == 'match offer':
+                    assert(off.a == p)
+                    if self.gtype == PLAYED:
+                        # original fics says "has joined a match with"
+                        off.b.write_('%(pname)s, who was challenging you, has joined a game with %(oname)s.\n',
+                            {'pname': p.name, 'oname': self.get_opp(p)})
+                    else:
+                        assert(self.gtype == EXAMINED)
+                        off.b.write_('%(pname)s, who was challenging you, has started examining a game.\n',
+                            {'pname': p.name})
+                    p.write_('Challenge to %s withdrawn.\n', (off.b.name,))
+                    if off.variant_name == 'bughouse':
+                        # inform the other two players involved in the
+                        # withdrawn bughouse match offer
+                        assert(p.session.partner)
+                        assert(off.b.session.partner)
+                        if self.gtype == PLAYED:
+                            offname = self.get_opp(p).name
+                            p.session.partner.write_('Your partner has joined a game with %s.\n', (oppname,))
+                            off.b.session.partner.write_('%(pname)s, who was challenging your partner, has joined a game with %(oname)s.\n',
+                                {'pname': p.name,
+                                'oname': oname})
+                        else:
+                            p.session.partner.write_('Your partner has started examining a game.\n')
+                            off.b.session.partner.write_('%(pname)s, who was challenging your partner, has started examining a game.\n', (p.name,))
+                    off.withdraw(notify=False)
+
+            for off in p.session.offers_received:
+                if off.name == 'match offer':
+                    if self.gtype == PLAYED:
+                        assert(off.b == p)
+                        off.a.write_('%(pname)s, whom you were challenging, has joined a game with %(oname)s.\n',
+                            {'pname': p.name, 'oname': self.get_opp(p)})
+                    else:
+                        assert(self.gtype == EXAMINED)
+                        off.a.write_('%(pname)s, whom you were challenging, has started examining a game.\n',
+                            {'pname': p.name})
+                    p.write_('Challenge from %s removed.\n', (off.a.name,))
+                    if off.variant_name == 'bughouse':
+                        # inform the other two players involved in the declined
+                        # bughouse match offer
+                        assert(p.session.partner)
+                        assert(off.a.session.partner)
+                        p.session.partner.write_('Your partner has started another game.\n')
+                        off.a.session.partner.write_('The partner of %s has started another game.\n', (p.session.partner.name,))
+                    off.decline(notify=False)
+
     def send_boards(self):
         for p in self.players:
             self.send_board(p)

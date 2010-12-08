@@ -55,6 +55,24 @@ class Partner(Offer):
         self.b.session.partner = self.a
         partners.append(set([self.a, self.b]))
 
+        # end any pending partnership offers
+        for offer in self.a.session.offers_sent[:]:
+            if offer.name == 'partnership request':
+                offer.b.write_('%(aname)s, who was offering a partnership with you, has accepted a partnership with %(bname)s.\n', {'aname': self.a.name, 'bname': self.b.name})
+                offer.withdraw(notify=False)
+        for offer in self.b.session.offers_sent[:]:
+            if offer.name == 'partnership request':
+                offer.b.write_('%(aname)s, who was offering a partnership with you, has accepted a partnership with %(bname)s.\n', {'aname': self.b.name, 'bname': self.a.name})
+                offer.withdraw(notify=False)
+        for offer in self.a.session.offers_received[:]:
+            if offer.name == 'partnership request':
+                offer.a.write_('%(aname)s, whom you were offering a partnership with, has accepted a partnership with %(bname)s.\n', {'aname': self.a.name, 'bname': self.b.name})
+                offer.withdraw(notify=False)
+        for offer in self.b.session.offers_received[:]:
+            if offer.name == 'partnership request':
+                offer.a.write_('%(aname)s, whom you were offering a partnership with, has accepted a partnership with %(bname)s.\n', {'aname': self.b.name, 'bname': self.a.name})
+                offer.withdraw(notify=False)
+
     def withdraw_logout(self):
         Offer.withdraw_logout(self)
         self.a.write_('Partnership offer to %s withdrawn.\n', (self.b.name,))

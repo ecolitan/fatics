@@ -291,7 +291,7 @@ class Challenge(Offer, MatchStringParser):
     def __init__(self, a, b, args=None, tags=None):
         """ Initiate a new offer.  "a" is the player issuing the offer;
         "b" receives the request """
-        Offer.__init__(self, "match offer")
+        Offer.__init__(self, 'match offer')
 
         self.a = a
         self.b = b
@@ -455,11 +455,12 @@ class Challenge(Offer, MatchStringParser):
                 raise MatchError(_('You cannot challenge your own partner for bughouse.\n'))
             if not apart.vars['open'] or apart.session.game:
                 raise MatchError(_('Your partner is not available to play right now.\n'))
-            if bpart.vars['open'] or bpart.session.game:
+            if not bpart.vars['open'] or bpart.session.game:
                 raise MatchError(_("Your opponent's partner is not available to play right now.\n"))
             assert(b != apart)
             assert(apart != bpart)
 
+            # check playban and ratedban lists
             if apart.is_playbanned:
                 raise MatchError(_('Your partner may not play games.\n'))
             if bpart.is_playbanned:
@@ -469,6 +470,12 @@ class Challenge(Offer, MatchStringParser):
                     raise MatchError(_('Your partner may not play rated games.\n'))
                 if bpart.is_ratedbanned:
                     raise MatchError(_("Your opponent's partner may not play rated games.\n"))
+
+            # inform the other two players about the challenge
+            apart.write_('Your bughouse partner issues:\n')
+            apart.write_('Your game will be: ')
+            bpart.write_('Your bughouse partner was challenged:\n')
+            bpart.write_('Your game will be: ')
 
         if a.is_playbanned:
             raise MatchError(_('You may not play games.\n'))
@@ -544,14 +551,14 @@ class Challenge(Offer, MatchStringParser):
 
     def withdraw_logout(self):
         Offer.withdraw_logout(self)
-        self.a.write_('Withdrawing your match offer to %s.\n',
+        self.a.write_('Challenge to %s withdrawn.\n',
             (self.b.name,))
         self.b.write_('%s, who was challenging you, has departed.\n',
             (self.a.name,))
 
     def decline_logout(self):
         Offer.decline_logout(self)
-        self.b.write_('Declining the match offer from %s.\n',
+        self.b.write_('Challenge from %s removed.\n',
             (self.a.name,))
         self.a.write_('%s, whom you were challenging, has departed.\n',
             (self.b.name,))

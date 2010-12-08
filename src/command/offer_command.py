@@ -23,6 +23,7 @@ from command import *
 class Accept(Command):
     def run(self, args, conn):
         if not conn.user.session.offers_received:
+            # original FICS uses "There are no offers to accept."
             conn.write(_('You have no pending offers from other players.\n'))
             return
         if args[0] is None:
@@ -51,6 +52,7 @@ class Decline(Command):
 class Withdraw(Command):
     def run(self, args, conn):
         if len(conn.user.session.offers_sent) == 0:
+            # original FICS uses "There are no offers to withdraw."
             conn.write(_('You have no pending offers to other players.\n'))
             return
         if args[0] is None:
