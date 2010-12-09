@@ -95,10 +95,6 @@ def piece_is_white(pc):
     assert(pc in 'pnbrqkPNBRQK')
     return pc.isupper()
 
-def switch_pc_color(pc):
-    """ For when a piece is captured and moved into holding. """
-    return pc.lower() if pc.isupper() else pc.upper()
-
 class Zobrist(object):
     """Zobrist keys for low-overhead repetition detection"""
     _piece_index = {
@@ -522,7 +518,7 @@ class Position(object):
                 sq = 0x10 * r + f
                 yield (sq, self.board[sq])
 
-    def _add_to_holding(self, pc, update_hash):
+    def add_to_holding(self, pc, update_hash):
         count = self.holding[pc]
         assert(0 <= count <= 15)
         self.holding[pc] += 1
@@ -531,7 +527,7 @@ class Position(object):
                 self.hash ^= zobrist.holding_hash(pc, count)
             self.hash ^= zobrist.holding_hash(pc, count + 1)
 
-    def _remove_from_holding(self, pc, update_hash):
+    def remove_from_holding(self, pc, update_hash):
         count = self.holding[pc]
         assert(1 <= count <= 16)
         self.holding[pc] -= 1
@@ -563,7 +559,7 @@ class Position(object):
             assert(mv.drop.isupper() if self.wtm else mv.drop.islower())
             self.board[mv.to] = mv.drop
             self.hash ^= zobrist.piece_hash(mv.to, mv.drop)
-            self._remove_from_holding(mv.drop, True)
+            self.bug_link.remove_from_holding(mv.drop, True)
             # material does not change when dropping a piece
             # does not reset 50-move count because it's reversible
         else:
@@ -572,17 +568,17 @@ class Position(object):
             if mv.is_capture:
                 if self.promoted[mv.to]:
                     # promoted piece reverts to a pawn
-                    holding_pc = 'P' if self.wtm else 'p'
+                    holding_pc = 'p' if self.wtm else 'P'
                     mv.undo.capture_was_promoted = True
                     # clear the old promoted marker; if the capturing piece
                     # is promoted, we'll re-set it below
                     self.hash ^= zobrist.promoted_hash[mv.to]
                     self.promoted[mv.to] = 0
                 else:
-                    holding_pc = switch_pc_color(mv.capture)
+                    holding_pc = mv.capture
                     mv.undo.capture_was_promoted = False
                 mv.undo.holding_pc = holding_pc
-                self._add_to_holding(holding_pc, True)
+                self.bug_link.add_to_holding(holding_pc, True)
                 self.hash ^= zobrist.piece_hash(mv.to, mv.capture)
                 # add to capturer's material, since the piece is now in
                 # his or her holding
@@ -625,12 +621,12 @@ class Position(object):
                 assert(self.board[mv.to - 0x10] == 'p')
                 self.hash ^= zobrist.piece_hash(mv.to - 0x10, 'p')
                 self.board[mv.to - 0x10] = '-'
-                self._add_to_holding('P', True)
+                self.bug_link.add_to_holding('p', True)
             else:
                 assert(self.board[mv.to + 0x10] == 'P')
                 self.hash ^= zobrist.piece_hash(mv.to + 0x10, 'P')
                 self.board[mv.to + 0x10] = '-'
-                self._add_to_holding('p', True)
+                self.bug_link.add_to_holding('P', True)
         elif mv.is_oo:
             # move the rook
             if self.wtm:
@@ -739,16 +735,16 @@ class Position(object):
 
         if mv.drop:
             self.board[mv.to] = '-'
-            self._add_to_holding(mv.drop, False)
+            self.bug_link.add_to_holding(mv.drop, False)
         elif mv.is_ep:
             if self.wtm:
                 assert(self.board[mv.to - 0x10] == '-')
                 self.board[mv.to - 0x10] = 'p'
-                self._remove_from_holding('P', False)
+                self.bug_link.remove_from_holding('P', False)
             else:
                 assert(self.board[mv.to + 0x10] == '-')
                 self.board[mv.to + 0x10] = 'P'
-                self._remove_from_holding('p', False)
+                self.bug_link.remove_from_holding('p', False)
         elif mv.is_oo:
             if self.wtm:
                 assert(self.board[F1] == 'R')
@@ -768,7 +764,7 @@ class Position(object):
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
         elif mv.is_capture:
-            self._remove_from_holding(mv.undo.holding_pc, False)
+            self.bug_link.remove_from_holding(mv.undo.holding_pc, False)
 
         # restore the "promoted" markers
         if mv.prom:
@@ -1321,6 +1317,8 @@ class Bughouse(object):
         self.game = game
         self.pos = copy.deepcopy(initial_pos)
         self.name = 'bughouse'
+        assert(game.white.session.partner)
+        assert(game.black.session.partner)
 
     def parse_move(self, s, conn):
         """Try to parse a move.  If it looks like a move but

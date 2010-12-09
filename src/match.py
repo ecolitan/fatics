@@ -18,6 +18,7 @@
 #
 
 import re
+import copy
 
 import game
 import speed_variant
@@ -360,7 +361,7 @@ class Challenge(Offer, MatchStringParser):
         else:
             time_str = ' %d %d' % (self.time, self.inc)
 
-        # example: Guest (++++) [white] hans (----) unrated blitz 5 0.
+        # example: GuestABCD (++++) [white] hans (----) unrated blitz 5 0.
         challenge_str = '%s (%s)%s %s (%s) %s %s%s' % (self.a.name,
             self.a_rating, side_str, self.b.name, self.b_rating, rated_str,
             self.speed_variant, time_str)
@@ -374,7 +375,6 @@ class Challenge(Offer, MatchStringParser):
                 self.inc)
         if self.adjourned:
             challenge_str = '%s (adjourned)' % challenge_str
-
         #if self.board is not None:
         #    challenge_str = 'Loaded from a board'
 
@@ -392,6 +392,33 @@ class Challenge(Offer, MatchStringParser):
             a.write_('Match request does not meet formula for %s:\n', b.name)
             b.write_('Ignoring (formula): %s\n', challenge_str)
             return
+
+        if self.variant_name == 'bughouse':
+            # build the challenge string for the other game
+            apart = a.session.partner
+            bpart = b.session.partner
+            challenge_str2 = '%s (%s)%s %s (%s) %s %s%s' % (apart.name,
+                apart.get_rating(self.speed_variant), side_str,
+                bpart.name, bpart.get_rating(self.speed_variant), rated_str,
+                self.speed_variant, time_str)
+            if self.idn is not None:
+                challenge_str2 = '%s idn=%d' % (challenge_str2, self.idn)
+            if self.clock_name not in ['fischer', 'untimed']:
+                challenge_str2 = '%s %s' % (challenge_str2, self.clock_name)
+            if self.clock_name == 'overtime':
+                challenge_str2 = '%s %d/%d,SD/%d+%d' % (challenge_str2,
+                    self.overtime_move_num, self.time, self.overtime_bonus,
+                    self.inc)
+            if self.adjourned:
+                challenge_str2 = '%s (adjourned)' % challenge_str2
+
+            # inform the other two players about the challenge
+            apart.write_('Your bughouse partner issues: %s\n' % challenge_str)
+            apart.write_('Your game will be: %s\n' % challenge_str2)
+            bpart.write_('Your bughouse partner was challenged: %s\n'
+                % challenge_str)
+            bpart.write_('Your game will be: %s\n' % challenge_str2)
+
 
         o = next((o for o in b_sent if o.name == self.name and
             o.b == a), None)
@@ -440,6 +467,17 @@ class Challenge(Offer, MatchStringParser):
                 self.rated = True
         if self.rated and (a.is_guest or b.is_guest):
             raise MatchError(_('Only registered players can play rated games.\n'))
+        if a.is_playbanned:
+            raise MatchError(_('You may not play games.\n'))
+        if b.is_playbanned:
+            raise MatchError(_('%s may not play games.\n') % b.name)
+        if self.rated:
+            if a.is_ratedbanned:
+                raise MatchError(_('You may not play rated games.\n'))
+            if b.is_ratedbanned:
+                raise MatchError(_('%s may not play rated games.\n') % b.name)
+
+        # check bughouse partners' availability
         if self.variant_name == 'bughouse':
             if not a.session.partner:
                 raise MatchError(_('You have no partner for bughouse.\n'))
@@ -470,22 +508,6 @@ class Challenge(Offer, MatchStringParser):
                     raise MatchError(_('Your partner may not play rated games.\n'))
                 if bpart.is_ratedbanned:
                     raise MatchError(_("Your opponent's partner may not play rated games.\n"))
-
-            # inform the other two players about the challenge
-            apart.write_('Your bughouse partner issues:\n')
-            apart.write_('Your game will be: ')
-            bpart.write_('Your bughouse partner was challenged:\n')
-            bpart.write_('Your game will be: ')
-
-        if a.is_playbanned:
-            raise MatchError(_('You may not play games.\n'))
-        if b.is_playbanned:
-            raise MatchError(_('%s may not play games.\n') % b.name)
-        if self.rated:
-            if a.is_ratedbanned:
-                raise MatchError(_('You may not play rated games.\n'))
-            if b.is_ratedbanned:
-                raise MatchError(_('%s may not play rated games.\n') % b.name)
 
         self.a_rating = a.get_rating(self.speed_variant)
         self.b_rating = b.get_rating(self.speed_variant)
@@ -548,6 +570,16 @@ class Challenge(Offer, MatchStringParser):
         Offer.accept(self)
 
         g = game.PlayedGame(self)
+        if self.variant_name == 'bughouse':
+            chal2 = copy.copy(self)
+            chal2.a = self.a.session.partner
+            chal2.b = self.b.session.partner
+            chal2.side = g.user_get_side(self.b)
+            g2 = game.PlayedGame(chal2)
+            g2.bug_link = g
+            g.bug_link = g2
+            g2.pos.bug_link = g.pos
+            g.pos.bug_link = g2.pos
 
     def withdraw_logout(self):
         Offer.withdraw_logout(self)
