@@ -122,6 +122,7 @@ class TestMatch(Test):
         t2.close()
 
         self.expect('admin, who was challenging you, has departed.', t)
+        self.expect('Challenge from admin removed.', t)
         self.close(t)
 
     def test_decline_logout(self):
@@ -135,6 +136,7 @@ class TestMatch(Test):
         t2.close()
 
         self.expect('admin, whom you were challenging, has departed', t)
+        self.expect('Challenge to admin withdrawn.', t)
         self.close(t)
 
     def test_decline_unclean_logout(self):
@@ -158,6 +160,7 @@ class TestMatch(Test):
         self.expect('Challenge:', t3)
         t3.write('a\n')
         self.expect('admin, who was challenging you, has joined a game with GuestEFGH.', t)
+        self.expect('Challenge from admin removed.', t)
         self.expect('Challenge to GuestABCD withdrawn.', t2)
         self.close(t)
         self.close(t2)
@@ -173,6 +176,7 @@ class TestMatch(Test):
         self.expect('Challenge:', t3)
         t3.write('a\n')
         self.expect('GuestABCD, whom you were challenging, has joined a game with GuestEFGH.', t2)
+        self.expect('Challenge to GuestABCD withdrawn.', t2)
         self.expect('Challenge from admin removed.', t)
         self.close(t)
         self.close(t2)
@@ -186,6 +190,7 @@ class TestMatch(Test):
         self.expect('Challenge to GuestABCD withdrawn.', t2)
 
         self.expect('admin, who was challenging you, has started examining a game.', t)
+        self.expect('Challenge from admin removed.', t)
         self.close(t)
         self.close(t2)
 
@@ -197,6 +202,7 @@ class TestMatch(Test):
         t.write('ex\n')
         self.expect('Challenge from admin removed.', t)
         self.expect('GuestABCD, whom you were challenging, has started examining a game.', t2)
+        self.expect('Challenge to GuestABCD withdrawn.', t2)
         self.close(t)
         self.close(t2)
 

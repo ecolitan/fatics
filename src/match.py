@@ -587,12 +587,16 @@ class Challenge(Offer, MatchStringParser):
             (self.b.name,))
         self.b.write_('%s, who was challenging you, has departed.\n',
             (self.a.name,))
+        self.b.write_('Challenge from %s removed.\n',
+            (self.a.name,))
 
     def decline_logout(self):
         Offer.decline_logout(self)
         self.b.write_('Challenge from %s removed.\n',
             (self.a.name,))
         self.a.write_('%s, whom you were challenging, has departed.\n',
+            (self.b.name,))
+        self.a.write_('Challenge to %s withdrawn.\n',
             (self.b.name,))
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

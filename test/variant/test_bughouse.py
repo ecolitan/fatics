@@ -62,11 +62,6 @@ class TestBughouse(Test):
         t.write('match guestefgh bughouse 3+0\n')
         self.expect('You cannot challenge your own partner for bughouse.', t)
 
-        t4.write('set open\n')
-        self.expect('You are no longer open to receive match requests.', t4)
-        t4.write('set open\n')
-        self.expect('You are now open to receive match requests.', t4)
-
         t.write('match guestijkl bughouse 3+0\n')
         self.expect('Issuing: GuestABCD (++++) GuestIJKL (++++) unrated blitz bughouse 3 0', t)
         self.expect('Your bughouse partner issues: GuestABCD (++++) GuestIJKL (++++) unrated blitz bughouse 3 0', t2)
@@ -89,6 +84,48 @@ class TestBughouse(Test):
         t2.write('ex\n')
         self.expect("Your partner has started another game.", t)
         t2.write('unex\n')'''
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
+    def test_match_partner_decline_play(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match guestijkl bughouse 3+0\n')
+        self.expect('Issuing: GuestABCD (++++) GuestIJKL (++++) unrated blitz bughouse 3 0', t)
+
+        t5 = self.connect_as_admin()
+        t5.write('match guestmnop 1+0\n')
+        self.expect('Challenge: admin', t4)
+        t4.write('a\n')
+        self.expect("GuestMNOP, whose partner you were challenging, has joined a game with admin.", t)
+        self.expect("Challenge to GuestIJKL withdrawn.", t)
+        self.expect("GuestMNOP, whose partner your partner was challenging, has joined a game with admin.", t2)
+        self.expect("Partner's challenge to GuestIJKL withdrawn.", t2)
+        self.expect("Your partner has joined a game with admin.", t3)
+        self.expect("Challenge from GuestABCD removed.", t3)
+        t5.write('abort\n')
+        self.expect('aborted on move 1', t4)
+        self.close(t5)
 
         self.close(t)
         self.close(t2)
