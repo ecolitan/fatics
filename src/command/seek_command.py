@@ -165,7 +165,7 @@ class Play(Command):
                     tags['side'] = None
                 match.Challenge(conn.user, ad.a, tags=tags)
             else:
-                ad.a.write_('%s accepts your seek.' % (conn.user.name,))
+                ad.a.write_('%s accepts your seek.', (conn.user.name,))
                 ad.accept(conn.user)
 
 #  7 1500 SomePlayerA         5   2 rated   blitz      [white]  1300-9999 m

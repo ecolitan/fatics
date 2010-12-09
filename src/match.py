@@ -303,7 +303,7 @@ class Challenge(Offer, MatchStringParser):
             self.adjourned = db.get_adjourned_between(a.id, b.id)
         if self.adjourned:
             if tags or args:
-                a.write_('You have an adjourned game with %s.  You cannot start a new game until you finish it.\n' % b.name)
+                a.write_('You have an adjourned game with %s.  You cannot start a new game until you finish it.\n', b.name)
                 return
             tags = self.adjourned.copy()
             tags.update({
@@ -413,11 +413,11 @@ class Challenge(Offer, MatchStringParser):
                 challenge_str2 = '%s (adjourned)' % challenge_str2
 
             # inform the other two players about the challenge
-            apart.write_('Your bughouse partner issues: %s\n' % challenge_str)
-            apart.write_('Your game will be: %s\n' % challenge_str2)
-            bpart.write_('Your bughouse partner was challenged: %s\n'
-                % challenge_str)
-            bpart.write_('Your game will be: %s\n' % challenge_str2)
+            apart.write_('Your bughouse partner issues: %s\n', challenge_str)
+            apart.write_('Your game will be: %s\n', challenge_str2)
+            bpart.write_('Your bughouse partner was challenged: %s\n',
+                challenge_str)
+            bpart.write_('Your game will be: %s\n', challenge_str2)
 
 
         o = next((o for o in b_sent if o.name == self.name and

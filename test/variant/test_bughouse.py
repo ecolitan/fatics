@@ -70,21 +70,6 @@ class TestBughouse(Test):
         self.expect('Your bughouse partner was challenged: GuestABCD (++++) GuestIJKL (++++) unrated blitz bughouse 3 0', t4)
         self.expect('Your game will be: GuestEFGH (++++) GuestMNOP (++++) unrated blitz bughouse 3 0', t4)
 
-        '''t5 = self.connect_as_admin()
-        t5.write('match guestmnop 1+0\n')
-        self.expect('Challenge: admin', t4)
-        t4.write('a\n')
-        self.expect("Your opponent's partner has started another game.", t)
-        t5.write('abort\n')
-        self.expect('aborted on move 1', t4)
-        self.close(t5)
-
-        t.write('match guestijkl bughouse 3+0\n')
-        self.expect('Issuing: GuestABCD (++++) GuestIJKL (++++) 3 0 unrated bughouse', t)
-        t2.write('ex\n')
-        self.expect("Your partner has started another game.", t)
-        t2.write('unex\n')'''
-
         self.close(t)
         self.close(t2)
         self.close(t3)
