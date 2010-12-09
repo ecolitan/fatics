@@ -71,6 +71,7 @@ class Game(object):
         games[self.number] = self
         self.observers = set()
         self.pending_offers = []
+        self.bug_link = None
 
         # (silently) remove each player's seeks
         for p in self.players:
@@ -112,7 +113,7 @@ class Game(object):
                                 'oname': self.get_opp(p).name})
                         else:
                             off.b.session.partner.write_('%(pname)s, who was challenging your partner, has started examining a game.\n', (p.name,))
-                        p.session.partner.write_("Partner's challenge to %s withdrawn.", (off.b.name,))
+                        p.session.partner.write_("Partner's challenge to %s withdrawn.\n", (off.b.name,))
                         off.b.session.partner.write_("Partner's challenge from %s removed.\n", (p.name,))
                     off.withdraw(notify=False)
 
@@ -138,8 +139,8 @@ class Game(object):
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
                         else:
-                            off.b.session.partner.write_('%(pname)s, whom your partner was challenging, has started examining a game.\n', (p.name,))
-                        p.session.partner.write_("Partner's challenge from %s removed\n", (off.a.session.name,))
+                            off.a.session.partner.write_('%s, whom your partner was challenging, has started examining a game.\n', (p.name,))
+                        p.session.partner.write_("Partner's challenge from %s removed.\n", (off.a.name,))
                         off.a.session.partner.write_("Partner's challenge to %s withdrawn.\n", (p.name,))
                     off.decline(notify=False)
 
@@ -152,6 +153,7 @@ class Game(object):
                             off.b.write_('%(pname)s, whose partner was challenging you, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
+                            # original FICS says "whose partner challenged your partner"
                             off.b.session.partner.write_('%(pname)s, whose partner was challenging your partner, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
@@ -160,7 +162,7 @@ class Game(object):
                             off.b.session.partner.write_('%s, whose partner was challenging your partner, has started examining a game.\n', (p.name,))
                         p.session.partner.write_("Challenge to %s withdrawn.\n", (off.b.name,))
                         off.b.write_('Challenge from %s removed.\n', (p.session.partner.name,))
-                        off.b.session.partner.write_("Partner's challenge from %s removed.\n", (p.name,))
+                        off.b.session.partner.write_("Partner's challenge from %s removed.\n", (off.a.name,))
                         p.write_("Partner's challenge to %s withdrawn.", (off.b.name,))
                         off.withdraw(notify=False)
 
@@ -170,6 +172,7 @@ class Game(object):
                             off.a.write_('%(pname)s, whose partner you were challenging, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
+                            # original FICS says "(potential opponent)'s partner has joined a game with...."
                             off.a.session.partner.write_('%(pname)s, whose partner your partner was challenging, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})

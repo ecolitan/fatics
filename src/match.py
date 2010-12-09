@@ -574,12 +574,12 @@ class Challenge(Offer, MatchStringParser):
             chal2 = copy.copy(self)
             chal2.a = self.a.session.partner
             chal2.b = self.b.session.partner
-            chal2.side = g.user_get_side(self.b)
+            chal2.side = g.get_user_side(self.b)
             g2 = game.PlayedGame(chal2)
             g2.bug_link = g
             g.bug_link = g2
-            g2.pos.bug_link = g.pos
-            g.pos.bug_link = g2.pos
+            g2.variant.pos.bug_link = g.variant.pos
+            g.variant.pos.bug_link = g2.variant.pos
 
     def withdraw_logout(self):
         Offer.withdraw_logout(self)

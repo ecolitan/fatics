@@ -25,6 +25,8 @@ class KibitzCommand(Command):
     def _do_kibitz(self, g, msg, conn):
         name = conn.user.get_display_name()
         plist = g.players | g.observers
+        if g.bug_link:
+            plist |= g.bug_link.players | g.bug_link.observers
         assert(len(plist) > 0)
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
@@ -50,6 +52,8 @@ class WhisperCommand(Command):
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
         plist = g.observers
+        if g.bug_link:
+            plist |= g.bug_link.observers
         if g.gtype == game.EXAMINED:
             plist |= g.players
         for u in plist:

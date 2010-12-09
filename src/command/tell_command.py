@@ -128,6 +128,7 @@ class Say(Command):
             conn.write(_('You are muted.\n'))
             return
         if conn.user.session.game:
+            # TODO: send says to bughouse linked game, if any
             g = conn.user.session.game
             opp = g.get_opp(conn.user)
             assert(opp.is_online)
