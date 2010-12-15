@@ -40,6 +40,10 @@ class History(object):
             result_reason = 'Res'
         elif 'ran out of time' in msg:
             result_reason = 'TM'
+        elif 'partner won' in msg:
+            result_reason = 'PW'
+        elif "Partners' game drawn" in msg:
+            result_reason = 'PDr'
         # TODO add suicide PLM and WNM
         elif '50 move rule' in msg:
             result_reason = '50'

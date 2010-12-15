@@ -397,8 +397,8 @@ class Challenge(Offer, MatchStringParser):
             # build the challenge string for the other game
             apart = a.session.partner
             bpart = b.session.partner
-            challenge_str2 = '%s (%s)%s %s (%s) %s %s%s' % (apart.name,
-                apart.get_rating(self.speed_variant), side_str,
+            challenge_str2 = '%s (%s) %s (%s) %s %s%s' % (apart.name,
+                apart.get_rating(self.speed_variant),
                 bpart.name, bpart.get_rating(self.speed_variant), rated_str,
                 self.speed_variant, time_str)
             if self.idn is not None:

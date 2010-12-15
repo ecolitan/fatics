@@ -687,6 +687,28 @@ class PlayedGame(Game):
                 else:
                     raise RuntimeError('game.result: unexpected result code')
                 rating.update_ratings(self, white_score, black_score)
+
+        if self.bug_link and self.bug_link.is_active:
+            if result_code == '1-0':
+                self.bug_link.result("%s's partner won" %
+                    self.white.session.partner.name, '0-1')
+            elif result_code == '0-1':
+                self.bug_link.result("%s's partner won" %
+                    self.black.session.partner.name, '1-0')
+            elif result_code == '1/2-1/2':
+                self.bug_link.result("Partners' game drawn", '1/2-1/2')
+            elif result_code == '*':
+                if 'adjourned' in msg:
+                    self.bug_link.adjourn("Partners' game aborted")
+                elif 'aborted' in msg:
+                    self.bug_link.result('*', "Partners' game aborted")
+                else:
+                    print 'unexpected incomplete game message %s' % msg
+                    assert(False)
+            else:
+                print 'unexpected result code %s' % result_code
+                assert(False)
+
         self.free()
 
     def moretime(self, secs, u):

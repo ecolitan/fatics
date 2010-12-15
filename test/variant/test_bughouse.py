@@ -256,18 +256,12 @@ class TestBughouse(Test):
         t3 = self.connect_as('GuestIJKL', '')
         t4 = self.connect_as('GuestMNOP', '')
 
-        t.write('match guestijkl bughouse\n')
-        self.expect('You have no partner for bughouse.', t)
-
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
         self.expect('GuestABCD offers', t2)
         t2.write('part guestabcd\n')
         self.expect('GuestEFGH accepts', t)
-
-        t.write('match guestijkl bughouse\n')
-        self.expect('Your opponent has no partner for bughouse.', t)
 
         t4.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t4)
@@ -316,18 +310,12 @@ class TestBughouse(Test):
         t3 = self.connect_as('GuestIJKL', '')
         t4 = self.connect_as('GuestMNOP', '')
 
-        t.write('match guestijkl bughouse\n')
-        self.expect('You have no partner for bughouse.', t)
-
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
         self.expect('GuestABCD offers', t2)
         t2.write('part guestabcd\n')
         self.expect('GuestEFGH accepts', t)
-
-        t.write('match guestijkl bughouse\n')
-        self.expect('Your opponent has no partner for bughouse.', t)
 
         t4.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t4)
@@ -359,6 +347,143 @@ class TestBughouse(Test):
         self.expect('(whispered to 1 player)', t3)
 
         self.close(t5)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
+    def test_win_white(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match guestijkl bughouse 3+0 w\n')
+        self.expect('Issuing: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t)
+        self.expect('Your bughouse partner issues: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t2)
+        self.expect('Your game will be: GuestEFGH (++++) GuestMNOP (++++) unrated blitz bughouse 3 0', t2)
+        self.expect('Challenge: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t3)
+        self.expect('Your bughouse partner was challenged: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t4)
+        self.expect('Your game will be: GuestEFGH (++++) GuestMNOP (++++) unrated blitz bughouse 3 0', t4)
+
+        t3.write('a\n')
+        self.expect('Creating:', t)
+        self.expect('Creating:', t2)
+        self.expect('Creating:', t3)
+        self.expect('Creating:', t4)
+
+        t2.write('res\n')
+        self.expect('GuestEFGH resigns} 1-0', t2)
+        self.expect('GuestEFGH resigns} 1-0', t4)
+        self.expect("GuestIJKL's partner won} 0-1", t)
+        self.expect("GuestIJKL's partner won} 0-1", t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
+    def test_win_black(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match guestijkl bughouse 3+0 w\n')
+        self.expect('Issuing: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t)
+        self.expect('Your bughouse partner issues: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t2)
+        self.expect('Your game will be: GuestEFGH (++++) GuestMNOP (++++) unrated blitz bughouse 3 0', t2)
+        self.expect('Challenge: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t3)
+        self.expect('Your bughouse partner was challenged: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t4)
+        self.expect('Your game will be: GuestEFGH (++++) GuestMNOP (++++) unrated blitz bughouse 3 0', t4)
+
+        t3.write('a\n')
+        self.expect('Creating:', t)
+        self.expect('Creating:', t2)
+        self.expect('Creating:', t3)
+        self.expect('Creating:', t4)
+
+        t.write('res\n')
+        self.expect('GuestABCD resigns} 0-1', t)
+        self.expect('GuestABCD resigns} 0-1', t3)
+        self.expect("GuestMNOP's partner won} 1-0", t2)
+        self.expect("GuestMNOP's partner won} 1-0", t4)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
+    def test_draw_agreement(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match guestijkl bughouse 3+0 w\n')
+        self.expect('Issuing: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t)
+        self.expect('Your bughouse partner issues: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t2)
+        self.expect('Your game will be: GuestEFGH (++++) GuestMNOP (++++) unrated blitz bughouse 3 0', t2)
+        self.expect('Challenge: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t3)
+        self.expect('Your bughouse partner was challenged: GuestABCD (++++) [white] GuestIJKL (++++) unrated blitz bughouse 3 0', t4)
+        self.expect('Your game will be: GuestEFGH (++++) GuestMNOP (++++) unrated blitz bughouse 3 0', t4)
+
+        t3.write('a\n')
+        self.expect('Creating:', t)
+        self.expect('Creating:', t2)
+        self.expect('Creating:', t3)
+        self.expect('Creating:', t4)
+
+        t3.write('draw\n')
+        self.expect('GuestIJKL offers a draw.', t)
+        t.write('draw\n')
+        self.expect('drawn by agreement} 1/2-1/2', t)
+        self.expect('drawn by agreement} 1/2-1/2', t3)
+        self.expect("Partners' game drawn} 1/2-1/2", t2)
+        self.expect("Partners' game drawn} 1/2-1/2", t4)
 
         self.close(t)
         self.close(t2)

@@ -31,6 +31,7 @@ __builtin__.__dict__['N_'] = lambda s: s
 __builtin__.__dict__['A_'] = lambda s: s
 
 sys.path.insert(0, 'src/')
+import speed_variant
 import variant.chess
 
 epd_file = 'data/scid.epd'
