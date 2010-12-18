@@ -23,33 +23,35 @@ import copy
 
 tag_re = re.compile(r'''\[(\w+)\s+"([^\n]*?)"\]\s*$''')
 space_re = re.compile(r'''\s+''')
-move_num_re = re.compile(r'''(\d+)\.*''')
+move_num_re = re.compile(r'''(\d+)([AaBb])\.*''')
 move_re = re.compile(r'''([NBRQK]?[a-h1-8x]{2,5}(?:=[NBRQK])?|[PNBRQpnbrq]@[a-h][1-8]|O-O-O|O-O)([+#])?''')
 dots_re = re.compile(r'''\.\.\.''')
 comment_re = re.compile(r'''\{(.*?)\}''', re.S)
 nag_re = re.compile(r'''\$(\d+)''')
 result_re = re.compile(r'''(1-0|0-1|1/2-1/2|\*)''')
-checkmate_re = re.compile(r'''\s+checkmated\s*$''')
+checkmate_re = re.compile(r'''(\w+)\s+checkmated\s*$''')
+#resign_re = re.compile(r'''(\w+)\s+resigns\s*$''')
+#partner_won_re = re.compile(r'''(\w+)'s\s+partner\s+won\*$''')
 stalemate_re = re.compile(r'''\s+drawn\s+by\s+stalemate\s*$''')
 repetition_re = re.compile(r'''\s+drawn\s+by\s+repetition\s*$''')
 fifty_re = re.compile(r'''\s+drawn\s+by\s+the\s+50\s+move\s+rule\s*$''')
-nomaterial_re = re.compile(r'''[nN]either\s+player\s+has\s+mating\s+material\s*$''')
 
 class PgnError(Exception):
     def __init__(self, reason):
         self.reason = reason
         print reason
 
-class PgnMove(object):
-    def __init__(self, text, decorator):
+class BpgnMove(object):
+    def __init__(self, text, decorator, char):
         self.text = text
         self.decorator = decorator if decorator is not None else ''
+        self.char = char
         self.comments = []
 
     def add_comment(self, com):
         self.comments.append(com)
 
-class Pgn(object):
+class Bpgn(object):
     def __init__(self, f):
         self.f = f
 
@@ -114,7 +116,8 @@ class PgnGame(object):
         self.is_stalemate = False
         self.is_repetition = False
         self.is_fifty = False
-        self.is_draw_nomaterial = False
+        #self.is_resign = False
+        #self.partner_won = False
         self.initial_comments = []
         self.parse(movetext)
         assert('White' in self.tags)
@@ -123,6 +126,7 @@ class PgnGame(object):
         """parses moves and their comments"""
         i = 0
         self.moves = []
+        move_char = None
         while i < len(s):
             m = space_re.match(s, i)
             if m:
@@ -139,6 +143,7 @@ class PgnGame(object):
             # a move cannot start with a number.
             m = move_num_re.match(s, i)
             if m:
+                move_char = m.group(2)
                 i = m.end()
                 continue
 
@@ -152,7 +157,7 @@ class PgnGame(object):
                 if m.group(2) is not None:
                     if '#' in m.group(2):
                         self.is_checkmate = True
-                self.moves.append(PgnMove(m.group(1), m.group(2)))
+                self.moves.append(BpgnMove(m.group(1), m.group(2), move_char))
                 i = m.end()
                 continue
 
@@ -161,15 +166,52 @@ class PgnGame(object):
                 i = m.end()
                 if checkmate_re.search(m.group(1)):
                     self.is_checkmate = True
+                    m2 = checkmate_re.search(m.group(1))
+                    who = m2.group(1)
+                    if who == self.tags['WhiteA']:
+                        self.mated = 'A'
+                    elif who == self.tags['BlackA']:
+                        self.mated = 'a'
+                    elif who == self.tags['WhiteB']:
+                        self.mated = 'B'
+                    elif who == self.tags['BlackB']:
+                        self.mated = 'b'
+                    else:
+                        raise PgnError('unknown player resigned: %s' % who)
                 elif stalemate_re.search(m.group(1)):
                     self.is_stalemate = True
                 elif repetition_re.search(m.group(1)):
                     self.is_repetition = True
                 elif fifty_re.search(m.group(1)):
                     self.is_fifty = True
-                elif nomaterial_re.search(m.group(1)):
-                    self.is_draw_nomaterial = True
-
+                '''elif resign_re.search(m.group(1)):
+                    self.is_resign = True
+                    m2 = resign_re.search(m.group(1))
+                    who = m2.group(1)
+                    if who == self.tags['WhiteA']:
+                        self.resigned = 'A'
+                    elif who == self.tags['BlackA']:
+                        self.resigned = 'a'
+                    elif who == self.tags['WhiteB']:
+                        self.resigned = 'B'
+                    elif who == self.tags['BlackB']:
+                        self.resigned = 'b'
+                    else:
+                        raise PgnError('unknown player resigned: %s' % who)
+                elif partner_won_re.search(m.group(1)):
+                    self.partner_won = True
+                    m2 = partner_won_re.search(m.group(1))
+                    who = m2.group(1)
+                    if who == self.tags['WhiteA']:
+                        self.won = 'b'
+                    elif who == self.tags['BlackA']:
+                        self.won = 'B'
+                    elif who == self.tags['WhiteB']:
+                        self.won = 'a'
+                    elif who == self.tags['BlackB']:
+                        self.won = 'A'
+                    else:
+                        raise PgnError("unknown player's partner won: %s" % who)'''
                 if len(self.moves) > 0:
                     self.moves[-1].add_comment(m.group(1))
                 else:

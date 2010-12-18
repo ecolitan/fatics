@@ -20,7 +20,7 @@
 import subprocess
 
 SENDMAIL = "/usr/sbin/sendmail"
-FROM = "FatICS <wmahan+fatics@gmail.com>"
+FROM = "FatICS <noreply@fatics.org>"
 
 class EmailError(Exception):
     def __init__(self, msg):

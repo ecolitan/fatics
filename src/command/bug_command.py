@@ -35,7 +35,7 @@ class Partner(Command):
                 p = conn.user.session.partner
                 assert(p.is_online)
                 assert(p.session.partner == conn.user)
-                p.write_('%s has left the partnership.', conn.user.name)
+                p.write_('\n%s has left the partnership.\n', conn.user.name)
                 partner.end_partnership(conn.user, p)
             else:
                 conn.write(_('You do not have a bughouse partner.\n'))

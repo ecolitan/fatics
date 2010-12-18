@@ -747,6 +747,8 @@ class Position(object):
         ksq = self.king_pos[self.wtm]
         if self._any_pc_moves(ksq, self.board[ksq]):
             return True
+        # it's slow to iterate over every square in the board, but it's
+        # only necessary if the king has no legal moves
         for (sq, pc) in self:
             #if pc != '-' and piece_is_white(pc) == self.wtm:
             if pc not in ['-', 'K', 'k'] and piece_is_white(pc) == self.wtm:

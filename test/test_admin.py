@@ -720,6 +720,15 @@ class TestRatedban(Test):
 
         self.close(t)
 
+class TestLight(Test):
+    def test_admin_light(self):
+        t = self.connect_as_admin()
+        t.write('admin\n')
+        self.expect("Admin mode (*) is now not shown.", t)
+        t.write('admin\n')
+        self.expect("Admin mode (*) is now shown.", t)
+        self.close(t)
+
 class AreloadTest(Test):
     def runTest(self):
         self.skip('not stable')

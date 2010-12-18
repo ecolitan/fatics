@@ -211,8 +211,10 @@ class Unalias(Command):
 @ics_command('uptime', '', admin.Level.user)
 class Uptime(Command):
     def run(self, args, conn):
-        conn.write(_("Server location: %s   Server version : %s\n") % (server.location, server.version))
-        conn.write(_("The server has been up since %s.\n") % time.strftime("%a %b %e, %H:%M %Z %Y", time.localtime(server.start_time)))
+        conn.write(_("FatICS version : %s\n") % server.version)
+        conn.write(_("Server location: %s\n" % server.location))
+        conn.write(_("The server has been up since %s.\n")
+            % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime()))
         conn.write(_("Up for: %s\n") % time_format.hms_words(time.time() -
             server.start_time))
 

@@ -78,6 +78,7 @@ class TestLlogons(Test):
         self.expect(': admin                login  from %s\r\n' % LOCAL_IP, t)
         t.write('llogons 1\n')
         self.expect(': admin                login  from %s\r\n' % LOCAL_IP, t)
+        time.sleep(1)
 
         t2 = self.connect_as('GuestABCD', '')
         t.write('llogons 1\n')

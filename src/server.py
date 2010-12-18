@@ -17,10 +17,19 @@
 #
 
 import time
+import subprocess
 
 class Server(object):
-    location = "USA"
-    version = "0.1"
+    location = "London, England"
+    try:
+        #version = subprocess.check_output(["hg", "parents", "--template",
+        #    "r{rev} ({date|isodate})"])
+        version = subprocess.Popen(["hg", "parents", "--template",
+            "r{rev} ({date|isodate})"],
+            stdout=subprocess.PIPE).communicate()[0]
+    except:
+        raise
+        version = "unknown"
 
     def __init__(self):
         self.start_time = time.time()

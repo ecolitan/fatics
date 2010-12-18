@@ -500,7 +500,7 @@ class Position(object):
 
             if detect_check:
                 self.detect_check()
-                if self.is_checkmate or self.is_stalemate:
+                if self.is_checkmate or self.is_stalemate_on_one_board:
                     raise BadFenError('got a terminal position')
 
 
@@ -799,31 +799,38 @@ class Position(object):
         assert(bmat == self.material[0])
         assert(wmat == self.material[1])
 
+    def get_last_move(self):
+        return self.history.get_move(self.ply - 1)
+
     def detect_check(self):
         """detect whether the player to move is in check, checkmated,
         or stalemated"""
         self.in_check = self.under_attack(self.king_pos[self.wtm],
             not self.wtm)
 
-        any_legal = self._any_legal_moves()
-        self.is_checkmate = self.in_check and not any_legal
-        self.is_stalemate = not self.in_check and not any_legal
+        self.is_checkmate = False
+        self.is_stalemate = False
+        #if self.is_checkmate_on_one_board:
+        #if self.bug_link.is_checkmate_on_one_board:
 
-    def get_last_move(self):
-        return self.history.get_move(self.ply - 1)
-
-    def _any_legal_moves(self):
+        self.is_checkmate_on_one_board = False
+        self.is_stalemate_on_one_board = False
         if self.ep:
-            return True
+            return
         ksq = self.king_pos[self.wtm]
         if self._any_pc_moves(ksq, self.board[ksq]):
-            return True
+            return
 
         # try drops
+        # get the first piece in holding, if any
         if self.in_check:
-            # try dropping a piece
-            for (pc, count) in self.holding.iteritems():
+            # first, see if any drop will ever be possible to block the check,
+            # and only then check if we currently have a piece capable
+            # of blocking it
+
+            for (pc, count) in self.holding.items():
                 if pc.isupper() == self.wtm and count > 0:
+                    # we have at least one piece in holding
                     # try dropping at all empty sqares adjacent to king;
                     # note that trying drops farther away is superfluous
                     for d in piece_moves['k']:
@@ -833,7 +840,6 @@ class Position(object):
                                 continue
                             if Move(self, None, ksq + d, drop=pc).is_legal():
                                 return True
-
         else:
             # if the player has any pieces in holding, then there
             # is a legal move

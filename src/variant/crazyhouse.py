@@ -809,6 +809,9 @@ class Position(object):
         assert(bmat == self.material[0])
         assert(wmat == self.material[1])
 
+    def get_last_move(self):
+        return self.history.get_move(self.ply - 1)
+
     def detect_check(self):
         """detect whether the player to move is in check, checkmated,
         or stalemated"""
@@ -818,9 +821,6 @@ class Position(object):
         any_legal = self._any_legal_moves()
         self.is_checkmate = self.in_check and not any_legal
         self.is_stalemate = not self.in_check and not any_legal
-
-    def get_last_move(self):
-        return self.history.get_move(self.ply - 1)
 
     def _any_legal_moves(self):
         if self.ep:

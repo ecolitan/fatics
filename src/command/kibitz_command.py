@@ -41,7 +41,7 @@ class KibitzCommand(Command):
                 continue
             if u != conn.user:
                 count += 1
-            u.write_('%s(%s)[%d] kibitzes: %s\n',
+            u.write_('\n%s(%s)[%d] kibitzes: %s\n',
                 (name, rat, g.number, msg))
         conn.write(ngettext('(kibitzed to %d player)\n',
             '(kibitzed to %d players)\n', count) % count)
@@ -65,7 +65,7 @@ class WhisperCommand(Command):
                 continue
             if u != conn.user:
                 count += 1
-            u.write_('%s(%s)[%d] whispers: %s\n',
+            u.write_('\n%s(%s)[%d] whispers: %s\n',
                 (name, rat, g.number, msg))
         conn.write(ngettext('(whispered to %d player)\n',
             '(whispered to %d players)\n', count) % count)

@@ -82,9 +82,9 @@ class Game(object):
         for p in self.players:
             if p.session.partner:
                 if self.gtype == PLAYED:
-                    p.session.partner.write_('Your partner has joined a game with %s.\n', (self.get_opp(p),))
+                    p.session.partner.write_('\nYour partner has joined a game with %s.\n', (self.get_opp(p),))
                 else:
-                    p.session.partner.write_('Your partner has started examining a game.\n')
+                    p.session.partner.write_('\nYour partner has started examining a game.\n')
 
         # remove offers to and from each player
         for p in self.players:
@@ -93,11 +93,11 @@ class Game(object):
                     assert(off.a == p)
                     if self.gtype == PLAYED:
                         # original fics says "has joined a match with"
-                        off.b.write_('%(pname)s, who was challenging you, has joined a game with %(oname)s.\n',
+                        off.b.write_('\n%(pname)s, who was challenging you, has joined a game with %(oname)s.\n',
                             {'pname': p.name, 'oname': self.get_opp(p)})
                     else:
                         assert(self.gtype == EXAMINED)
-                        off.b.write_('%(pname)s, who was challenging you, has started examining a game.\n',
+                        off.b.write_('\n%(pname)s, who was challenging you, has started examining a game.\n',
                             {'pname': p.name})
                     p.write_('Challenge to %s withdrawn.\n', (off.b.name,))
                     off.b.write_('Challenge from %s removed.\n',
@@ -108,11 +108,11 @@ class Game(object):
                         assert(p.session.partner)
                         assert(off.b.session.partner)
                         if self.gtype == PLAYED:
-                            off.b.session.partner.write_('%(pname)s, who was challenging your partner, has joined a game with %(oname)s.\n',
+                            off.b.session.partner.write_('\n%(pname)s, who was challenging your partner, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
                         else:
-                            off.b.session.partner.write_('%(pname)s, who was challenging your partner, has started examining a game.\n', (p.name,))
+                            off.b.session.partner.write_('\n%(pname)s, who was challenging your partner, has started examining a game.\n', (p.name,))
                         p.session.partner.write_("Partner's challenge to %s withdrawn.\n", (off.b.name,))
                         off.b.session.partner.write_("Partner's challenge from %s removed.\n", (p.name,))
                     off.withdraw(notify=False)
@@ -121,11 +121,11 @@ class Game(object):
                 if off.name == 'match offer':
                     if self.gtype == PLAYED:
                         assert(off.b == p)
-                        off.a.write_('%(pname)s, whom you were challenging, has joined a game with %(oname)s.\n',
+                        off.a.write_('\n%(pname)s, whom you were challenging, has joined a game with %(oname)s.\n',
                             {'pname': p.name, 'oname': self.get_opp(p)})
                     else:
                         assert(self.gtype == EXAMINED)
-                        off.a.write_('%(pname)s, whom you were challenging, has started examining a game.\n',
+                        off.a.write_('\n%(pname)s, whom you were challenging, has started examining a game.\n',
                             {'pname': p.name})
                     p.write_('Challenge from %s removed.\n', (off.a.name,))
                     off.a.write_('Challenge to %s withdrawn.\n', (p.name,))
@@ -135,11 +135,11 @@ class Game(object):
                         assert(p.session.partner)
                         assert(off.a.session.partner)
                         if self.gtype == PLAYED:
-                            off.a.session.partner.write_('%(pname)s, whom your partner was challenging, has joined a game with %(oname)s.\n',
+                            off.a.session.partner.write_('\n%(pname)s, whom your partner was challenging, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
                         else:
-                            off.a.session.partner.write_('%s, whom your partner was challenging, has started examining a game.\n', (p.name,))
+                            off.a.session.partner.write_('\n%s, whom your partner was challenging, has started examining a game.\n', (p.name,))
                         p.session.partner.write_("Partner's challenge from %s removed.\n", (off.a.name,))
                         off.a.session.partner.write_("Partner's challenge to %s withdrawn.\n", (p.name,))
                     off.decline(notify=False)
@@ -150,16 +150,16 @@ class Game(object):
                 for off in p.session.partner.session.offers_sent[:]:
                     if off.variant_name == 'bughouse':
                         if self.gtype == PLAYED:
-                            off.b.write_('%(pname)s, whose partner was challenging you, has joined a game with %(oname)s.\n',
+                            off.b.write_('\n%(pname)s, whose partner was challenging you, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
                             # original FICS says "whose partner challenged your partner"
-                            off.b.session.partner.write_('%(pname)s, whose partner was challenging your partner, has joined a game with %(oname)s.\n',
+                            off.b.session.partner.write_('\n%(pname)s, whose partner was challenging your partner, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
                         else:
-                            off.b.write_('%s, whose partner was challenging you, has started examining a game.\n', (p.name,))
-                            off.b.session.partner.write_('%s, whose partner was challenging your partner, has started examining a game.\n', (p.name,))
+                            off.b.write_('\n%s, whose partner was challenging you, has started examining a game.\n', (p.name,))
+                            off.b.session.partner.write_('\n%s, whose partner was challenging your partner, has started examining a game.\n', (p.name,))
                         p.session.partner.write_("Challenge to %s withdrawn.\n", (off.b.name,))
                         off.b.write_('Challenge from %s removed.\n', (p.session.partner.name,))
                         off.b.session.partner.write_("Partner's challenge from %s removed.\n", (off.a.name,))
@@ -169,16 +169,16 @@ class Game(object):
                 for off in p.session.partner.session.offers_received[:]:
                     if off.variant_name == 'bughouse':
                         if self.gtype == PLAYED:
-                            off.a.write_('%(pname)s, whose partner you were challenging, has joined a game with %(oname)s.\n',
+                            off.a.write_('\n%(pname)s, whose partner you were challenging, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
                             # original FICS says "(potential opponent)'s partner has joined a game with...."
-                            off.a.session.partner.write_('%(pname)s, whose partner your partner was challenging, has joined a game with %(oname)s.\n',
+                            off.a.session.partner.write_('\n%(pname)s, whose partner your partner was challenging, has joined a game with %(oname)s.\n',
                                 {'pname': p.name,
                                 'oname': self.get_opp(p).name})
                         else:
-                            off.a.write_('%(pname)s, whose partner you were challenging, has started examining a game.\n', (p.name,))
-                            off.a.session.partner.write_('%(pname)s, whose partner your partner was challenging, has started examining a game.\n', (p.name,))
+                            off.a.write_('\n%(pname)s, whose partner you were challenging, has started examining a game.\n', (p.name,))
+                            off.a.session.partner.write_('\n%(pname)s, whose partner your partner was challenging, has started examining a game.\n', (p.name,))
                         off.a.write_("Challenge to %s withdrawn.\n", (p.session.partner.name,))
                         off.a.session.partner.write_("Partner's challenge to %s withdrawn.\n", (p.session.partner.name,))
                         p.session.partner.write_("Challenge from %s removed.\n", (off.a.name,))
@@ -647,15 +647,49 @@ class PlayedGame(Game):
 
         super(PlayedGame, self).next_move(mv, conn)
 
-        if self.variant.pos.is_checkmate:
-            if self.variant.get_turn() == WHITE:
-                self.result('%s checkmated' % self.white.name, '0-1')
-            else:
-                self.result('%s checkmated' % self.black.name, '1-0')
-        elif self.variant.pos.is_stalemate:
-            self.result('Game drawn by stalemate', '1/2-1/2')
-        elif self.variant.pos.is_draw_nomaterial:
-            self.result('Game drawn because neither player has mating material', '1/2-1/2')
+        if self.variant.name == "bughouse":
+            # bughouse is a special case because a checkmate or stalemate
+            # on one board doesn't necessariy end the games
+            if self.variant.pos.is_checkmate:
+                if (self.variant.pos.contact_or_knight_mate
+                        or self.bug_link.variant.pos.is_stalemate):
+                    # mate, and the linked game can never provide a piece
+                    # to stop it
+                    if self.variant.get_turn() == WHITE:
+                        self.result('%s checkmated' % self.white.name, '0-1')
+                    else:
+                        self.result('%s checkmated' % self.black.name, '1-0')
+                elif self.bug_link.variant.pos.is_checkmate:
+                    # linked game is also a mate.  If the mating players are on
+                    # the same team, that team wins; otherwise it's a draw.
+                    # A contact or N mate would have already ended this game.
+                    assert(not self.bug_link.variant.pos.contact_or_knight_mate)
+                    if self.bug_link.variant.get_turn() != self.variant.get_turn():
+                        self.bug_link.is_active = False
+                        if self.variant.get_turn() == WHITE:
+                            self.result('%s and %s checkmated' % (self.bug_link.black.name, self.white.name), '0-1')
+                            self.result('%s and %s checkmated' % (self.bug_link.black.name, self.white.name), '1-0')
+                        else:
+                            self.result('%s and %s checkmated' % (self.bug_link.white.name, self.black.name), '1-0')
+                            self.bug_link.result('%s and %s checkmated' % (self.bug_link.white.name, self.black.name, '0-1'))
+                    else:
+                        self.bug_link.is_active = False
+                        self.bug_link.result('Game drawn by mate on both boards', '1/2-1/2')
+                        self.result('Game drawn by mate on both boards', '1/2-1/2')
+            elif (self.variant.pos.is_stalemate
+                    and self.bug_link.variant.pos.is_stalemate):
+                self.result('Game drawn by stalemate', '1/2-1/2')
+
+        else:
+            if self.variant.pos.is_checkmate:
+                if self.variant.get_turn() == WHITE:
+                    self.result('%s checkmated' % self.white.name, '0-1')
+                else:
+                    self.result('%s checkmated' % self.black.name, '1-0')
+            elif self.variant.pos.is_stalemate:
+                self.result('Game drawn by stalemate', '1/2-1/2')
+            elif self.variant.pos.is_draw_nomaterial:
+                self.result('Game drawn because neither player has mating material', '1/2-1/2')
 
     def observe(self, u):
         """ For some reason it seems that FICS only sends gameinfo strings
@@ -698,9 +732,9 @@ class PlayedGame(Game):
             elif result_code == '1/2-1/2':
                 self.bug_link.result("Partners' game drawn", '1/2-1/2')
             elif result_code == '*':
-                if 'adjourned' in msg:
+                if 'Game adjourned' in msg:
                     self.bug_link.adjourn("Partners' game aborted")
-                elif 'aborted' in msg:
+                elif 'Game aborted' in msg:
                     self.bug_link.result('*', "Partners' game aborted")
                 else:
                     print 'unexpected incomplete game message %s' % msg
@@ -737,7 +771,7 @@ class PlayedGame(Game):
     def leave(self, user):
         side = self.get_user_side(user)
         opp = self.get_opp(user)
-        opp.write_('Your opponent has lost contact or quit.\n')
+        opp.write_('\nYour opponent has lost contact or quit.\n')
         if (user.is_guest or user.has_title('abuser') or
                 (user.vars['noescape'] and opp.vars['noescape'])):
             res = '0-1' if side == WHITE else '1-0'

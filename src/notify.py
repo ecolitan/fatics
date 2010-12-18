@@ -36,7 +36,7 @@ def notify_users(user, arrived):
             assert(opp_name)
             opp = online.find_exact(opp_name)
             if opp:
-                opp.write_('Notification: %s, who has an adjourned game with you, has arrived.\n', (name,))
+                opp.write_('\nNotification: %s, who has an adjourned game with you, has arrived.\n', (name,))
                 adjourned_opps.append(opp_name)
         if adjourned_opps:
             user.nwrite_('%d player who has an adjourned game with you is online: %s\n',
@@ -49,10 +49,10 @@ def notify_users(user, arrived):
         if u:
             if arrived:
                 if u.name not in adjourned_opps:
-                    u.write_("Notification: %s has arrived.\n", name)
+                    u.write_("\nNotification: %s has arrived.\n", name)
                     nlist.append(u.name)
             else:
-                u.write_("Notification: %s has departed.\n", name)
+                u.write_("\nNotification: %s has departed.\n", name)
                 nlist.append(u.name)
 
     if nlist and user.vars['notifiedby']:
@@ -65,8 +65,8 @@ def notify_users(user, arrived):
         u = online.find_exact(nname)
         if u and u.vars['notifiedby']:
             if arrived:
-                u.write_("Notification: %s has arrived and isn't on your notify list.\n", name)
+                u.write_("\nNotification: %s has arrived and isn't on your notify list.\n", name)
             else:
-                u.write_("Notification: %s has departed and isn't on your notify list.\n", name)
+                u.write_("\nNotification: %s has departed and isn't on your notify list.\n", name)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

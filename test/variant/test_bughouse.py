@@ -17,6 +17,7 @@
 #
 
 from test.test import *
+from bpgn import Bpgn
 
 class TestBughouse(Test):
     def test_match(self):
@@ -484,6 +485,122 @@ class TestBughouse(Test):
         self.expect('drawn by agreement} 1/2-1/2', t3)
         self.expect("Partners' game drawn} 1/2-1/2", t2)
         self.expect("Partners' game drawn} 1/2-1/2", t4)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
+class TestBpgn(Test):
+    def test_bpgn(self):
+        self._skip('does not work yet')
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+        t3.write('set style 12\n')
+        t4.write('set style 12\n')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        f = open('../data/bughouse.bpgn', 'r')
+
+        bpgn = Bpgn(f)
+        for g in bpgn:
+            print 'game %s' % g
+            t.write('match GuestIJKL bughouse white 1+0\n')
+            self.expect('Issuing:', t)
+            self.expect('Challenge:', t3)
+            t3.write('accept\n')
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            self.expect('<12> ', t3)
+            self.expect('<12> ', t4)
+
+            # board A is t vs. t3; board B is t2 vs. t4
+            for mv in g.moves:
+                if mv.char == 'A':
+                    #print 'sending %s to A' % mv.text
+                    t.write('%s%s\n' % (mv.text, mv.decorator))
+                    self.expect('<12> ', t)
+                    self.expect('<12> ', t3)
+                elif mv.char == 'B':
+                    #print 'sending %s to B' % mv.text
+                    t4.write('%s%s\n' % (mv.text, mv.decorator))
+                    self.expect('<12> ', t2)
+                    self.expect('<12> ', t4)
+                elif mv.char == 'a':
+                    #print 'sending %s to a' % mv.text
+                    t3.write('%s%s\n' % (mv.text, mv.decorator))
+                    self.expect('<12> ', t)
+                    self.expect('<12> ', t3)
+                elif mv.char == 'b':
+                    #print 'sending %s to b' % mv.text
+                    t2.write('%s%s\n' % (mv.text, mv.decorator))
+                    self.expect('<12> ', t2)
+                    self.expect('<12> ', t4)
+
+            if g.is_checkmate:
+                assert(g.mated)
+                if g.mated == 'A':
+                    assert(g.result == '0-1')
+                    self.expect("GuestABCD checkmated} 0-1", t)
+                    self.expect("GuestABCD checkmated} 0-1", t3)
+                    self.expect("GuestMNOP's partner won} 1-0", t2)
+                    self.expect("GuestMNOP's partner won} 1-0", t4)
+                elif g.mated == 'a':
+                    assert(g.result == '1-0')
+                    self.expect("GuestIJKL checkmated} 1-0", t)
+                    self.expect("GuestIJKL checkmated} 1-0", t3)
+                    self.expect("GuestEFGH's partner won} 0-1", t2)
+                    self.expect("GuestEFGH's partner won} 0-1", t4)
+                elif g.mated == 'B':
+                    assert(g.result == '1-0')
+                    self.expect("GuestABCD's partner won} 1-0", t)
+                    self.expect("GuestABCD's partner won} 1-0", t3)
+                    self.expect("GuestMNOP checkmated} 0-1", t2)
+                    self.expect("GuestMNOP checkmated} 0-1", t4)
+                elif g.mated == 'b':
+                    assert(g.result == '0-1')
+                    self.expect("GuestIJKL's partner won} 0-1", t)
+                    self.expect("GuestIKJL's partner won} 0-1", t3)
+                    self.expect("GuestEFGH checkmated} 1-0", t2)
+                    self.expect("GuestEFGH checkmated} 1-0", t4)
+                else:
+                    assert(False)
+            elif g.result == '1/2-1/2' and g.is_stalemate:
+                self.expect('} 1/2-1/2', t)
+                self.expect('} 1/2-1/2', t2)
+                self.expect('} 1/2-1/2', t3)
+                self.expect('} 1/2-1/2', t4)
+            elif g.result == '1/2-1/2' and g.is_repetition:
+                t.write('draw\n')
+                t2.write('draw\n')
+                self.expect('} 1/2-1/2', t)
+                self.expect('} 1/2-1/2', t2)
+                self.expect('} 1/2-1/2', t3)
+                self.expect('} 1/2-1/2', t4)
+            else:
+                # result we can't check
+                t.write('abo\n')
+                t2.write('abo\n')
+                t3.write('abo\n')
+                t4.write('abo\n')
 
         self.close(t)
         self.close(t2)

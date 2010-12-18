@@ -60,7 +60,7 @@ class Seek(Command):
             assert(not ad.expired)
             conn.write(_('Your seek matches one posted by %s.\n') %
                 ad.a.name)
-            ad.a.write_('Your seek matches one posted by %s.\n',
+            ad.a.write_('\nYour seek matches one posted by %s.\n',
                 (conn.user.name,))
             ad.b = conn.user
             g = game.PlayedGame(ad)
@@ -165,7 +165,7 @@ class Play(Command):
                     tags['side'] = None
                 match.Challenge(conn.user, ad.a, tags=tags)
             else:
-                ad.a.write_('%s accepts your seek.', (conn.user.name,))
+                ad.a.write_('\n%s accepts your seek.\n', (conn.user.name,))
                 ad.accept(conn.user)
 
 #  7 1500 SomePlayerA         5   2 rated   blitz      [white]  1300-9999 m

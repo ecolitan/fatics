@@ -120,7 +120,6 @@ class Asetadmin(Command):
                     (u.name, level))
                 if u.is_online:
                     u.write(A_('''\n\n%s has set your admin level to %d.\n\n''') % (conn.user.name, level))
-#Asetadmin('asetadmin', 'wd', admin.Level.admin)
 
 @ics_command('asetpasswd', 'wW', admin.Level.admin)
 class Asetpasswd(Command):

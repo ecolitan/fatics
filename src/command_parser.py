@@ -54,7 +54,7 @@ class CommandParser(object):
             conn.user.session.last_command_time = time.time()
             if conn.user.idlenotified:
                 for u in conn.user.idlenotified:
-                    u.write_('Notification: %s has unidled.\n',
+                    u.write_('\nNotification: %s has unidled.\n',
                         (conn.user.name,))
                     u.idlenotifiers.remove(conn.user)
                 conn.user.idlenotified.clear()

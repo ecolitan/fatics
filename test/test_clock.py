@@ -298,6 +298,9 @@ class TestFlag(Test):
         self.expect('Challenge:', t2)
         t2.write('accept\n')
 
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
         moves = ['e4', 'e5', 'Nc3', 'Bc5', 'f4', 'exf4', 'Nf3', 'Qf6', 'd4', 'Bb4', 'e5', 'Bxc3+', 'bxc3', 'Qf5', 'Bd3', 'Qg4', 'O-O', 'g5', 'g3', 'fxg3', 'Nxg5', 'gxh2+', 'Kxh2', 'Qh4+', 'Kg2', 'Nh6', 'Rh1', 'Qg4+', 'Qxg4', 'Nxg4', 'Nxh7', 'Rxh7', 'Rxh7', 'd5', 'exd6', 'Be6', 'dxc7', 'Na6', 'Bg5', 'Kd7', 'Bd8', 'Rxd8', 'cxd8=Q+', 'Kxd8', 'Re1', 'Nf6', 'Rxe6', 'fxe6', 'Rxb7', 'Nc7', 'Rxa7', 'Nfd5', 'c4', 'Nf4+', 'Kf3', 'Nxd3', 'cxd3', 'Kd7', 'Rxc7+', 'Kd6', 'Ke4', 'Kxc7', 'Ke5', 'Kd7', 'd5', 'exd5', 'cxd5', 'Kc7', 'd6+', 'Kd7']
 
         wtm = True
@@ -306,8 +309,8 @@ class TestFlag(Test):
                 t.write('%s\n' % mv)
             else:
                 t2.write('%s\n' % mv)
-            self.expect('<12> ', t)
-            self.expect('<12> ', t2)
+            self.expect('<12> ', t, timeout=4)
+            self.expect('<12> ', t2, timeout=4)
             wtm = not wtm
 
         assert(wtm)
