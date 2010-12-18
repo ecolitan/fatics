@@ -30,6 +30,10 @@ class DB(object):
             read_default_file="~/.my.cnf")
         cursor = self.db.cursor()
         cursor.execute("""SET time_zone='+00:00'""")
+        # Since we don't catch timeouts to the MySQL server when
+        # executing queries, increase the default connection timeout
+        # used by the server.
+        cursor.execute("""SET wait_timeout=604800""") # 1 week
         cursor.close()
 
     def user_get(self, name):
