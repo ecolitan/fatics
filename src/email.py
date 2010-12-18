@@ -32,7 +32,7 @@ def send_mail(fr, to, body):
     message = """From: %s\nTo: %s <%s>\nSubject: %s\n\n%s""" % (FROM,
         to.name, to.email, subject, body)
 
-    p = subprocess.Popen([SENDMAIL, '-t', '-i'], stdin=subprocess.PIPE).stdin
+    p = subprocess.Popen([SENDMAIL, '-t', '-i'], stdin=subprocess.PIPE)
     p.stdin.write(message)
     p.stdin.close()
     if p.wait() != 0:
