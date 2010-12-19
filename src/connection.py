@@ -28,6 +28,7 @@ import command_parser
 import lang
 import filter_
 from config import config
+from db import db
 from timeseal import timeseal, REPLY as TIMESEAL_REPLY
 from session import Session
 from login import login
@@ -56,7 +57,7 @@ class Connection(basic.LineReceiver):
             self.transport.encoder = timeseal.compress_zipseal
             self.session.check_for_timeseal = False
         self.factory.connections.append(self)
-        self.write(config.welcome_msg)
+        self.write(db.get_server_message('welcome'))
         self.login()
         self.session.login_last_command = time.time()
         self.ip = self.transport.getPeer().host
@@ -74,7 +75,7 @@ class Connection(basic.LineReceiver):
 
     def login(self):
         self.state = 'login'
-        self.write(config.login_msg)
+        self.write(db.get_server_message('login'))
         self.write("login: ")
 
     def lineReceived(self, line):
@@ -194,7 +195,7 @@ class Connection(basic.LineReceiver):
         self.transport.loseConnection()
         if reason == 'quit':
             #timeseal.print_stats()
-            self.write(config.logout_msg)
+            self.write(db.get_server_message('logout'))
 
     def connectionLost(self, reason):
         basic.LineReceiver.connectionLost(self, reason)

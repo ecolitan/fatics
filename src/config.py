@@ -36,10 +36,6 @@ class Config(object):
 
     # Silly Babas requires freechess.org to be in the welcome message,
     # so work it into a disclaimer.
-    welcome_msg = '''Welcome to / Bienvenue à / Bienvenido a / Willkommen auf\n\n                   ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟\n\nThis server is not endorsed by freechess.org.\n\n'''
-    login_msg = '''If you are not a registered player, enter the login name "guest".\n\n'''
-    logout_msg = '''♙♙♙ Thank you for using FatICS. ♟♟♟\n'''
-
     prompt = 'fics% '
 
 config = Config()

@@ -19,7 +19,7 @@
 from test.test import *
 from bpgn import Bpgn
 
-class TestBughouse(Test):
+class TestBughouseMatch(Test):
     def test_match(self):
         t = self.connect_as('GuestABCD', '')
         t2 = self.connect_as('GuestEFGH', '')
@@ -250,6 +250,8 @@ class TestBughouse(Test):
         self.close(t3)
         self.close(t4)
 
+
+class TestBughouseKibitz(Test):
     def test_kibitz(self):
         # kibitz goes to all 4 players
         t = self.connect_as('GuestABCD', '')
@@ -606,5 +608,68 @@ class TestBpgn(Test):
         self.close(t2)
         self.close(t3)
         self.close(t4)
+
+class TestBughouseRules(Test):
+    def test_draw_checkmate(self):
+        t = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as('GuestIJKL', '')
+        t4 = self.connect_as('GuestMNOP', '')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+        t3.write('set style 12\n')
+        t4.write('set style 12\n')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match GuestIJKL bughouse white 1+0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t3)
+        t3.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        self.expect('<12> ', t3)
+        self.expect('<12> ', t4)
+
+        moves = ['e4', 'f5', 'h4', 'g5', 'Qh5']
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t3.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t3)
+            wtm = not wtm
+
+        self.expect_not('mated', t)
+
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t4.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t2)
+            self.expect('<12> ', t4)
+            wtm = not wtm
+
+        self.expect(' (GuestABCD vs. GuestIJKL) Game drawn by mate on both boards} 1/2-1/2', t)
+        self.expect(' (GuestABCD vs. GuestIJKL) Game drawn by mate on both boards} 1/2-1/2', t3)
+        self.expect(' (GuestMNOP vs. GuestEFGH) Game drawn by mate on both boards} 1/2-1/2', t2)
+        self.expect(' (GuestMNOP vs. GuestEFGH) Game drawn by mate on both boards} 1/2-1/2', t4)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

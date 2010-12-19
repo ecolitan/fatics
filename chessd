@@ -15,6 +15,11 @@ case "$1" in
     echo "Running test suite...."
     trial -e test/
     ;;
+  reloaddb)
+    echo "Reloading database...."
+    mysql chess < db/db.sql
+    ./scripts/import-eco.py
+    ;;
   profile)
     echo "Running chessd in profile mode...."
     twistd --profile profile-chessd.data --savestats --profiler cProfile -r epoll -noy src/chessd.tac

@@ -69,6 +69,7 @@ class BaseUser(object):
         self.is_online = True
         online.add(self)
         self.write(server.get_copyright_notice())
+        self.write(db.get_server_message('motd'))
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
 

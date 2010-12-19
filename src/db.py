@@ -1051,6 +1051,14 @@ class DB(object):
             (game_id, idn))
         cursor.close()
 
+    def get_server_message(self, name):
+        cursor = self.db.cursor()
+        cursor.execute("""SELECT server_message_text FROM server_message
+            WHERE server_message_name = %s""", (name,))
+        row = cursor.fetchone()
+        cursor.close()
+        return row[0]
+
 db = DB()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

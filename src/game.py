@@ -651,7 +651,7 @@ class PlayedGame(Game):
             # bughouse is a special case because a checkmate or stalemate
             # on one board doesn't necessariy end the games
             if self.variant.pos.is_checkmate:
-                if (self.variant.pos.contact_or_knight_mate
+                if (self.variant.pos.is_contact_or_knight_mate
                         or self.bug_link.variant.pos.is_stalemate):
                     # mate, and the linked game can never provide a piece
                     # to stop it
@@ -663,9 +663,9 @@ class PlayedGame(Game):
                     # linked game is also a mate.  If the mating players are on
                     # the same team, that team wins; otherwise it's a draw.
                     # A contact or N mate would have already ended this game.
-                    assert(not self.bug_link.variant.pos.contact_or_knight_mate)
+                    assert(not self.bug_link.variant.pos.is_contact_or_knight_mate)
                     if self.bug_link.variant.get_turn() != self.variant.get_turn():
-                        self.bug_link.is_active = False
+                        self.is_active = False
                         if self.variant.get_turn() == WHITE:
                             self.result('%s and %s checkmated' % (self.bug_link.black.name, self.white.name), '0-1')
                             self.result('%s and %s checkmated' % (self.bug_link.black.name, self.white.name), '1-0')
@@ -673,7 +673,7 @@ class PlayedGame(Game):
                             self.result('%s and %s checkmated' % (self.bug_link.white.name, self.black.name), '1-0')
                             self.bug_link.result('%s and %s checkmated' % (self.bug_link.white.name, self.black.name, '0-1'))
                     else:
-                        self.bug_link.is_active = False
+                        self.is_active = False
                         self.bug_link.result('Game drawn by mate on both boards', '1/2-1/2')
                         self.result('Game drawn by mate on both boards', '1/2-1/2')
             elif (self.variant.pos.is_stalemate

@@ -174,7 +174,7 @@ CREATE TABLE `history` (
   `time` smallint(4) COMMENT 'initial time',
   `inc` smallint(4) COMMENT 'increment',
   `result_reason` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Sta', 'Rep',
-     'Res', 'TM', 'PW', 'PDr', 'WLM', 'WNM', '50') NOT NULL,
+     'Res', 'TM', 'PW', 'PDr', 'WLM', 'WNM', 'MBB', '50') NOT NULL,
   `when_ended` TIMESTAMP NOT NULL,
   `game_id` int(8) NOT NULL COMMENT 'corresponding game entry that has the moves',
   INDEX(`user_id`),
@@ -212,7 +212,7 @@ CREATE TABLE `game` (
   `rated` BOOLEAN NOT NULL,
   `result` ENUM('1-0', '0-1', '1/2-1/2', '*') NOT NULL,
   `result_reason` ENUM('Adj', 'Agr', 'Dis', 'Fla', 'Mat', 'NM', 'Sta', 'Rep',
-     'Res', 'TM', 'PW', 'PDr', 'WLM', 'WNM', '50') NOT NULL,
+     'Res', 'TM', 'PW', 'PDr', 'WLM', 'WNM', 'MBB', '50') NOT NULL,
   `ply_count` SMALLINT NOT NULL,
   `movetext` TEXT,
   `when_started` TIMESTAMP NOT NULL,
@@ -417,6 +417,14 @@ CREATE TABLE `adjourned_game` (
   UNIQUE INDEX(`white_user_id`,`black_user_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `server_message`;
+CREATE TABLE `server_message` (
+  `server_message_id` int(4) NOT NULL AUTO_INCREMENT,
+  `server_message_name` VARCHAR(32) NOT NULL,
+  `server_message_text` TEXT NOT NULL,
+  PRIMARY KEY (`server_message_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
 -- data
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
@@ -464,6 +472,14 @@ INSERT INTO `variant` VALUES (NULL,'chess','n');
 INSERT INTO `variant` VALUES (NULL,'crazyhouse','z');
 INSERT INTO `variant` VALUES (NULL,'chess960','9');
 INSERT INTO `variant` VALUES (NULL,'bughouse','B');
+UNLOCK TABLES;
+
+LOCK TABLES `server_message` WRITE;
+INSERT INTO `server_message` VALUES (NULL,'motd',"Welcome to the fatics.org test server.  Message wmahan with any comments.\n\nThere is just one rule here: don't be a dick.\n\nFor real chess, go to freechess.org instead.  Thanks for testing!\n\n");
+INSERT INTO `server_message` VALUES (NULL,'welcome',"Welcome to / Bienvenue à / Bienvenido a / Willkommen auf\n\n                   ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟\n\nThis server is not endorsed by freechess.org.\n\n");
+INSERT INTO `server_message` VALUES (NULL,'login',"If you are not a registered player, enter the login name \"guest\".\n\n");
+INSERT INTO `server_message` VALUES (NULL,'logout',"♙♙♙ Thank you for using FatICS. ♟♟♟\n");
+
 UNLOCK TABLES;
 
 SOURCE db/chess960.sql

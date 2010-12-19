@@ -385,7 +385,7 @@ class Position(object):
         self.history = PositionHistory()
         self.set_pos(fen)
         self.is_draw_nomaterial = False # never happens in bughouse
-        self._check_material()
+        self.check_material()
 
     set_pos_re = re.compile(r'''^([1-8rnbqkpRNBQKP/]+) ([wb]) ([kqKQ]+|-) ([a-h][36]|-) (\d+) (\d+)$''')
     def set_pos(self, fen, detect_check=True):
@@ -500,7 +500,7 @@ class Position(object):
 
             if detect_check:
                 self.detect_check()
-                if self.is_checkmate or self.is_stalemate_on_one_board:
+                if self.is_checkmate or self.is_stalemate:
                     raise BadFenError('got a terminal position')
 
 
@@ -523,9 +523,12 @@ class Position(object):
         assert(0 <= count <= 15)
         self.holding[pc] += 1
         if update_hash:
+            # these things are skipped when undoing a move, since
+            # the correct material and hash are already stored
             if count > 0:
                 self.hash ^= zobrist.holding_hash(pc, count)
             self.hash ^= zobrist.holding_hash(pc, count + 1)
+            self.material[pc.isupper()] += piece_material[pc.lower()]
 
     def remove_from_holding(self, pc, update_hash):
         count = self.holding[pc]
@@ -538,7 +541,7 @@ class Position(object):
 
     def make_move(self, mv):
         """make the move"""
-        self._check_material()
+        self.check_material()
         assert(self.hash == self._compute_hash())
         self.ply += 1
 
@@ -559,15 +562,15 @@ class Position(object):
             assert(mv.drop.isupper() if self.wtm else mv.drop.islower())
             self.board[mv.to] = mv.drop
             self.hash ^= zobrist.piece_hash(mv.to, mv.drop)
-            self.bug_link.remove_from_holding(mv.drop, True)
-            # material does not change when dropping a piece
+            self.remove_from_holding(mv.drop, True)
+            # dropping a piece does not change material; it
             # does not reset 50-move count because it's reversible
         else:
             self.board[mv.fr] = '-'
 
             if mv.is_capture:
                 if self.promoted[mv.to]:
-                    # promoted piece reverts to a pawn
+                    # promoted piece reverts to a pawn when captured
                     holding_pc = 'p' if self.wtm else 'P'
                     mv.undo.capture_was_promoted = True
                     # clear the old promoted marker; if the capturing piece
@@ -579,10 +582,8 @@ class Position(object):
                     mv.undo.capture_was_promoted = False
                 mv.undo.holding_pc = holding_pc
                 self.bug_link.add_to_holding(holding_pc, True)
+                self.bug_link.check_material()
                 self.hash ^= zobrist.piece_hash(mv.to, mv.capture)
-                # add to capturer's material, since the piece is now in
-                # his or her holding
-                self.material[self.wtm] += piece_material[holding_pc.lower()]
                 self.material[not self.wtm] -= piece_material[mv.capture.lower()]
             assert(not self.promoted[mv.to])
             if not mv.prom:
@@ -614,7 +615,6 @@ class Position(object):
                     zobrist.castle_hash(mv.undo.castle_flags)
 
         if mv.is_ep:
-            self.material[self.wtm] += piece_material['p']
             self.material[not self.wtm] -= piece_material['p']
             # remove the captured pawn
             if self.wtm:
@@ -622,11 +622,13 @@ class Position(object):
                 self.hash ^= zobrist.piece_hash(mv.to - 0x10, 'p')
                 self.board[mv.to - 0x10] = '-'
                 self.bug_link.add_to_holding('p', True)
+                self.bug_link.check_material()
             else:
                 assert(self.board[mv.to + 0x10] == 'P')
                 self.hash ^= zobrist.piece_hash(mv.to + 0x10, 'P')
                 self.board[mv.to + 0x10] = '-'
                 self.bug_link.add_to_holding('P', True)
+                self.bug_link.check_material()
         elif mv.is_oo:
             # move the rook
             if self.wtm:
@@ -668,7 +670,7 @@ class Position(object):
         if self.hash != self._compute_hash():
             print 'failed on move %d %s' % (self.ply, str(mv))
             assert(False)
-        self._check_material()
+        self.check_material()
         self.history.set_hash(self.ply, self.hash)
 
     def _is_legal_ep(self, ep):
@@ -714,7 +716,7 @@ class Position(object):
 
     def undo_move(self, mv):
         assert(self.hash == self._compute_hash())
-        self._check_material()
+        self.check_material()
         self.wtm = not self.wtm
         self.ply -= 1
         self.ep = mv.undo.ep
@@ -735,16 +737,20 @@ class Position(object):
 
         if mv.drop:
             self.board[mv.to] = '-'
-            self.bug_link.add_to_holding(mv.drop, False)
+            self.add_to_holding(mv.drop, False)
         elif mv.is_ep:
             if self.wtm:
                 assert(self.board[mv.to - 0x10] == '-')
                 self.board[mv.to - 0x10] = 'p'
-                self.bug_link.remove_from_holding('P', False)
+                self.bug_link.remove_from_holding('p', False)
+                self.bug_link.material[0] -= piece_material['p']
+                self.bug_link.check_material()
             else:
                 assert(self.board[mv.to + 0x10] == '-')
                 self.board[mv.to + 0x10] = 'P'
-                self.bug_link.remove_from_holding('p', False)
+                self.bug_link.remove_from_holding('P', False)
+                self.bug_link.material[0] -= piece_material['P']
+                self.bug_link.check_material()
         elif mv.is_oo:
             if self.wtm:
                 assert(self.board[F1] == 'R')
@@ -765,6 +771,8 @@ class Position(object):
                 self.board[D8] = '-'
         elif mv.is_capture:
             self.bug_link.remove_from_holding(mv.undo.holding_pc, False)
+            self.bug_link.material[not self.wtm] -= piece_material[mv.undo.holding_pc.lower()]
+            self.bug_link.check_material()
 
         # restore the "promoted" markers
         if mv.prom:
@@ -779,10 +787,11 @@ class Position(object):
             else:
                 self.promoted[mv.to] = 0
 
-        self._check_material()
+        assert(self.material == mv.undo.material)
+        self.check_material()
         assert(self.hash == self._compute_hash())
 
-    def _check_material(self):
+    def check_material(self):
         bmat = (sum([piece_material[pc.lower()]
             for (sq, pc) in self if pc != '-' and not piece_is_white(pc)]))
         wmat = sum([piece_material[pc.lower()]
@@ -796,6 +805,10 @@ class Position(object):
 
         if bmat != self.material[0]:
             print self.to_xfen()
+            print 'bmat %d, mat0 %d' % (bmat, self.material[0])
+        if wmat != self.material[1]:
+            print self.to_xfen()
+            print 'wmat %d, mat1 %d' % (wmat, self.material[1])
         assert(bmat == self.material[0])
         assert(wmat == self.material[1])
 
@@ -810,11 +823,6 @@ class Position(object):
 
         self.is_checkmate = False
         self.is_stalemate = False
-        #if self.is_checkmate_on_one_board:
-        #if self.bug_link.is_checkmate_on_one_board:
-
-        self.is_checkmate_on_one_board = False
-        self.is_stalemate_on_one_board = False
         if self.ep:
             return
         ksq = self.king_pos[self.wtm]
@@ -839,21 +847,40 @@ class Position(object):
                                 # can't drop a pawn on the first or last rank
                                 continue
                             if Move(self, None, ksq + d, drop=pc).is_legal():
-                                return True
+                                return
         else:
             # if the player has any pieces in holding, then there
             # is a legal move
             for (pc, count) in self.holding.iteritems():
                 if pc.isupper() == self.wtm and count > 0:
-                    return True
+                    return
 
         for (sq, pc) in self:
             #if pc != '-' and piece_is_white(pc) == self.wtm:
             if pc not in ['-', 'K', 'k'] and piece_is_white(pc) == self.wtm:
                 cur_sq = sq
                 if self._any_pc_moves(sq, pc):
-                    return True
-        return False
+                    return
+
+        # there are no legal moves
+        if self.in_check:
+            self.is_checkmate = True
+            # check whether we can ever block the checkmate by dropping
+            # a piece
+            self.is_contact_or_knight_mate = False
+            #self.is_contact_or_knight_mate = True
+            # any piece would work
+            drop_pc = 'N' if self.wtm else 'n'
+            self.add_to_holding(drop_pc, True)
+            for d in piece_moves['k']:
+                if self._is_pc_at('-', ksq + d):
+                    if Move(self, None, ksq + d, drop=drop_pc).is_legal():
+                        self.is_contact_or_knight_mate = False
+                        break
+            self.material[self.wtm] -= piece_material[drop_pc.lower()]
+            self.remove_from_holding(drop_pc, True)
+        else:
+            self.is_stalemate = True
 
     def _pawn_cap_at(self, sq):
         if not valid_sq(sq):

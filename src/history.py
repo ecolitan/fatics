@@ -47,6 +47,8 @@ class History(object):
         # TODO add suicide PLM and WNM
         elif '50 move rule' in msg:
             result_reason = '50'
+        elif 'mate on both boards' in msg:
+            result_reason = 'MBB'
         else:
             raise RuntimeError('could not abbreviate result message: %s' % msg)
 
