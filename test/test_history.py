@@ -22,8 +22,8 @@ from test import *
 
 class TestHistory(Test):
     def test_history_guest(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('history\n')
         self.expect('GuestABCD has no history games', t)
@@ -79,7 +79,7 @@ class TestHistory(Test):
 
     def test_history_user(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -120,8 +120,8 @@ class TestHistory(Test):
         self.close(t)
 
     def test_alternating_colors(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t2.write('match GuestABCD 3 1 chess black u\n')
         self.expect('Challenge:', t)

@@ -78,9 +78,14 @@ class Test(unittest.TestCase):
     def connect(self):
         return connect()
 
-    def connect_as_guest(self):
+    def connect_as_guest(self, name=None):
         t = connect()
-        t.write("guest\n\n")
+        if name:
+            t.write("%s\n" % name)
+            self.expect('is not a registered name', t)
+            t.write('\n')
+        else:
+            t.write("guest\n\n")
         t.read_until('fics%', 5)
         return t
 
@@ -93,7 +98,9 @@ class Test(unittest.TestCase):
 
     def connect_as(self, name, passwd):
         t = connect()
-        t.write("%s\n%s\n" % (name, passwd))
+        t.write('%s\n' % name)
+        self.expect('is a registered name', t)
+        t.write('%s\n' % passwd)
         s = t.read_until('fics%', 5)
         assert('fics%' in s)
         return t

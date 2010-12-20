@@ -867,8 +867,7 @@ class Position(object):
             self.is_checkmate = True
             # check whether we can ever block the checkmate by dropping
             # a piece
-            self.is_contact_or_knight_mate = False
-            #self.is_contact_or_knight_mate = True
+            self.is_contact_or_knight_mate = True
             # any piece would work
             drop_pc = 'N' if self.wtm else 'n'
             self.add_to_holding(drop_pc, True)

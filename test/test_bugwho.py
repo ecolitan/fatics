@@ -40,10 +40,10 @@ class TestBugwho(Test):
         self.close(t)
 
     def test_bugwho(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
-        t4 = self.connect_as('GuestMNOP', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
 
         t.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t)

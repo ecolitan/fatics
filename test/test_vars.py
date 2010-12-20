@@ -188,7 +188,7 @@ class TestGameinfo(Test):
 # <d1> 314 5 e3 e2e3 100 59800 563
 class TestCompressMove(Test):
     def test_compressmove(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t.write("match admin 2 12 u white\n")
         t.write('set style 12\n')

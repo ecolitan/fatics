@@ -142,8 +142,8 @@ class TestAbuser(Test):
 
 class TestCensor(Test):
     def test_censor_guest(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestDEFG', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestDEFG')
 
         t.write('+cen Nosuchplayer\n')
         self.expect('There is no player matching the name "nosuchplayer".', t)
@@ -304,8 +304,8 @@ class TestCensor(Test):
 
 class TestNoplay(Test):
     def test_noplay_guest(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestDEFG', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestDEFG')
 
         t.write('+noplay GuestDEFG\n')
         self.expect('GuestDEFG added to your noplay list.', t)

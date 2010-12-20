@@ -20,7 +20,7 @@ from test import *
 
 class TestNotify(Test):
     def test_notify_guest(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t.write('+not admin\n')
         self.expect('Only registered players', t)
 
@@ -120,7 +120,7 @@ class TestNotify(Test):
 
 class TestIdlenotify(Test):
     def test_idlenotify_guest(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('+idlenot admin\n')
@@ -145,7 +145,7 @@ class TestIdlenotify(Test):
         self.close(t2)
 
     def test_idlenotify_depart(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('+idlenot admin\n')
@@ -168,7 +168,7 @@ class TestIdlenotify(Test):
         self.close(t2)
 
     def test_bad_idlenotify(self):
-        t = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestEFGH')
         t.write('+idlenot 33\n')
         self.expect('"33" is not a valid handle.', t)
         t.write('+idlenot admin\n')

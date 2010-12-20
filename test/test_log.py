@@ -61,7 +61,7 @@ class TestLogons(Test):
         self.close(t)
 
     def test_logons_guest(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t.write('log\n')
         self.expect_re(': GuestABCD            login \r\n', t)
         self.close(t)
@@ -80,7 +80,7 @@ class TestLlogons(Test):
         self.expect(': admin                login  from %s\r\n' % LOCAL_IP, t)
         time.sleep(1)
 
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
         t.write('llogons 1\n')
         self.expect(': GuestABCD            login  from %s\r\n' % LOCAL_IP, t)
         self.close(t2)

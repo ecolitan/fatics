@@ -24,7 +24,7 @@ import time
 
 class TestSeek(Test):
     def test_seek_guest(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest()
 
         t.write('seek 3 0\n')
@@ -49,8 +49,8 @@ class TestSeek(Test):
         self.close(t2)
 
     def test_matching_seek(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
@@ -70,8 +70,8 @@ class TestSeek(Test):
         self.close(t2)
 
     def test_matching_seek_formula(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
@@ -211,7 +211,7 @@ class TestSeek(Test):
 
     def test_showownseek(self):
         """ Test the showownseek var and ivar. """
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t.write('see 3+0\n')
         self.expect('(0 players saw the seek.)', t)
 
@@ -231,7 +231,7 @@ class TestSeek(Test):
         self.close(t)
 
     def test_seek_limit(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
 
         t.write('see 1+0\n')
         self.expect('(0 players saw the seek.)', t)
@@ -248,8 +248,8 @@ class TestSeek(Test):
         self.close(t)
 
     def test_manual(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('see 90+5 white fischer m\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t)
@@ -340,7 +340,7 @@ class TestSeek(Test):
         self.close(t3)
 
     def test_filter_formula(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest()
 
         t2.write('set formula !blitz\n')
@@ -430,7 +430,7 @@ class TestPlay(Test):
 class TestSought(Test):
     def test_sought_all(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t.write('seek 1+0\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t)
@@ -458,7 +458,7 @@ class TestSought(Test):
 
     def test_sought(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
         t3 = self.connect_as_guest()
 
         t.write('set formula time < 15\n')
@@ -487,7 +487,7 @@ class TestSought(Test):
 class TestSeekinfo(Test):
     def test_seekinfo(self):
         t = self.connect_as_guest()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
         t3 = self.connect_as_admin()
 
         t.write('iset seekinfo 1\n')

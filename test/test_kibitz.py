@@ -20,8 +20,8 @@ from test import *
 
 class TestKibitz(Test):
     def test_kibitz_guest(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest()
 
         t.write('kibitz hello\n')
@@ -108,7 +108,7 @@ class TestKibitz(Test):
 
     @with_player('testplayer', 'testpass')
     def test_kiblevel(self):
-        t = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestEFGH')
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
 
@@ -154,8 +154,8 @@ class TestKibitz(Test):
 
 class TestWhisper(Test):
     def test_whisper_guest(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest()
 
         t.write('whi hello\n')
@@ -228,7 +228,7 @@ class TestWhisper(Test):
 
     @with_player('testplayer', 'testpass')
     def test_kiblevel_whisper(self):
-        t = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestEFGH')
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
 
@@ -273,7 +273,7 @@ class TestWhisper(Test):
 class TestXkibitz(Test):
     @with_player('testplayer', 'testpass')
     def test_xkibitz(self):
-        t = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestEFGH')
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
 
@@ -301,7 +301,7 @@ class TestXkibitz(Test):
 class TestXwhisper(Test):
     @with_player('testplayer', 'testpass')
     def test_xwhisper(self):
-        t = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestEFGH')
         t2 = self.connect_as('testplayer', 'testpass')
         t3 = self.connect_as_admin()
 

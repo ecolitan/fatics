@@ -20,7 +20,7 @@ from test import *
 
 class TestMessage(Test):
     def test_message_guest(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
 
         t.write("mess\n")
         self.expect("Only registered players can use the messages command", t)

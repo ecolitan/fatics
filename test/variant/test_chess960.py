@@ -25,7 +25,7 @@ from db import db
 
 class TestChess960(Test):
     def test_bad_idn(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0 fr idn=960\n')
@@ -79,7 +79,7 @@ class TestChess960(Test):
         self.close(t)
 
     def test_rematch_same_idn(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -120,7 +120,7 @@ class TestChess960(Test):
         self.close(t2)
 
     def _assert_game_is_legal(self, moves, idn, result=None, clear_hist=True):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -160,8 +160,8 @@ class TestChess960(Test):
 class TestPgn(Test):
     def test_pgn(self):
         self._skip('slow test')
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')

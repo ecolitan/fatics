@@ -89,7 +89,7 @@ class TestTime(Test):
         self.close(t2)
 
     def test_time_examined(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t.write('ex\n')
         self.expect('Starting a game', t)
         t.write('time\n')
@@ -318,7 +318,7 @@ class TestFlag(Test):
 
         t.write('time\n')
 
-        self.expect('{Game 1 (admin vs. TestPlayer) admin ran out of time and TestPlayer lacks mating material} 1/2-1/2', t, timeout=10)
+        self.expect('{Game 1 (admin vs. TestPlayer) admin ran out of time and TestPlayer lacks mating material} 1/2-1/2', t, timeout=20)
         self.expect('{Game 1 (admin vs. TestPlayer) admin ran out of time and TestPlayer lacks mating material} 1/2-1/2', t2)
 
         t.write('aclearhist admin\n')

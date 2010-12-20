@@ -22,7 +22,7 @@ import time
 
 class TestExamine(Test):
     def test_examine_scratch(self):
-        t = self.connect_as('GuestPQLQ', '')
+        t = self.connect_as_guest('GuestPQLQ')
 
         t.write('forward\n')
         self.expect('You are not examining a game', t)
@@ -156,8 +156,8 @@ class TestExamine(Test):
         self.close(t)
 
     def test_examine_history_last(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -205,7 +205,7 @@ class TestExamine(Test):
         self.close(t2)
 
     def test_examine_moves(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
 
         t.write('iset ms 1\n')
         t.write('ex\n')
@@ -238,7 +238,7 @@ class TestExamine(Test):
         self._assert_game_is_legal(moves, 'Game 1: Game drawn by stalemate 1/2-1/2')
 
     def _assert_game_is_legal(self, moves, result=None):
-        t = self.connect_as('GuestWXYZ', '')
+        t = self.connect_as_guest('GuestWXYZ')
         t.write('ex\n')
         for mv in moves:
             t.write('%s\n' % mv)

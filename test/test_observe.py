@@ -20,9 +20,9 @@ from test import *
 
 class TestObserve(Test):
     def test_observe_and_unobserve(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
 
         t.write('set style 12\n')
         t.write('observe\n')
@@ -89,8 +89,8 @@ class TestObserve(Test):
         self.close(t3)
 
     def test_observe_examined(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
         t2.write('set style 12\n')
 
         t.write('ex\n')
@@ -113,9 +113,9 @@ class TestObserve(Test):
 
     def test_unobserve_logout(self):
         """ Test that games are implicitly unobserved when logging out. """
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
 
         t2.write('match guestijkl 1 0 w\n')
         self.expect('Challenge:', t3)
@@ -134,10 +134,10 @@ class TestObserve(Test):
         self.close(t3)
 
     def test_unobserve_multiple(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
-        t4 = self.connect_as('GuestMNOP', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
         t5 = self.connect_as_guest()
 
         t.write('match guestefgh 1+0\n')
@@ -167,10 +167,10 @@ class TestObserve(Test):
 
 class TestAllobservers(Test):
     def test_allobservers(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
-        t4 = self.connect_as('GuestMNOP', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
 
         self.expect_command_prints_nothing("allobservers\n", t)
 
@@ -229,10 +229,10 @@ class TestAllobservers(Test):
 class TestPrimary(Test):
     @with_player('testobs', 'testpass')
     def test_primary(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
-        t4 = self.connect_as('GuestMNOP', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
         t5 = self.connect_as('testobs', 'testpass')
 
         t5.write('primary\n')

@@ -232,7 +232,7 @@ class SilenceVarTest(Test):
         self.expect('You are no longer examining', t2)
 
         # observing a game
-        t3 = self.connect_as('GuestABCD', '')
+        t3 = self.connect_as_guest('GuestABCD')
         t.write('match guestabcd white 1 0\n')
         self.expect('Challenge:', t3)
         t3.write('accept\n')

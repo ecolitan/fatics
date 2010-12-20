@@ -65,13 +65,13 @@ class CommandTest(Test):
         t.write('nuke guesttest\n')
         self.expect('no player matching', t)
 
-        t2 = self.connect_as('GuestTest', '')
+        t2 = self.connect_as_guest('GuestTest')
         t.write('nuke guesttest\n')
         self.expect('You have been kicked out', t2)
         self.expect('Nuked: GuestTest', t)
         t2.close()
 
-        t2 = self.connect_as('GuestTest', '')
+        t2 = self.connect_as_guest('GuestTest')
         t.write('asetadmin guesttest 100\n')
         t2.write('nuke admin\n')
         self.expect('need a higher adminlevel', t2)
@@ -98,7 +98,7 @@ class CommandTest(Test):
         self.adduser('testplayer', 'passwd')
         t = self.connect_as_admin()
 
-        t2 = self.connect_as('GuestTest', '')
+        t2 = self.connect_as_guest('GuestTest')
         t.write('asetpass GuestTest pass\n')
         self.expect('cannot set the password', t)
         self.close(t2)
@@ -173,7 +173,7 @@ class CommandTest(Test):
     @with_player('TestPlayer', 'testpass')
     def test_asetemail_bad(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t.write('asetemail guestabcd nobody@example.org\n')
         self.expect('You can only set the email for registered', t)
@@ -201,7 +201,7 @@ class CommandTest(Test):
         self.close(t)
 
     def test_aclearhistory(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
@@ -230,7 +230,7 @@ class CommandTest(Test):
     @with_player('TestPlayer', 'testpass')
     def test_pose(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t.write('pose testplayer test\n')
         self.expect('No player named "testplayer" is online', t)
@@ -302,7 +302,7 @@ class CommentTest(Test):
         t.write('addcomment admin\n')
         self.expect('Usage:', t)
 
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
         t.write('addcomment  guestabcd test\n')
         self.expect('Unregistered players cannot have comments.', t)
         t.write('showcomment guestabcd\n')
@@ -357,7 +357,7 @@ class BanTest(Test):
 
     def test_ban_bad(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
         t.write('+ban nosuchplayer\n')
         self.expect('no player matching the name "nosuchplayer"', t)
         t.write('+ban admin\n')
@@ -477,7 +477,7 @@ class MuzzleTest(Test):
 
     def test_muzzle_bad(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
         t.write('+muzzle nosuchplayer\n')
         self.expect('no player matching the name "nosuchplayer"', t)
         t.write('+muzzle admin\n')
@@ -538,7 +538,7 @@ class MuteTest(Test):
 
     def test_mute_guest(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t.write('+mute GuestABCD\n')
         self.expect('GuestABCD added to the mute list.', t)
@@ -571,7 +571,7 @@ class MuteTest(Test):
 class TestPlayban(Test):
     def test_playban_guest(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t.write('+playban guestabcd\n')
         self.expect('GuestABCD added to the playban list.', t)
@@ -713,7 +713,7 @@ class TestRatedban(Test):
         t.write('+ratedban admin\n')
         self.expect('Admins cannot be ratedbanned.', t)
 
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
         t.write('+ratedban guestabcd\n')
         self.expect('Only registered players can be ratedbanned.', t)
         self.close(t2)

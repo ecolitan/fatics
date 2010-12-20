@@ -92,7 +92,7 @@ class FingerTest(Test):
         t.close()
 
     def test_finger_game(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin white 1 0\n')

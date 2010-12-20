@@ -78,7 +78,7 @@ class TestMatch(Test):
         """ Test default time controls using the 'time' and 'inc'
         vars. """
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t2.write('match admin\n')
         self.expect('Challenge:', t)
@@ -104,7 +104,7 @@ class TestMatch(Test):
     def test_plus_syntax(self):
         """ Test syntax like 'match admin 3+0' """
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t2.write('match admin 3+1 white\n')
         self.expect('Challenge: GuestABCD (++++) [white] admin (----) unrated blitz 3 1', t)
@@ -113,7 +113,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_withdraw_logout(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t2.write('match guest\n')
         t2.write('quit\n')
@@ -126,7 +126,7 @@ class TestMatch(Test):
         self.close(t)
 
     def test_decline_logout(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin\n')
@@ -140,7 +140,7 @@ class TestMatch(Test):
         self.close(t)
 
     def test_decline_unclean_logout(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin\n')
@@ -151,9 +151,9 @@ class TestMatch(Test):
         self.close(t)
 
     def test_withdraw_play(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
-        t3 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as_guest('GuestEFGH')
         t2.write('match guestabcd\n')
         t2.write('match guestefgh\n')
         self.expect('Challenge:', t)
@@ -167,9 +167,9 @@ class TestMatch(Test):
         self.close(t3)
 
     def test_decline_play(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
-        t3 = self.connect_as('GuestEFGH', '')
+        t3 = self.connect_as_guest('GuestEFGH')
         t2.write('match guestabcd\n')
         self.expect('Issuing:', t2)
         t.write('match guestefgh\n')
@@ -183,7 +183,7 @@ class TestMatch(Test):
         self.close(t3)
 
     def test_withdraw_examine(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t2.write('match guestabcd\n')
         t2.write('ex\n')
@@ -195,7 +195,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_decline_examine(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t2.write('match guestabcd\n')
         self.expect('Challenge:', t)
@@ -284,7 +284,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_counteroffer(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin 1 0\n')
@@ -297,7 +297,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_update_offer(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin 1 0\n')
@@ -310,7 +310,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_update_offer_clock(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin 2+12\n')
@@ -334,7 +334,7 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_intercept(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
         t.write('match admin 1 2 white\n')
@@ -363,8 +363,8 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_censor(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('+cen guestefgh\n')
         self.expect('GuestEFGH added to your censor list.', t)
@@ -379,8 +379,8 @@ class TestMatch(Test):
         self.close(t2)
 
     def test_noplay(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('+nop guestefgh\n')
         self.expect('GuestEFGH added to your noplay list.', t)
@@ -421,7 +421,7 @@ class TestRmatch(Test):
 class TestRematch(Test):
     def test_rematch(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('GuestABCD', '')
+        t2 = self.connect_as_guest('GuestABCD')
 
         t2.write('rematch\n')
         self.expect('You have no previous opponent.', t2)

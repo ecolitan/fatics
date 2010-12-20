@@ -20,13 +20,13 @@ from test import *
 
 class TestPartner(Test):
     def test_bugopen(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t)
         t.write('set bugopen 0\n')
         self.expect('You are not open for bughouse.', t)
 
-        t2 = self.connect_as('GuestEFGH', '')
+        t2 = self.connect_as_guest('GuestEFGH')
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
 
@@ -43,8 +43,8 @@ class TestPartner(Test):
         self.close(t2)
 
     def test_partner(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t.write('partner\n')
         self.expect('You do not have a bughouse partner.', t)
@@ -77,7 +77,7 @@ class TestPartner(Test):
         t.write("partner guestefgh\n")
         self.expect("You are already GuestEFGH's bughouse partner.", t)
 
-        t3 = self.connect_as('GuestIJKL', '')
+        t3 = self.connect_as_guest('GuestIJKL')
         t3.write('partner guestefgh\n')
         self.expect('GuestEFGH already has a partner.', t3)
         t.write('partner guestijkl\n')
@@ -95,8 +95,8 @@ class TestPartner(Test):
         self.close(t2)
 
     def test_partner_decline(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
@@ -111,8 +111,8 @@ class TestPartner(Test):
         self.close(t2)
 
     def test_partner_withdraw(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
@@ -130,8 +130,8 @@ class TestPartner(Test):
         self.close(t2)
 
     def test_partner_decline_logout(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
@@ -147,8 +147,8 @@ class TestPartner(Test):
         self.close(t)
 
     def test_partner_withdraw_logout(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
@@ -164,9 +164,9 @@ class TestPartner(Test):
         self.close(t2)
 
     def test_partner_decline_other_partner(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
@@ -188,9 +188,9 @@ class TestPartner(Test):
         self.close(t3)
 
     def test_partner_withdraw_other_partner(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
-        t3 = self.connect_as('GuestIJKL', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
@@ -212,8 +212,8 @@ class TestPartner(Test):
         self.close(t3)
 
     def test_partner_leave(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
@@ -233,7 +233,7 @@ class TestPartner(Test):
         self.close(t2)
 
     def test_partner_bad(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t.write('part Guestabcd\n')
         self.expect("You can't be your own bughouse partner.", t)
         t.write('partner nosuchuser\n')
@@ -241,8 +241,8 @@ class TestPartner(Test):
         self.close(t)
 
     def test_partner_censor(self):
-        t = self.connect_as('GuestABCD', '')
-        t2 = self.connect_as('GuestEFGH', '')
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
 
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)

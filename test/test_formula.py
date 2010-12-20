@@ -53,7 +53,7 @@ class TestFormula(Test):
         self.close(t)
 
     def test_formula_guest(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest()
 
         t.write('set formula !blitz && time > 1\n')
@@ -84,7 +84,7 @@ class TestFormula(Test):
         self.close(t)
 
     def test_formula_fvar(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest()
 
         t.write('set formula f1\n')
@@ -114,7 +114,7 @@ class TestFormula(Test):
         self.close(t2)
 
     '''def test_formula_1(self):
-        t = self.connect_as('GuestABCD', '')
+        t = self.connect_as_guest('GuestABCD')
         t.write('set formula inc=0 && time=3 && !private && rating>1500 && 1850>rating\n')
         self.close(t)'''
 
