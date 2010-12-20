@@ -676,12 +676,18 @@ class PlayedGame(Game):
                         self.is_active = False
                         self.bug_link.result('Game drawn by mate on both boards', '1/2-1/2')
                         self.result('Game drawn by mate on both boards', '1/2-1/2')
-            elif (self.variant.pos.is_stalemate
-                    and self.bug_link.variant.pos.is_stalemate):
-                self.is_active = False
-                self.bug_link.result('Game drawn by stalemate', '1/2-1/2')
-                self.result('Game drawn by stalemate', '1/2-1/2')
-
+            elif self.variant.pos.is_stalemate:
+                if self.bug_link.variant.pos.is_stalemate:
+                    self.is_active = False
+                    self.bug_link.result('Game drawn by stalemate', '1/2-1/2')
+                    self.result('Game drawn by stalemate', '1/2-1/2')
+                elif self.bug_link.variant.pos.is_checkmate:
+                    if self.bug_link.variant.get_turn() == WHITE:
+                        self.bug_link.result('%s checkmated'
+                            % self.bug_link.white.name, '0-1')
+                    else:
+                        self.bug_link.result('%s checkmated'
+                            % self.bug_link.black.name, '1-0')
         else:
             if self.variant.pos.is_checkmate:
                 if self.variant.get_turn() == WHITE:

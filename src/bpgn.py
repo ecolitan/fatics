@@ -21,7 +21,8 @@
 import re
 import copy
 
-tag_re = re.compile(r'''\[(\w+)\s+"([^\n]*?)"\]\s*$''')
+# XXX we ignore additional tags on the same line
+tag_re = re.compile(r'''\[(\w+)\s+"([^"\n]*?)"\]\s*''')
 space_re = re.compile(r'''\s+''')
 move_num_re = re.compile(r'''(\d+)([AaBb])\.*''')
 move_re = re.compile(r'''([NBRQK]?[a-h1-8x]{2,5}(?:=[NBRQK])?|[PNBRQpnbrq]@[a-h][1-8]|O-O-O|O-O)([+#])?''')
@@ -120,7 +121,10 @@ class PgnGame(object):
         #self.partner_won = False
         self.initial_comments = []
         self.parse(movetext)
-        assert('White' in self.tags)
+        assert('WhiteA' in self.tags)
+        assert('BlackA' in self.tags)
+        assert('WhiteB' in self.tags)
+        assert('BlackB' in self.tags)
 
     def parse(self, s):
         """parses moves and their comments"""
@@ -177,7 +181,7 @@ class PgnGame(object):
                     elif who == self.tags['BlackB']:
                         self.mated = 'b'
                     else:
-                        raise PgnError('unknown player resigned: %s' % who)
+                        raise PgnError('unknown player checkmated: %s' % who)
                 elif stalemate_re.search(m.group(1)):
                     self.is_stalemate = True
                 elif repetition_re.search(m.group(1)):
@@ -226,6 +230,7 @@ class PgnGame(object):
             raise PgnError('unrecognized sytax in pgn: "%s"' % s[i:i+15])
 
     def __str__(self):
-        return '%s vs. %s' % (self.tags['White'], self.tags['Black'])
+        return '%s vs. %s and %s vs. %s' % (self.tags['WhiteA'],
+            self.tags['BlackA'], self.tags['WhiteB'], self.tags['BlackB'])
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

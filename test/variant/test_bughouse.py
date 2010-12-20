@@ -495,7 +495,6 @@ class TestBughouseKibitz(Test):
 
 class TestBpgn(Test):
     def test_bpgn(self):
-        self._skip('does not work yet')
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest('GuestIJKL')
@@ -580,7 +579,7 @@ class TestBpgn(Test):
                 elif g.mated == 'b':
                     assert(g.result == '0-1')
                     self.expect("GuestIJKL's partner won} 0-1", t)
-                    self.expect("GuestIKJL's partner won} 0-1", t3)
+                    self.expect("GuestIJKL's partner won} 0-1", t3)
                     self.expect("GuestEFGH checkmated} 1-0", t2)
                     self.expect("GuestEFGH checkmated} 1-0", t4)
                 else:
@@ -1004,6 +1003,148 @@ class TestBughouseRules(Test):
         self.expect(' (GuestABCD vs. GuestIJKL) Game drawn by stalemate} 1/2-1/2', t3)
         self.expect(' (GuestMNOP vs. GuestEFGH) Game drawn by stalemate} 1/2-1/2', t2)
         self.expect(' (GuestMNOP vs. GuestEFGH) Game drawn by stalemate} 1/2-1/2', t4)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
+    def test_stalemate_and_checkmate(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+        t3.write('set style 12\n')
+        t4.write('set style 12\n')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match GuestIJKL bughouse white 1+0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t3)
+        t3.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        self.expect('<12> ', t3)
+        self.expect('<12> ', t4)
+
+        # by Sam Loyd
+        moves = ['d4', 'd6', 'Qd2', 'e5', 'a4', 'e4', 'Qf4', 'f5', 'h3',
+            'Be7', 'Qh2', 'Be6', 'Ra3', 'c5', 'Rg3', 'Qa5+', 'Nd2', 'Bh4',
+            'f3', 'Bb3', 'd5', 'e3', 'c4', 'f4']
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t3.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t3)
+            wtm = not wtm
+
+        self.expect_not('mated', t)
+
+        moves2 = ['e4', 'f5', 'h4', 'g5', 'Qh5']
+        wtm = True
+        for mv in moves2:
+            if wtm:
+                t4.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t2)
+            self.expect('<12> ', t4)
+            wtm = not wtm
+
+        self.expect(" (GuestABCD vs. GuestIJKL) GuestIJKL's partner won} 0-1", t)
+        self.expect(" (GuestABCD vs. GuestIJKL) GuestIJKL's partner won} 0-1", t3)
+        self.expect(' (GuestMNOP vs. GuestEFGH) GuestEFGH checkmated} 1-0', t2)
+        self.expect(' (GuestMNOP vs. GuestEFGH) GuestEFGH checkmated} 1-0', t4)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
+    def test_checkmate_and_stalemate(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+        t3.write('set style 12\n')
+        t4.write('set style 12\n')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match GuestIJKL bughouse white 1+0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t3)
+        t3.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        self.expect('<12> ', t3)
+        self.expect('<12> ', t4)
+
+        moves = ['f4', 'e5', 'g4', 'Qh4#']
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t3.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t3)
+            wtm = not wtm
+
+        self.expect_not('mated', t)
+
+        # by Sam Loyd
+        moves2 = ['d4', 'd6', 'Qd2', 'e5', 'a4', 'e4', 'Qf4', 'f5', 'h3',
+            'Be7', 'Qh2', 'Be6', 'Ra3', 'c5', 'Rg3', 'Qa5+', 'Nd2', 'Bh4',
+            'f3', 'Bb3', 'd5', 'e3', 'c4', 'f4']
+        wtm = True
+        for mv in moves2:
+            if wtm:
+                t4.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t2)
+            self.expect('<12> ', t4)
+            wtm = not wtm
+
+        self.expect(" (GuestABCD vs. GuestIJKL) GuestABCD checkmated} 0-1", t)
+        self.expect(" (GuestABCD vs. GuestIJKL) GuestABCD checkmated} 0-1", t3)
+        self.expect(" (GuestMNOP vs. GuestEFGH) GuestMNOP's partner won} 1-0", t2)
+        self.expect(" (GuestMNOP vs. GuestEFGH) GuestMNOP's partner won} 1-0", t4)
 
         self.close(t)
         self.close(t2)
