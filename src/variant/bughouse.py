@@ -380,6 +380,7 @@ class Position(object):
         self.king_pos = [None, None]
         # self.holding = {pc: 0 for pc in 'PNBRQpnbrq'} # Python 2.7-ism
         self.holding = {}
+        self.bug_link = None
         for pc in 'PNBRQpnbrq':
             self.holding[pc] = 0 # works with Python 2.6
         self.history = PositionHistory()
@@ -495,7 +496,7 @@ class Position(object):
                     self.ep = None
                     self.hash ^= zobrist.ep_hash(self.ep)
 
-            assert(self.hash == self._compute_hash())
+            assert(self.hash == self.compute_hash())
             self.history.set_hash(self.ply, self.hash)
 
             if detect_check:
@@ -542,7 +543,10 @@ class Position(object):
     def make_move(self, mv):
         """make the move"""
         self.check_material()
-        assert(self.hash == self._compute_hash())
+        assert(self.hash == self.compute_hash())
+        if self.bug_link:
+            self.bug_link.check_material()
+            assert(self.bug_link.hash == self.bug_link.compute_hash())
         self.ply += 1
 
         mv.undo = Undo()
@@ -666,11 +670,14 @@ class Position(object):
             self.hash ^= zobrist.ep_hash(self.ep)
 
         self.history.set_move(self.ply - 1 , mv)
-        #assert(self.hash == self._compute_hash())
-        if self.hash != self._compute_hash():
+        #assert(self.hash == self.compute_hash())
+        if self.hash != self.compute_hash():
             print 'failed on move %d %s' % (self.ply, str(mv))
             assert(False)
         self.check_material()
+        if self.bug_link:
+            assert(self.bug_link.hash == self.bug_link.compute_hash())
+            self.bug_link.check_material()
         self.history.set_hash(self.ply, self.hash)
 
     def _is_legal_ep(self, ep):
@@ -697,7 +704,7 @@ class Position(object):
                 return True
         return False
 
-    def _compute_hash(self):
+    def compute_hash(self):
         hash = 0
         if self.wtm:
             hash ^= zobrist.side_hash
@@ -715,7 +722,7 @@ class Position(object):
         return hash
 
     def undo_move(self, mv):
-        assert(self.hash == self._compute_hash())
+        assert(self.hash == self.compute_hash())
         self.check_material()
         self.wtm = not self.wtm
         self.ply -= 1
@@ -742,13 +749,13 @@ class Position(object):
             if self.wtm:
                 assert(self.board[mv.to - 0x10] == '-')
                 self.board[mv.to - 0x10] = 'p'
-                self.bug_link.remove_from_holding('p', False)
+                self.bug_link.remove_from_holding('p', True)
                 self.bug_link.material[0] -= piece_material['p']
                 self.bug_link.check_material()
             else:
                 assert(self.board[mv.to + 0x10] == '-')
                 self.board[mv.to + 0x10] = 'P'
-                self.bug_link.remove_from_holding('P', False)
+                self.bug_link.remove_from_holding('P', True)
                 self.bug_link.material[0] -= piece_material['P']
                 self.bug_link.check_material()
         elif mv.is_oo:
@@ -770,7 +777,7 @@ class Position(object):
                 self.board[A8] = 'r'
                 self.board[D8] = '-'
         elif mv.is_capture:
-            self.bug_link.remove_from_holding(mv.undo.holding_pc, False)
+            self.bug_link.remove_from_holding(mv.undo.holding_pc, True)
             self.bug_link.material[not self.wtm] -= piece_material[mv.undo.holding_pc.lower()]
             self.bug_link.check_material()
 
@@ -789,7 +796,7 @@ class Position(object):
 
         assert(self.material == mv.undo.material)
         self.check_material()
-        assert(self.hash == self._compute_hash())
+        assert(self.hash == self.compute_hash())
 
     def check_material(self):
         bmat = (sum([piece_material[pc.lower()]
@@ -1230,7 +1237,7 @@ class Position(object):
         return False
 
     def is_draw_repetition(self, side):
-        assert(self.hash == self._compute_hash())
+        assert(self.hash == self.compute_hash())
         """check for draw by repetition"""
 
         # Note that the most recent possible identical position is
