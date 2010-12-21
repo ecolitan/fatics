@@ -16,25 +16,20 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import re
+from test import *
 
-class Checker(object):
-    legal_chars_re = re.compile('''^[\t\x20-\xfd]*$''')
-    def check_user_utf8(self, s):
-        ret =  self.legal_chars_re.match(s)
-        if ret:
-            try:
-                s.decode('utf-8')
-            except UnicodeDecodeError:
-                ret = False
-        return ret
+compatibility_port = 5003
 
-def utf8_to_ascii(s):
-    """ Try to gracefully convert UTF-8 to ASCII.  Non-ASCII chars are
-    replaced by '?'. """
-    return s.decode('utf-8').encode('ascii', 'replace')
-
-checker = Checker()
-
+class TestCompatibility(Test):
+    """ Test the compatibility port used for old clients that don't support
+    FatICS's newline order and non-ASCII characters. """
+    def test_compatibility(self):
+        t = telnetlib.Telnet(host, compatibility_port)
+        self.expect('??? FatICS', t)
+        t.write("guest\n\n")
+        self.expect('fics% ', t)
+        t.write('quit\n')
+        self.expect('??? Thank you', t)
+        t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

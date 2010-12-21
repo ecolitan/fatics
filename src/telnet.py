@@ -34,6 +34,8 @@ followed the server and not the RFC."""
 from zope.interface import implements
 from twisted.internet import protocol, interfaces
 
+import utf8
+
 # telnet codes
 ECHO = chr(1)
 TM = chr(6) # timing mark
@@ -202,8 +204,12 @@ class TelnetTransport(protocol.Protocol):
 
     def _escape(self, data):
         data = data.replace('''\xff''', '''\xff\xff''')
-        data = data.replace('\n', '\r\n')
-        #data = data.replace('\n', '\n\r')
+        if self.compatibility:
+            #data = data.decode('ascii','replace').replace(u'\ufffd', '_')
+            data = utf8.utf8_to_ascii(data)
+            data = data.replace('\n', '\n\r')
+        else:
+            data = data.replace('\n', '\r\n')
         return data
 
     def write(self, data):

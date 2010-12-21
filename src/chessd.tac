@@ -48,27 +48,31 @@ if os.geteuid() == 0:
     sys.path.append('.')
 
 class IcsFactory(ServerFactory):
-    def __init__(self):
+    def __init__(self, port):
         #ServerFactory.__init__(self)
+        self.port = port
         pass
 
     connections = []
     def buildProtocol(self, addr):
         conn = telnet.TelnetTransport(connection.Connection)
         conn.factory = self
+        conn.compatibility = self.port == config.compatibility_port
         return conn
 
 def getService(port):
     """
     Return a service suitable for creating an application object.
     """
-    return internet.TCPServer(port, IcsFactory())
+    return internet.TCPServer(port, IcsFactory(port))
 
 application = service.Application("chessd")
 
 service = getService(config.port)
 service.setServiceParent(application)
 service = getService(config.zipseal_port)
+service.setServiceParent(application)
+service = getService(config.compatibility_port)
 service.setServiceParent(application)
 if os.geteuid() == 0:
     service = getService(23)
