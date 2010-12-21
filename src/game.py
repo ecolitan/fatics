@@ -741,9 +741,9 @@ class PlayedGame(Game):
                 self.bug_link.result("Partners' game drawn", '1/2-1/2')
             elif result_code == '*':
                 if 'Game adjourned' in msg:
-                    self.bug_link.adjourn("Partners' game aborted")
+                    self.bug_link.adjourn("Partners' game adjourned")
                 elif 'Game aborted' in msg:
-                    self.bug_link.result('*', "Partners' game aborted")
+                    self.bug_link.result("Partners' game aborted", '*')
                 else:
                     print 'unexpected incomplete game message %s' % msg
                     assert(False)

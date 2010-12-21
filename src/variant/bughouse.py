@@ -724,6 +724,9 @@ class Position(object):
     def undo_move(self, mv):
         assert(self.hash == self.compute_hash())
         self.check_material()
+        if self.bug_link:
+            self.bug_link.check_material()
+            assert(self.bug_link.hash == self.bug_link.compute_hash())
         self.wtm = not self.wtm
         self.ply -= 1
         self.ep = mv.undo.ep
@@ -756,7 +759,7 @@ class Position(object):
                 assert(self.board[mv.to + 0x10] == '-')
                 self.board[mv.to + 0x10] = 'P'
                 self.bug_link.remove_from_holding('P', True)
-                self.bug_link.material[0] -= piece_material['P']
+                self.bug_link.material[1] -= piece_material['p']
                 self.bug_link.check_material()
         elif mv.is_oo:
             if self.wtm:
@@ -797,6 +800,9 @@ class Position(object):
         assert(self.material == mv.undo.material)
         self.check_material()
         assert(self.hash == self.compute_hash())
+        if self.bug_link:
+            self.bug_link.check_material()
+            assert(self.bug_link.hash == self.bug_link.compute_hash())
 
     def check_material(self):
         bmat = (sum([piece_material[pc.lower()]

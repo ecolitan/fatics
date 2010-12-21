@@ -82,9 +82,12 @@ class Bpgn(object):
                         continue
                     m = tag_re.match(line)
                     if not m:
-                        raise PgnError('missing tag section at line %d' % line_num)
-                    tags[m.group(1)] = m.group(2).replace(r'\"', '"')
-            else:
+                        in_tag_section = False
+                        movetext = []
+                    else:
+                        tags[m.group(1)] = m.group(2).replace(r'\"', '"')
+
+            if not in_tag_section:
                 if line == '':
                     # Search for the result to try to handle blank lines
                     # within the movetext.  This doesn't account for
@@ -120,6 +123,7 @@ class PgnGame(object):
         #self.is_resign = False
         #self.partner_won = False
         self.initial_comments = []
+        assert(movetext)
         self.parse(movetext)
         assert('WhiteA' in self.tags)
         assert('BlackA' in self.tags)
@@ -158,9 +162,6 @@ class PgnGame(object):
 
             m = move_re.match(s, i)
             if m:
-                if m.group(2) is not None:
-                    if '#' in m.group(2):
-                        self.is_checkmate = True
                 self.moves.append(BpgnMove(m.group(1), m.group(2), move_char))
                 i = m.end()
                 continue
@@ -227,7 +228,8 @@ class PgnGame(object):
                 i = m.end()
                 continue
 
-            raise PgnError('unrecognized sytax in pgn: "%s"' % s[i:i+15])
+            print 'match %r' % move_num_re.match(s, i)
+            raise PgnError('unrecognized sytax in pgn: "%s", i %d' % (s[i:i+15], i))
 
     def __str__(self):
         return '%s vs. %s and %s vs. %s' % (self.tags['WhiteA'],

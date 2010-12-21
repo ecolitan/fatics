@@ -535,23 +535,20 @@ class TestBpgn(Test):
 
             # board A is t vs. t3; board B is t2 vs. t4
             for mv in g.moves:
+                #print '%s. %s' % (mv.char, mv.text)
                 if mv.char == 'A':
-                    #print 'sending %s to A' % mv.text
                     t.write('%s%s\n' % (mv.text, mv.decorator))
                     self.expect('<12> ', t)
                     self.expect('<12> ', t3)
                 elif mv.char == 'B':
-                    #print 'sending %s to B' % mv.text
                     t4.write('%s%s\n' % (mv.text, mv.decorator))
                     self.expect('<12> ', t2)
                     self.expect('<12> ', t4)
                 elif mv.char == 'a':
-                    #print 'sending %s to a' % mv.text
                     t3.write('%s%s\n' % (mv.text, mv.decorator))
                     self.expect('<12> ', t)
                     self.expect('<12> ', t3)
                 elif mv.char == 'b':
-                    #print 'sending %s to b' % mv.text
                     t2.write('%s%s\n' % (mv.text, mv.decorator))
                     self.expect('<12> ', t2)
                     self.expect('<12> ', t4)

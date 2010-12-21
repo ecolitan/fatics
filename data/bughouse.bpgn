@@ -1,0 +1,481 @@
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.03"]
+[WhiteA "stwlad"][WhiteAElo "2049"]
+[BlackA "MrBug"][BlackAElo "2163"]
+[WhiteB "Burgsvik"][WhiteBElo "1937"]
+[BlackB "AmbiDexter"][BlackBElo "1979"]
+[TimeControl "180+0"]
+[Result "0-1"]
+1B. e4 {179} 1A. e4 {179} 1b. d5 {180} 2B. e5 {179} 1a. Nf6 {180} 2b. d4 {180}
+2A. Nc3 {179} 2a. Nc6 {180} 3B. Bb5+ {177} 3A. d4 {178} 3a. d5 {180}
+4A. exd5 {178} 3b. c6 {178} 4a. Nxd5 {180} 5A. Nf3 {178} 5a. e6 {179}
+4B. Bd3 {175} 6A. Bd3 {177} 4b. P@c7 {175} 6a. Ncb4 {177} 5B. P@f5 {174}
+7A. Be4 {175} 7a. Nxc3 {175} 5b. e6 {172} 8A. bxc3 {175} 8a. Nd5 {175}
+9A. Bd2 {174} 6B. fxe6 {171} 6b. Bxe6 {172} 7B. N@f4 {171} 9a. Nf6 {172}
+7b. N@c5 {168} 10A. Bg5 {170} 8B. Nf3 {169} 10a. Nxe4 {169} 8b. Nxd3+ {166}
+9B. cxd3 {169} 11A. Bxd8 {169} 11a. Kxd8 {169} 12A. B@h4+ {167} 9b. Q@g4 {161}
+12a. P@f6 {167} 10B. Nxe6 {166} 13A. d5 {165} 13a. Nxc3 {166} 14A. Qd3 {164}
+10b. fxe6 {155} 14a. Nxd5 {164} 11B. B@h3 {165} 11b. Qg6 {151} 15A. Ne5 {157}
+12B. P@h5 {163} 12b. Qf7 {150} 15a. Bb4+ {152} 16A. P@d2 {155} 13B. B@e4 {151}
+16a. N@f4 {148} 13b. Nh6 {145} 14B. P@g6 {149} 14b. hxg6 {144} 17A. N@c6+ {150}
+15B. Bxg6 {148} 15b. Bc5 {139} 16B. Bxf7+ {146} 17a. bxc6 {140} 16b. Nxf7 {139}
+18A. Nxc6+ {149} 17B. Bxe6 {145} 18a. Kd7 {140} 17b. Qe7 {138} 18B. Bxf7+ {143}
+18b. Qxf7 {137} 19B. Ng5 {137} 19b. Qxh5 {135} 19A. Qxd5+ {135} 19a. Nxd5 {138}
+20B. Q@e6+ {129} 20A. Nxb4 {127} 20b. N@e7 {131} 20a. Nxb4 {134}
+21A. B@a4+ {125} 21a. B@c6 {133} 21B. Qxh5+ {119} 21b. Rxh5 {129}
+22A. Bxc6+ {119} 22a. Nxc6 {132} 23A. B@b5 {116} 22B. B@g6+ {111}
+23a. Q@e5+ {129} 22b. P@f7 {121} 23B. Qxf7+ {107} 23b. Kd7 {118}
+24B. Qe8# {107}
+{AmbiDexter checkmated} 0-1
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.03"]
+[WhiteA "Horkko"][WhiteAElo "2298"]
+[BlackA "LINDEGREN"][BlackAElo "2134"]
+[WhiteB "LSS"][WhiteBElo "2083"]
+[BlackB "Mejvik"][BlackBElo "1785"]
+[TimeControl "180+0"]
+[Result "1-0"]
+1B. d4 {179} 1b. Nf6 {180} 2B. Nc3 {179} 1A. Nc3 {179} 2b. e6 {180}
+1a. e6 {180} 3B. Nf3 {179} 3b. Be7 {180} 2A. e4 {178} 4B. Bg5 {178}
+2a. Nc6 {180} 3A. Nf3 {178} 4b. Nc6 {179} 3a. Nf6 {180} 5B. e3 {177}
+4A. d4 {178} 4a. d5 {180} 5b. Ng4 {178} 5A. Bd3 {178} 6B. Bxe7 {177}
+6b. Qxe7 {178} 7B. Qd2 {176} 7b. d5 {177} 8B. h3 {176} 5a. Bb4 {177}
+6A. exd5 {177} 8b. Nf6 {176} 6a. Ne4 {177} 9B. Bb5 {175} 9b. Ne4 {175}
+7A. Bxe4 {176} 10B. Nxe4 {174} 7a. exd5 {176} 10b. dxe4 {174} 11B. Ne5 {173}
+8A. N@h5 {173} 11b. Bd7 {172} 12B. Nxd7 {172} 8a. B@f8 {173} 9A. B@h4 {172}
+12b. Qxd7 {169} 9a. B@e7 {171} 13B. Rd1 {171} 13b. P@f3 {168} 14B. Bf1 {165}
+10A. N@f5 {162} 14b. N@h4 {165} 10a. Bxf5 {168} 15B. Rh2 {161} 11A. Bxf5 {162}
+11a. Bxh4 {166} 12A. Nxh4 {162} 15b. B@d6 {160} 12a. Qxh4 {164} 13A. Qe2+ {161}
+16B. P@g3 {159} 16b. fxg2 {158} 17B. Bxg2 {159} 17b. Nxg2+ {158}
+18B. Rxg2 {157} 13a. P@e4 {159} 18b. B@f3 {158} 14A. P@d7+ {160} 19B. Rh2 {155}
+14a. Kd8 {156} 19b. Bb4 {156} 15A. B@g5+ {158} 15a. Bfe7 {152} 16A. Bxh4 {156}
+16a. Bxh4 {151} 17A. Nxg7 {155} 17a. Nxd4 {147} 20B. P@c3 {129} 20b. P@e2 {154}
+21B. Qxe2 {116} 21b. Bxe2 {153} 22B. Kxe2 {115} 18A. Q@e8+ {119}
+{LINDEGREN resigns} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.03"]
+[WhiteA "LINDEGREN"][WhiteAElo "2124"]
+[BlackA "Horkko"][BlackAElo "2308"]
+[WhiteB "Mejvik"][WhiteBElo "1795"]
+[BlackB "LSS"][BlackBElo "2073"]
+[TimeControl "180+0"]
+[Result "1-0"]
+1A. d4 {180} 1a. Nf6 {180} 2A. Nf3 {180} 1B. Nc3 {178} 2a. d6 {180}
+1b. e6 {180} 2B. d4 {178} 2b. d5 {180} 3B. e4 {178} 3A. Bf4 {179} 3b. Nf6 {179}
+3a. Bg4 {180} 4A. e3 {179} 4B. Bg5 {177} 4a. e6 {179} 4b. dxe4 {179}
+5A. Be2 {178} 5B. Nxe4 {176} 5a. Be7 {179} 6A. Ng5 {178} 5b. Be7 {176}
+6a. Bxe2 {178} 6B. Bxf6 {175} 6b. Bxf6 {176} 7A. Qxe2 {178} 7a. P@h6 {177}
+7B. Nf3 {174} 7b. Nc6 {175} 8A. Nxf7 {175} 8B. Nxf6+ {173} 8b. Qxf6 {175}
+8a. Kxf7 {177} 9A. Nc3 {175} 9B. B@g5 {171} 9a. Rf8 {176} 9b. Qf5 {174}
+10A. B@h3 {175} 10a. B@d7 {174} 10B. N@h5 {167} 10b. Rg8 {173} 11A. P@e5 {171}
+11a. Nd5 {172} 12A. Nxd5 {169} 12a. exd5 {172} 13A. e6+ {169} 13a. Bxe6 {171}
+11B. N@f6+ {159} 14A. Bxe6+ {168} 14a. Kxe6 {170} 11b. gxf6 {172}
+12B. Nxf6+ {159} 15A. e4 {168} 12b. Qxf6 {171} 15a. Kf7 {169} 13B. Bxf6 {158}
+13b. B@a5+ {171} 16A. exd5 {163} 16a. Kg8 {169} 14B. P@c3 {153} 14b. P@e7 {169}
+17A. N@e6 {162} 17a. N@h4 {168} 18A. Rg1 {160} 15B. Bxe7 {148} 15b. Nxe7 {169}
+18a. Qe8 {161} 19A. Nxc7 {157} 19a. Q@a5+ {160} 20A. N@c3 {152} 20a. Qxc7 {158}
+16B. N@f6+ {130} 21A. N@e6 {151} 16b. Kd8 {168} 21a. Qb6 {155} 17B. Nxh7 {129}
+17b. B@h6 {164} 22A. Nxf8 {148} 22a. Qxf8 {155} 18B. B@f6 {126}
+18b. P@d2+ {162} 19B. Nxd2 {124} 19b. N@d5 {161} 20B. Bxe7+ {122}
+20b. Nxe7 {161} 21B. Nf3 {121} 23A. B@e6+ {135} 21b. P@e3 {158} 23a. P@f7 {153}
+22B. fxe3 {119} 22b. Bxe3 {158} 24A. Bxf7+ {134} 23B. Qe2 {119} 24a. Kh8 {152}
+23b. P@d2+ {154} 24B. Nxd2 {118} 25A. Bxh6 {127} 24b. P@f2+ {149}
+25a. gxh6 {149} 25B. Kd1 {116} 25b. R@e1+ {147} 26B. Qxe1 {115}
+26b. fxe1=Q+ {147} 27B. Kxe1 {115} 27b. Bxd2+ {147} 28B. Kxd2 {114}
+28b. Bd7 {146} 26A. Be6 {120} 29B. B@f6 {113} 26a. R@f6 {145} 27A. P@f7 {117}
+27a. Na6 {143} 28A. Q@g8+ {113} 29b. Re8 {122} 30B. Bxe7+ {111} 30b. Rxe7 {122}
+28a. Qxg8 {128} 29A. fxg8=Q+ {113} 29a. Rxg8 {128} 31B. Q@f8+ {107}
+30A. Bxg8 {112} 30a. Kxg8 {126} 31b. R@e8 {120} 31A. B@e6+ {111}
+31a. P@f7 {125} 32A. Bxf7+ {109} 32B. Qh6 {103} 32a. Rxf7 {124} 33A. B@e6 {109}
+32b. Q@f2+ {117} 33a. B@g6 {121} 33B. B@e2 {100} 34A. N@f4 {107}
+33b. P@e3+ {115} 34B. Qxe3 {98} 34b. Qxe3+ {114} 34a. Qxb2 {117} 35B. Kxe3 {97}
+35b. e5 {114} 36B. d5 {96} 36b. f5 {111} 37B. B@g5 {93} 37b. f4+ {108}
+38B. Kd3 {92} 38b. Bf5+ {106} 39B. P@e4 {90} 35A. Nxg6 {88} 35a. Qxa1+ {115}
+36A. Nd1 {86} 39b. Bxe4+ {97} 40B. Kxe4 {90} 36a. Q@b4+ {113} 37A. P@d2 {84}
+40b. B@g6+ {94} 41B. P@f5 {89} 41b. Bxh7 {84} 37a. Qxd1+ {95} 38A. Qxd1 {82}
+42B. Bxe7+ {81} 42b. Rxe7 {83} 38a. R@e4+ {92} 43B. R@f8+ {77} 39A. B@e3 {80}
+43b. Q@e8 {81} 44B. Rxe8+ {76} 44b. Kxe8 {81} 45B. N@f6+ {75} 39a. Nxg2+ {87}
+40A. Rxg2 {78} 45b. Kf7 {78} 40a. Q@h1+ {86} 46B. P@g6+ {72} 41A. R@g1 {76}
+41a. Qxg1+ {85} 46b. Bxg6 {76} 42A. Rxg1 {75} 42a. Rxe3+ {85} 47B. fxg6+ {71}
+47b. Kxg6 {75} 43A. P@e2 {73} 43a. N@f3+ {84} 44A. Kf1 {72} 44a. B@h3+ {83}
+48B. Bh5+ {66} 45A. Rg2 {69} 45a. Bxg2+ {81} 48b. Kxf6 {71} 46A. Kxg2 {68}
+46a. N@h4+ {81} 49B. R@f5+ {64} 49b. Kg7 {68} 47A. Nxh4 {61} 50B. B@f6+ {61}
+47a. Nxh4+ {81} 48A. Kg1 {60} 50b. Kh7 {63} 51B. N@g5+ {53} 48a. B@h5 {62}
+51b. Kh6 {54} 49A. Q@e8+ {52} 49a. Bf8 {60} 52B. R@g6+ {40} 52b. Kxh5 {52}
+50A. N@e7+ {46} 53B. Nf7+ {37} 50a. Kg7 {58} 53b. Kxg6 {50} 51A. B@h8+ {41}
+54B. Bxe7 {31} 51a. Kxh8 {53} 52A. R@g8# {41}
+{Horkko checkmated} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.03"]
+[WhiteA "Horkko"][WhiteAElo "2317"]
+[BlackA "LINDEGREN"][BlackAElo "2115"]
+[WhiteB "LSS"][WhiteBElo "2064"]
+[BlackB "Mejvik"][BlackBElo "1804"]
+[TimeControl "180+0"]
+[Result "1-0"]
+1A. Nc3 {180} 1B. Nf3 {179} 1a. d5 {180} 1b. Nf6 {180} 2A. Nf3 {180}
+2B. Nc3 {179} 2b. e5 {180} 2a. Nf6 {180} 3A. d4 {180} 3a. Nc6 {179}
+3B. Nxe5 {177} 4A. Bf4 {180} 4a. Bf5 {179} 3b. Qe7 {179} 5A. e3 {179}
+5a. e6 {178} 4B. d4 {175} 6A. Bb5 {179} 4b. d6 {178} 6a. Ne4 {178}
+5B. Nf3 {174} 7A. Ne5 {178} 5b. Nc6 {177} 7a. P@d7 {177} 6B. e3 {173}
+8A. Bxc6 {177} 8a. bxc6 {177} 9A. O-O {176} 6b. d5 {174} 9a. Be7 {176}
+7B. Bb5 {171} 10A. f3 {175} 7b. Bd7 {173} 10a. Nxc3 {174} 11A. bxc3 {175}
+11a. O-O {174} 8B. B@e5 {169} 12A. Qe2 {174} 12a. f6 {174} 8b. Nxe5 {172}
+9B. Nxe5 {169} 13A. Nd3 {173} 9b. Bxb5 {171} 10B. Nxb5 {169} 13a. N@g6 {172}
+14A. B@g3 {172} 10b. N@h4 {168} 14a. Nxf4 {171} 15A. Bxf4 {172} 11B. Rg1 {167}
+11b. Ne4 {166} 15a. Bxd3 {168} 16A. cxd3 {171} 16a. B@g5 {167} 12B. B@d7+ {163}
+17A. B@g3 {169} 17a. d6 {166} 12b. Qxd7 {163} 13B. Nxd7 {162} 18A. B@g4 {166}
+13b. B@b4+ {161} 18a. f5 {163} 19A. Bh3 {166} 14B. N@c3 {158} 19a. Bef6 {162}
+20A. Rad1 {164} 20a. Qe7 {161} 21A. Rd2 {163} 21a. Rab8 {160} 22A. Rfd1 {162}
+22a. Kh8 {159} 23A. Bf2 {160} 14b. Nxg2+ {150} 15B. Rxg2 {157} 15b. N@h4 {149}
+23a. N@h5 {154} 24A. P@g3 {159} 16B. Rg4 {151} 24a. Rbe8 {151} 16b. N@f3+ {147}
+25A. g4 {158} 25a. fxg4 {148} 17B. Kf1 {148} 17b. Nxh2+ {146} 26A. Bxg4 {156}
+26a. Nxf4 {148} 27A. exf4 {155} 27a. Bxf4 {148} 28A. g3 {154} 18B. Kg1 {142}
+28a. Bxd2 {146} 29A. Qxd2 {154} 29a. e5 {145} 30A. P@g2 {152} 30a. e4 {143}
+31A. dxe4 {151} 18b. N4f3+ {138} 31a. dxe4 {142} 32A. fxe4 {150}
+32a. Qxe4 {141} 19B. Kh1 {139} 33A. Re1 {149} 19b. Nxf2+ {136} 20B. Kg2 {136}
+33a. Qg6 {135} 34A. Rxe8 {147} 34a. Qxe8 {134} 20b. B@h3+ {129} 35A. P@e6 {146}
+21B. Kxf2 {135} 21b. Nxg4+ {129} 35a. Q@a1+ {132} 36A. R@e1 {145}
+22B. Kxf3 {133} 36a. N@b1 {122} 22b. R@f2+ {117} 37A. Qe2 {143} 23B. Kg3 {130}
+37a. Qxc3 {116} 38A. e7 {138} 38a. Rg8 {114} 39A. Be6 {136} 23b. Bfd6+ {80}
+24B. Ne5 {128} 24b. Nxe5 {71} 25B. Nxd6+ {126} 25b. Bxd6 {70} 26B. dxe5 {126}
+26b. Bxe5+ {59} 27B. P@f4 {125} 27b. P@h4+ {54} 28B. Kxh3 {124} 28b. P@g4+ {44}
+29B. Kxh4 {124} 29b. N@f5+ {37} 30B. Kxg4 {123} 30b. h5+ {35} 31B. Kxf5 {123}
+31b. O-O {24} 32B. Kxe5 {123} 39a. N@c1 {23} 32b. Rae8+ {23} 40A. Bxg8 {135}
+33B. Kxd5 {121} 40a. Nxe2+ {21} 41A. Rxe2 {135} 33b. c6+ {21} 34B. Kc4 {121}
+41a. Qc1+ {20} 42A. N@f1 {134} 34b. N@b6+ {19} 35B. Kb3 {119} 35b. P@c4+ {16}
+42a. Nc3 {14} 36B. Ka3 {118} 43A. Bc4 {132} 36b. R@a6+ {10} 37B. N@a4 {116}
+43a. Nxe2+ {8} 44A. Bxe2 {132} 37b. Re4 {9} 44a. N@c3 {6} 38B. P@h7+ {114}
+45A. N@f4 {131} 38b. Kh8 {8} 39B. R@g8+ {113} 45a. Nxe2+ {4} 46A. Nxe2 {130}
+39b. Rxg8 {7} 40B. hxg8=Q+ {113} 46a. Qd1 {3} 40b. Kxg8 {6} 47A. R@e1 {130}
+41B. R@e8+ {112} 41b. Rxe8 {5} 42B. R@h8+ {112} 47a. Qd3 {1} 48A. P@h6 {129}
+48a. Qdg6 {1} 42b. Kxh8 {4} 43B. P@h7 {112} 43b. Kxh7 {3} 49A. R@f8+ {128}
+49a. R@g8 {1} 50A. hxg7+ {128} 44B. Qxh5+ {110}
+{LINDEGREN forfeits on time} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.02"]
+[WhiteA "EEKarf"][WhiteAElo "1949"]
+[BlackA "Horkko"][BlackAElo "2349"]
+[WhiteB "pamir"][WhiteBElo "1645"]
+[BlackB "JiggaB"][BlackBElo "2078"]
+[TimeControl "180+0"]
+[Result "0-1"]
+1A. e4 {179} 1B. e4 {179} 1a. Nf6 {180} 2A. Nc3 {179} 1b. Nf6 {180}
+2a. e5 {180} 2B. Nc3 {178} 2b. Nc6 {180} 3A. Nf3 {178} 3a. Nc6 {180}
+4A. Bc4 {177} 4a. Be7 {180} 5A. O-O {177} 3B. Nf3 {177} 5a. O-O {180}
+3b. d5 {180} 6A. d3 {177} 6a. d6 {180} 7A. Bg5 {176} 4B. exd5 {176}
+4b. Nxd5 {179} 7a. Bg4 {179} 5B. Nxd5 {176} 8A. Bxf6 {176} 8a. Bxf6 {179}
+5b. Qxd5 {179} 9A. Nd5 {175} 9a. P@h3 {179} 6B. d3 {175} 6b. Qd8 {178}
+10A. Nxf6+ {174} 10a. Qxf6 {179} 11A. N@d5 {173} 7B. B@a4 {173} 11a. Qd8 {178}
+7b. e6 {177} 12A. P@e7 {172} 8B. N@e5 {172} 12a. Nxe7 {177} 8b. Bd7 {176}
+13A. gxh3 {171} 9B. Nxd7 {171} 13a. Bxh3 {176} 9b. Qxd7 {175} 14A. N@g5 {169}
+10B. Bxc6 {169} 10b. Qxc6 {175} 14a. Nxd5 {175} 15A. Bxd5 {167} 11B. N@e5 {165}
+15a. B@g4 {172} 11b. B@a5+ {173} 12B. c3 {163} 16A. B@f5 {162} 16a. Bxf5 {171}
+17A. exf5 {162} 12b. Qd6 {170} 17a. N@f4 {171} 13B. P@d7+ {161} 13b. Ke7 {168}
+18A. Nxf7 {154} 14B. Nxf7 {150} 18a. N@e2+ {164}
+{JiggaB resigns} 0-1
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.02"]
+[WhiteA "Horkko"][WhiteAElo "2357"]
+[BlackA "EEKarf"][BlackAElo "1941"]
+[WhiteB "JiggaB"][WhiteBElo "2070"]
+[BlackB "pamir"][BlackBElo "1653"]
+[TimeControl "180+0"]
+[Result "0-1"]
+1A. Nc3 {180} 1B. e4 {180} 1b. e6 {180} 1a. Nf6 {179} 2A. Nf3 {180}
+2a. Nc6 {179} 3A. d4 {180} 2B. Nc3 {178} 3a. d5 {179} 2b. Nc6 {180}
+4A. Bg5 {180} 4a. Bf5 {178} 3B. d4 {177} 5A. e3 {179} 5a. e6 {178}
+3b. Nf6 {180} 6A. Bb5 {179} 4B. d5 {177} 6a. Be7 {177} 7A. Ne5 {179}
+4b. exd5 {178} 5B. exd5 {177} 5b. Nb4 {178} 6B. Nf3 {176} 7a. O-O {175}
+8A. P@h6 {178} 6b. Bc5 {176} 8a. gxh6 {174} 7B. P@d4 {174} 9A. Bxc6 {176}
+9a. bxc6 {172} 7b. Be7 {174} 10A. Nxc6 {175} 8B. Bd3 {174} 10a. Qe8 {171}
+8b. Nbxd5 {172} 11A. Nxe7+ {174} 9B. Nxd5 {173} 11a. Qxe7 {171} 9b. Nxd5 {172}
+12A. Bxf6 {173} 10B. Ne5 {173} 12a. Qxf6 {170} 13A. P@e5 {173} 13a. Qg5 {169}
+10b. P@f6 {168} 11B. Nxf7 {171} 11b. Kxf7 {167} 12B. B@h5+ {170}
+12b. B@g6 {166} 14A. N@g3 {155} 14a. P@g7 {168} 15A. f4 {150} 15a. Qe7 {165}
+16A. N@h5 {148} 16a. P@f2+ {164} 13B. Bhxg6+ {145} 17A. Kf1 {146}
+13b. hxg6 {166} 14B. Bxg6+ {145} 17a. B@g4 {162} 14b. Kxg6 {163}
+15B. B@e4+ {144} 18A. B@e2 {142} 15b. f5 {159} 16B. Qg4+ {143} 18a. Bxe2+ {158}
+16b. Bg5 {157} 19A. Qxe2 {141} 19a. P@h3 {157} 17B. Qxf5+ {142} 17b. Kh6 {157}
+18B. Qg6# {141}
+{pamir checkmated} 0-1
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.02"]
+[WhiteA "EEKarf"][WhiteAElo "1949"]
+[BlackA "Horkko"][BlackAElo "2349"]
+[WhiteB "pamir"][WhiteBElo "1645"]
+[BlackB "JiggaB"][BlackBElo "2078"]
+[TimeControl "180+0"]
+[Result "1-0"]
+1A. e4 {179} 1a. Nf6 {180} 1B. e4 {179} 2A. Nc3 {179} 1b. d5 {180} 2a. e5 {180}
+2B. Nc3 {179} 3A. Nf3 {179} 2b. d4 {179} 3a. Nc6 {180} 4A. Bc4 {179}
+3B. Nd5 {178} 3b. Nf6 {179} 4a. Be7 {179} 5A. d3 {178} 4B. Nxf6+ {177}
+5a. O-O {179} 4b. exf6 {179} 6A. Bg5 {178} 6a. d6 {179} 5B. Bc4 {176}
+7A. Bxf6 {177} 5b. Nc6 {179} 7a. Bxf6 {179} 8A. Nd5 {177} 6B. Bxf7+ {175}
+8a. N@d4 {178} 9A. Nxf6+ {176} 6b. Kxf7 {177} 9a. Qxf6 {178} 7B. B@d5+ {175}
+10A. Nxd4 {174} 7b. B@e6 {175} 10a. Nxd4 {177} 11A. N@d5 {174} 11a. Qg5 {175}
+12A. B@e3 {171} 12a. Qxg2 {174} 8B. Bxe6+ {164} 13A. Kd2 {167} 8b. Bxe6 {173}
+9B. P@d5 {164} 9b. Bxd5 {172} 10B. exd5 {163} 10b. Qxd5 {172} 11B. N@f4 {162}
+11b. Qe5+ {171} 13a. P@c3+ {165} 12B. N@e2 {159} 12b. N@h4 {170}
+14A. bxc3 {164} 14a. B@b2 {164} 13B. d3 {155} 13b. P@e3 {168} 15A. B@e2 {158}
+15a. Nxe2 {158} 14B. Bxe3 {147} 14b. dxe3 {168} 16A. Qxe2 {157} 15B. fxe3 {145}
+16a. P@f3 {156} 17A. Rhg1 {156} 15b. Qxe3 {166} 16B. B@f2 {145} 16b. Bb4+ {161}
+17B. c3 {143} 17a. Bxc3+ {139} 17b. Qxf2+ {150} 18B. Kxf2 {142} 18A. Nxc3 {153}
+18b. N@g4+ {149} 19B. Kf1 {140} 18a. Qh3 {126} 19A. B@f1 {151} 19a. P@g2 {124}
+20A. Bxg2 {151} 20a. fxg2 {124} 21A. P@f3 {149} 19b. N@e3+ {132} 20B. Ke1 {139}
+21a. B@d4 {122} 22A. P@b2 {147} 20b. P@f2+ {127} 21B. Kd2 {138}
+21b. B@e1+ {127} 22a. a5 {116} 22B. Kc1 {135} 23A. B@g4 {143} 22b. Ke8 {122}
+23a. Bxg4 {113} 24A. fxg4 {143} 23B. P@f7+ {132} 23b. Kd8 {121} 24B. Ne6+ {129}
+24b. Kc8 {120} 24a. Qxh2 {101} 25A. P@f6 {138} 25B. P@a6 {118} 25b. bxa6 {117}
+25a. gxf6 {96} 26A. P@g7 {137} 26a. Bxc3+ {94} 26B. P@b7+ {112} 27A. bxc3 {135}
+26b. Kxb7 {116} 27a. Kxg7 {92} 27B. N@c5+ {111} 27b. Bxc5 {115}
+28B. Nxc5+ {110} 28A. N@f5+ {132} 28b. Kc8 {114} 28a. Kg8 {90} 29B. P@b7+ {109}
+29b. Kb8 {113} 30B. bxa8=Q+ {95} 30b. Kxa8 {112} 31B. B@b7+ {94} 31b. Kb8 {111}
+32B. Nxa6+ {73} 32b. Kxb7 {110} 33B. Nc5+ {71} 33b. Ka8 {109} 34B. B@b7+ {69}
+34b. Kb8 {107} 35B. Nd7+ {61} 35b. Kxb7 {107} 36B. Qb3+ {60} 36b. B@b6 {106}
+37B. Nc5+ {53} 37b. Ka8 {105}
+{Horkko resigns} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.02"]
+[WhiteA "Horkko"][WhiteAElo "2341"]
+[BlackA "EEKarf"][BlackAElo "1957"]
+[WhiteB "JiggaB"][WhiteBElo "2086"]
+[BlackB "pamir"][BlackBElo "1637"]
+[TimeControl "180+0"]
+[Result "0-1"]
+1A. Nc3 {180} 1B. e4 {179} 1a. Nf6 {180} 2A. Nf3 {180} 1b. e6 {180}
+2a. Nc6 {180} 2B. Nc3 {179} 3A. d4 {180} 3a. d5 {180} 2b. Nc6 {179}
+4A. Bg5 {180} 4a. Bf5 {179} 3B. d4 {178} 5A. e3 {179} 3b. Nf6 {179}
+5a. e6 {179} 6A. Bb5 {179} 4B. e5 {177} 6a. Be7 {178} 7A. Ne5 {179}
+4b. Nd5 {178} 5B. Nxd5 {176} 7a. O-O {177} 5b. exd5 {178} 6B. Nf3 {176}
+8A. Bxc6 {178} 6b. d6 {177} 8a. bxc6 {177} 9A. Nxc6 {177} 7B. Bg5 {175}
+9a. Qe8 {175} 7b. Be7 {176} 10A. Nxe7+ {177} 10a. Qxe7 {175} 8B. Bxe7 {174}
+11A. N@h5 {177} 8b. Qxe7 {176} 9B. Be2 {174} 9b. dxe5 {175} 11a. N@g4 {172}
+10B. dxe5 {172} 12A. P@f3 {175} 10b. P@e4 {173} 12a. Nxf2 {168} 13A. Kxf2 {175}
+13a. Ng4+ {167} 11B. P@f6 {166} 14A. fxg4 {173} 11b. B@a5+ {172}
+14a. Qxg5 {167} 12B. B@c3 {165} 15A. gxf5 {172} 12b. Bxc3+ {171}
+13B. bxc3 {165} 13b. gxf6 {171} 15a. Qxf5+ {165} 14B. exf6 {164}
+16A. P@f4 {170} 14b. Qxf6 {170} 16a. B@h4+ {164} 17A. P@g3 {169}
+15B. P@e5 {162} 17a. B@g4 {163} 15b. Nxe5 {168} 16B. Nxe5 {162} 16b. Qxe5 {168}
+18A. B@e2 {166} 17B. B@d4 {160} 18a. Bxe2 {160} 17b. Qe7 {166} 19A. Qxe2 {166}
+18B. B@f6 {158} 19a. N@g4+ {158} 20A. Qxg4 {162} 20a. Qxg4 {155}
+21A. B@f3 {161} 18b. e3 {156} 19B. N@g7+ {156} 21a. Qf5 {150} 22A. gxh4 {159}
+19b. Kd7 {152} 20B. Bxe7 {155} 22a. P@e7 {147} 20b. B@d2+ {149} 21B. Kf1 {154}
+23A. Rac1 {152} 23a. P@g6 {143} 24A. N@g3 {149} 21b. B@h3 {132} 24a. Qxh5 {134}
+25A. Bxh5 {147} 25a. gxh5 {134} 22B. N@c5+ {148} 26A. Nxh5 {146}
+22b. Kxe7 {130} 23B. Q@f6+ {147} 23b. Kf8 {128} 26a. Q@g4 {128}
+24B. B@e7+ {124} 24b. Kg8 {126}
+{Horkko resigns} 0-1
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.02"]
+[WhiteA "EEKarf"][WhiteAElo "1964"]
+[BlackA "Horkko"][BlackAElo "2334"]
+[WhiteB "pamir"][WhiteBElo "1630"]
+[BlackB "JiggaB"][BlackBElo "2093"]
+[TimeControl "180+0"]
+[Result "0-1"]
+1A. e4 {179} 1B. e4 {179} 1a. Nf6 {180} 2A. Nc3 {179} 1b. d5 {180} 2a. e5 {180}
+2B. Nc3 {179} 3A. Bc4 {178} 2b. d4 {179} 3a. Nc6 {180} 4A. Nf3 {177}
+4a. Be7 {180} 3B. Nce2 {178} 5A. O-O {177} 3b. Nf6 {178} 5a. O-O {180}
+6A. d3 {177} 6a. d6 {180} 4B. Ng3 {177} 7A. Bg5 {176} 4b. Nc6 {178}
+7a. Bg4 {179} 5B. Nf3 {176} 8A. Bxf6 {175} 5b. e5 {177} 8a. Bxf6 {179}
+9A. Nd5 {175} 6B. Bb5 {176} 9a. Bxf3 {179} 6b. N@d6 {177} 10A. Qxf3 {173}
+10a. Bg5 {178} 7B. Nxe5 {174} 7b. Bd7 {174} 8B. Nxd7 {173} 8b. Qxd7 {174}
+11A. Qg4 {168} 9B. N@e5 {173} 9b. Nxe5 {173} 10B. Bxd7+ {171} 11a. B@d7 {176}
+10b. Nexd7 {173} 12A. B@f5 {167} 11B. B@d5 {170} 12a. Bxf5 {175}
+13A. exf5 {167} 11b. B@g4 {168} 12B. Bxf7+ {166} 12b. Nxf7 {167}
+13B. B@f3 {166} 13b. Bxf3 {165} 13a. Q@h4 {162} 14B. Qxf3 {165} 14b. B@g4 {164}
+15B. Qxg4 {160} 14A. Qxh4 {158} 15b. Nxg4 {163} 16B. h3 {159} 14a. Bxh4 {160}
+16b. Nxf2 {161} 17B. Kxf2 {158} 15A. N@f6+ {155} 15a. Bxf6 {158}
+16A. Nxf6+ {154} 17b. B@e5 {156} 16a. Qxf6 {157} 17A. N@g4 {152} 17a. Qg5 {155}
+18B. Q@g4 {154} 18b. Bxg3+ {154} 18A. B@f6 {149} 19B. Qxg3 {153} 19b. Bd6 {154}
+20B. N@f4 {149} 18a. gxf6 {151} 20b. Bxf4 {153} 21B. Qxf4 {149} 21b. Q@e5 {152}
+19A. N@h6+ {146} 19a. Kh8 {150} 20A. P@g7+ {144} 20a. Qxg7 {148} 22B. Qf3 {144}
+21A. N@h5 {144} 22b. O-O {150} 23B. B@f4 {141} 21a. P@h3 {143} 23b. Ng5 {149}
+22A. Nxg7 {141} 22a. N@e2+ {142} 23A. Kh1 {140} 23a. hxg2+ {141}
+24A. Kxg2 {139} 24B. Bxe5 {135} 24b. Nxe4+ {145} 24a. P@h3+ {137}
+25B. Kg1 {133} 25A. Kf3 {137} 25a. Ncd4+ {137} 26A. Ke3 {136} 26a. Q@f4# {135}
+{EEKarf checkmated} 0-1
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.02"]
+[WhiteA "Horkko"][WhiteAElo "2343"]
+[BlackA "EEKarf"][BlackAElo "1955"]
+[WhiteB "JiggaB"][WhiteBElo "2084"]
+[BlackB "pamir"][BlackBElo "1639"]
+[TimeControl "180+0"]
+[Result "1-0"]
+1B. e4 {180} 1A. Nc3 {180} 1b. e6 {180} 2B. Nc3 {180} 1a. Nf6 {179}
+2b. Nc6 {179} 2A. Nf3 {180} 3B. d4 {180} 2a. Nc6 {179} 3b. Nf6 {179}
+3A. d4 {180} 3a. d5 {178} 4B. e5 {179} 4A. Bg5 {180} 4a. Bf5 {178} 5A. e3 {179}
+4b. Nd5 {177} 5B. Nxd5 {178} 5b. exd5 {177} 6B. Nf3 {178} 5a. e6 {175}
+6b. d6 {176} 6A. Bb5 {179} 6a. Be7 {175} 7A. Ne5 {178} 7B. Bg5 {176}
+7a. O-O {174} 7b. Be7 {175} 8A. Bxc6 {177} 8a. bxc6 {173} 8B. Bxe7 {175}
+9A. Nxc6 {177} 8b. Qxe7 {175} 9a. Qe8 {173} 10A. Nxe7+ {176} 9B. Be2 {174}
+10a. Qxe7 {173} 11A. N@c6 {175} 9b. B@e4 {174} 11a. Qd6 {171} 10B. B@g5 {172}
+12A. B@e7 {174} 10b. P@f6 {172} 12a. Qxc6 {169} 11B. exf6 {172} 11b. gxf6 {172}
+13A. Bexf6 {174} 12B. Bxf6 {171} 12b. Qxf6 {171} 13a. B@g4 {168}
+13B. N@h5 {171} 13b. Qxf3 {168} 14A. N@e7+ {168} 14B. Bxf3 {168} 14a. Kh8 {167}
+14b. Bxf3 {168} 15A. Bxg7+ {167} 15a. Kxg7 {167} 15B. N@g7+ {165}
+16A. B@f6# {166}
+{EEKarf checkmated} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.01"]
+[WhiteA "Tabak"][WhiteAElo "2049"]
+[BlackA "idleworm"][BlackAElo "2211"]
+[WhiteB "Grishezz"][WhiteBElo "2029"]
+[BlackB "wanksta"][BlackBElo "2120"]
+[TimeControl "120+0"]
+[Result "1-0"]
+1A. e4 {120} 1B. d4 {120} 1b. Nf6 {120} 1a. e6 {120} 2A. Nc3 {120} 2B. a4 {119}
+2a. Nc6 {120} 2b. Nc6 {120} 3A. Nf3 {120} 3B. Ra3 {119} 3a. Bb4 {120}
+4A. d4 {119} 3b. d5 {120} 4a. d5 {120} 4B. Bg5 {118} 5A. Bd3 {118} 4b. e5 {119}
+5a. dxe4 {118} 6A. Bxe4 {118} 6a. Nge7 {118} 7A. Bxc6+ {118} 7a. Nxc6 {117}
+8A. O-O {117} 8a. Bd7 {116} 9A. Ne4 {117} 9a. Be7 {115} 10A. c3 {117}
+10a. Rg8 {110} 11A. Ng3 {117} 11a. Bf6 {108} 12A. Nh5 {116} 12a. Ne7 {107}
+13A. Qc2 {115} 13a. Nf5 {106} 5B. B@b5 {108} 14A. Re1 {113} 14a. Qe7 {104}
+5b. Bxa3 {115} 6B. Nxa3 {107} 15A. R@e2 {111} 6b. exd4 {114} 15a. B@g4 {102}
+7B. Qxd4 {105} 16A. P@h3 {110} 7b. N@e6 {113} 16a. Bxh5 {101} 17A. Qxf5 {109}
+8B. Bxf6 {102} 8b. Nxd4 {112} 9B. Bxd4 {100} 17a. exf5 {93} 9b. N@e6 {108}
+10B. Q@d1 {95} 10b. P@b4 {107} 18A. Rxe7+ {97} 18a. Bxe7 {93} 11B. N@h5 {90}
+19A. Rxe7+ {95} 11b. bxa3 {104} 19a. Kxe7 {92} 20A. N@d5+ {94} 20a. Kd8 {91}
+21A. Bg5+ {92} 12B. Bxg7 {86} 21a. P@f6 {89} 12b. Rg8 {100} 13B. R@e3 {76}
+13b. B@e7 {98} 14B. P@f6 {69} 14b. Q@b4+ {97} 15B. c3 {64} 15b. Qxb2 {95}
+22A. P@d6 {59} 16B. fxe7 {61} 16b. Qxe7 {95} 17B. Nf6+ {58} 22a. B@a5 {82}
+23A. Q@g3 {53} 23a. N@e6 {77} 24A. Bxf6+ {51} 24a. Kc8 {74} 25A. dxc7 {47}
+25a. N@e2+ {73} 26A. Kh1 {46} 26a. Nxg3+ {72} 27A. hxg3 {45} 17b. Kd8 {64}
+18B. R@c2 {53} 27a. Bxc7 {63} 28A. Nxc7 {43} 28a. Nxc7 {61} 18b. P@f4 {54}
+29A. Be5 {36} 19B. Rxe6 {47} 29a. Bxf3 {58} 30A. gxf3 {35} 30a. P@e4 {57}
+19b. Bxe6 {51} 31A. P@g2 {34} 31a. Bc6 {54} 32A. R@e7 {28} 32a. N@d5 {52}
+33A. Rxf7 {26} 33a. exf3 {51} 34A. gxf3 {26} 34a. Re8 {51} 35A. Re1 {23}
+20B. e3 {22} 20b. fxe3 {49} 21B. fxe3 {21} 35a. P@d2 {39} 21b. P@f2+ {46}
+22B. Rxf2 {20} 22b. Qxc3+ {44} 36A. P@d7+ {14} 23B. Q@d2 {15} 36a. Bxd7 {37}
+37A. Rg1 {14} 23b. Qxd2+ {41} 24B. Qxd2 {13} 37a. P@e2 {34} 38A. Rxd7 {13}
+24b. Rxg7 {37} 38a. e1=Q {30} 25B. Nxd5 {11} 39A. Rxc7+ {11} 39a. Nxc7 {29}
+25b. Bxd5 {35} 40A. P@d7+ {10} 26B. Qxd5+ {10} 26b. B@d6 {35} 27B. R@h8+ {9}
+40a. Kxd7 {26} 41A. N@c5+ {9} 27b. B@e8 {33} 41a. Kc6 {23} 42A. Q@d7+ {9}
+42a. Kb6 {22} 43A. B@a5+ {8} 43a. Kxa5 {22} 44A. Qxc7+ {8} 28B. P@f6 {3}
+28b. B@b4+ {33} 44a. Q@b6 {20} 29B. Kd1 {2} 45A. Nb3+ {8} 45a. Ka4 {20}
+29b. N@c3+ {32} 46A. Qc4+ {8} 30B. Kc2 {2} 46a. P@b4 {19} 30b. P@b3+ {31}
+47A. Nc5+ {8} 31B. Kxb3 {2} 47a. Ka5 {18} 48A. Nb3+ {7} 31b. N@d2+ {30}
+32B. Kc2 {1} 48a. Ka4 {17} 49A. Nc5+ {7} 32b. P@b3+ {29} 49a. Ka5 {16}
+50A. b3 {7} 33B. Kd3 {1} 33b. N@f4+ {27} 50a. Qxg1+ {15} 51A. Kxg1 {6}
+34B. Kxd2 {1} 51a. d1=Q+ {15} 52A. Qf1 {6} 34b. Qxe3+ {26} 52a. N@e2+ {15}
+53A. Kg2 {5}
+{Grishezz forfeits on time} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.08"]
+[WhiteA "Ursa"][WhiteAElo "1956"]
+[BlackA "MrBug"][BlackAElo "2186"]
+[WhiteB "IMGnyce"][WhiteBElo "1796"]
+[BlackB "ronenl"][BlackBElo "2190"]
+[TimeControl "180+0"]
+[Result "1-0"]
+1B. e4 {179} 1A. e4 {179} 1b. Nc6 {180} 1a. Nf6 {180} 2B. d4 {178} 2A. e5 {178}
+2b. Nf6 {180} 3B. Nc3 {177} 2a. Nd5 {179} 3A. d4 {178} 3b. d5 {180}
+4B. exd5 {176} 3a. d6 {178} 4b. Nxd5 {180} 5B. Nf3 {175} 4A. P@e4 {175}
+5b. e6 {179} 4a. Nb6 {177} 6B. Bb5 {173} 6b. Nxc3 {179} 7B. bxc3 {172}
+5A. exd6 {172} 7b. Qd5 {179} 5a. cxd6 {177} 6A. d5 {171} 8B. P@c4 {170}
+8b. Qe4+ {178} 6a. e6 {175} 9B. Qe2 {166} 9b. Qxe2+ {176} 10B. Kxe2 {166}
+7A. N@g5 {164} 10b. Bd7 {176} 11B. Bxc6 {163} 11b. Bxc6 {175} 12B. Bf4 {163}
+7a. N@e5 {168} 12b. P@g4 {172} 8A. dxe6 {162} 13B. Ne5 {161} 8a. Bxe6 {167}
+13b. P@f3+ {172} 14B. gxf3 {159} 14b. gxf3+ {171} 15B. Nxf3 {159}
+9A. P@f5 {157} 15b. Rc8 {158} 16B. Rhg1 {157} 9a. P@d7 {149} 10A. fxe6 {155}
+10a. dxe6 {149} 16b. B@e4 {149} 17B. P@g2 {156} 17b. Bxc2 {148} 18B. P@d3 {155}
+11A. P@f5 {147} 18b. Bd6 {142} 11a. P@d7 {142} 19B. Bxd6 {153} 12A. B@h3 {146}
+19b. cxd6 {142} 20B. Rac1 {153} 20b. Bxd3+ {138} 21B. Kxd3 {152} 21b. d5 {138}
+22B. Ne5 {151} 12a. P@f6 {133} 22b. dxc4+ {136} 23B. Nxc4 {150} 13A. Nxf7 {144}
+23b. Bb5 {136} 13a. Nxf7 {130} 14A. fxe6 {143} 14a. dxe6 {130} 24B. N@a3 {146}
+15A. Bxe6 {143} 24b. Bxc4+ {134} 15a. B@g8 {128} 25B. Nxc4 {144} 25b. O-O {133}
+26B. P@e7 {143} 26b. P@e4+ {132} 27B. Kxe4 {141} 16A. P@f5 {135} 27b. f5+ {132}
+28B. Ke3 {140} 16a. P@d7 {122} 28b. Rfe8 {127} 29B. Nd6 {140} 17A. P@d5 {131}
+17a. N@e5 {119} 18A. Bxf7+ {131} 18a. Bxf7 {118} 19A. B@e6 {129}
+29b. P@f4+ {115} 30B. Ke2 {137} 19a. B@c5 {112} 20A. Bxf7+ {127}
+20a. Nxf7 {111} 21A. N@d3 {126} 30b. P@d3+ {111} 31B. Kxd3 {135}
+31b. B@e4+ {110} 32B. Kd2 {135} 21a. Q@e7 {107} 22A. Nxc5 {125} 22a. dxc5 {105}
+32b. Rxe7 {101} 33B. Nxc8 {134} 23A. P@e6 {118} 33b. N@c4+ {99} 34B. Kd1 {133}
+23a. B@d4 {101} 24A. exf7+ {115} 24a. Qxf7 {100} 25A. Nh3 {114} 34b. Nb2+ {75}
+35B. Ke1 {132} 35b. Nd3+ {65} 36B. Kd2 {132} 36b. N@c4+ {60} 37B. Ke2 {131}
+37b. B@h5+ {37} 38B. P@f3 {130} 38b. Re8 {32} 39B. N@e7+ {129} 39b. Kh8 {31}
+25a. Nxd5 {31} 26A. exd5 {112} 26a. Qxd5 {31} 40B. B@d2 {118} 27A. Qe2+ {105}
+27a. R@e4 {29} 28A. Nc3 {102} 40b. Nxc1+ {25} 41B. Rxc1 {116} 41b. Nxd2 {22}
+42B. Kxd2 {115} 28a. Bxc3+ {22} 42b. N@c4+ {21} 29A. bxc3 {100} 43B. Ke2 {114}
+43b. B@d3+ {20} 44B. Ke1 {114} 29a. Qxf5 {17} 30A. Qxe4+ {95} 30a. Qxe4+ {17}
+31A. R@e3 {95} 44b. R@f1# {11}
+{IMGnyce checkmated} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.08"]
+[WhiteA "ronenl"][WhiteAElo "2208"]
+[BlackA "IMGnyce"][BlackAElo "1778"]
+[WhiteB "MrBug"][WhiteBElo "2168"]
+[BlackB "Ursa"][BlackBElo "1974"]
+[TimeControl "180+0"]
+[Result "1-0"]
+1B. e4 {179} 1b. e6 {180} 1A. e4 {180} 1a. e5 {180} 2B. Nc3 {179} 2b. d5 {180}
+2A. Nc3 {180} 2a. Nc6 {180} 3B. d4 {179} 3A. Nf3 {179} 3a. Bc5 {179}
+3b. Nf6 {178} 4A. Be2 {179} 4a. d6 {179} 5A. O-O {179} 4B. exd5 {178}
+5a. Bg4 {178} 4b. Nxd5 {178} 6A. d3 {178} 5B. Nf3 {177} 5b. Bb4 {177}
+6a. P@h3 {177} 6B. Bd2 {176} 7A. gxh3 {177} 7a. Bxh3 {177} 8A. Ng5 {177}
+8a. Bxf1 {175} 9A. Qxf1 {177} 9a. Nh6 {173} 6b. B@a5 {169} 10A. Nd5 {174}
+10a. O-O {170} 7B. Nxd5 {171} 7b. Bxd2+ {168} 8B. Nxd2 {170} 11A. Nxh7 {170}
+8b. Qxd5 {167} 11a. Kxh7 {170} 9B. P@e3 {169} 12A. Bxh6 {170} 12a. B@f6 {167}
+9b. P@h3 {163} 13A. Nxf6+ {168} 13a. Qxf6 {166} 14A. B@g5 {167} 10B. N@f4 {165}
+14a. Qg6 {165} 15A. P@f5 {165} 15a. Nd4 {161} 16A. fxg6+ {162} 16a. fxg6 {160}
+10b. Bxd2+ {149} 17A. Bxg7 {158} 17a. N@f3+ {159} 11B. Qxd2 {161}
+18A. Kh1 {157} 11b. hxg2 {148} 18a. Kxg7 {156} 19A. P@f6+ {153} 19a. Rxf6 {155}
+20A. Bxf6+ {152} 20a. Kxf6 {155} 21A. N@d5+ {151} 21a. Kf7 {155} 22A. Qh3 {144}
+22a. B@h5 {152} 12B. Nxd5 {137} 12b. N@f3+ {148} 23A. Qd7+ {142} 13B. Kd1 {134}
+13b. gxf1=Q+ {146} 14B. Rxf1 {134}
+{MrBug resigns} 1-0
+
+[Event "fics rated bughouse match"]
+[Site "fics"]
+[Date "2005.01.08"]
+[WhiteA "Fudpucker"][WhiteAElo "2204"]
+[BlackA "ronenl"][BlackAElo "2218"]
+[WhiteB "biru"][WhiteBElo "2105"]
+[BlackB "YellowMoon"][BlackBElo "1869"]
+[TimeControl "180+0"]
+[Result "0-1"]
+1A. e4 {179} 1B. d4 {179} 1b. Nc6 {180} 1a. Nc6 {180} 2B. Nf3 {179}
+2A. Nc3 {179} 2b. Nf6 {180} 3B. Nc3 {179} 3b. e6 {180} 4B. Bg5 {178}
+2a. Nf6 {178} 4b. Be7 {179} 3A. d4 {179} 5B. e3 {178} 3a. d5 {178} 5b. d6 {177}
+4A. exd5 {177} 6B. Bb5 {177} 4a. Nxd5 {178} 5A. Nf3 {177} 6b. Bd7 {176}
+5a. e6 {177} 7B. O-O {176} 6A. Bd3 {177} 7b. Ng4 {174} 6a. Ndb4 {176}
+8B. Bxe7 {174} 7A. O-O {176} 8b. Qxe7 {174} 9B. P@h3 {174} 7a. Nxd3 {175}
+8A. cxd3 {175} 9b. h5 {172} 8a. B@h5 {175} 10B. B@h4 {172} 9A. B@b5 {174}
+10b. P@f6 {170} 9a. Bd7 {174} 11B. d5 {171} 11b. Nd8 {168} 12B. Bxd7+ {169}
+12b. Qxd7 {167} 10A. B@e2 {163} 13B. dxe6 {164} 13b. Nxe6 {166} 10a. B@g4 {168}
+14B. Nd5 {157} 11A. d5 {155} 11a. P@h3 {164} 14b. N@c6 {159} 12A. gxh3 {154}
+12a. Bxh3 {163} 13A. dxc6 {154} 13a. bxc6 {163} 14A. Bc4 {153} 15B. P@h6 {150}
+15b. Nxh6 {157} 16B. Bxf6 {149} 14a. P@g2 {155} 15A. Re1 {151} 16b. N@e4 {151}
+15a. Bc5 {154} 17B. Bxg7 {147} 16A. d4 {149} 17b. Nxg7 {151} 16a. Bxf3 {148}
+18B. N@f6+ {140} 17A. Bxf3 {148} 17a. P@c2 {134} 18A. Qxc2 {145}
+18b. Nxf6 {129} 19B. Nxf6+ {140} 19b. Kd8 {120} 20B. Nxd7 {139} 20b. Kxd7 {119}
+18a. Q@h1# {118}
+{Fudpucker checkmated} 0-1
+
