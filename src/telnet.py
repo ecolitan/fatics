@@ -203,12 +203,12 @@ class TelnetTransport(protocol.Protocol):
         self.protocol.dataReceived(bytes)
 
     def _escape(self, data):
-        data = data.replace('''\xff''', '''\xff\xff''')
         if self.compatibility:
-            #data = data.decode('ascii','replace').replace(u'\ufffd', '_')
             data = utf8.utf8_to_ascii(data)
             data = data.replace('\n', '\n\r')
         else:
+            # escape telnet IAC
+            data = data.replace('''\xff''', '''\xff\xff''')
             data = data.replace('\n', '\r\n')
         return data
 

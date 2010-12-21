@@ -164,7 +164,7 @@ class ExaminedGame(Game):
         if user.is_online:
             user.write_('You are no longer examining game %d.\n', self.number)
         for p in self.players | self.observers:
-            p.write_('%s has stopped examining game %d.\n', (user.name, self.number))
+            p.write_('\n%(name)s has stopped examining game %(num)d.\n', {'name': user.name, 'num': self.number})
         if not self.players:
             for p in self.observers:
                 p.write_('Game %d (which you were observing) has no examiners.\n', (self.number,))

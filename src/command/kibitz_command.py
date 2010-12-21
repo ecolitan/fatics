@@ -51,7 +51,7 @@ class WhisperCommand(Command):
         name = conn.user.get_display_name()
         count = 0
         rat = conn.user.get_rating(g.speed_variant)
-        plist = g.observers
+        plist = g.observers.copy()
         if g.bug_link:
             plist |= g.bug_link.observers
         if g.gtype == game.EXAMINED:
@@ -77,7 +77,7 @@ class Kibitz(KibitzCommand, GameMixin):
         if not g:
             return
         if conn.user.is_guest and conn.user not in g.players:
-            conn.write(_("Only registered players may kibitz to others' games."))
+            conn.write(_("Only registered players may kibitz to others' games.\n"))
             return
         self._do_kibitz(g, args[0], conn)
 
@@ -88,7 +88,7 @@ class Whisper(WhisperCommand, GameMixin):
         if not g:
             return
         if conn.user.is_guest and conn.user not in g.players:
-            conn.write(_("Only registered players may whisper to others' games."))
+            conn.write(_("Only registered players may whisper to others' games.\n"))
             return
         self._do_whisper(g, args[0], conn)
 

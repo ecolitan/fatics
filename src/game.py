@@ -247,8 +247,9 @@ class Game(object):
 
     def unobserve(self, u):
         """Remove the given user as an observer and notify the user."""
-        u.write(_('Removing game %d from observation list.\n')
-            % self.number)
+        assert(u in self.observers)
+        u.write_('\nRemoving game %d from observation list.\n',
+            self.number)
         u.session.observed.remove(self)
         self.observers.remove(u)
 
@@ -256,10 +257,10 @@ class Game(object):
         for o in self.pending_offers[:]:
             o.decline(notify=False)
         assert(not self.pending_offers)
-        del games[self.number]
         for u in self.observers.copy():
             self.unobserve(u)
         assert(not self.observers)
+        del games[self.number]
 
     def get_eco(self):
         i = min(self.variant.pos.ply, 36)

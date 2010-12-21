@@ -69,6 +69,8 @@ class Session(object):
     def close(self):
         assert(not self.closed)
         self.closed = True
+        # XXX this will not remove draw offers; game-related offers
+        # should probably be saved when a game is adjourned
         for v in self.offers_sent[:]:
             assert(v.a == self.user)
             v.withdraw_logout()
