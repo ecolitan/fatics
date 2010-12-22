@@ -21,7 +21,7 @@ import examine
 
 from command import *
 
-@ics_command('examine', 'on', admin.Level.user)
+@ics_command('examine', 'on')
 class Examine(Command):
     def run(self, args, conn):
         if conn.user.session.game:
@@ -67,33 +67,47 @@ class Examine(Command):
                 return
             conn.write('TODO: EXAMINE ADJOURNED GAME\n')
 
-@ics_command('backward', 'p', admin.Level.user)
+@ics_command('mexamine', 'w')
+class Mexamine(Command):
+    def run(self, args, conn):
+        g = conn.user.session.game
+        if not g or g.gtype != game.EXAMINED:
+            conn.write(_("You are not examining a game.\n"))
+            return
+
+        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+        if not u:
+            return
+
+        g.mexamine(u, conn)
+
+@ics_command('backward', 'p')
 class Backward(Command):
     def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
-        if not conn.user.session.game or conn.user.session.game.gtype != game.EXAMINED:
+        g = conn.user.session.game
+        if not g or g.gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.game
         g.backward(n, conn)
 
 @ics_command('forward', 'p', admin.Level.user)
 class Forward(Command):
     def run(self, args, conn):
         n = args[0] if args[0] is not None else 1
-        if not conn.user.session.game or conn.user.session.game.gtype != game.EXAMINED:
+        g = conn.user.session.game
+        if not g or g.gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.game
         g.forward(n, conn)
 
 @ics_command('unexamine', '')
 class Unexamine(Command):
     def run(self, args, conn):
-        if not conn.user.session.game or conn.user.session.game.gtype != game.EXAMINED:
+        g = conn.user.session.game
+        if not g or g.gtype != game.EXAMINED:
             conn.write(_("You are not examining a game.\n"))
             return
-        g = conn.user.session.game
         g.leave(conn.user)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

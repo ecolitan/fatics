@@ -145,6 +145,41 @@ class ExaminedGame(Game):
         elif self.variant.pos.is_draw_nomaterial:
             self.result('Game drawn because neither player has mating material', '1/2-1/2')
 
+    def mexamine(self, u, conn):
+        # GuestWYMW has made you an examiner of game 81.
+        # GuestMWVC is now an examiner of game 81.
+        if u in self.players:
+            assert(u.session.game)
+            conn.write(_('%(name)s is already an examiner of game %(num)d.'),
+                {'name': conn.user.name, 'num': self.number})
+            return
+
+        if u.session.game:
+            if u.session.game.gtype == EXAMINED:
+                conn.write(_('%s is examining a game.\n') % u.name)
+            else:
+                conn.write(_('%s is playing a game.\n') % u.name)
+            return
+
+        if u not in self.observers:
+            conn.write(_('%s is not observing the game you are examining.\n') % u.name)
+            return
+
+        # unobserve
+        u.session.observed.remove(self)
+        self.observers.remove(u)
+
+        self.players.add(u)
+        u.session.game = self
+        conn.write(_('%(name)s is now an examiner of game %(num)d.\n') %
+            {'name': u.name, 'num': self.number})
+        u.write_('\n%(name)s has made you an examiner of game %(num)d.\n',
+            {'name': conn.user.name, 'num': self.number})
+
+        # send the board again, because style 12 will now tell the interface
+        # that the game is examined
+        self.send_board(u)
+
     def next_move(self, mv, conn):
         self.moves = self.moves[0:self.variant.pos.ply]
         self.moves.append(mv.to_san())

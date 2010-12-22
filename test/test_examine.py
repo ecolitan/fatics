@@ -291,4 +291,68 @@ class TestUnexamine(Test):
         self.expect('You are no longer examining game 1.', t)
         t.close()
 
+class TestMexamine(Test):
+    def test_mexamine_bad(self):
+        t = self.connect_as_guest()
+        t.write('mex foo\n')
+        self.expect('You are not examining a game.', t)
+
+        t.write('ex\n')
+        t.write('mex nosuchplayer\n')
+        self.expect('No player named "nosuchplayer" is online.', t)
+
+        t.write('mex\n')
+        self.expect('Usage: ', t)
+
+        t.write('mex 1\n')
+        self.expect('not a valid handle', t)
+
+        self.close(t)
+
+    def test_mexamine(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+
+        t2.write('set style 12\n')
+
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+
+        t.write('mex guestefgh\n')
+        self.expect('GuestEFGH is not observing the game you are examining.', t)
+
+        t.write('d4\n')
+        self.expect('GuestABCD moves: d4', t)
+
+        t2.write('ex\n')
+        self.expect('Starting a game', t2)
+        t.write('mex guestefgh\n')
+        self.expect('GuestEFGH is examining a game.', t)
+        t2.write('unex\n')
+        self.expect('You are no longer examining', t2)
+
+        t2.write('o guestabcd\n')
+        self.expect('<12> ', t2)
+
+        t.write('mex guestefgh\n')
+        self.expect('GuestEFGH is now an examiner of game', t)
+        self.expect('GuestABCD has made you an examiner of game', t2)
+
+        t2.write('f5\n')
+        self.expect(': GuestEFGH moves: f5', t)
+        self.expect(': GuestEFGH moves: f5', t2)
+
+        t2.write('unob\n')
+        self.expect('You are not observing any games', t2)
+
+        t.write('unex\n')
+        self.expect('GuestABCD has stopped examining', t2)
+
+        t2.write('e4\n')
+        self.expect(': GuestEFGH moves: e4', t2)
+        t2.write('unex\n')
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
