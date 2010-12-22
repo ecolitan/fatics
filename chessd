@@ -5,7 +5,7 @@ cd `dirname $0`
 case "$1" in
   start)
     echo "Starting chessd...."
-    rm -f twistd.log; twistd --pidfile chessd.pid -r epoll -oy src/chessd.tac
+    rm -f chessd.log; twistd --log chessd.log --pidfile chessd.pid -r epoll -oy src/chessd.tac
     ;;
   run)
     echo "Running chessd in the foreground...."
@@ -22,7 +22,7 @@ case "$1" in
     ;;
   profile)
     echo "Running chessd in profile mode...."
-    twistd --profile profile-chessd.data --savestats --profiler cProfile -r epoll -noy src/chessd.tac
+    twistd --log chessd.log --profile profile-chessd.data --savestats --profiler cProfile -r epoll -noy src/chessd.tac
     ;;
   stop)
     echo "Stopping chessd...."

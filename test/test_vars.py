@@ -130,8 +130,12 @@ class TestIvars(Test):
 
     def test_login_ivars(self):
         t = self.connect()
-        t.write('%b000000000000000000000000000000000\n')
+        t.write('%b10011101010001000100001000000001000\n')
         self.expect("Ivars set.", t)
+        t.write('g\n\n')
+        self.expect('fics% ', t)
+        t.write('ivar\n')
+        self.expect('block=0', t)
         t.close()
 
     def test_ms(self):

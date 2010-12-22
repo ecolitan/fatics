@@ -344,20 +344,9 @@ varlist = VarList()
 
 
 '''
-ivars:
-allresults atomic audiochat
-block boardinfo
-compressmove crazyhousea
-defprompt
-extascii extuserinfo
-fr
-gameinfo graph
-lock losers
-nohighlight nowrap
-pendinfo pin pinginfo premove
-seekca seekinfo seekremove showserver singleboard smartmove startpos suicide
+other possible ivars?
+atomic
 vthighlight
-wildcastle
 xml ?
 '''
 

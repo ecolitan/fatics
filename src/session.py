@@ -106,7 +106,7 @@ class Session(object):
     def set_ivars_from_str(self, s):
         """Parse a %b string sent by Jin to set ivars before logging in."""
         for (i, val) in enumerate(s):
-            self.ivars[var.ivar_number[i].name] = val
+            self.ivars[var.ivar_number[i].name] = int(val)
         self.conn.write("#Ivars set.\n")
 
     def set_ivar(self, v, val):
