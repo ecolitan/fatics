@@ -75,7 +75,7 @@ class Game(object):
 
         # (silently) remove each player's seeks
         for p in self.players:
-            for s in p.session.seeks:
+            for s in p.session.seeks[:]:
                 s.remove()
 
         # notify partner, if any
