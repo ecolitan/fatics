@@ -75,7 +75,7 @@ From the top of the FatICS source tree, you can use one of the
 following commands:
 
   "./chessd run"     -- run in the foreground; log to the console
-  "./chessd start"   -- run as a daemon; log to twistd.log
+  "./chessd start"   -- run as a daemon; log to chessd.log
   "./chessd profile" -- run in profiling mode
 
 After the server is started, you can use these commands:

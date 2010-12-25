@@ -22,6 +22,7 @@ import subprocess
 import telnetlib
 import subprocess
 import time
+import pexpect
 
 from test import *
 
@@ -31,7 +32,8 @@ zipseal_prog_win = '../timeseal/win32/zipseal.exe'
 zipseal_port = 5001
 
 class TestZipseal(Test):
-    def test_zipseal(self):
+
+    def _zipseal_connect(self, username, passwd):
         if not os.path.exists(zipseal_prog):
             raise unittest.SkipTest('no zipseal binary')
             return
@@ -40,13 +42,15 @@ class TestZipseal(Test):
         except ImportError:
             raise unittest.SkipTest('pexpect module not installed')
 
-        process = pexpect.spawn(zipseal_prog, [host, str(zipseal_port)])
+        p = pexpect.spawn(zipseal_prog, [host, str(zipseal_port)])
+        p.expect_exact('login:')
+        p.send('%s\n%s\n' % (username, passwd))
+        p.expect_exact('fics%')
 
-        process.expect_exact('login:')
-        process.send('admin\n')
-        process.send('%s\n' % admin_passwd)
+        return p
 
-        process.expect_exact('fics%')
+    def test_zipseal(self):
+        process = self._zipseal_connect('admin', admin_passwd)
 
         process.send('fi admin\n')
         process.expect_exact('Finger of admin')
@@ -61,16 +65,40 @@ class TestZipseal(Test):
 
         process.close()
 
+    def test_zipseal_game(self):
+        p1 = self._zipseal_connect('admin', admin_passwd)
+        p2 = self._zipseal_connect('GuestABCD', '')
+
+        p1.send("set style 12\n")
+        p2.send("set style 12\n")
+        p1.send('match guestabcd 3+0 black\n')
+        p2.expect_exact('Challenge:')
+        p2.send('accept\n')
+        p1.expect_exact('<12> ')
+        p2.expect_exact('<12> ')
+
+        p2.send('d4\n')
+        p1.expect_exact('<12> ')
+        p2.expect_exact('<12> ')
+
+        p1.send('d5\n')
+        p1.expect_exact('<12> ')
+        p2.expect_exact('<12> ')
+
+        time.sleep(1)
+        p2.send('c4\n')
+        p1.expect_exact('<12> ')
+        p2.expect_exact('<12> ')
+
+        p1.close()
+        p2.close()
+
 class TestZipsealWindows(Test):
     def test_zipseal_windows(self):
         if not os.path.exists(wine_prog):
             raise unittest.SkipTest('no wine binary')
         if not os.path.exists(zipseal_prog_win):
             raise unittest.SkipTest('no zipseal windows binary')
-        try:
-            import pexpect
-        except ImportError:
-            raise unittest.SkipTest('pexpect module not installed')
 
         process = pexpect.spawn(wine_prog,
             [zipseal_prog_win, host, str(zipseal_port)])

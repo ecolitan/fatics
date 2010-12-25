@@ -188,8 +188,6 @@ class Game(object):
     def send_boards(self):
         for p in self.players:
             self.send_board(p)
-            if p.has_timeseal():
-                p.session.ping(for_move=True)
         for u in self.observers:
             self.send_board(u)
 
@@ -460,6 +458,9 @@ class PlayedGame(Game):
         self.white.session.last_opp = self.black
         self.black.session.last_opp = self.white
 
+        p = self.get_user_to_move()
+        if p.has_timeseal():
+            p.session.ping(for_move=True)
         self.send_boards()
 
     def _resume(self, adj, a, b):
@@ -646,6 +647,9 @@ class PlayedGame(Game):
         assert(mv == self.variant.pos.get_last_move())
         mv.time = time
 
+        p = self.get_user_to_move()
+        if p.has_timeseal():
+            p.session.ping(for_move=True)
         super(PlayedGame, self).next_move(mv, conn)
 
         if self.variant.name == "bughouse":
