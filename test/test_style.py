@@ -19,8 +19,8 @@
 from test import *
 
 class TestStyle12(Test):
+    @with_player('testplayer', 'testpass')
     def test_style12(self):
-        self.adduser('testplayer', 'testpass')
         t = self.connect_as('testplayer', 'testpass')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
@@ -51,7 +51,5 @@ class TestStyle12(Test):
 
         self.close(t)
         self.close(t2)
-
-        self.deluser('testplayer')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

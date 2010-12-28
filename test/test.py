@@ -111,7 +111,7 @@ class Test(unittest.TestCase):
         t.read_all()
         t.close()
 
-    def adduser(self, name, passwd, lists=None):
+    def _adduser(self, name, passwd, lists=None):
         t = self.connect_as_admin()
         t.write('addplayer %s fakeemail@example.com Test Player\n' % name)
         self.expect('Added: ', t)
@@ -121,7 +121,7 @@ class Test(unittest.TestCase):
                 t.write('addlist %s %s\n' % (lname, name))
         self.close(t)
 
-    def deluser(self, name):
+    def _deluser(self, name):
         t = self.connect_as_admin()
         t.write('remplayer %s\n' % name)
         self.expect('removed', t)
@@ -155,12 +155,12 @@ def with_admin(f):
 def with_player(pname, ppass, ptitles=None):
     def wrap(f):
         def new_f(self):
-            self.adduser(pname, ppass, ptitles)
+            self._adduser(pname, ppass, ptitles)
             try:
                 f(self)
             finally:
                 try:
-                    self.deluser(pname)
+                    self._deluser(pname)
                 except:
                     pass
         new_f.__name__ = f.__name__

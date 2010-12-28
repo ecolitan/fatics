@@ -106,44 +106,41 @@ class TellTest(Test):
         self.close(t2)
 
 class QtellTest(Test):
+    @with_player('tdplayer', 'tdplayer', ['td'])
     def test_qtell(self):
-        self.adduser('tdplayer', 'tdplayer', ['td'])
-        try:
-            t = self.connect_as('tdplayer', 'tdplayer')
-            t.write('qtell nonexistentname test\n')
-            self.expect('*qtell nonexistentname 1*', t)
+        t = self.connect_as('tdplayer', 'tdplayer')
+        t.write('qtell nonexistentname test\n')
+        self.expect('*qtell nonexistentname 1*', t)
 
-            t.write('qtell admin test\n')
-            self.expect('*qtell admin 1*', t)
+        t.write('qtell admin test\n')
+        self.expect('*qtell admin 1*', t)
 
-            t2 = self.connect_as_admin()
-            t.write('qtell admin simple test\n')
-            self.expect(':simple test', t2)
-            self.expect('*qtell admin 0*', t)
+        t2 = self.connect_as_admin()
+        t.write('qtell admin simple test\n')
+        self.expect(':simple test', t2)
+        self.expect('*qtell admin 0*', t)
 
-            t.write('qtell admin \\bthis\\nis a \\Hmore complicated\\h test\n')
-            self.expect(':\x07this', t2)
-            self.expect(':is a \x1b[7mmore complicated\x1b[0m test', t2)
-            self.expect('*qtell admin 0*', t)
+        t.write('qtell admin \\bthis\\nis a \\Hmore complicated\\h test\n')
+        self.expect(':\x07this', t2)
+        self.expect(':is a \x1b[7mmore complicated\x1b[0m test', t2)
+        self.expect('*qtell admin 0*', t)
 
-            t2.write('qtell tdplayer test\n')
-            self.expect('Only TD programs are allowed to use this command', t2)
+        t2.write('qtell tdplayer test\n')
+        self.expect('Only TD programs are allowed to use this command', t2)
 
 
-            t2.write('+ch 55\n')
-            self.expect('added', t2)
-            t.write('qtell -1 hello world\n')
-            self.expect('*qtell -1 1*', t)
-            t.write('qtell 55 !!! ###\n')
-            self.expect('*qtell 55 0*', t)
-            self.expect('!!! ###', t2)
-            t2.write('-ch 55\n')
-            self.expect('removed', t2)
+        t2.write('+ch 55\n')
+        self.expect('added', t2)
+        t.write('qtell -1 hello world\n')
+        self.expect('*qtell -1 1*', t)
+        t.write('qtell 55 !!! ###\n')
+        self.expect('*qtell 55 0*', t)
+        self.expect('!!! ###', t2)
+        t2.write('-ch 55\n')
+        self.expect('removed', t2)
 
-            self.close(t2)
-            self.close(t)
-        finally:
-            self.deluser('tdplayer')
+        self.close(t2)
+        self.close(t)
 
 class SayTest(Test):
     @with_player('testplayer', 'testpass')

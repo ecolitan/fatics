@@ -55,6 +55,7 @@ CREATE TABLE `user` (
   `ptime` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'show time in prompt',
   -- not persistent in original FICS
   -- `tourney` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'currently in a tourney',
+  -- `flip` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'flip board',
   `messreply` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'send email address in mailed messages',
   `chanoff` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'hide all channel tells',
   `showownseek` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'show own seeks',
@@ -475,7 +476,7 @@ INSERT INTO `variant` VALUES (NULL,'bughouse','B');
 UNLOCK TABLES;
 
 LOCK TABLES `server_message` WRITE;
-INSERT INTO `server_message` VALUES (NULL,'motd',"Welcome to the fatics.org test server.  Message wmahan with any comments.\n\nThere is just one rule here: don't be a dick.\n\nFor real chess, go to freechess.org instead.  Thanks for testing!\n\n");
+INSERT INTO `server_message` VALUES (NULL,'motd',"Welcome to the fatics.org test server.  Message wmahan with any comments.\n\nThere is just one rule here: be nice.\n\nFor real chess, go to freechess.org instead.  Thanks for testing!\n\n");
 INSERT INTO `server_message` VALUES (NULL,'welcome',"Welcome to / Bienvenue à / Bienvenido a / Willkommen auf\n\n                   ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟\n\nThis server is not endorsed by freechess.org.\n\n");
 INSERT INTO `server_message` VALUES (NULL,'login',"If you are not a registered player, enter the login name \"guest\".\n\n");
 INSERT INTO `server_message` VALUES (NULL,'logout',"♙♙♙ Thank you for using FatICS. ♟♟♟\n");

@@ -49,8 +49,8 @@ class Partner(Offer):
 
     def accept(self):
         Offer.accept(self)
-        self.a.write_("You agree to be %s's partner.\n", (self.b.name,))
-        self.b.write_("%s agrees to be your partner.\n", (self.a.name,))
+        self.a.write_("%s agrees to be your partner.\n", (self.b.name,))
+        self.b.write_("You agree to be %s's partner.\n", (self.a.name,))
         self.a.session.partner = self.b
         self.b.session.partner = self.a
         partners.append(set([self.a, self.b]))

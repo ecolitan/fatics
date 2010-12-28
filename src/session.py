@@ -51,6 +51,7 @@ class Session(object):
         self.closed = False
         self.seeks = []
         self.partner = None
+        self.following = None
 
     def set_user(self, user):
         self.user = user

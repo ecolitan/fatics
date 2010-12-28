@@ -27,19 +27,52 @@ class TestVarsCommand(Test):
         self.close(t)
 
     def test_self_vars_guest(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+
+        t.write('set prompt ics>\n')
+        self.expect('prompt set', t)
+        t.write('set interface Test interface\n')
+        self.expect('interface set', t)
+        t.write('set bugopen 1\n')
+        self.expect('now open for bughouse', t)
+        t2.write('part guestabcd\n')
+        self.expect('offers', t)
+        t.write('part guestefgh\n')
+        self.expect('agree', t)
+        # TODO: follow
+
         t.write('vars\n')
         self.expect('Variable settings of Guest', t)
         self.expect('shout=1', t)
+        self.expect('Prompt: ics>', t)
+        self.expect('Interface: Test interface', t)
+        self.expect('Bughouse partner: GuestEFGH', t)
+
         self.close(t)
 
     def test_other_vars(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+
+        t.write('set shout 0\n')
+        self.expect('You will not hear shouts.', t)
+        t2.write('vars admin\n')
+        self.expect('Variable settings of admin:', t2)
+        self.expect('shout=0', t2)
+
+        t.write('set shout\n')
+        self.expect('You will now hear shouts.', t)
+        self.close(t)
+        self.close(t2)
+
+    def test_vars_offline(self):
         t = self.connect_as_guest()
         t.write('vars admin\n')
         self.expect('Variable settings of admin:', t)
         self.expect('shout=1', t)
         self.close(t)
-    
+
     def test_self_ivars(self):
         t = self.connect_as_admin()
         t.write('ivars\n')

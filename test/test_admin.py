@@ -94,8 +94,8 @@ class CommandTest(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('testplayer', 'passwd')
     def test_asetpass(self):
-        self.adduser('testplayer', 'passwd')
         t = self.connect_as_admin()
 
         t2 = self.connect_as_guest('GuestTest')
@@ -104,22 +104,20 @@ class CommandTest(Test):
         self.close(t2)
 
         t2 = self.connect_as('testplayer', 'passwd')
-        t.write('asetpass testplayer test\n')
+        t.write('asetpass testplayer blah\n')
         self.expect("Password of testplayer changed", t)
         self.expect("admin has changed your password", t2)
         self.close(t)
         self.close(t2)
 
         t2 = self.connect()
-        t2.write('testplayer\ntest\n')
+        t2.write('testplayer\nblah\n')
         self.expect('fics%', t2)
         self.close(t2)
-        self.deluser('testplayer')
 
-
+    @with_player('testplayer', 'passwd')
+    @with_player('testtwo', 'passwd')
     def test_asetadmin(self):
-        self.adduser('testplayer', 'passwd')
-        self.adduser('testtwo', 'passwd')
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'passwd')
         t.write('asetadmin testplayer 100\n')
@@ -138,8 +136,6 @@ class CommandTest(Test):
         t2.write('asetadmin testtwo 50\n')
         self.expect('Admin level of testtwo set', t2)
         self.close(t2)
-        self.deluser('testplayer')
-        self.deluser('testtwo')
 
     def test_asetemail(self):
         t = self.connect_as_admin()

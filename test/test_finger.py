@@ -50,8 +50,8 @@ class FingerTest(Test):
 
         self.close(t)
 
+    @with_player('admintwo', 'admintwo')
     def test_ambiguous_finger(self):
-        self.adduser('admintwo', 'admintwo')
         t = self.connect_as_admin()
 
         t.write('finger ad\n')
@@ -68,8 +68,6 @@ class FingerTest(Test):
         t.write('finger ad\n')
         self.expect('Matches: admin admintwo', t)
         self.close(t)
-
-        self.deluser('admintwo')
 
     def test_finger_guest(self):
         t = self.connect_as_guest()

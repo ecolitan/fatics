@@ -18,6 +18,62 @@
 
 from test import *
 
+class TestBugwho(Test):
+    def test_bugwho_none(self):
+        t = self.connect_as_guest()
+
+        t.write('bugwho foo\n')
+        self.expect('Usage:', t)
+
+        t.write('bugwho g\n')
+        self.expect('Bughouse games in progress', t)
+        self.expect(' 0 games displayed.', t)
+
+        t.write('bugwho p\n')
+        self.expect('Partnerships not playing bughouse', t)
+        self.expect(' 0 partnerships displayed.', t)
+
+        t.write('bugwho u\n')
+        self.expect('Unpartnered players with bugopen on', t)
+        self.expect('0 players displayed (of 1).', t)
+
+        self.close(t)
+
+    def test_bugwho(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
+
+        t.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t)
+        t2.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t2)
+        t3.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t3)
+        t4.write('set bugopen 1\n')
+        self.expect('You are now open for bughouse.', t4)
+
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers to be your bughouse partner.', t2)
+        t2.write('a\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t.write('bugwho\n')
+        self.expect('Bughouse games in progress', t)
+        self.expect(' 0 games displayed.', t)
+        self.expect('Partnerships not playing bughouse', t)
+        self.expect('++++ GuestABCD(U) / ++++ GuestEFGH(U)', t)
+        self.expect(' 1 partnership displayed.', t)
+        self.expect('Unpartnered players with bugopen on', t)
+        self.expect('++++ GuestIJKL(U)\r\n++++ GuestMNOP(U)', t)
+        self.expect('2 players displayed (of 4).', t)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
 class TestPartner(Test):
     def test_bugopen(self):
         t = self.connect_as_guest('GuestABCD')
@@ -65,6 +121,9 @@ class TestPartner(Test):
         t2.write('a\n')
         self.expect("GuestEFGH accepts your partnership request.", t)
         self.expect("Accepting the partnership request from GuestABCD.", t2)
+
+        self.expect("GuestEFGH agrees to be your partner.", t)
+        self.expect("You agree to be GuestABCD's partner.", t2)
 
         t.write('bugwho p\n')
         self.expect('1 partnership displayed.', t)
@@ -223,6 +282,8 @@ class TestPartner(Test):
         t2.write('partner guestabcd\n')
         self.expect('Accepting the partnership request from GuestABCD.', t2)
         self.expect('GuestEFGH accepts your partnership request.', t)
+        self.expect("GuestEFGH agrees to be your partner.", t)
+        self.expect("You agree to be GuestABCD's partner.", t2)
 
         self.close(t)
         self.expect('Your partner, GuestABCD, has departed.', t2)

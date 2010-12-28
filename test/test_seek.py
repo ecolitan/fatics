@@ -37,9 +37,9 @@ class TestSeek(Test):
         self.expect('You already have an active seek with the same parameters.', t)
 
         t.write('seek 15+5\n')
-        self.expect('Your seek has been posted with index %d.' %
-            (n  + 1), t)
-        self.expect('GuestABCD (++++) seeking 15 5 unrated standard ("play %d" to respond)' % (n + 1), t2)
+        m2 = self.expect_re('Your seek has been posted with index (\d+).', t)
+        n2 = int(m2.group(1))
+        self.expect('GuestABCD (++++) seeking 15 5 unrated standard ("play %d" to respond)' % n2, t2)
         self.expect('(1 player saw the seek.)', t)
 
         t.write('unseek\n')

@@ -44,10 +44,8 @@ class Var(object):
         self.is_persistent = False
         self.is_formula_or_note = False
         # display in vars output
-        self.display_in_vars = True
 
     def hide_in_vars(self):
-        self.display_in_vars = False
         return self
 
     def add_as_var(self):
@@ -55,9 +53,10 @@ class Var(object):
         self.is_ivar = False
         return self
 
-    def add_as_ivar(self, number): 
+    def add_as_ivar(self, number=None):
         ivars[self.name] = self
-        ivar_number[number] = self
+        if number is not None:
+            ivar_number[number] = self
         self.is_ivar = True
         return self
 
@@ -122,7 +121,6 @@ class FormulaVar(Var):
         name = 'formula' if num == 0 else 'f' + str(num)
         super(FormulaVar, self).__init__(name, None)
         self.num = num
-        self.display_in_vars = False
         self.is_formula_or_note = True
 
     def set(self, user, val):
@@ -147,7 +145,6 @@ class NoteVar(Var):
 
     def __init__(self, name, default):
         Var.__init__(self, name, default)
-        self.display_in_vars = False # don't display in "vars" output
         self.is_formula_or_note = True
 
     def set(self, user, val):
@@ -182,8 +179,8 @@ class IntVar(Var):
     def get_display_str(self, val):
         return '''%s=%d''' % (self.name, val)
 
-"""A boolean variable."""
 class BoolVar(Var):
+    """ A boolean variable. """
     def __init__(self, name, default, on_msg=None, off_msg=None):
         Var.__init__(self, name, default)
 
@@ -251,9 +248,11 @@ class VarList(object):
         BoolVar("examine", False, N_("You will now enter examine mode after a game.\n"), N_("You will now not enter examine mode after a game.\n")).persist().add_as_var()
         BoolVar("mailmess", False, N_("Your messages will be mailed to you.\n"), N_("Your messages will not be mailed to you.\n")).persist().add_as_var()
         BoolVar("showownseek", False, N_("You will now see your own seeks.\n"), N_("You will not see your own seeks.\n")).persist().add_as_var()
+        # TODO: highlight
 
-        # non-persistent
+        # not persistent
         BoolVar("tourney", False, N_("Your tournament variable is now set.\n"), N_("Your tournament variable is no longer set.\n")).add_as_var()
+        BoolVar("flip", False, N_("Flip on.\n"), N_("Flip off.\n")).add_as_var()
 
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
@@ -322,6 +321,13 @@ class VarList(object):
         BoolVar("obsping", False).add_as_ivar(33) # ignored
         BoolVar("singleboard", False).add_as_ivar(34)
 
+        # These do not seem to have numbers.
+        BoolVar("atomic", True).add_as_ivar()
+        BoolVar("vthighlight", False).add_as_ivar()
+
+        # The original FICS ivariables command displays "xml=0", but
+        # does not allow setting an xml ivariable.
+
         self.default_ivars = {}
         for ivar in ivars.itervalues():
             self.default_ivars[ivar.name] = ivar.default
@@ -341,14 +347,5 @@ class VarList(object):
         return copy.copy(self.default_ivars)
 
 varlist = VarList()
-
-
-'''
-other possible ivars?
-atomic
-vthighlight
-xml ?
-'''
-
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
