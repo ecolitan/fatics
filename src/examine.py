@@ -40,6 +40,7 @@ class ExaminedGame(Game):
             user, user)
         assert(user.session.game is None)
         user.session.game = self
+
         self.start_time = time.time()
         if hist_game is None:
             self.speed_variant = speed_variant.from_names('untimed', 'chess')
@@ -60,6 +61,11 @@ class ExaminedGame(Game):
             self.black_name = hist_game['black_name']
             self.result_code = hist_game['result']
             self.result_reason = hist_game['result_reason']
+
+        for uf in user.session.followed_by:
+            uf.write_('\n%s, whom you are following, has started examining a game.\n', user)
+            self.observe(uf)
+
         self.send_boards()
 
     def forward(self, n, conn):

@@ -165,6 +165,101 @@ class TestObserve(Test):
         for tt in [t, t2, t3, t4, t5]:
             self.close(tt)
 
+class TestFollow(Test):
+    def test_follow_examine(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest()
+
+        t2.write('set style 12\n')
+        t2.write('follow guestabcd\n')
+        self.expect("You will now be following GuestABCD's games.", t2)
+
+        t2.write('foll guestabcd\n')
+        self.expect("You are already following GuestABCD's games.", t2)
+
+        t.write('ex\n')
+        self.expect('GuestABCD, whom you are following, has started examining a game.', t2)
+        self.expect('<12> ', t2)
+        t.write('Nf3\n')
+        self.expect('GuestABCD moves: Nf3', t2)
+
+        t2.write('follow\n')
+        self.expect("You will not follow any player's games.", t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_follow_play(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest()
+
+        t3.write('set style 12\n')
+        t3.write('follow guestabcd\n')
+        self.expect("You will now be following GuestABCD's games.", t3)
+
+        t.write('match guestefgh 1+0 u w\n')
+        self.expect('Challenge: ', t2)
+        t2.write('a\n')
+
+        self.expect("GuestABCD, whom you are following, has started a game with GuestEFGH.", t3)
+
+        t3.write('unfollow\n')
+        self.expect("You will not follow any player's games.", t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
+    def test_follow_in_progress(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest()
+
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t.write('Nf3\n')
+        self.expect('GuestABCD moves: Nf3', t)
+
+        t2.write('set style 12\n')
+        t2.write('follow guestabcd\n')
+        self.expect("You will now be following GuestABCD's games.", t2)
+        self.expect('<12> ', t2)
+
+        t2.write('o guestabcd\n')
+        self.expect("You are already observing ", t2)
+
+        t.write('d5\n')
+        self.expect('GuestABCD moves: d5', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_follow_logout(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest()
+
+        t2.write('follow guestabcd\n')
+        self.expect("You will now be following GuestABCD's games.", t2)
+
+        self.close(t)
+        self.expect('GuestABCD, whose games you were following, has logged out.', t2)
+        self.close(t2)
+
+    def test_follow_bad(self):
+        t = self.connect_as_guest('GuestABCD')
+
+        t.write('follow\n')
+        self.expect("You are not following any player's games.", t)
+        t.write('follow admin\n')
+        self.expect('No player named "admin" is online.', t)
+        t.write('follow 1\n')
+        self.expect('"1" is not a valid handle.', t)
+        t.write('follow GuestABCD\n')
+        self.expect("You can't follow your own games.", t)
+
+        self.close(t)
+
+
 class TestAllobservers(Test):
     def test_allobservers(self):
         t = self.connect_as_guest('GuestABCD')
@@ -235,12 +330,6 @@ class TestPrimary(Test):
         t4 = self.connect_as_guest('GuestMNOP')
         t5 = self.connect_as('testobs', 'testpass')
 
-        t5.write('primary\n')
-        self.expect('You are not observing any games.', t5)
-
-        t5.write('primary 1\n')
-        self.expect('There is no such game.', t5)
-
         t.write('ex\n')
         self.expect('Starting a game', t)
 
@@ -291,5 +380,25 @@ class TestPrimary(Test):
 
         for tt in [t, t2, t3, t4, t5]:
             self.close(tt)
+
+    def test_primary_bad(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest()
+
+        t2.write('primary\n')
+        self.expect('You are not observing any games.', t2)
+
+        t2.write('primary 999\n')
+        self.expect('There is no such game.', t2)
+
+        t2.write('primary GuestABCD\n')
+        self.expect('GuestABCD is not playing or examining a game.', t2)
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t2.write('primary GuestABCD\n')
+        self.expect('You are not observing game', t2)
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

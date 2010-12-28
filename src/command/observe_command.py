@@ -17,9 +17,12 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
+from command import ics_command, Command
 
-@ics_command('observe', 'i', admin.Level.user)
+import game
+import user
+
+@ics_command('observe', 'i')
 class Observe(Command):
     def run(self, args, conn):
         if args[0] in ['/l', '/b', '/s', '/S', '/w', '/z', '/B', '/L', '/x']:
@@ -35,7 +38,46 @@ class Observe(Command):
                 assert(conn.user not in g.observers)
                 g.observe(conn.user)
 
-@ics_command('allobservers', 'o', admin.Level.user)
+@ics_command('follow', 'o')
+class Follow(Command):
+    def run(self, args, conn):
+        if args[0] is None:
+            uf = conn.user.session.following
+            if not uf:
+                conn.write(_("You are not following any player's games.\n"))
+            else:
+                assert(uf.is_online)
+                uf.session.followed_by.remove(conn.user)
+                conn.user.session.following = None
+                conn.write(_("You will not follow any player's games.\n"))
+        else:
+            u2 = user.find.by_prefix_for_user(args[0], conn,
+                online_only=True)
+            if u2:
+                if u2 == conn.user:
+                    conn.write(_("You can't follow your own games.\n"))
+                    return
+                if conn.user.session.following:
+                    if u2 == conn.user.session.following:
+                        conn.write(_("You are already following %s's games.\n")
+                            % u2.name)
+                        return
+                    conn.user.write(_("You will no longer be following %s's games.\n") % conn.user.session.following.name)
+                    conn.user.session.following.session.followed_by.remove(conn.user)
+                    conn.user.session.following = None
+                conn.write(_("You will now be following %s's games.\n")
+                    % u2.name)
+                conn.user.session.following = u2
+                u2.session.followed_by.add(conn.user)
+
+                # If there is a game in progress and we are not already
+                # observing it, start observing it.
+                if (u2.session.game and
+                        u2.session.game not in conn.user.session.observed):
+                    u2.session.game.observe(conn.user)
+                    assert(u2.session.game in conn.user.session.observed)
+
+@ics_command('allobservers', 'o')
 class Allobservers(Command):
     def run(self, args, conn):
         if args[0] is not None:
@@ -50,7 +92,7 @@ class Allobservers(Command):
             for g in game.games.itervalues():
                 g.show_observers(conn)
 
-@ics_command('unobserve', 'n', admin.Level.user)
+@ics_command('unobserve', 'n')
 class Unobserve(Command):
     def run(self, args, conn):
         if args[0] is not None:
@@ -69,7 +111,7 @@ class Unobserve(Command):
                     g.unobserve(conn.user)
                 assert(not conn.user.session.observed)
 
-@ics_command('primary', 'n', admin.Level.user)
+@ics_command('primary', 'n')
 class Primary(Command):
     def run(self, args, conn):
         if args[0] is None:
@@ -90,6 +132,6 @@ class Primary(Command):
                             g.number)
 
                 else:
-                    conn.write('You are not observing game %d.\n' % conn)
+                    conn.write('You are not observing game %d.\n' % g.number)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

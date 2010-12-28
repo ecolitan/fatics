@@ -52,6 +52,7 @@ class Session(object):
         self.seeks = []
         self.partner = None
         self.following = None
+        self.followed_by = set()
 
     def set_user(self, user):
         self.user = user
@@ -81,7 +82,7 @@ class Session(object):
         if self.partner:
             #self.conn.write(_('Removing partnership with %s.\n') %
             #    partner.name)
-            self.partner.write_('Your partner, %s, has departed.\n',
+            self.partner.write_('\nYour partner, %s, has departed.\n',
                 self.user.name)
             partner.end_partnership(self.partner, self.user)
 
@@ -90,6 +91,11 @@ class Session(object):
             assert(self.game == None)
         del self.offers_received[:]
         del self.offers_sent[:]
+
+        if self.followed_by:
+            for p in self.followed_by.copy():
+                p.write_('\n%s, whose games you were following, has logged out.\n', self.user.name)
+            self.followed_by = set()
 
         # unobserve games
         assert(self.user.session == self)

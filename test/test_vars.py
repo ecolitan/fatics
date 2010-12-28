@@ -40,7 +40,8 @@ class TestVarsCommand(Test):
         self.expect('offers', t)
         t.write('part guestefgh\n')
         self.expect('agree', t)
-        # TODO: follow
+        t.write('follow guestefgh\n')
+        self.expect("You will now be following GuestEFGH's games.", t)
 
         t.write('vars\n')
         self.expect('Variable settings of Guest', t)
@@ -48,6 +49,7 @@ class TestVarsCommand(Test):
         self.expect('Prompt: ics>', t)
         self.expect('Interface: Test interface', t)
         self.expect('Bughouse partner: GuestEFGH', t)
+        self.expect('Following: GuestEFGH', t)
 
         self.close(t)
 

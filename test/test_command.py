@@ -46,11 +46,25 @@ class TestCommand(Test):
 
         t.write('   \t \n')
         self.expect_not('Bad command', t)
-        
+
         t.write('tell\n')
         self.expect('Usage: ', t)
 
-        t.close()
-    
+        self.close(t)
+
+    def test_message_resends_prompt(self):
+        ''' Test that an asynchronous message from the server is preceded by
+        a newline and followed by a new prompt. '''
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest()
+
+        t2.write('\n')
+        self.expect('fics% ', t2)
+
+        t.write('shout foo bar\n')
+        self.expect('\r\nadmin(*) shouts: foo bar\r\nfics% ', t2)
+
+        self.close(t)
+        self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -399,7 +399,6 @@ class PlayedGame(Game):
             self._init_new(chal)
             creating = 'Creating'
         assert(self.clock)
-        # XXX is this property necessary?
         self.is_active = True
 
         self.players = set([self.white, self.black])
@@ -457,6 +456,12 @@ class PlayedGame(Game):
 
         self.white.session.last_opp = self.black
         self.black.session.last_opp = self.white
+
+        for p in self.players:
+            for uf in p.session.followed_by:
+                uf.write_('\n%(uname)s, whom you are following, has started a game with %(oppname)s.\n',
+                    {'uname': p, 'oppname': self.get_opp(p)})
+                self.observe(uf)
 
         p = self.get_user_to_move()
         if p.has_timeseal():

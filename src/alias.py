@@ -168,7 +168,9 @@ class Alias(object):
             'sit': 'ptell sit! $@',
             'nosit': 'ptell go! $@',
             'mateme': 'ptell $1 mates me! $@',
-            'mates': 'ptell $1 mates $o! $@'
+            'mates': 'ptell $1 mates $o! $@',
+            # not in "help system_alias"
+            'unfollow': 'follow',
     }
 
     # If this ever needs optimization, punctuation could be separated
