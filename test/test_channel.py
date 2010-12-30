@@ -100,11 +100,24 @@ class TestChannel(Test):
         t.write('-ch 100\n')
         self.expect("is not on your channel list", t)
 
+        self.close(t)
+
+    def test_channel_admin_ch0(self):
+        t = self.connect_as_admin()
         t.write('+ch 0\n')
         self.expect("[0] added to your channel list", t)
+        t.write('inch 0\n')
+        self.expect('0: admin', t)
+        self.close(t)
+
+        # XXX want to do a server restart here to check whether
+        # the value is stored correctly in the DB
+
+        t = self.connect_as_admin()
+        t.write('inch 0\n')
+        self.expect('0: admin', t)
         t.write('-ch 0\n')
         self.expect("[0] removed from your channel list", t)
-
         self.close(t)
 
     def test_chanoff_var(self):

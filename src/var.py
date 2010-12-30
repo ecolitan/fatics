@@ -17,6 +17,8 @@
 #
 
 import copy
+import pytz
+import datetime
 
 import trie
 import lang
@@ -44,9 +46,6 @@ class Var(object):
         self.is_persistent = False
         self.is_formula_or_note = False
         # display in vars output
-
-    def hide_in_vars(self):
-        return self
 
     def add_as_var(self):
         vars[self.name] = self
@@ -87,10 +86,8 @@ class StringVar(Var):
         if val is None:
             user.write(_('''%s unset.\n''') % self.name)
         else:
-            user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
-
-    def get_display_str(self, val):
-        return '''%s="%s"''' % (self.name, val)
+            user.write((_('''%(name)s set to "%(val)s".\n''')
+                % {'name': self.name, 'val': val}))
 
 class PromptVar(StringVar):
     def set(self, user, val):
@@ -137,9 +134,6 @@ class FormulaVar(Var):
             user.set_formula(self, val)
             user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
 
-    def get_display_str(self, val):
-        return '''%s=%s''' % (self.name, val)
-
 class NoteVar(Var):
     max_len = 1023
 
@@ -154,10 +148,27 @@ class NoteVar(Var):
         if val is None:
             user.write(_('''Note %s unset.\n''') % self.name)
         else:
-            user.write((_('''Note %(name)s set: %(val)s\n''') % {'name': self.name, 'val': val}))
+            user.write((_('''Note %(name)s set: %(val)s\n''') %
+                {'name': self.name, 'val': val}))
 
-"""An integer variable."""
+class TzoneVar(Var):
+    def set(self, user, val):
+        if val is None:
+            val = 'UTC'
+        elif val not in pytz.common_timezones:
+            raise BadVarError()
+        user.tz = pytz.timezone(val)
+        user.set_var(self, val)
+        if val == 'UTC':
+            info = ''
+        else:
+            info = datetime.datetime.utcnow().replace(
+                tzinfo=pytz.utc).astimezone(user.tz).strftime(' (%Z, UTC%z)')
+        user.write(_('''Time zone set to "%(val)s"%(info)s.\n''') %
+            {'val': val, 'info': info})
+
 class IntVar(Var):
+    """An integer variable."""
     def __init__(self, name, default, min=-99999, max=99999):
         Var.__init__(self, name, default)
         self.min = min
@@ -175,9 +186,6 @@ class IntVar(Var):
         else:
             user.set_var(self, val)
         user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
-
-    def get_display_str(self, val):
-        return '''%s=%d''' % (self.name, val)
 
 class BoolVar(Var):
     """ A boolean variable. """
@@ -217,9 +225,6 @@ class BoolVar(Var):
                 user.write(_(self.off_msg))
             else:
                 user.write(_("%s unset.\n") % self.name)
-
-    def get_display_str(self, val):
-        return '''%s=%d''' % (self.name, int(val))
 
 class VarList(object):
     def __init__(self):
@@ -271,6 +276,8 @@ class VarList(object):
 
         for i in range(1, 11):
             NoteVar(str(i), None).persist().add_as_var()
+
+        TzoneVar("tzone", "UTC").persist().add_as_var()
 
         self.default_vars = {}
         self.transient_vars = {}

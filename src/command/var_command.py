@@ -92,9 +92,8 @@ class Variables(Command):
         if not u:
             return
 
-        #disp_tzone = u.vars['tzone'] if (u == conn.user or
-        #    u.is_admin()) else '???'
-        u.vars['disp_tzone'] = '???'
+        u.vars['disp_tzone'] = u.vars['tzone'][0:8] if (u == conn.user or
+            conn.user.is_admin()) else '???'
 
         conn.write(_("Variable settings of %s:\n\n") % u.name)
         conn.write('time=%(time)d       private=?     shout=%(shout)d         pin=?           style=%(style)d \n' % u.vars)

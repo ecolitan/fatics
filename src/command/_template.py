@@ -17,7 +17,7 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
+from command import ics_command, Command
 
 @ics_command('foo', '')
 class Foo(Command):

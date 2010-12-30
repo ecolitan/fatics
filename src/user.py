@@ -343,6 +343,7 @@ class User(BaseUser):
         for note in db.user_get_notes(self.id):
             self.notes[note['num']] = note['txt']
         self._rating = None
+        self.tz = pytz.timezone(self.vars['tzone'])
 
     def _get_censor(self):
         if self._censor is None:
@@ -625,6 +626,7 @@ class GuestUser(BaseUser):
         self.censor = set()
         self.is_muted = False
         self.is_playbanned = False
+        self.tz = pytz.timezone(self.vars['tzone'])
 
     def log_on(self, conn):
         self._titles = set(['unregistered'])

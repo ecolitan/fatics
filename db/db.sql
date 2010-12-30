@@ -59,7 +59,7 @@ CREATE TABLE `user` (
   `messreply` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'send email address in mailed messages',
   `chanoff` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'hide all channel tells',
   `showownseek` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'show own seeks',
-  `tzone` varchar(8) NOT NULL DEFAULT 'SERVER' COMMENT 'time zone',
+  `tzone` varchar(32) NOT NULL DEFAULT 'UTC' COMMENT 'time zone',
   `provshow` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show provisional ratings',
   `silence` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'hide shouts and tells while playing',
   `autoflag` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'automatically flag opp',
@@ -111,14 +111,17 @@ CREATE TABLE `note` (
 
 DROP TABLE IF EXISTS `channel`;
 CREATE TABLE `channel` (
-  `channel_id` int(8) NOT NULL AUTO_INCREMENT,
+  -- Making channel_id AUTO_INCREMENT caused a bug with channel 0, because
+  -- MySQL intepreted 0 as an auto-increment value.  Fortunately, there
+  -- is no need to use AUTO_INCREMENT with channels.
+  `channel_id` int(8) NOT NULL,
   `name` varchar(32) DEFAULT NULL COMMENT 'brief channel name',
   `descr` varchar(255) DEFAULT NULL COMMENT 'long channel desciption',
   `topic` varchar(1024) DEFAULT NULL COMMENT 'topic text, if any',
   `topic_who` int(8) DEFAULT NULL COMMENT 'who posted the topic',
   `topic_when` timestamp COMMENT 'when the topic was posted',
   PRIMARY KEY (`channel_id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 
 -- A list of owners for each channel.
 DROP TABLE IF EXISTS `channel_owner`;

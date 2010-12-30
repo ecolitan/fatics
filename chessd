@@ -15,6 +15,13 @@ case "$1" in
     echo "Running test suite...."
     trial -e test/
     ;;
+  upgrade)
+    echo "Upgrading and restarting server...."
+    $0 stop
+    hg pull
+    hg update
+    $0 start
+    ;;
   reloaddb)
     echo "Reloading database...."
     mysql chess < db/db.sql
@@ -29,7 +36,7 @@ case "$1" in
     kill `cat chessd.pid`
     ;;
   *)
-    echo "Usage: $0 (start|run|test|profile|stop)"
+    echo "Usage: $0 (start|stop|run|test|profile|upgrade|reloaddb)"
     ;;
 esac
 

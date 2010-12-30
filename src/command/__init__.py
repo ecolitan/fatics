@@ -17,7 +17,8 @@
 #
 
 __all__ = ['admin_command',
-'bug_command', 'channel_command', 'command', 'examine_command',
+'bug_command', 'channel_command', 'command',
+'date_command', 'examine_command',
 'game_command',
 'kibitz_command', 'list_command', 'match_command', 'message_command',
 'news_command',

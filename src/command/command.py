@@ -16,7 +16,6 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import time
 import re
 
 import user
@@ -127,19 +126,6 @@ class Alias(Command):
         else:
             conn.write(_('Alias "%s" set.\n') % aname)
 
-@ics_command('date', '', admin.Level.user)
-class Date(Command):
-    def run(self, args, conn):
-        t = time.time()
-        #conn.write(_("Local time     - %s\n") % )
-        conn.write(_("Server time    - %s\n") % time.strftime("%a %b %e, %H:%M UTC %Y", time.gmtime(t)))
-        conn.write(_("GMT            - %s\n") % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime(t)))
-
-@ics_command('follow', 'w', admin.Level.user)
-class Follow(Command):
-    def run(self, args, conn):
-        conn.write('TODO: FOLLOW\n')
-
 @ics_command('games', 'o', admin.Level.user)
 class Games(Command):
     def run(self, args, conn):
@@ -207,16 +193,6 @@ class Unalias(Command):
         else:
             conn.user.set_alias(aname, None)
             conn.write(_('Alias "%s" unset.\n') % aname)
-
-@ics_command('uptime', '', admin.Level.user)
-class Uptime(Command):
-    def run(self, args, conn):
-        conn.write(_("FatICS version : %s\n") % server.version)
-        conn.write(_("Server location: %s\n" % server.location))
-        conn.write(_("The server has been up since %s.\n")
-            % time.strftime("%a %b %e, %H:%M GMT %Y", time.gmtime()))
-        conn.write(_("Up for: %s\n") % time_format.hms_words(time.time() -
-            server.start_time))
 
 @ics_command('who', 'T', admin.Level.user)
 class Who(Command):
