@@ -53,8 +53,7 @@ def from_name_or_number(arg, conn):
             conn.write(_("There is no such game.\n"))
     except ValueError:
         # user name
-        u = user.find.by_prefix_for_user(arg, conn,
-            online_only=True)
+        u = user.find_by_prefix_for_user(arg, conn, online_only=True)
         if u:
             if not u.session.game:
                 conn.write(_("%s is not playing or examining a game.\n")

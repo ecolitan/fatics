@@ -35,7 +35,7 @@ class Match(Command):
             else:
                 conn.write(_("You can't challenge while you are playing a game.\n"))
             return
-        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+        u = user.find_by_prefix_for_user(args[0], conn, online_only=True)
         if not u:
             return
         if u == conn.user:

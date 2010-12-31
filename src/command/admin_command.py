@@ -47,7 +47,7 @@ class Admin(Command):
 @ics_command('aclearhistory', 'w', admin.Level.admin)
 class Aclearhistory(Command):
     def run(self, args, conn):
-        u = user.find.by_name_exact_for_user(args[0], conn)
+        u = user.find_by_name_exact_for_user(args[0], conn)
         if u:
             # disallow clearing history for higher adminlevels?
             u.clear_history()
@@ -57,20 +57,17 @@ class Aclearhistory(Command):
 class Addplayer(Command):
     def run(self, args, conn):
         [name, email, real_name] = args
-        try:
-            u = user.find.by_name_exact(name)
-        except user.UsernameException as e:
-            conn.write(e.reason + '\n')
+        u = user.find_by_name_exact_for_user(name, conn)
+        if u:
+            conn.write(A_('A player named %s is already registered.\n')
+                % u.name)
         else:
-            if u:
-                conn.write(A_('A player named %s is already registered.\n') % u.name)
-            else:
-                passwd = user.make_passwd()
-                user.add_user(name, email, passwd, real_name)
-                # Not sure if this is useful info.
-                #db.add_comment(conn.user.id, user_id,
-                #    'Player added by addplayer.')
-                conn.write(A_('Added: >%s< >%s< >%s< >%s<\n') % (name, real_name, email, passwd))
+            passwd = user.make_passwd()
+            user_id = user.add_user(name, email, passwd, real_name)
+            #db.add_comment(conn.user.id, user_id,
+            #    'Player added by %s using addplayer.' % conn.user.name)
+            conn.write(A_('Added: >%s< >%s< >%s< >%s<\n')
+                % (name, real_name, email, passwd))
 
 @ics_command('announce', 'S', admin.Level.admin)
 class Announce(Command):
@@ -103,7 +100,7 @@ class Areload(Command):
 class Asetadmin(Command):
     def run(self, args, conn):
         [name, level] = args
-        u = user.find.by_name_exact_for_user(name, conn)
+        u = user.find_by_name_exact_for_user(name, conn)
         if u:
             # Note: it's possible to set the admin level
             # of a guest.
@@ -125,7 +122,7 @@ class Asetadmin(Command):
 class Asetpasswd(Command):
     def run(self, args, conn):
         (name, passwd) = args
-        u = user.find.by_name_exact_for_user(name, conn)
+        u = user.find_by_name_exact_for_user(name, conn)
         if u:
             if u.is_guest:
                 conn.write('You cannot set the password of an unregistered player!\n')
@@ -144,7 +141,7 @@ class Asetrating(Command):
     def run(self, args, conn):
         (name, speed_name, variant_name, urating, rd, volatility, win,
             loss, draw) = args
-        u = user.find.by_prefix_for_user(name, conn)
+        u = user.find_by_prefix_for_user(name, conn)
         if not u:
             return
         if u.is_guest:
@@ -170,7 +167,7 @@ class Asetrating(Command):
 @ics_command('asetemail', 'ww', admin.Level.admin)
 class Asetemail(Command):
     def run(self, args, conn):
-        u = user.find.by_prefix_for_user(args[0], conn)
+        u = user.find_by_prefix_for_user(args[0], conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
                 conn.write("You need a higher adminlevel to change the email address of %s.\n" % u.name)
@@ -201,7 +198,7 @@ class Asetemail(Command):
 @ics_command('nuke', 'w', admin.Level.admin)
 class Nuke(Command):
     def run(self, args, conn):
-        u = user.find.by_name_exact_for_user(args[0], conn)
+        u = user.find_by_name_exact_for_user(args[0], conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
                 conn.write("You need a higher adminlevel to nuke %s!\n" % u.name)
@@ -217,7 +214,7 @@ class Nuke(Command):
 @ics_command('pose', 'wS', admin.Level.admin)
 class Pose(Command):
     def run(self, args, conn):
-        u2 = user.find.by_prefix_for_user(args[0], conn.user,
+        u2 = user.find_by_prefix_for_user(args[0], conn.user,
             online_only=True)
         if u2:
             if not admin.checker.check_user_operation(conn.user, u2):
@@ -231,7 +228,7 @@ class Pose(Command):
 @ics_command('remplayer', 'w', admin.Level.admin)
 class Remplayer(Command):
     def run(self, args, conn):
-        u = user.find.by_name_exact_for_user(args[0], conn)
+        u = user.find_by_name_exact_for_user(args[0], conn)
         if u:
             if not admin.checker.check_user_operation(conn.user, u):
                 conn.write(A_('''You can't remove an admin with a level higher than or equal to yourself.\n'''))
@@ -244,7 +241,7 @@ class Remplayer(Command):
 @ics_command('addcomment', 'wS', admin.Level.admin)
 class Addcomment(Command):
     def run(self, args, conn):
-        u = user.find.by_prefix_for_user(args[0], conn)
+        u = user.find_by_prefix_for_user(args[0], conn)
         if u:
             if u.is_guest:
                 conn.write(A_('Unregistered players cannot have comments.\n'))
@@ -255,7 +252,7 @@ class Addcomment(Command):
 @ics_command('showcomment', 'w', admin.Level.admin)
 class Showcomment(Command):
     def run(self, args, conn):
-        u = user.find.by_prefix_for_user(args[0], conn)
+        u = user.find_by_prefix_for_user(args[0], conn)
         if u:
             if u.is_guest:
                 conn.write(A_('Unregistered players cannot have comments.\n'))

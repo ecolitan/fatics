@@ -85,7 +85,7 @@ class TitleList(SystemUserList):
 
     def add(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(_("Only registered users may have titles.\n"))
@@ -99,7 +99,7 @@ class TitleList(SystemUserList):
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(_("Only registered users may have titles.\n"))
@@ -117,7 +117,7 @@ class NotifyList(MyList):
     def add(self, item, conn):
         if conn.user.is_guest:
             raise ListError(_('Only registered players can have notify lists.\n'))
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u == conn.user:
                 raise ListError(_('You cannot notify yourself.\n'))
@@ -135,7 +135,7 @@ class NotifyList(MyList):
     def sub(self, item, conn):
         if conn.user.is_guest:
             raise ListError(_('Only registered players can have notify lists.\n'))
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.notifiers:
                 raise ListError(_('%s is not on your notify list.\n') % u.name)
@@ -154,7 +154,7 @@ class NotifyList(MyList):
 
 class IdlenotifyList(MyList):
     def add(self, item, conn):
-        u = user.find.by_prefix_for_user(item, conn, online_only=True)
+        u = user.find_by_prefix_for_user(item, conn, online_only=True)
         if u:
             if u == conn.user:
                 raise ListError(_('You cannot idlenotify yourself.\n'))
@@ -165,7 +165,7 @@ class IdlenotifyList(MyList):
             conn.write(_('%s added to your idlenotify list.\n') % u.name)
 
     def sub(self, item, conn):
-        u = user.find.by_prefix_for_user(item, conn, online_only=True)
+        u = user.find_by_prefix_for_user(item, conn, online_only=True)
         if u:
             if conn.user not in u.idlenotified:
                 raise ListError(_('%s is not on your idlenotify list.\n') % u.name)
@@ -218,7 +218,7 @@ class ChannelList(MyList):
 
 class CensorList(MyList):
     def add(self, item, conn):
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.name in conn.user.censor:
                 raise ListError(_('%s is already on your censor list.\n') % u.name)
@@ -226,7 +226,7 @@ class CensorList(MyList):
             conn.write(_('%s added to your censor list.\n') % u.name)
 
     def sub(self, item, conn):
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.censor:
                 raise ListError(_('%s is not on your censor list.\n') % u.name)
@@ -241,7 +241,7 @@ class CensorList(MyList):
 
 class NoplayList(MyList):
     def add(self, item, conn):
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.name in conn.user.noplay:
                 raise ListError(_('%s is already on your noplay list.\n') % u.name)
@@ -249,7 +249,7 @@ class NoplayList(MyList):
             conn.write(_('%s added to your noplay list.\n') % u.name)
 
     def sub(self, item, conn):
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.noplay:
                 raise ListError(_('%s is not on your noplay list.\n') % u.name)
@@ -269,7 +269,7 @@ class BanList(SystemUserList):
 
     def add(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(A_('Only registered players can be banned.\n'))
@@ -285,7 +285,7 @@ class BanList(SystemUserList):
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(A_('Only registered players can be banned.\n'))
@@ -305,7 +305,7 @@ class MuzzleList(SystemUserList):
 
     def add(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(A_('Only registered players can be muzzled.\n'))
@@ -319,7 +319,7 @@ class MuzzleList(SystemUserList):
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(A_('Only registered players can be muzzled.\n'))
@@ -339,7 +339,7 @@ class MuteList(SystemUserList):
 
     def add(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_admin():
                 raise ListError(A_('Admins cannot be muted.\n'))
@@ -352,7 +352,7 @@ class MuteList(SystemUserList):
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if not u.is_muted:
                 raise ListError(_('%s is not on the mute list.\n') % u.name)
@@ -390,7 +390,7 @@ class RatedbanList(SystemUserList):
 
     def add(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(A_('Only registered players can be ratedbanned.\n'))
@@ -404,7 +404,7 @@ class RatedbanList(SystemUserList):
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_guest:
                 raise ListError(A_('Only registered players can be ratedbanned.\n'))
@@ -424,7 +424,7 @@ class PlaybanList(SystemUserList):
 
     def add(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.is_admin():
                 raise ListError(A_('Admins cannot be playbanned.\n'))
@@ -437,7 +437,7 @@ class PlaybanList(SystemUserList):
 
     def sub(self, item, conn):
         self._require_admin(conn.user)
-        u = user.find.by_prefix_for_user(item, conn)
+        u = user.find_by_prefix_for_user(item, conn)
         if u:
             if not u.is_playbanned:
                 raise ListError(_('%s is not on the playban list.\n') % u.name)

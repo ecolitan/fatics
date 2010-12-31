@@ -52,7 +52,7 @@ class Chkick(Command):
     @requires_registration
     def run(self, args, conn):
         (chid, name) = args
-        u = user.find.by_prefix_for_user(name, conn)
+        u = user.find_by_prefix_for_user(name, conn)
         if not u:
             return
         try:

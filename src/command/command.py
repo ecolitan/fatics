@@ -151,17 +151,6 @@ class Help(Command):
             cmds = [c.name for c in command_list.cmds.itervalues()]
         conn.write('This server is under development.\n\nRecognized commands: %s\n' % ' '.join(cmds))
 
-@ics_command('history', 'o', admin.Level.user)
-class History(Command):
-    def run(self, args, conn):
-        u = None
-        if args[0] is not None:
-            u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
-        else:
-            u = conn.user
-        if u:
-            history.show_for_user(u, conn)
-
 @ics_command('password', 'WW', admin.Level.user)
 class Password(Command):
     def run(self, args, conn):

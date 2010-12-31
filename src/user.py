@@ -652,91 +652,106 @@ class AmbiguousException(Exception):
     def __init__(self, names):
         self.names = names
 
-"""Various ways to look up a user."""
-class Find(object):
-    def _check_name(self, name, min_len):
-        if len(name) < min_len:
-            raise UsernameException(_('Names should be at least %d characters long.  Try again.\n') % min_len)
-        elif len(name) > 17:
-            raise UsernameException(_('Names should be at most %d characters long.  Try again.\n') % 17)
-        elif not self.username_re.match(name):
-            raise UsernameException(_('Names should only consist of lower and upper case letters.  Try again.\n'))
+def _check_name(name, min_len):
+    """ Check whether a string is a valid user name. """
+    if len(name) < min_len:
+        raise UsernameException(_('Names should be at least %d characters long.  Try again.\n') % min_len)
+    elif len(name) > 17:
+        raise UsernameException(_('Names should be at most %d characters long.  Try again.\n') % 17)
+    elif not username_re.match(name):
+        raise UsernameException(_('Names should only consist of lower and upper case letters.  Try again.\n'))
 
-    """Find a user, accepting only exact matches."""
-    username_re = re.compile('^[a-zA-Z_]+$')
-    def by_name_exact(self, name, min_len=config.min_login_name_len,online_only=False):
-        self._check_name(name, min_len)
-        u = online.find_exact(name)
-        if not u and not online_only:
-            dbu = db.user_get(name)
-            if dbu:
-                u = User(dbu)
-        return u
+username_re = re.compile('^[a-zA-Z_]+$')
+def find_by_name_exact(name,
+        min_len=config.min_login_name_len, online_only=False):
+    """Find a user, accepting only exact matches. """
+    _check_name(name, min_len)
+    u = online.find_exact(name)
+    if not u and not online_only:
+        dbu = db.user_get(name)
+        if dbu:
+            u = User(dbu)
+    return u
 
-    """Find a user but allow the name to abbreviated if
+def _find_by_prefix(name, online_only=False):
+    """ Find a user but allow the name to abbreviated if
     it is unambiguous; if the name is not an exact match, prefer
-    online users to offline"""
-    def by_prefix(self, name, online_only=False):
-        u = None
-        if len(name) >= config.min_login_name_len:
-            u = self.by_name_exact(name, 2, online_only=online_only)
-        else:
-            self._check_name(name, 1)
-        if not u:
-            ulist = online.find_part(name)
-            if len(ulist) == 1:
-                u = ulist[0]
-            elif len(ulist) > 1:
-                # when there are multiple matching users
-                # online, don't bother searching for offline
-                # users who also match
-                raise AmbiguousException([u.name for u in ulist])
-        if u and online_only:
-            assert(u.is_online)
-        if not u and not online_only:
-            ulist = db.user_get_matching(name)
-            if len(ulist) == 1:
-                u = User(ulist[0])
-            elif len(ulist) > 1:
-                raise AmbiguousException([u['user_name'] for u in ulist])
-        return u
+    online users to offline. """
+    u = None
 
-    """ Like by_prefix(), but writes an error message on failure. """
-    def by_prefix_for_user(self, name, conn, min_len=0, online_only=False):
-        u = None
-        try:
-            if len(name) < min_len:
-                conn.write(_('You need to specify at least %d characters of the name.\n') % min_len)
-            else:
-                u = self.by_prefix(name, online_only=online_only)
-                if online_only:
-                    if not u:
-                        conn.write(_('No player named "%s" is online.\n') % name)
-                        u = None
-                    else:
-                        assert(u.is_online)
-                elif not u:
-                    conn.write(_('There is no player matching the name "%s".\n') % name)
-        except UsernameException:
-            conn.write(_('"%s" is not a valid handle.\n') % name)
-        except AmbiguousException as e:
-            conn.write(_("""Ambiguous name "%s". Matches: %s\n""") % (name, ' '.join(e.names)))
-        return u
+    # first try an exact match
+    if len(name) >= config.min_login_name_len:
+        u = find_by_name_exact(name, min_len=2, online_only=online_only)
+    else:
+        _check_name(name, 1)
+    if not u:
+        # failing that, try a prefix match
+        ulist = online.find_part(name)
+        if len(ulist) == 1:
+            u = ulist[0]
+        elif len(ulist) > 1:
+            # when there are multiple matching users
+            # online, don't bother searching for offline
+            # users who also match
+            raise AmbiguousException([u.name for u in ulist])
 
-    """Like by_name_exact, but writes an error message
-    on failure."""
-    def by_name_exact_for_user(self, name, conn):
-        u = None
-        try:
-            u = self.by_name_exact(name)
-        except UsernameException:
-            conn.write(_('"%s" is not a valid handle.\n') % name)
+    if u and online_only:
+        assert(u.is_online)
+    if not u and not online_only:
+        ulist = db.user_get_matching(name)
+        if len(ulist) == 1:
+            u = User(ulist[0])
+        elif len(ulist) > 1:
+            raise AmbiguousException([u['user_name'] for u in ulist])
+    return u
+
+def find_by_prefix_for_user(name, conn, min_len=0, online_only=False):
+    """ Like _find_by_prefix(), but writes a friendly error message on
+    failure. """
+
+    u = None
+    try:
+        # Original FICS interprets a name ending with ! as an exact name
+        # that is not an abbreviation.  I don't see this documented anywhere
+        # but Babas uses this for private tells.
+        if name.endswith('!'):
+            name = name[:-1]
+            assert(len(name) > 0)
+            return find_by_name_exact_for_user(name, conn,
+                min_len=min_len, online_only=online_only)
+
+        if len(name) < min_len:
+            conn.write(_('You need to specify at least %d characters of the name.\n') % min_len)
         else:
-            if not u:
+            u = _find_by_prefix(name, online_only=online_only)
+            if online_only:
+                if not u:
+                    conn.write(_('No player named "%s" is online.\n') % name)
+                    u = None
+                else:
+                    assert(u.is_online)
+            elif not u:
                 conn.write(_('There is no player matching the name "%s".\n') % name)
-        return u
+    except UsernameException:
+        conn.write(_('"%s" is not a valid handle.\n') % name)
+    except AmbiguousException as e:
+        conn.write(_("""Ambiguous name "%s". Matches: %s\n""") %
+            (name, ' '.join(e.names)))
+    return u
 
-find = Find()
+def find_by_name_exact_for_user(name, conn, min_len=config.min_login_name_len,
+        online_only=False):
+    """ Like find_by_name_exact, but writes an error message
+    on failure. """
+    u = None
+    try:
+        u = find_by_name_exact(name, min_len=min_len, online_only=online_only)
+    except UsernameException:
+        conn.write(_('"%s" is not a valid handle.\n') % name)
+    else:
+        if not u:
+            conn.write(_('There is no player matching the name "%s".\n') % name)
+    return u
 
 # test whether a string meets the requirements for a password
 def is_legal_passwd(passwd):

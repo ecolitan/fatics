@@ -59,7 +59,7 @@ class TellCommand(Command):
                         conn.user.write(_('''(Not sent because you are not in channel %s.)\n''') % ch.id)
                         ch = None
             else:
-                u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+                u = user.find_by_prefix_for_user(args[0], conn, online_only=True)
 
         if ch:
             count = ch.tell(args[1], conn.user)
@@ -110,7 +110,7 @@ class Qtell(Command):
         else:
             # qtell user
             try:
-                u = user.find.by_name_exact(args[0])
+                u = user.find_by_name_exact(args[0])
                 if not u or not u.is_online:
                     ret = 1
                 else:

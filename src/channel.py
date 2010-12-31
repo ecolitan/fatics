@@ -48,7 +48,7 @@ class Channel(object):
     def tell(self, msg, user):
         #if user.is_chmuzzled:
         #    user.write(_('You are muzzled in all channels.\n'))
-        msg = '%s(%d): %s\n' % (user.get_display_name(), self.id, msg)
+        msg = '\n%s(%d): %s\n' % (user.get_display_name(), self.id, msg)
         is_guest = user.is_guest
         count = 0
         name = user.name
@@ -76,7 +76,7 @@ class Channel(object):
 
     def show_topic(self, user):
         if self.topic:
-            user.write_('TOPIC(%d): *** %s (%s at %s) ***\n',
+            user.write_('\nTOPIC(%d): *** %s (%s at %s) ***\n',
                 (self.id, self.topic, self.topic_who_name,
                 user.format_datetime(self.topic_when)))
         else:
@@ -110,7 +110,7 @@ class Channel(object):
             db.channel_del_topic(self.id)
             for u in self.online:
                 if u.hears_channels():
-                    u.write_('%s(%d): *** Cleared topic. ***\n',
+                    u.write_('\n%s(%d): *** Cleared topic. ***\n',
                         (owner.get_display_name(), self.id))
         else:
             # set a new topic
@@ -211,7 +211,7 @@ class Channel(object):
 
         for p in self.online:
             if p.hears_channels():
-                p.write_('%s(%d): *** Kicked out %s. ***\n',
+                p.write_('\n%s(%d): *** Kicked out %s. ***\n',
                     (owner.get_display_name(), self.id, u.name))
 
     def get_display_name(self):

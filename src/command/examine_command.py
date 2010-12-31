@@ -40,7 +40,7 @@ class Examine(Command):
             conn.write('TODO: EXAMINE SCRATCH BOARD\n')
             return
 
-        u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
+        u = user.find_by_prefix_for_user(args[0], conn, min_len=2)
         if not u:
             return
 
@@ -62,7 +62,7 @@ class Examine(Command):
                 conn.write('TODO: EXAMINE JOURNAL GAME\n')
                 return
 
-            u2 = user.find.by_prefix_for_user(args[1], conn, min_len=2)
+            u2 = user.find_by_prefix_for_user(args[1], conn, min_len=2)
             if not u2:
                 return
             conn.write('TODO: EXAMINE ADJOURNED GAME\n')
@@ -75,7 +75,7 @@ class Mexamine(Command):
             conn.write(_("You are not examining a game.\n"))
             return
 
-        u = user.find.by_prefix_for_user(args[0], conn, online_only=True)
+        u = user.find_by_prefix_for_user(args[0], conn, online_only=True)
         if not u:
             return
 

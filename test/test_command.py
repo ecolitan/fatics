@@ -53,8 +53,8 @@ class TestCommand(Test):
         self.close(t)
 
     def test_message_resends_prompt(self):
-        ''' Test that an asynchronous message from the server is preceded by
-        a newline and followed by a new prompt. '''
+        """ Test that an asynchronous message from the server is preceded by
+        a newline and followed by a new prompt. """
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
 
@@ -66,5 +66,30 @@ class TestCommand(Test):
 
         self.close(t)
         self.close(t2)
+
+    @with_player('TestPlayer', 'testpass')
+    def test_user_exclamation_pointa(self):
+        """ Test that appending ! to a user name prevents it from being
+        abbreviated. """
+        t = self.connect_as_guest()
+        t.write('f testplaye\n')
+        self.expect('Finger of TestPlayer:', t)
+
+        t.write('f testplaye!\n')
+        self.expect('There is no player matching the name "testplaye".', t)
+
+        t.write('f testplayer!\n')
+        self.expect('Finger of TestPlayer:', t)
+
+        t2 = self.connect_as('TestPlayer', 'testpass')
+        t.write('t testplaye this is a test\n')
+        self.expect('(told TestPlayer)', t)
+        t.write('t testplaye! this is a test\n')
+        self.expect('There is no player matching the name "testplaye".', t)
+        t.write('t testplayer! this is a test\n')
+        self.expect('(told TestPlayer)', t)
+
+        self.close(t2)
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

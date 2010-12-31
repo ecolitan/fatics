@@ -61,7 +61,7 @@ class Ivariables(Command):
         if args[0] is None:
             u = conn.user
         else:
-            u = user.find.by_prefix_for_user(args[0], conn,
+            u = user.find_by_prefix_for_user(args[0], conn,
                 online_only=True)
 
         if not u:
@@ -87,7 +87,7 @@ class Variables(Command):
         if args[0] is None:
             u = conn.user
         else:
-            u = user.find.by_prefix_for_user(args[0], conn)
+            u = user.find_by_prefix_for_user(args[0], conn)
 
         if not u:
             return

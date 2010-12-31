@@ -70,7 +70,7 @@ class Clearmessages(Command):
                     return
                 count = db.clear_messages_range(conn.user.id, start, end)
             else:
-                sender = user.find.by_prefix_for_user(args[0], conn)
+                sender = user.find_by_prefix_for_user(args[0], conn)
                 if not sender:
                     return
                 count = db.clear_messages_from_to(sender.id, conn.user.id)
@@ -85,7 +85,7 @@ class Fmessage(Command, FormatMessage):
         if conn.user.is_muted:
             conn.write(_('You are muted.\n'))
             return
-        u2 = user.find.by_prefix_for_user(args[0], conn)
+        u2 = user.find_by_prefix_for_user(args[0], conn)
         if u2:
             if conn.user.name in u2.censor and not conn.user.is_admin:
                 conn.write(_('%s is censoring you.\n') % u2.name)
@@ -156,7 +156,7 @@ class Messages(Command, FormatMessage):
                         return
                     msgs = db.get_messages_range(conn.user.id, start, end)
                 else:
-                    u2 = user.find.by_prefix_for_user(args[0], conn)
+                    u2 = user.find_by_prefix_for_user(args[0], conn)
                     if not u2:
                         return
                     msgs = db.get_messages_from_to(conn.user.id, u2.id)
@@ -183,7 +183,7 @@ class Messages(Command, FormatMessage):
         else:
             """ Send a message.  Note that the message may be localized
             differently for the sender and receiver. """
-            to = user.find.by_prefix_for_user(args[0], conn)
+            to = user.find_by_prefix_for_user(args[0], conn)
             if to:
                 if conn.user.is_muted:
                     conn.write(_('You are muted.\n'))

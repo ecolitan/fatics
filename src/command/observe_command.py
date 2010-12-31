@@ -51,7 +51,7 @@ class Follow(Command):
                 conn.user.session.following = None
                 conn.write(_("You will not follow any player's games.\n"))
         else:
-            u2 = user.find.by_prefix_for_user(args[0], conn,
+            u2 = user.find_by_prefix_for_user(args[0], conn,
                 online_only=True)
             if u2:
                 if u2 == conn.user:

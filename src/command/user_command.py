@@ -23,6 +23,7 @@ import admin
 import rating
 import user
 import game
+import history
 
 from command import ics_command, Command
 from command_parser import BadCommandError
@@ -43,7 +44,7 @@ class LogMixin(object):
 class Finger(Command):
     def run(self, args, conn):
         if args[0] is not None:
-            u = user.find.by_prefix_for_user(args[0], conn, min_len=2)
+            u = user.find_by_prefix_for_user(args[0], conn, min_len=2)
         else:
             u = conn.user
         if u:
@@ -111,7 +112,7 @@ class Finger(Command):
 class Ping(Command):
     def run(self, args, conn):
         if args[0] is not None:
-            u2 = user.find.by_prefix_for_user(args[0], conn,
+            u2 = user.find_by_prefix_for_user(args[0], conn,
                 online_only=True)
         else:
             u2 = conn.user
@@ -129,11 +130,22 @@ class Ping(Command):
                 avg = 1000.0 * sum(pt) / len(pt)
                 conn.write(_('Average: %.3fms\n') % (avg))
 
+@ics_command('history', 'o')
+class History(Command):
+    def run(self, args, conn):
+        u = None
+        if args[0] is not None:
+            u = user.find_by_prefix_for_user(args[0], conn, min_len=2)
+        else:
+            u = conn.user
+        if u:
+            history.show_for_user(u, conn)
+
 @ics_command('logons', 'o')
 class Logons(Command, LogMixin):
     def run(self, args, conn):
         if args[0] is not None:
-            u2 = user.find.by_prefix_for_user(args[0], conn)
+            u2 = user.find_by_prefix_for_user(args[0], conn)
         else:
             u2 = conn.user
         if u2:

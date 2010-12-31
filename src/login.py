@@ -28,7 +28,7 @@ class Login(object):
             conn.write(_('\nLogging you in as "%s"; you may use this name to play unrated games.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter the server as "%s":\n') % (u.name, u.name))
         elif name != '':
             try:
-                u = user.find.by_name_exact(name)
+                u = user.find_by_name_exact(name)
             except user.UsernameException as e:
                 conn.write('\n' + e.reason + '\n')
             else:
