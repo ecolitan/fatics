@@ -80,17 +80,25 @@ class Follow(Command):
 @ics_command('allobservers', 'o')
 class Allobservers(Command):
     def run(self, args, conn):
+        count = 0
         if args[0] is not None:
             g = game.from_name_or_number(args[0], conn)
             if g:
-                if not g.observers:
+                if g.allobservers(conn):
+                    count = 1
+                else:
                     conn.write(_('No one is observing game %d.\n')
                         % g.number)
-                else:
-                    g.show_observers(conn)
         else:
             for g in game.games.itervalues():
-                g.show_observers(conn)
+                if g.allobservers(conn):
+                    count += 1
+
+        if count > 0:
+            conn.write(ngettext(
+                '  %(count)d game displayed (of %(total)d in progress).\n',
+                '  %(count)d games displayed (of %(total)d in progress).\n',
+                    count) % {'count': count, 'total': len(game.games)})
 
 @ics_command('unobserve', 'n')
 class Unobserve(Command):

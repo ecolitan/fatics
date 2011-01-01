@@ -262,21 +262,23 @@ class TestFollow(Test):
 
 class TestAllobservers(Test):
     def test_allobservers(self):
+        t = self.connect_as_guest()
+
+        self.expect_command_prints_nothing("allobservers\n", t)
+        t.write('allob 1\n')
+        self.expect('There is no such game', t)
+        t.write('allob nosuchuser\n')
+        self.expect('No player named "nosuchuser" is online', t)
+        t.write('allob i18n\n')
+        self.expect('"i18n" is not a valid handle', t)
+
+        self.close(t)
+
+    def test_allobservers_played(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
-
-        self.expect_command_prints_nothing("allobservers\n", t)
-
-        t2.write('allob 1\n')
-        self.expect('There is no such game', t2)
-
-        t2.write('allob nosuchuser\n')
-        self.expect('No player named "nosuchuser" is online', t2)
-
-        t2.write('allob i18n\n')
-        self.expect('"i18n" is not a valid handle', t2)
 
         t2.write('allob guestabcd\n')
         self.expect('GuestABCD is not playing or examining a game', t2)
@@ -302,17 +304,29 @@ class TestAllobservers(Test):
         t.write('allob\n')
         self.expect('Observing 1 [GuestABCD vs. GuestEFGH]: GuestIJKL(U) (1 user)', t)
         self.expect('Observing 2 [GuestIJKL vs. GuestMNOP]: GuestABCD(U) (1 user)', t)
+        self.expect('  2 games displayed (of 2 in progress).', t)
 
         t4.write('o 1\n')
         self.expect('now observing', t4)
+
         t.write('allob guestefgh\n')
         self.expect('Observing 1 [GuestABCD vs. GuestEFGH]: GuestIJKL(U) GuestMNOP(U) (2 users)', t)
+        self.expect('  1 game displayed (of 2 in progress).', t)
+
         t2.write('allob 1\n')
         self.expect('Observing 1 [GuestABCD vs. GuestEFGH]: GuestIJKL(U) GuestMNOP(U) (2 users)', t2)
+        self.expect('  1 game displayed (of 2 in progress).', t2)
+
         t3.write('unob guestabcd\n')
         self.expect('Removing', t3)
         t4.write('unob 1\n')
         self.expect('Removing', t4)
+
+        # allob should skip games with no observers
+        t.write('allob\n')
+        self.expect('Observing 2 [GuestIJKL vs. GuestMNOP]: GuestABCD(U) (1 user)', t)
+        self.expect('  1 game displayed (of 2 in progress).', t)
+
         t.write('allob 1\n')
         self.expect('No one is observing game 1.', t)
 
@@ -320,6 +334,33 @@ class TestAllobservers(Test):
         self.close(t2)
         self.close(t3)
         self.close(t4)
+
+    def test_allobservers_examined(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+
+        t.write('ame\n')
+        self.expect('Examining 1 (scratch): #GuestABCD(U) (1 user)', t)
+        self.expect('  1 game displayed (of 1 in progress).', t)
+
+        t2.write('o guestabcd\n')
+        self.expect('now observing', t2)
+        t3.write('o guestabcd\n')
+        self.expect('now observing', t3)
+        t.write('mex guestefgh\n')
+        self.expect('GuestABCD has made you an examiner', t2)
+
+        t.write('allob\n')
+        self.expect('Examining 1 (scratch): #GuestABCD(U) #GuestEFGH(U) GuestIJKL(U) (3 users)', t)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
 
 class TestPrimary(Test):
     @with_player('testobs', 'testpass')

@@ -186,6 +186,21 @@ class ExaminedGame(Game):
         # that the game is examined
         self.send_board(u)
 
+    def allobservers(self, conn):
+        # despite the name, this includes examiners too
+        assert(self.players)
+        olist = [('#' + u.get_display_name()) for u in self.players]
+        olist += [u.get_display_name() for u in self.observers]
+
+        # Original FICS uses %2d for the game number, but that doesn't
+        # make sense to me, since game numbers are frequently 3 digits.
+        # I'm not convinced extra space is necessary at all.
+        conn.write(ngettext('Examining %d (scratch): %s (%d user)\n',
+                'Examining %d (scratch): %s (%d users)\n',
+                len(olist)) %
+            (self.number, ' '.join(olist), len(olist)))
+        return True
+
     def next_move(self, mv, conn):
         self.moves = self.moves[0:self.variant.pos.ply]
         self.moves.append(mv.to_san())

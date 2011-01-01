@@ -353,21 +353,6 @@ class Game(object):
 
         conn.write('      {Still in progress} *\n\n')
 
-    def show_observers(self, conn):
-        if self.observers:
-            olist = [u.get_display_name() for u in self.observers]
-            if self.gtype == EXAMINED:
-                white_name = list(self.players)[0].name
-                black_name = list(self.players)[0].name
-            else:
-                white_name = self.white.name
-                black_name = self.black.name
-            conn.write(ngettext('Observing %d [%s vs. %s]: %s (%d user)\n',
-                    'Observing %d [%s vs. %s]: %s (%d users)\n',
-                    len(olist)) %
-                (self.number, white_name, black_name,
-                    ' '.join(olist), len(olist)))
-
     def parse_move(self, s, conn):
         try:
             mv = self.variant.parse_move(s, conn)
@@ -776,6 +761,20 @@ class PlayedGame(Game):
             p.write_("%(uname)s has added %(secs)d seconds to %(oname)s's clock.\n",
                 {'uname': u.name, 'secs': secs, 'oname': opp.name})
         self.send_boards()
+
+    def allobservers(self, conn):
+        if self.observers:
+            olist = [u.get_display_name() for u in self.observers]
+            white_name = self.white.name
+            black_name = self.black.name
+            conn.write(ngettext('Observing %d [%s vs. %s]: %s (%d user)\n',
+                    'Observing %d [%s vs. %s]: %s (%d users)\n',
+                    len(olist)) %
+                (self.number, white_name, black_name,
+                    ' '.join(olist), len(olist)))
+            return True
+        else:
+            return False
 
     def resign(self, user):
         side = self.get_user_side(user)
