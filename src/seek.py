@@ -218,7 +218,7 @@ class Seek(MatchStringParser):
             mf_str = ''
 
         # not currently translated, for efficiency
-        seek_str = '%s (%s) seeking %d %d %s %s%s%s%s%s ("play %d" to respond)\n' % (
+        seek_str = '\n%s (%s) seeking %d %d %s %s%s%s%s%s ("play %d" to respond)\n' % (
                 self.a.name, self.rating, self.tags['time'], self.tags['inc'],
                 rated_str, speed_name, variant_str, clock_str,
                 side_str, mf_str, self.num)

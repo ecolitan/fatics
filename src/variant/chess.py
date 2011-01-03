@@ -68,9 +68,6 @@ piece_material = {
 def to_castle_flags(w_oo, w_ooo, b_oo, b_ooo):
     return (w_oo << 3) + (w_ooo << 2) + (b_oo << 1) + b_ooo
 
-def check_castle_flags(mask, wtm, is_oo):
-    return bool(mask & (1 << (2 * int(wtm) + int(is_oo))))
-
 castle_mask = array('i', [0xf for i in range(0x80)])
 castle_mask[A8] = to_castle_flags(True, True, True, False)
 castle_mask[E8] = to_castle_flags(True, True, False, False)
@@ -78,15 +75,6 @@ castle_mask[H8] = to_castle_flags(True, True, False, True)
 castle_mask[A1] = to_castle_flags(True, False, True, True)
 castle_mask[E1] = to_castle_flags(False, False, True, True)
 castle_mask[H1] = to_castle_flags(False, True, True, True)
-
-def rank(sq):
-    return sq // 0x10
-
-def file(sq):
-    return sq % 8
-
-def valid_sq(sq):
-    return not (sq & 0x88)
 
 def str_to_sq(s):
     return 'abcdefgh'.index(s[0]) + 0x10 * '12345678'.index(s[1])
@@ -238,8 +226,7 @@ class Move(object):
         to all move formats."""
         if self.is_oo:
             if (self.pos.in_check
-                    or not check_castle_flags(self.pos.castle_flags,
-                        self.pos.wtm, True)
+                    or not self.pos.check_castle_flags(self.pos.wtm, True)
                     or self.pos.board[self.fr + 1] != '-'
                     or self.pos.under_attack(self.fr + 1, not self.pos.wtm)
                     or self.pos.under_attack(self.to, not self.pos.wtm)):
@@ -248,8 +235,7 @@ class Move(object):
 
         if self.is_ooo:
             if (self.pos.in_check
-                    or not check_castle_flags(self.pos.castle_flags,
-                        self.pos.wtm, False)
+                    or not self.pos.check_castle_flags(self.pos.wtm, False)
                     or self.pos.board[self.fr - 1] != '-'
                     or self.pos.under_attack(self.fr - 1, not self.pos.wtm)
                     or self.pos.under_attack(self.to, not self.pos.wtm)):
@@ -1170,13 +1156,13 @@ class Position(object):
         stm_str = 'w' if self.wtm else 'b'
 
         castling = ''
-        if check_castle_flags(self.castle_flags, True, True):
+        if self.check_castle_flags(True, True):
             castling += 'K'
-        if check_castle_flags(self.castle_flags, True, False):
+        if self.check_castle_flags(True, False):
             castling += 'Q'
-        if check_castle_flags(self.castle_flags, False, True):
+        if self.check_castle_flags(False, True):
             castling += 'k'
-        if check_castle_flags(self.castle_flags, False, False):
+        if self.check_castle_flags(False, False):
             castling += 'q'
         if castling == '':
             castling = '-'
@@ -1191,6 +1177,10 @@ class Position(object):
 
         full_moves = self.ply // 2 + 1
         return "%s %s %s %s %d %d" % (pos_str, stm_str, castling, ep_str, self.fifty_count, full_moves)
+
+    def check_castle_flags(self, wtm, is_oo):
+        return bool(self.castle_flags & (1 << (2 * int(wtm) + int(is_oo))))
+
 
 class Chess(object):
     """normal chess"""
@@ -1246,10 +1236,10 @@ class Chess(object):
                 board_str += self.pos.board[0x10 * r + f]
         side_str = 'W' if self.pos.wtm else 'B'
         ep = -1 if not self.pos.ep else file(self.pos.ep)
-        w_oo = int(check_castle_flags(self.pos.castle_flags, True, True))
-        w_ooo = int(check_castle_flags(self.pos.castle_flags, True, False))
-        b_oo = int(check_castle_flags(self.pos.castle_flags, False, True))
-        b_ooo = int(check_castle_flags(self.pos.castle_flags, False, False))
+        w_oo = int(self.pos.check_castle_flags(True, True))
+        w_ooo = int(self.pos.check_castle_flags(True, False))
+        b_oo = int(self.pos.check_castle_flags(False, True))
+        b_ooo = int(self.pos.check_castle_flags(False, False))
         if self.game.gtype == EXAMINED:
             flip = 0
             if user in self.game.players:

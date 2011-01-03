@@ -322,6 +322,8 @@ class Game(object):
         else:
             assert(self.gtype == EXAMINED)
             white_name = list(self.players)[0].name
+            # XXX when examining a history game, it should use the players'
+            # names here
             black_name = white_name
             white_rating = list(self.players)[0].get_rating(self.speed_variant)
             black_rating = white_rating
@@ -372,6 +374,70 @@ class Game(object):
                 self.next_move(mv, conn)
         return parsed
 
+    def ginfo(self, conn):
+        conn.write(_('Game %d: Game information.\n\n') % self.number)
+        if self.gtype == PLAYED:
+            conn.write(_('  %s (%s) vs %s (%s) %s %s game.\n') % (
+                self.white.name, self.white_rating, self.black.name,
+                self.black_rating, self.rated_str, self.speed_variant))
+            # XXX display something different for non-fischer clocks?
+            conn.write(_('  Time controls: %d %d\n') %
+                (60 * self.white_time, self.inc))
+            conn.write(_('  Time of starting: %s\n') %
+                conn.user.format_datetime(self.when_started))
+            conn.write(_('   White time %s    Black time %s\n') %
+                (time_format.hms(self.clock.get_white_time(), conn.user),
+                time_format.hms(self.clock.get_black_time(), conn.user)))
+            conn.write(_('  The clock is not paused\n'))
+        else:
+            assert(self.gtype == EXAMINED)
+            white_name = list(self.players)[0].name
+            black_name = white_name
+            exname = white_name
+            # XXX use history names when available
+            # original FICS omits additional examiners too
+            conn.write(_('  %(exname)s is examining %(wname)s vs %(bname)s.\n') %
+                {'exname': exname, 'wname': white_name, 'bname': black_name})
+
+        # stuff hidden by private (if it is implemented)
+        hm = self.variant.pos.ply
+        fifty = self.variant.pos.fifty_count
+        # XXX this is printed even for zh and bug, which do not use
+        # the fifty-move count
+        conn.write(ngettext('  %d halfmove has been made.\n',
+            '  %d halfmoves have been made.\n', hm) % hm)
+        conn.write(ngettext(
+            '  Fifty move count started at halfmove %(start)d (%(left)d halfmove until a draw).\n',
+            '  Fifty move count started at halfmove %(start)d (%(left)d halfmoves until a draw).\n', 100 - fifty) % {'start': hm - fifty, 'left': 100 - fifty})
+        w_oo = self.variant.pos.check_castle_flags(True, True)
+        w_ooo = self.variant.pos.check_castle_flags(True, False)
+        b_oo = self.variant.pos.check_castle_flags(False, True)
+        b_ooo = self.variant.pos.check_castle_flags(False, False)
+        if w_oo and w_ooo:
+            conn.write(_('  White may castle both kingside and queenside.\n'))
+        elif w_oo:
+            conn.write(_('  White may castle kingside.\n'))
+        elif w_ooo:
+            conn.write(_('  White may castle queenside.\n'))
+        else:
+            conn.write(_('  White may not castle.\n'))
+        if b_oo and b_ooo:
+            conn.write(_('  Black may castle both kingside and queenside.\n'))
+        elif b_oo:
+            conn.write(_('  Black may castle kingside.\n'))
+        elif b_ooo:
+            conn.write(_('  Black may castle queenside.\n'))
+        else:
+            conn.write(_('  Black may not castle.\n'))
+        # This is different from original FICS in that we only report
+        # the double-push if there is a pseudo-legal en passant capture.
+        if self.variant.pos.ep:
+            conn.write(_('  Double pawn push occurred on the %s-file.\n') %
+                'abcdefgh'[file(self.variant.pos.ep)])
+        else:
+            conn.write(_("  Double pawn push didn't occur.\n"))
+
+
 class PlayedGame(Game):
     def __init__(self, chal):
         self.gtype = PLAYED
@@ -417,7 +483,7 @@ class PlayedGame(Game):
         # with FICS is more important than being logical.
         # not sure about the m and n; maybe they are a version number?
         # TODO: add info about clock style, variant/speed to gameinfo string
-        self.gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, self.initial_secs, self.inc, self.initial_secs, self.inc, self.white_rating.ginfo_str(), self.black_rating.ginfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
+        self.gameinfo_str = '<g1> %d p=%d t=%s r=%d u=%d,%d it=%d,%d i=%d,%d pt=0 rt=%s,%s ts=%d,%d m=2 n=0\n' % (self.number, self.private, self.speed_variant.variant.name, self.rated, self.white.is_guest, self.black.is_guest, self.initial_secs, self.inc, self.initial_secs, self.inc, self.white_rating.gameinfo_str(), self.black_rating.gameinfo_str(), self.white.has_timeseal(), self.black.has_timeseal())
         if self.white.session.ivars['gameinfo']:
             self.white.write(self.gameinfo_str)
         if self.black.session.ivars['gameinfo']:

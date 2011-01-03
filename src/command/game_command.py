@@ -188,5 +188,11 @@ class Time(Command, GameMixin):
             conn.write(_('White Clock : %s\n') % white_clock)
             conn.write(_('Black Clock : %s\n') % black_clock)
 
-# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
+@ics_command('ginfo', 'n')
+class Ginfo(Command, GameMixin):
+    def run(self, args, conn):
+        g = self._game_param(args[0], conn)
+        if g:
+            g.ginfo(conn)
 
+# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -37,4 +37,13 @@ def side_to_str(side):
     assert(side in [WHITE, BLACK])
     return "white" if side == WHITE else "black"
 
+def rank(sq):
+    return sq // 0x10
+
+def file(sq):
+    return sq % 8
+
+def valid_sq(sq):
+    return not (sq & 0x88)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
