@@ -97,13 +97,19 @@ class Xkibitz(KibitzCommand):
     def run(self, args, conn):
         g = game.from_name_or_number(args[0], conn)
         if g:
-            self._do_kibitz(g, args[1], conn)
+            if conn.user not in g.observers | g.players:
+                conn.write(_('You are not observing game %d.\n') % g.number)
+            else:
+                self._do_kibitz(g, args[1], conn)
 
 @ics_command('xwhisper', 'iS')
 class Xwhisper(WhisperCommand):
     def run(self, args, conn):
         g = game.from_name_or_number(args[0], conn)
         if g:
-            self._do_whisper(g, args[1], conn)
+            if conn.user not in g.observers | g.players:
+                conn.write(_('You are not observing game %d.\n') % g.number)
+            else:
+                self._do_whisper(g, args[1], conn)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

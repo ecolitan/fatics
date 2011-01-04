@@ -286,6 +286,10 @@ class TestXkibitz(Test):
 
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
+
+        t3.write('xki 1 test\n')
+        self.expect('You are not observing game 1.', t3)
+
         t3.write('o 1\n')
         self.expect('now observing game 1', t3)
 
@@ -314,6 +318,10 @@ class TestXwhisper(Test):
 
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
+
+        t3.write('xwhi 1 test\n')
+        self.expect('You are not observing game 1.', t3)
+
         t3.write('o 1\n')
         self.expect('now observing game 1', t3)
 
