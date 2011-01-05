@@ -256,6 +256,14 @@ CREATE TABLE `user_notify` (
   UNIQUE INDEX(`notified`, `notifier`)
 );
 
+-- game notifications
+DROP TABLE IF EXISTS `user_gnotify`;
+CREATE TABLE `user_gnotify` (
+  `gnotified` int(8) NOT NULL COMMENT 'id of the user receiving the notification',
+  `gnotifier` int(8) NOT NULL COMMENT 'id of the user causing the notification',
+  UNIQUE INDEX(`gnotified`, `gnotifier`)
+);
+
 -- censor lists
 DROP TABLE IF EXISTS `censor`;
 CREATE TABLE `censor` (

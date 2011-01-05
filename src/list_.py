@@ -58,14 +58,14 @@ class SystemUserList(MyList):
         conn.write(_('%(uname)s added to the %(lname)s list.\n') %
             {'uname': u.name, 'lname': self.name})
         if u.is_online:
-            u.write_('%(aname)s has added you to the %(lname)s list.\n',
+            u.write_('\n%(aname)s has added you to the %(lname)s list.\n',
                 {'aname': conn.user.name, 'lname': self.name})
 
     def _notify_removed(self, conn, u):
         conn.write(_('%(uname)s removed from the %(lname)s list.\n') %
             {'uname': u.name, 'lname': self.name})
         if u.is_online:
-            u.write_('%(aname)s has removed you from the %(lname)s list.\n',
+            u.write_('\n%(aname)s has removed you from the %(lname)s list.\n',
                 {'aname': conn.user.name, 'lname': self.name})
 
     def show(self, conn):
@@ -128,8 +128,9 @@ class NotifyList(MyList):
                     % u.name)
             conn.user.add_notification(u)
             conn.write(_('%s added to your notify list.\n') % u.name)
-            if u.is_online:
-                u.write_('You have been added to the notify list of %s.\n',
+            if u.is_online and u.vars['notifiedby']:
+                # new feature: inform the added user
+                u.write_('\nYou have been added to the notify list of %s.\n',
                     (conn.user.name,))
 
     def sub(self, item, conn):
@@ -158,7 +159,7 @@ class IdlenotifyList(MyList):
         if u:
             if u == conn.user:
                 raise ListError(_('You cannot idlenotify yourself.\n'))
-            if conn.user in u.idlenotified:
+            if conn.user in u.session.idlenotified_by:
                 raise ListError(_('%s is already on your idlenotify list.\n')
                     % u.name)
             conn.user.add_idlenotification(u)
@@ -167,16 +168,53 @@ class IdlenotifyList(MyList):
     def sub(self, item, conn):
         u = user.find_by_prefix_for_user(item, conn, online_only=True)
         if u:
-            if conn.user not in u.idlenotified:
+            if conn.user not in u.session.idlenotified_by:
                 raise ListError(_('%s is not on your idlenotify list.\n') % u.name)
             conn.user.remove_idlenotification(u)
             conn.write(_('%s removed from your idlenotify list.\n') % u.name)
 
     def show(self, conn):
-        notlist = conn.user.idlenotifiers
+        notlist = conn.user.session.idlenotifying
         conn.write(ngettext('-- idlenotify list: %d name --\n',
             '-- idlenotify list: %d names --\n', len(notlist)) % len(notlist))
         conn.write('%s\n' % ' '.join([u.name for u in notlist]))
+
+class GnotifyList(MyList):
+    def add(self, item, conn):
+        if conn.user.is_guest:
+            raise ListError(_('Only registered players can have gnotify lists.\n'))
+        u = user.find_by_prefix_for_user(item, conn)
+        if u:
+            if u == conn.user:
+                raise ListError(_('You cannot gnotify yourself.\n'))
+            if u.is_guest:
+                raise ListError(_('You cannot add an unregistered user to your gnotify list.\n'))
+            if u.name in conn.user.gnotifiers:
+                raise ListError(_('%s is already on your gnotify list.\n')
+                    % u.name)
+            conn.user.add_gnotification(u)
+            conn.write(_('%s added to your gnotify list.\n') % u.name)
+            #if u.is_online:
+            #    u.write_('\nYou have been added to the gnotify list of %s.\n',
+            #        (conn.user.name,))
+
+    def sub(self, item, conn):
+        if conn.user.is_guest:
+            raise ListError(_('Only registered players can have gnotify lists.\n'))
+        u = user.find_by_prefix_for_user(item, conn)
+        if u:
+            if u.name not in conn.user.gnotifiers:
+                raise ListError(_('%s is not on your gnotify list.\n') % u.name)
+            conn.user.remove_gnotification(u)
+            conn.write(_('%s removed from your gnotify list.\n') % u.name)
+
+    def show(self, conn):
+        if conn.user.is_guest:
+            raise ListError(_('Only registered players can have gnotify lists.\n'))
+        notlist = conn.user.gnotifiers
+        conn.write(ngettext('-- gnotify list: %d name --\n',
+            '-- gnotify list: %d names --\n', len(notlist)) % len(notlist))
+        conn.write('%s\n' % ' '.join(notlist))
 
 class ChannelList(MyList):
     def add(self, item, conn):
@@ -452,11 +490,12 @@ class PlaybanList(SystemUserList):
             if u.is_playbanned and u.is_guest]
         return db.get_playbanned_user_names() + playbanned_guests
 
-""" initialize lists """
 def _init_lists():
+    """ initialize lists """
     ChannelList("channel")
     NotifyList("notify")
     IdlenotifyList("idlenotify")
+    GnotifyList("gnotify")
     CensorList("censor")
     NoplayList("noplay")
     BanList("ban")
@@ -474,6 +513,6 @@ _init_lists()
 # TODO:
 # removedcom muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle,
 # c50muzzle, c51muzzle,
-# gnotify, follow, remote
+# gnotify, remote
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

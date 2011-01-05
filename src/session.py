@@ -53,6 +53,8 @@ class Session(object):
         self.partner = None
         self.following = None
         self.followed_by = set()
+        self.idlenotifying = set()
+        self.idlenotified_by = set()
 
     def set_user(self, user):
         self.user = user
@@ -91,6 +93,11 @@ class Session(object):
             assert(self.game == None)
         del self.offers_received[:]
         del self.offers_sent[:]
+
+        for u in self.idlenotified_by:
+            u.write_("\nNotification: %s, whom you were idlenotifying, has departed.\n", (self.user.name,))
+            u.session.idlenotifying.remove(self.user)
+        self.idlenotified_by.clear()
 
         if self.followed_by:
             for p in self.followed_by.copy():

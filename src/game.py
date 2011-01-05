@@ -29,6 +29,7 @@ import history
 import time_format
 
 from db import db
+from online import online
 from game_constants import *
 
 games = {}
@@ -458,14 +459,14 @@ class PlayedGame(Game):
         self.private = False
         self.rated_str = 'rated' if self.rated else 'unrated'
 
-        # GuestBEZD (0) admin (0) unrated blitz 2 12
-        self.info_str = '%s (%s) %s (%s) %s %s %d %d\n' % (
+        # GuestBEZD (++++) admin (1000) unrated blitz 2 12
+        self.info_str = '%s (%s) %s (%s) %s %s %d %d' % (
             self.white.name, self.white_rating, self.black.name,
             self.black_rating, self.rated_str, self.speed_variant,
             self.white_time, self.inc)
         # it seems original FICS uses "creating" here even for
         # adjourned games
-        create_str = 'Creating: %s' % self.info_str
+        create_str = 'Creating: %s\n' % self.info_str
         self.white.write(create_str)
         self.black.write(create_str)
 
@@ -507,11 +508,30 @@ class PlayedGame(Game):
         self.white.session.last_opp = self.black
         self.black.session.last_opp = self.white
 
+        gnotified = set()
         for p in self.players:
             for uf in p.session.followed_by:
                 uf.write_('\n%(uname)s, whom you are following, has started a game with %(oppname)s.\n',
                     {'uname': p, 'oppname': self.get_opp(p)})
                 self.observe(uf)
+
+            gnotified |= p.gnotified
+
+        # don't notify players of this game themselves
+        gnotified -= set([p.name for p in self.players])
+
+        # notify players, unless they are one of the players of this game
+        for un in gnotified:
+            u = online.find_exact(un)
+            if u:
+                # using info_str doesn't quite work, since original
+                # fics inserts "vs." into the game notification
+                #u.write_('\nGame notification: %s: Game %d\n' % (
+                #    self.info_str, self.number))
+                u.write('\nGame notification: %s (%s) vs. %s (%s) %s %s %d %d: Game %d\n' % (
+                    self.white.name, self.white_rating, self.black.name,
+                    self.black_rating, self.rated_str, self.speed_variant,
+                    self.white_time, self.inc, self.number))
 
         p = self.get_user_to_move()
         if p.has_timeseal():

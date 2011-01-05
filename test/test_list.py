@@ -28,7 +28,7 @@ class TestList(Test):
         t.write('sublist foo bar\n')
         self.expect("does not match any list", t)
 
-        t.write('+g admin\n')
+        t.write('+gm admin\n')
         self.expect("You don't have permission", t)
 
         self.close(t)

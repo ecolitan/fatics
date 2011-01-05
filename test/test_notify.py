@@ -163,7 +163,7 @@ class TestIdlenotify(Test):
         t.write('+idlenot admin\n')
         self.expect('admin added to your idlenotify list.', t)
 
-        # should handle disonnect gracefully
+        # should handle disconnect gracefully
         t.close()
         self.close(t2)
 
@@ -228,6 +228,64 @@ class TestZnotify(Test):
         self.expect('Present company on your notify list:\r\n   TestPlayer\r\nThe following players have you on their notify list:\r\n   testtwo', t)
 
         t.write('-notify testplayer\n')
+        self.close(t2)
+        self.close(t3)
+
+class TestGnotify(Test):
+    def test_gnotify_guest(self):
+        t = self.connect_as_guest('GuestABCD')
+        t.write('+gnot admin\n')
+        self.expect('Only registered players', t)
+
+        t.write('=gnot\n')
+        self.expect('Only registered players', t)
+
+        t2 = self.connect_as_admin()
+        t2.write('+gnot guest\n')
+        self.expect('You cannot add an unregistered', t2)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_bad_gnotify(self):
+        t = self.connect_as_admin()
+        t.write('+gnot testplayer\n')
+        self.expect('There is no player matching the name "testplayer"', t)
+        t.write('-gnotify testplayer\n')
+        self.expect('There is no player matching the name "testplayer"', t)
+        t.write('+gnot admin\n')
+        self.expect("gnotify yourself.", t)
+        self.close(t)
+
+    @with_player('TestPlayer', 'test')
+    def test_gnotify_user(self):
+        t = self.connect_as_admin()
+
+        t.write('=gnot\n')
+        self.expect('gnotify list: 0 names', t)
+
+        t.write('+gnotify testplayer\n')
+        self.expect("TestPlayer added to your gnotify list", t)
+
+        t.write('=gnot\n')
+        self.expect('gnotify list: 1 name', t)
+        self.expect('TestPlayer', t)
+
+        t.write('+gnot testplayer\n')
+        self.expect("TestPlayer is already on your gnotify list", t)
+        self.close(t)
+
+        t = self.connect_as_admin()
+        t2 = self.connect_as('TestPlayer', 'test')
+        t3 = self.connect_as_guest('GuestABCD')
+
+        t2.write('match guestabcd 2+12 b zh u\n')
+        self.expect('Challenge: ', t3)
+        t3.write('a\n')
+        self.expect('Game notification: GuestABCD (++++) vs. TestPlayer (----) unrated blitz crazyhouse 2 12: Game 1', t)
+        t3.write('abo\n')
+
+        self.close(t)
         self.close(t2)
         self.close(t3)
 

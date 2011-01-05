@@ -293,6 +293,8 @@ class DB(object):
         cursor.execute("""DELETE FROM user_title WHERE user_id=%s""", (id,))
         cursor.execute("""DELETE FROM user_notify
             WHERE notifier=%s OR notified=%s""", (id,id))
+        cursor.execute("""DELETE FROM user_gnotify
+            WHERE gnotifier=%s OR gnotified=%s""", (id,id))
         cursor.execute("""DELETE FROM censor WHERE censorer=%s OR censored=%s""", (id,id))
         cursor.execute("""DELETE FROM noplay WHERE noplayer=%s OR noplayed=%s""", (id,id))
         cursor.execute("""DELETE FROM formula WHERE user_id=%s""", (id,))
@@ -516,6 +518,43 @@ class DB(object):
     def user_get_notifiers(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT user_name FROM user LEFT JOIN user_notify ON (user.user_id=user_notify.notifier) WHERE notified=%s""", (user_id,))
+        rows = cursor.fetchall()
+        return rows
+
+    # game notifications
+    def user_add_gnotification(self, gnotified, gnotifier):
+        cursor = self.db.cursor()
+        try:
+            cursor.execute("""INSERT INTO user_gnotify
+                SET gnotified=%s,gnotifier=%s""", (gnotified,gnotifier))
+        except IntegrityError:
+            raise DuplicateKeyError()
+        finally:
+            cursor.close()
+
+    def user_del_gnotification(self, notified, notifier):
+        cursor = self.db.cursor()
+        cursor.execute("""DELETE FROM user_gnotify
+            WHERE notified=%s AND notifier=%s""", (notified,notifier))
+        if cursor.rowcount != 1:
+            cursor.close()
+            raise DeleteError()
+        cursor.close()
+
+    def user_get_gnotified(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT user_name FROM user
+            LEFT JOIN user_gnotify ON (user.user_id=user_gnotify.gnotified)
+            WHERE gnotifier=%s""", (user_id,))
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
+
+    def user_get_gnotifiers(self, user_id):
+        cursor = self.db.cursor(cursors.DictCursor)
+        cursor.execute("""SELECT user_name FROM user
+            LEFT JOIN user_gnotify ON (user.user_id=user_gnotify.gnotifier)
+            WHERE gnotified=%s""", (user_id,))
         rows = cursor.fetchall()
         return rows
 

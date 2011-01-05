@@ -60,8 +60,8 @@ class BaseUser(object):
         self.aliases = {}
         self.notifiers = set()
         self.notified = set()
-        self.idlenotifiers = set()
-        self.idlenotified = set()
+        self.gnotifiers = set()
+        self.gnotified = set()
         self.noplay = set()
         self.session = conn.session
         self.session.set_user(self)
@@ -75,10 +75,6 @@ class BaseUser(object):
 
     def log_off(self):
         assert(self.is_online)
-        for u in self.idlenotified:
-            u.write_("Notification: %s, whom you were idlenotifying, has departed.\n", (self.name,))
-            u.idlenotifiers.remove(self)
-        self.idlenotified.clear()
 
         db.user_log(self.name, login=False, ip=self.session.conn.ip)
 
@@ -183,17 +179,29 @@ class BaseUser(object):
         if user.is_online:
             user.notified.remove(self.name)
 
+    def add_gnotification(self, user):
+        self.gnotifiers.add(user.name)
+        if user.is_online:
+            user.gnotified.add(self.name)
+
+    def remove_gnotification(self, user):
+        self.gnotifiers.remove(user.name)
+        if user.is_online:
+            user.gnotified.remove(self.name)
+
     def add_idlenotification(self, user):
+        """ Inform this user when the given user unidles. """
         assert(self.is_online)
         assert(user.is_online)
-        self.idlenotifiers.add(user)
-        user.idlenotified.add(self)
+        self.session.idlenotifying.add(user)
+        user.session.idlenotified_by.add(self)
 
     def remove_idlenotification(self, user):
+        """ Remove a notification added by add_idlenotification. """
         assert(self.is_online)
         assert(user.is_online)
-        self.idlenotifiers.remove(user)
-        user.idlenotified.remove(self)
+        self.session.idlenotifying.remove(user)
+        user.session.idlenotified_by.remove(self)
 
     def add_censor(self, user):
         self.censor.add(user.name)
@@ -417,6 +425,12 @@ class User(BaseUser):
         if nlist:
             self.write(_('Present company includes: %s\n') % ' '.join(nlist))
 
+        # gnotify
+        self.gnotifiers = set([dbu['user_name']
+            for dbu in db.user_get_gnotifiers(self.id)])
+        self.gnotified = set([dbu['user_name']
+            for dbu in db.user_get_gnotified(self.id)])
+
         for a in db.user_get_aliases(self.id):
             self.aliases[a['name']] = a['val']
 
@@ -495,6 +509,16 @@ class User(BaseUser):
         BaseUser.remove_notification(self, user)
         if not user.is_guest:
             db.user_del_notification(self.id, user.id)
+
+    def add_gnotification(self, user):
+        BaseUser.add_gnotification(self, user)
+        if not user.is_guest:
+            db.user_add_gnotification(self.id, user.id)
+
+    def remove_gnotification(self, user):
+        BaseUser.remove_gnotification(self, user)
+        if not user.is_guest:
+            db.user_del_gnotification(self.id, user.id)
 
     def add_censor(self, user):
         BaseUser.add_censor(self, user)
