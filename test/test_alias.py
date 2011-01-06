@@ -18,6 +18,8 @@
 
 from test import *
 
+import time
+
 class TestAlias(Test):
     def test_alias(self):
         t = self.connect_as_admin()
@@ -88,18 +90,18 @@ class TestUserAlias(Test):
         self.expect('You have no alias "nosuchvar".', t)
 
         self.close(t)
-    
+
     def test_user_alias(self):
         t = self.connect_as_admin()
 
         t.write('alias bar\n')
         self.expect('You have no alias named "bar"', t)
-        
+
         t.write('alias bar shout my name is $m\n')
         self.expect('Alias "bar" set.', t)
 
         self.close(t)
-        
+
         t = self.connect_as_admin()
         t.write('alias bar\n')
         self.expect('bar -> shout my name is $m', t)
@@ -115,10 +117,31 @@ class TestUserAlias(Test):
 
         t.write('unalias bar\n')
         self.expect('Alias "bar" unset.', t)
-        
+
         t.write('unalias nosuchvar\n')
         self.expect('You have no alias "nosuchvar".', t)
 
+        self.close(t)
+
+    def test_noalias(self):
+        t = self.connect_as_guest()
+
+        t.write('alias bar tell admin hi there\n')
+        self.expect('Alias "bar" set.', t)
+        t.write('$bar\n')
+        self.expect('bar: Command not found', t)
+
+        self.close(t)
+
+    def test_nounidle(self):
+        t = self.connect_as_guest()
+        time.sleep(2)
+        t.write('fi\n')
+        self.expect('Idle: 0 seconds', t)
+        time.sleep(2)
+        t.write('$fi\n')
+        m = self.expect_re('Idle: (\d) seconds', t)
+        self.assert_(m.group(1) > 1)
         self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

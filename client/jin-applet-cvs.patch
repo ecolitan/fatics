@@ -10,7 +10,7 @@ RCS file: /cvsroot/jin/jin/release/build.xml,v
 retrieving revision 1.63
 diff -u -r1.63 build.xml
 --- release/build.xml	24 Feb 2008 02:18:25 -0000	1.63
-+++ release/build.xml	6 Jan 2011 07:14:49 -0000
++++ release/build.xml	6 Jan 2011 20:35:42 -0000
 @@ -26,7 +26,7 @@
  	<dirname property="app.dir" file="." /> <!-- The directory of the buildfile to run to build the app -->
  	<property name="releasefiles.dir" value="${app.dir}/build" /> <!-- The directory of the files to release -->
@@ -36,7 +36,7 @@ RCS file: /cvsroot/jin/jin/release/applet/server_support.php,v
 retrieving revision 1.2
 diff -u -r1.2 server_support.php
 --- release/applet/server_support.php	24 Feb 2008 02:16:28 -0000	1.2
-+++ release/applet/server_support.php	6 Jan 2011 07:14:49 -0000
++++ release/applet/server_support.php	6 Jan 2011 20:35:43 -0000
 @@ -12,7 +12,7 @@
  	
  	// Returns the port to which the applet should connect
@@ -59,7 +59,7 @@ RCS file: /cvsroot/jin/jin/src/free/freechess/FreechessConnection.java,v
 retrieving revision 1.51
 diff -u -r1.51 FreechessConnection.java
 --- src/free/freechess/FreechessConnection.java	7 Jun 2007 14:38:46 -0000	1.51
-+++ src/free/freechess/FreechessConnection.java	6 Jan 2011 07:15:03 -0000
++++ src/free/freechess/FreechessConnection.java	6 Jan 2011 20:35:45 -0000
 @@ -32,6 +32,7 @@
  import java.util.regex.Pattern;
  
@@ -167,7 +167,7 @@ RCS file: /cvsroot/jin/jin/src/free/jin/console/AbstractConsoleDesignation.java,
 retrieving revision 1.18
 diff -u -r1.18 AbstractConsoleDesignation.java
 --- src/free/jin/console/AbstractConsoleDesignation.java	16 Mar 2008 01:18:02 -0000	1.18
-+++ src/free/jin/console/AbstractConsoleDesignation.java	6 Jan 2011 07:15:06 -0000
++++ src/free/jin/console/AbstractConsoleDesignation.java	6 Jan 2011 20:35:46 -0000
 @@ -339,6 +339,7 @@
    
    private String getActualEncoding(){
@@ -182,7 +182,7 @@ RCS file: /cvsroot/jin/jin/src/free/jin/console/ConsoleManager.java,v
 retrieving revision 1.70
 diff -u -r1.70 ConsoleManager.java
 --- src/free/jin/console/ConsoleManager.java	22 Jul 2008 09:49:54 -0000	1.70
-+++ src/free/jin/console/ConsoleManager.java	6 Jan 2011 07:15:07 -0000
++++ src/free/jin/console/ConsoleManager.java	6 Jan 2011 20:35:47 -0000
 @@ -246,7 +246,7 @@
     */
    
@@ -202,13 +202,44 @@ diff -u -r1.70 ConsoleManager.java
      
      if (!Charset.isSupported(encoding))
        throw new UnsupportedEncodingException(encoding);
+Index: src/free/jin/console/prefs/EncodingPrefsPanel.java
+===================================================================
+RCS file: /cvsroot/jin/jin/src/free/jin/console/prefs/EncodingPrefsPanel.java,v
+retrieving revision 1.5
+diff -u -r1.5 EncodingPrefsPanel.java
+--- src/free/jin/console/prefs/EncodingPrefsPanel.java	16 Mar 2008 01:15:14 -0000	1.5
++++ src/free/jin/console/prefs/EncodingPrefsPanel.java	6 Jan 2011 20:35:48 -0000
+@@ -88,9 +88,10 @@
+    * The displayed name for the "system default" encoding. 
+    */
+   
+-  private static final String DEFAULT_ENCODING_NAME = 
+-    I18n.get(EncodingPrefsPanel.class).getFormattedString("defaultEncoding.name", 
+-        new Object[]{TextUtilities.getDefaultCharsetName()});
++  private static final String DEFAULT_ENCODING_NAME =
++    "UTF-8"; // wtm
++    //I18n.get(EncodingPrefsPanel.class).getFormattedString("defaultEncoding.name", 
++    //    new Object[]{TextUtilities.getDefaultCharsetName()});
+   
+   
+   
+@@ -187,7 +188,8 @@
+           
+           encodings.setModel(model);
+           
+-          boolean isSelectedDefault = TextUtilities.getDefaultCharset().equals(selectedEncoding);
++          //boolean isSelectedDefault = TextUtilities.getDefaultCharset().equals(selectedEncoding);
++          boolean isSelectedDefault = selectedEncoding.equals("UTF-8"); // wtm
+           
+           int selectedIndex = -1;
+           for (int i = 0; i < model.getSize(); i++){
 Index: src/free/jin/freechess/JinFreechessConnection.java
 ===================================================================
 RCS file: /cvsroot/jin/jin/src/free/jin/freechess/JinFreechessConnection.java,v
 retrieving revision 1.98
 diff -u -r1.98 JinFreechessConnection.java
 --- src/free/jin/freechess/JinFreechessConnection.java	10 Mar 2008 02:16:09 -0000	1.98
-+++ src/free/jin/freechess/JinFreechessConnection.java	6 Jan 2011 07:15:11 -0000
++++ src/free/jin/freechess/JinFreechessConnection.java	6 Jan 2011 20:35:52 -0000
 @@ -109,7 +109,8 @@
     */
    
@@ -227,32 +258,18 @@ diff -u -r1.98 JinFreechessConnection.java
      
      if (result == null)
        result = new Socket(hostname, port);
-Index: src/free/util/TextUtilities.java
-===================================================================
-RCS file: /cvsroot/jin/jin/src/free/util/TextUtilities.java,v
-retrieving revision 1.13
-diff -u -r1.13 TextUtilities.java
---- src/free/util/TextUtilities.java	16 Mar 2008 01:17:00 -0000	1.13
-+++ src/free/util/TextUtilities.java	6 Jan 2011 07:15:13 -0000
-@@ -295,7 +295,8 @@
-    */
-   
-   public static String getDefaultCharsetName(){
--    return getDefaultCharset().name();
-+    //return getDefaultCharset().name();
-+    return "UTF-8"; // wtm
-   }
-   
-   
-@@ -310,9 +311,10 @@
-   
-   public static String convert(String s, String fromEncoding, String toEncoding)
-       throws IllegalArgumentException{
--    
-     if ((fromEncoding == null) || (toEncoding == null))
-       return s;
-+   //if (fromEncoding == toEncoding)
-+   //  return s;
-     
-     byte [] rawBytes;
-     try{
+@@ -2434,7 +2436,13 @@
+     if (!ourGame)
+       throw new IllegalArgumentException("The specified Game object was not created by this JinConnection or the game has ended.");
+ 
+-    sendCommand(moveToString(game, move), true, true, false);
++    //sendCommand(moveToString(game, move), true, true, false);
++    // Previously avoidAliasing was set to true, but I don't think it's
++    // justified, since it appears that FICS does not expand aliases
++    // when parsing moves anyway.
++    // FatICS parses moves even before stripping the leading $, so I'm
++    // setting avoidAliasing to false to make things work.
++    sendCommand(moveToString(game, move), true, false, false);
+ 
+     Vector unechoedGameMoves = (Vector)unechoedMoves.get(game);
+     if (unechoedGameMoves == null){

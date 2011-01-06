@@ -48,7 +48,7 @@ class CommandParser(object):
         # options should really be orthogonal, so I made '$$' alone
         # expand aliaes. Now if you want the old behavior of neither
         # expanding aliases nor updating idle time, use '$$$'.
-        if len(s) >= 2 and s[0:2] == '$$':
+        if s.startswith('$$'):
             s = s[2:].lstrip()
         else:
             conn.user.session.last_command_time = time.time()
@@ -63,11 +63,15 @@ class CommandParser(object):
             # ignore blank line
             return block.BLK_NULL
 
+        # Parse moves.  Note that this takes place before stripping any
+        # leading '$'.  Jin actually sends moves prefixed with '$', but
+        # I think that's unnecessary, and prefer to patch Jin to not
+        # do that.
         if conn.session.game:
             if conn.session.game.parse_move(s, conn):
                 return block.BLK_GAME_MOVE
 
-        if s[0] == '$':
+        if s.startswith('$'):
             s = s[1:].lstrip()
         else:
             try:

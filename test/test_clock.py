@@ -103,6 +103,7 @@ class TestTime(Test):
 class TestFlag(Test):
     @with_player('TestPlayer', 'testpass')
     def test_flag(self):
+        self._skip('slow test')
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
 
@@ -148,6 +149,7 @@ class TestFlag(Test):
 
     @with_player('TestPlayer', 'testpass')
     def test_flag_both(self):
+        self._skip('slow test')
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
 
@@ -285,6 +287,7 @@ class TestFlag(Test):
     def test_autoflag_nomaterial(self):
         """ Test when a player runs out of time but the opponent
         has no mating material. """
+        self._skip('slow test')
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
 
