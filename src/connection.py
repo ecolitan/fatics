@@ -82,12 +82,14 @@ class Connection(basic.LineReceiver):
         #print '((%s,%s))\n' % (self.state, repr(line))
         if self.session.use_timeseal:
             (t, line) = timeseal.decode_timeseal(line)
-            assert(t != 0)
         elif self.session.use_zipseal:
             (t, line) = timeseal.decode_zipseal(line)
-            assert(t != 0)
         else:
             t = None
+        if t == 0:
+            self.write('timeseal error\n')
+            self.loseConnection('timeseal error')
+            return
         self.session.timeseal_last_timestamp = t
         if self.state:
             getattr(self, "lineReceived_" + self.state)(line)
@@ -122,12 +124,14 @@ class Connection(basic.LineReceiver):
                 if filter_.check_filter(self.ip):
                     # not translated, since the player hasn't logged on
                     self.write('Due to abuse, guest logins are blocked from your address.\n')
-                    return self.transport.loseConnection()
+                    self.loseConnection('filtered')
+                    return
             else:
                 if self.user.is_banned:
                     # not translated, since the player hasn't logged on
                     self.write('Player "%s" is banned.\n' % self.user.name)
-                    return self.transport.loseConnection()
+                    self.loseConnection('banned')
+                    return
             self.state = 'passwd'
         else:
             self.transport.wont(telnet.ECHO)

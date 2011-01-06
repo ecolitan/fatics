@@ -1,0 +1,229 @@
+? release/compile
+Index: release/build.xml
+===================================================================
+RCS file: /cvsroot/jin/jin/release/build.xml,v
+retrieving revision 1.63
+diff -u -r1.63 build.xml
+--- release/build.xml	24 Feb 2008 02:18:25 -0000	1.63
++++ release/build.xml	6 Jan 2011 04:16:34 -0000
+@@ -26,7 +26,7 @@
+ 	<dirname property="app.dir" file="." /> <!-- The directory of the buildfile to run to build the app -->
+ 	<property name="releasefiles.dir" value="${app.dir}/build" /> <!-- The directory of the files to release -->
+ 	<property name="result.dir" value="." /> <!-- The directory where to put the result -->
+-	<property name="target.protocols" value="icc fics" /> <!-- The list of protocols to target -->
++	<property name="target.protocols" value="fics" /> <!-- The list of protocols to target -->
+ 	<property name="target.servers" value="icc fics wcl" /> <!-- The list of servers to target -->
+ 	<property name="osx.icon" value="osx/icon.icns" />
+ 	
+@@ -435,7 +435,8 @@
+ 	
+ 	<!-- Applet release for FICS. Resulting file is ${applet-fics-archive} -->
+ 	<target name="applet.fics" depends="init" description="Builds an applet release for FICS">
+-		<antcall target="create-applet-archive">
++		<!--<antcall target="create-applet-archive"> - Wil  Mahan -->
++		<antcall target="applet">
+ 			<param name="protocol.id" value="fics" />
+ 			<param name="server.id" value="fics" />
+ 			<param name="server.classname" value="free.jin.freechess.servers.fics.FICSServer" />
+Index: release/applet/server_support.php
+===================================================================
+RCS file: /cvsroot/jin/jin/release/applet/server_support.php,v
+retrieving revision 1.2
+diff -u -r1.2 server_support.php
+--- release/applet/server_support.php	24 Feb 2008 02:16:28 -0000	1.2
++++ release/applet/server_support.php	6 Jan 2011 04:16:34 -0000
+@@ -12,7 +12,8 @@
+ 	
+ 	// Returns the port to which the applet should connect
+ 	function getPort(){
+-		return 5001;
++		//wtm return 5001;
++		return 5000;
+ 	}
+ 	
+ 	
+@@ -39,4 +40,4 @@
+ 			return null;
+ 	}
+ 		
+-?>
+\ No newline at end of file
++?>
+Index: src/free/freechess/FreechessConnection.java
+===================================================================
+RCS file: /cvsroot/jin/jin/src/free/freechess/FreechessConnection.java,v
+retrieving revision 1.51
+diff -u -r1.51 FreechessConnection.java
+--- src/free/freechess/FreechessConnection.java	7 Jun 2007 14:38:46 -0000	1.51
++++ src/free/freechess/FreechessConnection.java	6 Jan 2011 04:16:38 -0000
+@@ -32,6 +32,7 @@
+ import java.util.regex.Pattern;
+ 
+ import free.util.Connection;
++import free.util.TextUtilities; // wtm
+ 
+ 
+ /**
+@@ -424,7 +425,8 @@
+ 
+     try{
+       OutputStream out = getOutputStream();
+-      out.write(command.getBytes("ASCII"));
++      //out.write(command.getBytes("ASCII"));
++      out.write(command.getBytes("UTF-8")); // wtm
+       out.write('\n');
+       out.flush();
+     } catch (IOException e){
+@@ -471,6 +473,7 @@
+   protected Object readMessage(InputStream inputStream) throws IOException{
+     PushbackInputStream pin = (PushbackInputStream)inputStream;
+     StringBuffer buf = new StringBuffer();
++    //InputStreamReader reader = new InputStreamReader(pin, "UTF-8"); 
+     
+     boolean lineStartsWithPrompt = false;
+     while (true){
+@@ -483,12 +486,15 @@
+       }
+             
+       // End of line
+-      if (b == '\n'){
+-        // FICS uses \n\r for an end-of-line marker!?
+-        // Eat the following '\r', if there is one
++      if (b == '\n' || b == '\r'){
++        // FICS uses \n\r for an end-of-line marker.
++        // FatICS uses \r\n.
++        // Eat the following '\r' or '\n', if there is one
++        int oldb = b;
+         b = pin.read();
+-        if ((b > 0) && (b != '\r'))
+-          pin.unread(b);
++
++        if (b > 0) {
++        if (((b == '\r') || (b == '\n')) && b != oldb) {
+         
+         // Ignore all-prompt lines
+         if (lineStartsWithPrompt && (buf.length() == 0)){
+@@ -497,9 +503,16 @@
+         }
+         else
+           break;
++        }
++        else {
++          pin.unread(b);
++        }
++        }
++
+       }
+       
+       buf.append((char)b);
++      //System.out.print(Integer.toHexString(b) + " ");
+       
+       // Filter out the prompt
+       if (buf.toString().equals("fics% ")){
+@@ -507,8 +520,16 @@
+         lineStartsWithPrompt = true;
+       }
+     }
+-    
+-    return buf.toString();
++
++    //System.out.println("");
++    //System.out.println("utf8 ---got message " + TextUtilities.convert(line, "ISO-8859-1", "UTF-8"));
++    ///return buf.toString();
++
++    // Jin incorrectly converts single bytes into characters above.  To
++    // hack around this for UTF-8, which can represent characters
++    // with multiple bytes, we get back a stream of single bytes by
++    // pretending the badly-converted string is encoded as ISO-8859-1.
++    return TextUtilities.convert(buf.toString(), "ISO-8859-1", "UTF-8");
+   }
+   
+   
+@@ -523,6 +544,15 @@
+     
+     if (logStream != null)
+       logStream.println(line);
++
++    // wtm
++    //System.out.println("got message " + line);
++    //System.out.println("utf8 ---got message " + TextUtilities.convert(line, "ISO-8859-1", "UTF-8"));
++    /*try {
++      System.out.println("now got message " + new String(line.getBytes("ISO-8859-1"), "UTF-8"));
++    } catch (UnsupportedEncodingException e) {
++    }*/
++    // System.out.println(" ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟");
+     
+     if (handleGameInfo(line))
+       return;
+Index: src/free/jin/console/AbstractConsoleDesignation.java
+===================================================================
+RCS file: /cvsroot/jin/jin/src/free/jin/console/AbstractConsoleDesignation.java,v
+retrieving revision 1.18
+diff -u -r1.18 AbstractConsoleDesignation.java
+--- src/free/jin/console/AbstractConsoleDesignation.java	16 Mar 2008 01:18:02 -0000	1.18
++++ src/free/jin/console/AbstractConsoleDesignation.java	6 Jan 2011 04:16:38 -0000
+@@ -339,6 +339,7 @@
+   
+   private String getActualEncoding(){
+     return encoding == null ? console.getConsoleManager().getEncoding() : encoding;
++    //return "UTF-8"; // wtm
+   }
+   
+   
+Index: src/free/jin/freechess/JinFreechessConnection.java
+===================================================================
+RCS file: /cvsroot/jin/jin/src/free/jin/freechess/JinFreechessConnection.java,v
+retrieving revision 1.98
+diff -u -r1.98 JinFreechessConnection.java
+--- src/free/jin/freechess/JinFreechessConnection.java	10 Mar 2008 02:16:09 -0000	1.98
++++ src/free/jin/freechess/JinFreechessConnection.java	6 Jan 2011 04:16:42 -0000
+@@ -109,7 +109,8 @@
+    */
+   
+   public String getTextEncoding(){
+-    return null;
++    //wtm return null;
++    return "UTF-8";
+   }
+ 
+ 
+@@ -277,6 +278,7 @@
+         else
+           e.printStackTrace(); // Shouldn't happen, I think
+       }
++    result = null; // wtm - disable timeseal for now
+     
+     if (result == null)
+       result = new Socket(hostname, port);
+Index: src/free/util/TextUtilities.java
+===================================================================
+RCS file: /cvsroot/jin/jin/src/free/util/TextUtilities.java,v
+retrieving revision 1.13
+diff -u -r1.13 TextUtilities.java
+--- src/free/util/TextUtilities.java	16 Mar 2008 01:17:00 -0000	1.13
++++ src/free/util/TextUtilities.java	6 Jan 2011 04:16:43 -0000
+@@ -295,7 +295,9 @@
+    */
+   
+   public static String getDefaultCharsetName(){
+-    return getDefaultCharset().name();
++    System.out.println("default charset " + getDefaultCharset().name());
++    //return getDefaultCharset().name();
++    return "UTF-8"; // wtm
+   }
+   
+   
+@@ -310,9 +312,12 @@
+   
+   public static String convert(String s, String fromEncoding, String toEncoding)
+       throws IllegalArgumentException{
+-    
+     if ((fromEncoding == null) || (toEncoding == null))
+       return s;
++    System.out.println("Converting::: " + s + " from " + fromEncoding + " to " + toEncoding);
++    //System.out.println("Im finſteren Jagdſchloß am offenen Felsquellwaſſer patzte der affig-flatterhafte kauzig-höfliche Bäcker über ſeinem verſifften kniffligen C-Xylophon.\n");
++   //if (fromEncoding == toEncoding)
++   //  return s;
+     
+     byte [] rawBytes;
+     try{

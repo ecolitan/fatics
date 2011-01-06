@@ -93,6 +93,12 @@ class TestZipseal(Test):
         p1.close()
         p2.close()
 
+    def test_zipseal_error(self):
+        t = telnetlib.Telnet(host, zipseal_port, 120)
+        t.write('\n')
+        self.expect_EOF(t)
+        t.close()
+
 class TestZipsealWindows(Test):
     def test_zipseal_windows(self):
         if not os.path.exists(wine_prog):

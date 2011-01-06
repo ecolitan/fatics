@@ -72,7 +72,8 @@ class Test(unittest.TestCase):
     def expect_EOF(self, t):
         def read_some():
             t.read_very_eager()
-            t.read_until('not-seen', 2)
+            t.read_until('not-seen', 1)
+            t.read_very_eager()
         self.assertRaises(EOFError, read_some)
 
     def connect(self):
