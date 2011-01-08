@@ -117,7 +117,6 @@ class Connection(basic.LineReceiver):
             self.session.set_ivars_from_str(m.group(1))
             return
         name = line.strip()
-        self.transport.will(telnet.ECHO)
         self.user = login.get_user(name, self)
         if self.user:
             if self.user.is_guest:
@@ -132,9 +131,10 @@ class Connection(basic.LineReceiver):
                     self.write('Player "%s" is banned.\n' % self.user.name)
                     self.loseConnection('banned')
                     return
+            # hide password
+            self.transport.will(telnet.ECHO)
             self.state = 'passwd'
         else:
-            self.transport.wont(telnet.ECHO)
             self.write("login: ")
 
     def lineReceived_passwd(self, line):

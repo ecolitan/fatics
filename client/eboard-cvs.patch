@@ -1,0 +1,51 @@
+Index: ntext.cc
+===================================================================
+RCS file: /cvsroot/eboard/eboard/ntext.cc,v
+retrieving revision 1.24
+diff -u -r1.24 ntext.cc
+--- ntext.cc	29 Jun 2010 18:04:37 -0000	1.24
++++ ntext.cc	8 Jan 2011 08:00:14 -0000
+@@ -326,7 +326,7 @@
+     if (j==0 && sl->Width >= 0) {
+       w = sl->Width;
+     } else {
+-      if (!g_utf8_validate(tp+j,k-j,NULL)) continue;
++      if (!g_utf8_validate(tp+j,k-j,NULL)) break; //wtm //continue;
+       w = L.substringWidth(0,tp+j,k-j);
+       if (j==0) sl->Width = w;
+     }
+@@ -339,7 +339,8 @@
+ 
+     for(l=k-1;l>=j;l--)
+       if (tp[l] == ' ' || tp[l] == '\t') {
+-	if (!g_utf8_validate(tp+j,k-j,NULL)) continue;
++	//wtm if (!g_utf8_validate(tp+j,k-j,NULL)) continue;
++	if (!g_utf8_validate(tp+j,l-j,NULL)) continue;
+ 	w = L.substringWidth(0,tp+j,l-j);
+ 	if (w <= elw) {
+ 	  fl = new FLine(tp+j,color,l-j, sl->Timestamp);
+Index: network.cc
+===================================================================
+RCS file: /cvsroot/eboard/eboard/network.cc,v
+retrieving revision 1.52
+diff -u -r1.52 network.cc
+--- network.cc	29 Jun 2010 18:04:37 -0000	1.52
++++ network.cc	8 Jan 2011 08:00:15 -0000
+@@ -217,7 +217,7 @@
+     while(di!=buffer.begin()) {
+       c=buffer.front();
+       buffer.pop_front();
+-      if (c>=0x20)
++      if ((unsigned)c>=0x20)
+ 	tbuffer[i++]=c;
+     }
+     buffer.pop_front();
+@@ -292,7 +292,7 @@
+     while(di!=buffer.begin()) {
+       c=buffer.front();
+       buffer.pop_front();
+-      if (c>=0x20)
++      if ((unsigned)c>=0x20)
+ 	tbuffer[i++]=c;
+     }
+     global.LogAppend(tbuffer);

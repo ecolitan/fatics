@@ -38,7 +38,7 @@ class CommandParser(object):
     def _do_parse(self, s, conn):
         s = s.strip()
 
-        if not utf8.checker.check_user_utf8(s):
+        if not utf8.check_user_utf8(s):
             conn.write(_("Command ignored: invalid characters.\n"))
             # no exact code for this situation
             return block.BLK_ERROR_BADCOMMAND

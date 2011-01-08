@@ -28,6 +28,9 @@ class TestUtf8(Test):
         t.write('fi \xffadmin\n')
         self.expect("invalid characters", t)
 
+        t.write('shout \x00\n')
+        self.expect("invalid characters", t)
+
         self.close(t)
 
     def test_utf8(self):

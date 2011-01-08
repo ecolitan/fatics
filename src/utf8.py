@@ -18,23 +18,19 @@
 
 import re
 
-class Checker(object):
-    legal_chars_re = re.compile('''^[\t\x20-\xfd]*$''')
-    def check_user_utf8(self, s):
-        ret =  self.legal_chars_re.match(s)
-        if ret:
-            try:
-                s.decode('utf-8')
-            except UnicodeDecodeError:
-                ret = False
-        return ret
+legal_chars_re = re.compile('''^[\x20-\xfd]*$''')
+def check_user_utf8(s):
+    ret =  legal_chars_re.match(s)
+    if ret:
+        try:
+            s.decode('utf-8')
+        except UnicodeDecodeError:
+            ret = False
+    return ret
 
 def utf8_to_ascii(s):
     """ Try to gracefully convert UTF-8 to ASCII.  Non-ASCII chars are
     replaced by '?'. """
     return s.decode('utf-8').encode('ascii', 'replace')
-
-checker = Checker()
-
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

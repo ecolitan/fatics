@@ -102,6 +102,8 @@ class TelnetTransport(protocol.Protocol):
                     self.state = 'escaped'
                 elif b == '\r':
                     self.state = 'newline'
+                elif b == '\t':
+                    appDataBuffer.append('    ')
                 else:
                     appDataBuffer.append(b)
             elif self.state == 'escaped':
