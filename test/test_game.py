@@ -413,7 +413,7 @@ class TestRefresh(Test):
         self.close(t2)
 
 class TestMoves(Test):
-    def test_moves(self):
+    def test_moves_played(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
@@ -473,6 +473,27 @@ class TestMoves(Test):
         self.close(t)
         self.close(t2)
 
+    def test_moves_examined(self):
+        t = self.connect_as_guest('GuestABCD')
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t.write('d4\n')
+        self.expect('GuestABCD moves: d4', t)
+        t.write('d5\n')
+        self.expect('GuestABCD moves: d5', t)
+        t.write('c4\n')
+        self.expect('GuestABCD moves: c4', t)
+
+        t.write('moves\n')
+        self.expect('Movelist for game 1:\r\n\r\nGuestABCD (++++) vs. GuestABCD (++++) --- ', t)
+        self.expect('''Move  GuestABCD               GuestABCD\r\n----  ---------------------   ---------------------\r\n''', t)
+        self.expect('''  1.  d4      (0:00)          d5      (0:00)\r\n''', t)
+        self.expect('''  2.  c4      (0:00)''', t)
+        self.expect('''      {Still in progress} *''', t)
+
+        t.write('unex\n')
+
+        self.close(t)
 
 class TestGames(Test):
     def test_games(self):

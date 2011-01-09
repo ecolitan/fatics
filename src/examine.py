@@ -17,7 +17,7 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import time
+import datetime
 
 import speed_variant
 import clock
@@ -40,8 +40,8 @@ class ExaminedGame(Game):
             user, user)
         assert(user.session.game is None)
         user.session.game = self
+        self.when_started = datetime.datetime.utcnow()
 
-        self.start_time = time.time()
         if hist_game is None:
             self.speed_variant = speed_variant.from_names('untimed', 'chess')
             self.variant = speed_variant.variant_class[self.speed_variant.variant.name](self)

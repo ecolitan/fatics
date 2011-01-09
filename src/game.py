@@ -307,8 +307,8 @@ class Game(object):
         # don't translate since clients parse these messages
         conn.write("\nMovelist for game %d:\n\n" % self.number)
 
-        time_str = time.strftime("%a %b %e, %H:%M %Z %Y",
-            time.localtime(self.start_time))
+        time_str = conn.user.format_datetime(self.when_started)
+        #self.when_started.strftime("%a %b %e, %H:%M %Z %Y")
 
         # Original FICS prints (UNR) for unrated players here; in other
         # places it usually uses (++++) or (----) instead.  This looks like
@@ -628,8 +628,6 @@ class PlayedGame(Game):
         self.black.session.is_white = False
 
         self.rated = chal.rated
-
-        self.start_time = time.time()
 
         if self.white_time == 0:
             self.initial_secs = 10.0

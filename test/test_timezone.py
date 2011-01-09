@@ -42,6 +42,17 @@ class TestTimezone(Test):
 
         self.close(t)
 
+    def test_timezone_moves(self):
+        t = self.connect_as_guest()
+        t.write('set tzone Pacific/Fiji\n')
+        self.expect('Time zone set to "Pacific/Fiji"', t)
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t.write('moves\n')
+        self.expect_re(' FJS?T', t)
+        t.write('unex\n')
+        self.close(t)
+
     def test_timezone_persistence(self):
         t = self.connect_as_admin()
 

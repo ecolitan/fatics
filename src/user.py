@@ -307,8 +307,9 @@ class BaseUser(object):
         return not self.vars['chanoff'] and not self.in_silence()
 
     def format_datetime(self, dt):
-        return dt.replace(tzinfo=pytz.utc).strftime("%Y-%m-%d %H:%M %Z")
+        #return dt.replace(tzinfo=pytz.utc).strftime("%Y-%m-%d %H:%M %Z")
         #return dt.strftime("%a %b %e, %H:%M %Z %Y")
+        return dt.replace(tzinfo=pytz.utc).astimezone(self.tz).strftime('%Y-%m-%d %H:%M %Z')
 
     def set_muted(self, val):
         """ Mute or unmute the user (affects all communications). """

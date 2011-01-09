@@ -20,7 +20,7 @@ from test import *
 
 class TestAdjourn(Test):
     @with_player('TestPlayer', 'testpass')
-    def test_adjourn(self):
+    def test_adjourn_and_resume(self):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
         t.write('set style 12\n')
@@ -70,6 +70,10 @@ class TestAdjourn(Test):
 
         t.write('Be3\n')
         self.expect('B/c1-e3', t2)
+
+        t2.write('moves\n')
+        self.expect('Movelist for game 1:\r\n\r\nadmin (----) vs. TestPlayer (----) --- ', t2)
+
         t.write('abo\n')
         t2.write('abo\n')
         self.expect('aborted by agreement', t)
