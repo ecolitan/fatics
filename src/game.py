@@ -712,7 +712,7 @@ class PlayedGame(Game):
                     time = self.clock.got_move(moved_side,
                         self.variant.pos.ply, elapsed_ms / 1000.0)
                     mv.lag = int(round(1000.0 * self.clock.real_elapsed -
-                        - elapsed_ms))
+                        elapsed_ms))
                 else:
                     time = self.clock.got_move(moved_side,
                         self.variant.pos.ply)
