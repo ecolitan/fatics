@@ -709,12 +709,12 @@ class PlayedGame(Game):
             if self.clock.is_ticking:
                 if conn.user.has_timeseal():
                     assert(conn.session.move_sent_timestamp is not None)
-                    elapsed = (conn.session.timeseal_last_timestamp -
-                        conn.session.move_sent_timestamp) / 1000.0
+                    elapsed_ms = (conn.session.timeseal_last_timestamp -
+                        conn.session.move_sent_timestamp)
                     time = self.clock.got_move(moved_side,
-                        self.variant.pos.ply, elapsed)
-                    mv.lag = (int(round(1000.0 * self.clock.real_elapsed))
-                        - elapsed)
+                        self.variant.pos.ply, elapsed_ms / 1000.0)
+                    mv.lag = int(round(1000.0 * self.clock.real_elapsed -
+                        - elapsed_ms))
                 else:
                     time = self.clock.got_move(moved_side,
                         self.variant.pos.ply)
