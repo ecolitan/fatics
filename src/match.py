@@ -211,14 +211,15 @@ class MatchStringParser(object):
             if self.inc != 0:
                 self._set_inc(0)
 
-        if self.time is None:
-            self.time = u.vars['time']
         if self.inc is None:
-            if self.clock_name == 'hourglass':
-                # default to no increment
-                self.inc = 0
-            else:
+            if self.time is None:
+                # use user-defined defaults
+                self.time = u.vars['time']
                 self.inc = u.vars['inc']
+            else:
+                # original FICS set the increment to 0 when only an
+                # initial time is given
+                self.inc = 0
 
         if self.clock_name == 'bronstein' and not self.inc:
             raise MatchError(_('Games using a Bronstein clock must have an increment.\n'))

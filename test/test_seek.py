@@ -48,6 +48,26 @@ class TestSeek(Test):
         self.close(t)
         self.close(t2)
 
+    @with_player('testone', 'pass')
+    @with_player('testtwo', 'pass')
+    def test_seek_defaults(self):
+        t = self.connect_as('testone', 'pass')
+        t2 = self.connect_as('testtwo', 'pass')
+
+        t.write('set time 7\n')
+        t.write('set inc 4\n')
+        self.expect('inc set to 4.', t)
+        t.write('see\n')
+        self.expect('testone (----) seeking 7 4 rated blitz', t2)
+        t.write('uns\n')
+        self.expect('Your seeks have been removed.', t)
+
+        t.write('see 5\n')
+        self.expect('testone (----) seeking 5 0 rated blitz', t2)
+
+        self.close(t)
+        self.close(t2)
+
     def test_matching_seek(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest('GuestEFGH')
@@ -358,7 +378,6 @@ class TestSeek(Test):
 
         self.close(t)
         self.close(t2)
-
 
 class TestPlay(Test):
     @with_player('TestPlayer', 'testpass')
