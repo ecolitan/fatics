@@ -187,6 +187,7 @@ class Unalias(Command):
 class Who(Command):
     def run(self, args, conn):
         count = 0
+        conn.write('\n')
         for u in online.online:
             conn.write(u.get_display_name() + '\n')
             count = count + 1

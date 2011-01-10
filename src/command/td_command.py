@@ -29,7 +29,7 @@ from command_parser import BadCommandError
 class Rmatch(Command):
     def run(self, args, conn):
         if not conn.user.has_title('TD'):
-            conn.write(_('Only TD programs are allowed to use this command\n'))
+            conn.write(_('Only TD programs are allowed to use this command.\n'))
             return
         u1 = user.find_by_prefix_for_user(args[0], conn, online_only=True)
         if not u1:
@@ -54,7 +54,7 @@ class Rmatch(Command):
 class Tournset(Command):
     def run(self, args, conn):
         if not conn.user.has_title('TD'):
-            conn.write(_('Only TD programs are allowed to use this command\n'))
+            conn.write(_('Only TD programs are allowed to use this command.\n'))
             return
         u2 = user.find_by_prefix_for_user(args[0], conn, online_only=True)
         if not u2:
@@ -76,7 +76,7 @@ class Tournset(Command):
 class Robserve(Command):
     def run(self, args, conn):
         if not conn.user.has_title('TD'):
-            conn.write(_('Only TD programs are allowed to use this command\n'))
+            conn.write(_('Only TD programs are allowed to use this command.\n'))
             return
 
         u2 = user.find_by_prefix_for_user(args[0], conn, online_only=True)

@@ -93,8 +93,8 @@ class Test(unittest.TestCase):
     def connect_as_admin(self):
         t = connect()
         t.write("admin\n%s\n" % admin_passwd)
-        s = t.read_until('fics%', 5)
-        assert('fics%' in s)
+        s = t.read_until('fics% ', 5)
+        assert('fics% ' in s)
         return t
 
     def connect_as(self, name, passwd):
@@ -102,8 +102,8 @@ class Test(unittest.TestCase):
         t.write('%s\n' % name)
         self.expect('is a registered name', t)
         t.write('%s\n' % passwd)
-        s = t.read_until('fics%', 5)
-        assert('fics%' in s)
+        s = t.read_until('fics% ', 5)
+        assert('fics% ' in s)
         return t
 
     def close(self, t):
@@ -124,6 +124,7 @@ class Test(unittest.TestCase):
 
     def _deluser(self, name):
         t = self.connect_as_admin()
+        #t.write('nuke %s\n' % name) # in case an error prevented clean logout
         t.write('remplayer %s\n' % name)
         self.expect('removed', t)
         self.close(t)
@@ -131,6 +132,48 @@ class Test(unittest.TestCase):
     def _skip(self, reason):
         raise unittest.SkipTest(reason)
 
+    def setUp(self):
+        pass
+
+    def _nuke_all_players(self):
+        try:
+            t = self.connect_as_admin()
+            t.write('who\n')
+            # will have to be redone when 'who' output is finished
+            while True:
+                m = self.expect_re('^(.*?)\r\n', t)
+                line = m.group(1)
+                if line == '':
+                    continue
+                elif ' displayed.' in line:
+                    break
+                else:
+                    m2 = re.match('^(\w+)(?:\(.*?\))*$', line)
+                    self.assert_(m2)
+                    name = m2.group(1)
+                    if name != 'admin':
+                        t.write('nuke %s\n' % name)
+            self.close(t)
+        except unittest.FailTest:
+            # this is only called from within an exception handler, so
+            # there's no need to raise another
+            pass
+
+    def tearDown(self):
+        """ Make sure that all tests shut down cleanly. """
+        t = self.connect_as_guest('GuestWXYZ')
+        t.write('who\n')
+        try:
+            self.expect('1 player displayed.', t)
+        except unittest.FailTest:
+            # The test left open connections lying around.
+            # Nuke all players to give the remaining tests a clean
+            # environment.
+            self.close(t)
+            self._nuke_all_players()
+            raise
+
+        self.close(t)
 
 # test decorators
 """def with_guest(f):
