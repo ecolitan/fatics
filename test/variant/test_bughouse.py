@@ -1148,4 +1148,49 @@ class TestBughouseRules(Test):
         self.close(t3)
         self.close(t4)
 
+    def test_bughouse_b1_line(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t3 = self.connect_as_guest('GuestIJKL')
+        t4 = self.connect_as_guest('GuestMNOP')
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+        t3.write('set style 12\n')
+        t4.write('set style 12\n')
+
+        t2.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t2)
+        t.write('part guestefgh\n')
+        self.expect('GuestABCD offers', t2)
+        t2.write('part guestabcd\n')
+        self.expect('GuestEFGH accepts', t)
+
+        t4.write('set bugopen\n')
+        self.expect('You are now open for bughouse.', t4)
+        t3.write('part guestmnop\n')
+        self.expect('GuestIJKL offers', t4)
+        t4.write('a\n')
+        self.expect('GuestMNOP accepts', t3)
+
+        t.write('match GuestIJKL bughouse white 1+0\n')
+        self.expect('Issuing:', t)
+        self.expect('Challenge:', t3)
+        t3.write('accept\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+        self.expect('<12> ', t3)
+        self.expect('<12> ', t4)
+
+        t.write('e4\n')
+        self.expect('<12> ', t)
+        self.expect('<b1> game 1 white [] black []', t)
+        self.expect('<12> ', t3)
+        self.expect('<b1> game 1 white [] black []', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+        self.close(t4)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

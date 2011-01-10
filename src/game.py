@@ -234,6 +234,7 @@ class Game(object):
             return self.black
 
     def observe(self, u):
+        assert(u not in self.observers)
         u.session.observed.add(self)
         self.observers.add(u)
         u.write(_('You are now observing game %d.\n') % self.number)

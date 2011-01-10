@@ -85,6 +85,10 @@ class Robserve(Command):
 
         g = game.from_name_or_number(args[1], conn)
         if g:
-            g.observe(u2)
+            if u2 in g.observers or u2 in g.players:
+                # TODO: how to print error message to TD?
+                pass
+            else:
+                g.observe(u2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

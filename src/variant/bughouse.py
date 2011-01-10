@@ -21,10 +21,9 @@ import copy
 import random
 from array import array
 
-import time_format
-
 from game_constants import *
 from speed_variant import IllegalMoveError
+from base_variant import BaseVariant
 
 """
 0x88 board representation; pieces are represented as ASCII,
@@ -145,6 +144,7 @@ class Move(object):
         self.time = None
         self._san = None
         self._verbose_alg = None
+        self.lag = 0
 
         # if a promotion piece is not given, assume queen
         if not self.prom:
@@ -1347,7 +1347,7 @@ class Position(object):
         return bool(self.castle_flags & (1 << (2 * int(wtm) + int(is_oo))))
 
 
-class Bughouse(object):
+class Bughouse(BaseVariant):
     def __init__(self, game):
         self.game = game
         self.pos = copy.deepcopy(initial_pos)
@@ -1403,88 +1403,6 @@ class Bughouse(object):
 
         s = '<b1> game %d white [%s] black [%s]%s\n' % (self.game.number,
             holding_white, holding_black, passed_str)
-        return s
-
-    def to_style12(self, user):
-        """returns a style12 string for a given user"""
-        # <12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 473 GuestPPMD GuestCWVQ -1 1 0 39 39 60000 60000 1 none (0:00.000) none 1 0 0
-        s = ''
-        board_str = ''
-        for r in range(7, -1, -1):
-            board_str += ' '
-            for f in range(8):
-                board_str += self.pos.board[0x10 * r + f]
-        side_str = 'W' if self.pos.wtm else 'B'
-        ep = -1 if not self.pos.ep else file(self.pos.ep)
-        w_oo = int(self.pos.check_castle_flags(True, True))
-        w_ooo = int(self.pos.check_castle_flags(True, False))
-        b_oo = int(self.pos.check_castle_flags(False, True))
-        b_ooo = int(self.pos.check_castle_flags(False, False))
-        if self.game.gtype == EXAMINED:
-            flip = 0
-            if user in self.game.players:
-                relation = 2
-            elif user in self.game.observers:
-                relation = -2
-            else:
-                relation = -3
-            white_clock = 0
-            black_clock = 0
-            white_name = list(self.game.players)[0].name
-            black_name = list(self.game.players)[0].name
-            clock_is_ticking = 0
-        elif self.game.gtype == PLAYED:
-            if self.game.white == user:
-                relation = 1 if self.pos.wtm else -1
-                flip = 0
-            elif self.game.black == user:
-                relation = 1 if not self.pos.wtm else -1
-                flip = 1
-            elif user in self.game.observers:
-                relation = 0
-                flip = 0
-            else:
-                relation = -3
-                flip = 0
-            if user.session.ivars['ms']:
-                white_clock = int(round(1000 * self.game.clock.get_white_time()))
-                black_clock = int(round(1000 * self.game.clock.get_black_time()))
-            else:
-                white_clock = int(round(self.game.clock.get_white_time()))
-                black_clock = int(round(self.game.clock.get_black_time()))
-            white_name = self.game.white.name
-            black_name = self.game.black.name
-            clock_is_ticking = int(self.game.clock.is_ticking)
-        else:
-            assert(False)
-        full_moves = self.pos.ply // 2 + 1
-        last_mv = self.pos.get_last_move()
-        if last_mv is None:
-            last_move_time_str = time_format.hms(0.0, user)
-            last_move_san = 'none'
-            last_move_verbose = 'none'
-        else:
-            assert(last_mv.time is not None)
-            last_move_time_str = time_format.hms(last_mv.time, user)
-            last_move_san = last_mv.to_san()
-            last_move_verbose = last_mv.to_verbose_alg()
-            if last_mv.is_capture:
-                if last_mv.undo.holding_pc.isupper():
-                    s += self.get_b1('W%s' % last_mv.undo.holding_pc)
-                else:
-                    s += self.get_b1('B%s' % last_mv.undo.holding_pc.upper())
-
-        # board_str begins with a space
-        # XXX whose lag should we use?
-        s += '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
-            board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
-            self.pos.fifty_count, self.game.number, white_name,
-            black_name, relation, self.game.white_time,
-            self.game.inc, self.pos.material[1], self.pos.material[0],
-            white_clock, black_clock, full_moves, last_move_verbose,
-            last_move_time_str, last_move_san, flip,
-            clock_is_ticking, int(user.session.lag))
-        s += self.get_b1()
         return s
 
 def init_direction_table():
