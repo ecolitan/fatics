@@ -17,9 +17,11 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-from command import *
+from command import ics_command, Command
 
 import match
+import user
+import game
 
 from command_parser import BadCommandError
 
@@ -69,5 +71,20 @@ class Tournset(Command):
         else:
             u2.write_('%s has set your tourney variable to OFF.\n',
                 (conn.user.name,))
+
+@ics_command('robserve', 'wi')
+class Robserve(Command):
+    def run(self, args, conn):
+        if not conn.user.has_title('TD'):
+            conn.write(_('Only TD programs are allowed to use this command\n'))
+            return
+
+        u2 = user.find_by_prefix_for_user(args[0], conn, online_only=True)
+        if not u2:
+            return
+
+        g = game.from_name_or_number(args[1], conn)
+        if g:
+            g.observe(u2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

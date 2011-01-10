@@ -442,4 +442,29 @@ class TestPrimary(Test):
         self.close(t)
         self.close(t2)
 
+class TestRobserve(Test):
+    @with_player('tdplayer', 'tdplayer', ['td'])
+    def test_robserve(self):
+        t = self.connect_as('tdplayer', 'tdplayer')
+        t2 = self.connect_as_guest('GuestABCD')
+        t3 = self.connect_as_guest('GuestEFGH')
+
+        t2.write('ex\n')
+        self.expect('Starting a game', t2)
+
+        t3.write('robserve tdplayer 1\n')
+        self.expect('Only TD programs', t3)
+
+        t.write('robserve GuestEFGH 1\n')
+        self.expect('You are now observing game 1.', t3)
+        t3.write('unob\n')
+        self.expect('Removing game 1', t3)
+
+        t.write('rob GuestEFGH GuestABCD\n')
+        self.expect('You are now observing game 1.', t3)
+
+        self.close(t)
+        self.close(t2)
+        self.close(t3)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
