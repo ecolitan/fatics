@@ -23,6 +23,7 @@ import time
 class TestExamine(Test):
     def test_examine_scratch(self):
         t = self.connect_as_guest('GuestPQLQ')
+        t.write('set style 12\n')
 
         t.write('forward\n')
         self.expect('You are not examining a game', t)

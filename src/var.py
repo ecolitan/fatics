@@ -264,7 +264,7 @@ class VarList(object):
         IntVar("height", 24, min=5).persist().add_as_var()
         IntVar("width", 79, min=32).persist().add_as_var()
 
-        IntVar("style", 12, min=0, max=12).persist().add_as_var()
+        IntVar("style", 1, min=1, max=12).persist().add_as_var()
         IntVar("kiblevel", 0, min=0, max=9999).add_as_var()
         StringVar("interface", None).add_as_var()
         PromptVar("prompt", config.prompt).add_as_var()

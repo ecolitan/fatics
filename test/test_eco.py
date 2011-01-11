@@ -24,6 +24,9 @@ class TestEco(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('eco\n')
         self.expect('You are not playing, examining, or observing a game.', t)
 
@@ -120,6 +123,9 @@ class TestEco(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
         self.expect('Challenge:', t2)
@@ -155,6 +161,9 @@ class TestEco(Test):
     def test_eco_utf8(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
 
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)

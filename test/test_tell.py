@@ -148,6 +148,9 @@ class SayTest(Test):
         t = self.connect_as('testplayer', 'testpass')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('say hello\n')
         self.expect("I don't know", t)
 

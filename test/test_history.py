@@ -25,6 +25,9 @@ class TestHistory(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest('GuestEFGH')
 
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('history\n')
         self.expect('GuestABCD has no history games', t)
 

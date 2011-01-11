@@ -22,8 +22,91 @@ from game_constants import *
 
 class BaseVariant(object):
     """ Methods common to all variants. """
+    def to_style1(self, user):
+        """ A human-readable board. """
+        if self.game.gtype == PLAYED and user == self.game.black:
+            side = BLACK
+        else:
+            side = WHITE
+        if user.vars['flip']:
+            side = opp(side)
+
+        s = []
+        s.append('\nGame %d: ' % self.game.number)
+        s.append(self.game.info_str + '\n')
+
+        # unlike original FICS, we display user titles here; why not?
+        #conn.write(_('Game %(num)d (%(wname)s vs. %(bname)s)\n\n') % {
+        #    'num': self.game.number, wname: self.game.white.get_display_name(),
+        #    'bname': self.game.black.get_display_name()})
+
+        full_moves = self.pos.ply // 2 + 1
+
+        if self.name in ['crazyhouse', 'bughouse']:
+            (holding_white, holding_black) = self.pos.get_holding_str()
+            if side == WHITE:
+                s.append('Black holding: [%s]\n' % holding_black)
+            else:
+                s.append('White holding: [%s]\n' % holding_white)
+        s.append('\n       ---------------------------------\n')
+        for r in range(0, 8):
+            rank = 8 - r if side == WHITE else r + 1
+            s.append('    %d  |' % rank)
+            for f in range(0,  8):
+                file_ = f + 1 if side == WHITE else 8 - f
+                piece_char = self.pos.board[0x10 * (rank - 1) + file_ - 1]
+                if piece_char == '-':
+                    piece_char = ' '
+                elif piece_char.islower():
+                    piece_char = '*' + piece_char
+                s.append(' %-2s|' % piece_char)
+
+            if r == 0:
+                s.append('     Move # : %d (%s)' %
+                    (full_moves, 'White' if self.pos.wtm else 'Black'))
+            elif r == 1:
+                last_mv = self.pos.get_last_move()
+                if last_mv is not None:
+                    last_move_time_str = time_format.hms(last_mv.time, user)
+                    side_str = 'Black' if self.pos.wtm else 'White'
+                    s.append("     %s Moves : '%-7s (%s)'" % (side_str,
+                        last_mv.to_san(), last_move_time_str))
+            elif r == 3:
+                if self.game.gtype == EXAMINED:
+                    black_time = 0
+                else:
+                    black_time = self.game.clock.get_black_time()
+                s.append('     Black Clock : %s' % time_format.hms(black_time, user))
+            elif r == 4:
+                if self.game.gtype == EXAMINED:
+                    white_time = 0
+                else:
+                    white_time = self.game.clock.get_white_time()
+                s.append('     White Clock : %s' % time_format.hms(white_time, user))
+            elif r == 5:
+                s.append('     Black Strength : %d' % self.pos.material[0])
+            elif r == 6:
+                s.append('     White Strength : %d' % self.pos.material[1])
+
+            s.append('\n')
+            if r < 7:
+                s.append('       |---+---+---+---+---+---+---+---|\n')
+
+        s.append('       ---------------------------------\n')
+        if side == WHITE:
+            s.append('         a   b   c   d   e   f   g   h\n')
+        else:
+            s.append('         h   g   f   e   d   c   b   a\n')
+        if self.name in ['crazyhouse', 'bughouse']:
+            if side == WHITE:
+                s.append('White holding: [%s]\n' % holding_white)
+            else:
+                s.append('Black holding: [%s]\n' % holding_black)
+        s.append('\n')
+        return ''.join(s)
+
     def to_style12(self, user):
-        """returns a style12 string for a given user"""
+        """ returns a style12 string for a given user """
         # <12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 473 GuestPPMD GuestCWVQ -1 1 0 39 39 60000 60000 1 none (0:00.000) none 1 0 0
         board_str = ''
         for r in range(7, -1, -1):

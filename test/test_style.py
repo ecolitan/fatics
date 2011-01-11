@@ -18,6 +18,142 @@
 
 from test import *
 
+class TestStyle1(Test):
+    @with_player('testplayer', 'testpass')
+    def test_style1(self):
+        t = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as_admin()
+        t.write('set style 1\n')
+        t.write('iset ms 1\n')
+        t2.write('set style 1\n')
+
+        t.write('match admin white 1 0 zh\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        exp_text = '''
+Game 1: testplayer (----) admin (----) rated lightning crazyhouse 1 0
+
+Black holding: []
+       ---------------------------------
+    8  | *r| *n| *b| *q| *k| *b| *n| *r|     Move # : 1 (White)
+       |---+---+---+---+---+---+---+---|
+    7  | *p| *p| *p| *p| *p| *p| *p| *p|
+       |---+---+---+---+---+---+---+---|
+    6  |   |   |   |   |   |   |   |   |
+       |---+---+---+---+---+---+---+---|
+    5  |   |   |   |   |   |   |   |   |     Black Clock : 1:00.000
+       |---+---+---+---+---+---+---+---|
+    4  |   |   |   |   |   |   |   |   |     White Clock : 1:00.000
+       |---+---+---+---+---+---+---+---|
+    3  |   |   |   |   |   |   |   |   |     Black Strength : 24
+       |---+---+---+---+---+---+---+---|
+    2  | P | P | P | P | P | P | P | P |     White Strength : 24
+       |---+---+---+---+---+---+---+---|
+    1  | R | N | B | Q | K | B | N | R |
+       ---------------------------------
+         a   b   c   d   e   f   g   h
+White holding: []'''
+        for line in exp_text.split('\n'):
+            self.expect(line.replace('\n', '\r\n'), t)
+
+        exp_text = '''
+Game 1: testplayer (----) admin (----) rated lightning crazyhouse 1 0
+
+White holding: []
+       ---------------------------------
+    1  | R | N | B | K | Q | B | N | R |     Move # : 1 (White)
+       |---+---+---+---+---+---+---+---|
+    2  | P | P | P | P | P | P | P | P |
+       |---+---+---+---+---+---+---+---|
+    3  |   |   |   |   |   |   |   |   |
+       |---+---+---+---+---+---+---+---|
+    4  |   |   |   |   |   |   |   |   |     Black Clock : 1:00
+       |---+---+---+---+---+---+---+---|
+    5  |   |   |   |   |   |   |   |   |     White Clock : 1:00
+       |---+---+---+---+---+---+---+---|
+    6  |   |   |   |   |   |   |   |   |     Black Strength : 24
+       |---+---+---+---+---+---+---+---|
+    7  | *p| *p| *p| *p| *p| *p| *p| *p|     White Strength : 24
+       |---+---+---+---+---+---+---+---|
+    8  | *r| *n| *b| *k| *q| *b| *n| *r|
+       ---------------------------------
+         h   g   f   e   d   c   b   a
+Black holding: []'''
+        for line in exp_text.split('\n'):
+            self.expect(line.replace('\n', '\r\n'), t2)
+
+        t.write('e4\n')
+
+        exp_text = '''
+Game 1: testplayer (----) admin (----) rated lightning crazyhouse 1 0
+
+Black holding: []
+       ---------------------------------
+    8  | *r| *n| *b| *q| *k| *b| *n| *r|     Move # : 1 (Black)
+       |---+---+---+---+---+---+---+---|
+    7  | *p| *p| *p| *p| *p| *p| *p| *p|
+       |---+---+---+---+---+---+---+---|
+    6  |   |   |   |   |   |   |   |   |
+       |---+---+---+---+---+---+---+---|
+    5  |   |   |   |   |   |   |   |   |     Black Clock : 1:00.000
+       |---+---+---+---+---+---+---+---|
+    4  |   |   |   |   | P |   |   |   |     White Clock : 1:00.000
+       |---+---+---+---+---+---+---+---|
+    3  |   |   |   |   |   |   |   |   |     Black Strength : 24
+       |---+---+---+---+---+---+---+---|
+    2  | P | P | P | P |   | P | P | P |     White Strength : 24
+       |---+---+---+---+---+---+---+---|
+    1  | R | N | B | Q | K | B | N | R |
+       ---------------------------------
+         a   b   c   d   e   f   g   h
+White holding: []'''
+        for line in exp_text.split('\n'):
+            self.expect(line.replace('\n', '\r\n'), t)
+
+        exp_text = '''
+Game 1: testplayer (----) admin (----) rated lightning crazyhouse 1 0
+
+White holding: []
+       ---------------------------------
+    1  | R | N | B | K | Q | B | N | R |     Move # : 1 (Black)
+       |---+---+---+---+---+---+---+---|
+    2  | P | P | P |   | P | P | P | P |     White Moves : 'e4      (0:00)'
+       |---+---+---+---+---+---+---+---|
+    3  |   |   |   |   |   |   |   |   |
+       |---+---+---+---+---+---+---+---|
+    4  |   |   |   | P |   |   |   |   |     Black Clock : 1:00
+       |---+---+---+---+---+---+---+---|
+    5  |   |   |   |   |   |   |   |   |     White Clock : 1:00
+       |---+---+---+---+---+---+---+---|
+    6  |   |   |   |   |   |   |   |   |     Black Strength : 24
+       |---+---+---+---+---+---+---+---|
+    7  | *p| *p| *p| *p| *p| *p| *p| *p|     White Strength : 24
+       |---+---+---+---+---+---+---+---|
+    8  | *r| *n| *b| *k| *q| *b| *n| *r|
+       ---------------------------------
+         h   g   f   e   d   c   b   a
+Black holding: []'''
+        for line in exp_text.split('\n'):
+            self.expect(line.replace('\n', '\r\n'), t2)
+
+        t2.write('d5\n')
+        self.expect('d5', t)
+        t.write('exd5\n')
+        self.expect('Black holding: []', t)
+        self.expect('White holding: [P]', t)
+        self.expect('White holding: [P]', t2)
+        self.expect('Black holding: []', t2)
+
+        t.write('abo\n')
+        t2.write('abo\n')
+        self.expect('aborted', t)
+
+        self.close(t)
+        self.close(t2)
+
 class TestStyle12(Test):
     @with_player('testplayer', 'testpass')
     def test_style12(self):

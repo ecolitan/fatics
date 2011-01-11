@@ -176,6 +176,10 @@ class TestIvars(Test):
     def test_ms(self):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -183,6 +187,7 @@ class TestIvars(Test):
         self.expect('<12> ', t2)
 
         t3 = self.connect_as_guest()
+        t3.write('set style 12\n')
         t3.write('iset ms 0\n')
         self.expect('ms unset', t3)
         t3.write('ref 1\n')

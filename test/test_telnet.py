@@ -18,6 +18,8 @@
 
 from test import *
 
+import os
+
 class TelnetTest(Test):
     def test_telnet_interrupt(self):
         t = self.connect_as_guest()

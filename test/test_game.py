@@ -201,6 +201,9 @@ class TestGame(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
         self.expect('Challenge:', t2)
@@ -233,6 +236,9 @@ class TestGame(Test):
     def test_draw_repetition_claim_later(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
 
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
@@ -270,6 +276,9 @@ class TestGame(Test):
     def test_draw_repetition_claim_too_late(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
+
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
 
         t.write('match admin white 1 0\n')
         self.expect('Issuing:', t)
@@ -390,6 +399,7 @@ class TestRefresh(Test):
         self.expect_not('<12> ', t2)
 
         t3 = self.connect_as_guest('GuestDEFG')
+        t3.write('set style 12\n')
         t3.write('re\n')
         self.expect('You are not playing, examining, or observing', t3)
         t3.write('re 999\n')
@@ -579,6 +589,7 @@ class TestMoretime(Test):
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
+        t3.write('set style 12\n')
 
         t.write('match testp white 6+10\n')
         self.expect('Challenge:', t2)

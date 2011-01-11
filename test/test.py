@@ -19,7 +19,6 @@
 import sys
 import telnetlib
 import socket
-import os
 import re
 
 from twisted.trial import unittest
@@ -114,6 +113,8 @@ class Test(unittest.TestCase):
 
     def _adduser(self, name, passwd, lists=None):
         t = self.connect_as_admin()
+        # in case the user already exists due to a failed test
+        t.write('remplayer %s\n' % name)
         t.write('addplayer %s fakeemail@example.com Test Player\n' % name)
         self.expect('Added: ', t)
         t.write('asetpass %s %s\n' % (name, passwd))

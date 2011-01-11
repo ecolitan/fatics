@@ -68,7 +68,7 @@ class TestCommand(Test):
         self.close(t2)
 
     @with_player('TestPlayer', 'testpass')
-    def test_user_exclamation_pointa(self):
+    def test_user_exclamation_point(self):
         """ Test that appending ! to a user name prevents it from being
         abbreviated. """
         t = self.connect_as_guest()
