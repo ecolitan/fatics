@@ -105,6 +105,16 @@ class TellTest(Test):
         self.close(t)
         self.close(t2)
 
+    def test_told(self):
+        t = self.connect_as_guest('GuestABCD')
+        t2 = self.connect_as_guest('GuestEFGH')
+        t.write('ex\n')
+        self.expect('Starting a game', t)
+        t2.write('t guestabcd woohoo\n')
+        self.expect('(told GuestABCD, who is examining a game)', t2)
+        self.close(t)
+        self.close(t2)
+
 class QtellTest(Test):
     @with_player('tdplayer', 'tdplayer', ['td'])
     def test_qtell(self):
@@ -163,11 +173,11 @@ class SayTest(Test):
 
         t.write('say Hello!\n')
         self.expect('testplayer[1] says: Hello!\r\n', t2)
-        self.expect('(told admin', t)
+        self.expect('(told admin, who is playing)', t)
 
         t2.write('say hi\n')
         self.expect('admin(*)[1] says: hi\r\n', t)
-        self.expect('(told testplayer', t2)
+        self.expect('(told testplayer, who is playing)', t2)
 
         t.write('resign\n')
         self.expect('testplayer resigns', t)
@@ -186,7 +196,7 @@ class SayTest(Test):
         t = self.connect_as('testplayer', 'testpass')
         t2.write('say yo\n')
         self.expect('admin(*) says: yo', t)
-        self.expect('(told testplayer', t2)
+        self.expect('(told testplayer)', t2)
 
         self.close(t)
         self.close(t2)

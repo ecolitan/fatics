@@ -76,6 +76,10 @@ class Connection(basic.LineReceiver):
     def login(self):
         self.state = 'login'
         self.write(db.get_server_message('login'))
+        if self.transport.compatibility:
+            # the string "freechess.org" must appear somewhere in this message;
+            # otherwise, Babs will refuse to connect
+            self.write('You are connected to the backwards-compatibility port for old FICS clients.\nYou will not be able to use zipseal or international characters.\nThis server is not endorsed by freechess.org.\n\n')
         self.write("login: ")
 
     def lineReceived(self, line):

@@ -24,7 +24,21 @@ import user
 import online
 import admin
 
-class TellCommand(Command):
+from game_constants import PLAYED, EXAMINED
+
+class ToldMixin(object):
+    def _told(self, u, conn):
+        if u.session.game:
+            if u.session.game.gtype == PLAYED:
+                conn.write(_("(told %s, who is playing)\n") % u.name)
+            elif u.session.game.gtype == EXAMINED:
+                conn.write(_("(told %s, who is examining a game)\n") % u.name)
+            else:
+                assert(False)
+        else:
+            conn.write(_("(told %s)\n") % u.name)
+
+class TellCommand(Command, ToldMixin):
     def _do_tell(self, args, conn):
         if conn.user.is_muted:
             # mute now prevents *all* tells
@@ -72,7 +86,7 @@ class TellCommand(Command):
             else:
                 u.write_('\n%s tells you: %s\n',
                     (conn.user.get_display_name(), args[1]))
-                conn.write(_("(told %s)\n") % u.name)
+                self._told(u, conn)
 
         return (u, ch)
 
@@ -121,7 +135,7 @@ class Qtell(Command):
         conn.write('*qtell %s %d*\n' % (args[0], ret))
 
 @ics_command('say', 'S')
-class Say(Command):
+class Say(Command, ToldMixin):
     def run(self, args, conn):
         if conn.user.is_muted:
             # mute now prevents *all* tells
@@ -137,8 +151,7 @@ class Say(Command):
                 return
             opp.write_("\n%s[%d] says: %s\n", (conn.user.get_display_name(),
                 g.number, args[0]))
-            # TODO ", who is playing"; ", who is examining a game"
-            conn.write(_('(told %s)\n') % opp.name)
+            self._told(opp, conn)
         else:
             opp = conn.user.session.last_opp
             if opp:
@@ -154,7 +167,7 @@ class Say(Command):
                         return
                     opp.write_("\n%s says: %s\n", (conn.user.get_display_name(),
                         args[0]))
-                    conn.write(_('(told %s)\n') % opp.name)
+                    self._told(opp, conn)
             else:
                 conn.write(_("I don't know whom to say that to.\n"))
 

@@ -440,7 +440,7 @@ CREATE TABLE `server_message` (
 -- data
 LOCK TABLES `user` WRITE;
 -- admin account with password 'admin'
-INSERT INTO `user` SET user_id=1,user_name='admin',user_passwd='$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy',user_real_name='Admin Account',user_email='ics@openchess.dyndns.org',user_admin_level=10000;
+INSERT INTO `user` SET user_id=1,user_name='admin',user_passwd='$2a$12$vUOlVpT6HhRBH3hCNrPW8.bqUwEZ/cRzLOOT142vmNYYxhq5bO4Sy',user_real_name='Admin Account',user_email='admin@fatics.org',user_admin_level=10000;
 UNLOCK TABLES;
 
 LOCK TABLES `channel` WRITE;
@@ -488,7 +488,7 @@ UNLOCK TABLES;
 
 LOCK TABLES `server_message` WRITE;
 INSERT INTO `server_message` VALUES (NULL,'motd',"Welcome to the fatics.org test server.  Message wmahan with any comments.\n\nThere is just one rule here: be nice.\n\nFor real chess, go to freechess.org instead.  Thanks for testing!\n\n");
-INSERT INTO `server_message` VALUES (NULL,'welcome',"Welcome to / Bienvenue à / Bienvenido a / Willkommen auf\n\n                   ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟\n\nThis server is not endorsed by freechess.org.\n\n");
+INSERT INTO `server_message` VALUES (NULL,'welcome',"Welcome to / Bienvenue à / Bienvenido a / Willkommen auf\n\n                   ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟\n\n");
 INSERT INTO `server_message` VALUES (NULL,'login',"If you are not a registered player, enter the login name \"guest\".\n\n");
 INSERT INTO `server_message` VALUES (NULL,'logout',"♙♙♙ Thank you for using FatICS. ♟♟♟\n");
 

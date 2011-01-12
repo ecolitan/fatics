@@ -21,11 +21,12 @@ from test import *
 compatibility_port = 5003
 
 class TestCompatibility(Test):
-    """ Test the compatibility port used for old clients that don't support
-    FatICS's newline order and non-ASCII characters. """
     def test_compatibility(self):
+        """ Test the compatibility port used for old clients that don't
+        support FatICS's newline order and non-ASCII characters. """
         t = telnetlib.Telnet(host, compatibility_port)
         self.expect('??? FatICS', t)
+        self.expect('freechess.org', t) # for Babas
         t.write("guest\n\n")
         self.expect('fics% ', t)
         t.write('quit\n')

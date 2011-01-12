@@ -35,8 +35,6 @@ class Config(object):
     # limit on number of channels one user can own
     max_channels_owned = 8
 
-    # Silly Babas requires freechess.org to be in the welcome message,
-    # so work it into a disclaimer.
     prompt = 'fics% '
 
 config = Config()
