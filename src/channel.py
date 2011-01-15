@@ -225,9 +225,9 @@ class Channel(object):
                 '{%s}' % u.get_display_name())
             for u in self.online]
 
+CHANNEL_MAX = sys.maxint
 class ChannelList(object):
     all = {}
-    max = sys.maxint
     def __init__(self):
         for ch in db.channel_list():
             id = ch['channel_id']
@@ -235,7 +235,7 @@ class ChannelList(object):
 
     def __getitem__(self, key):
         assert(type(key) == type(1) or type(key) == type(1L))
-        if key < 0 or key > self.max:
+        if key < 0 or key > CHANNEL_MAX:
             raise KeyError
         try:
             return self.all[key]

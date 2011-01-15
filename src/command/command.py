@@ -26,9 +26,11 @@ import history
 import speed_variant
 import online
 import time_format
+import channel
 
 from server import server
 from db import db, DeleteError
+from config import config
 
 class CommandList(object):
     def __init__(self):
@@ -151,7 +153,18 @@ class Help(Command):
             cmds = [c.name for c in command_list.cmds.itervalues()]
         conn.write('This server is under development.\n\nRecognized commands: %s\n' % ' '.join(cmds))
 
-@ics_command('password', 'WW', admin.Level.user)
+@ics_command('limits', '')
+class Limits(Command):
+    def run(self, args, conn):
+        conn.write(_('Current hardcoded limits:\n'))
+        conn.write(_('  Server:\n'))
+        conn.write(_('    Channels: %d\n') % channel.CHANNEL_MAX)
+        conn.write(_('    Players: %d\n') % config.maxplayer)
+        conn.write(_('    Connections: %(umax)d users (+ %(amax)d admins)\n') %
+            {'umax': config.maxplayer - config.admin_reserve,
+                'amax': config.admin_reserve})
+
+@ics_command('password', 'WW')
 class Password(Command):
     def run(self, args, conn):
         if conn.user.is_guest:

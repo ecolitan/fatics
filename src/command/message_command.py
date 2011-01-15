@@ -87,7 +87,7 @@ class Fmessage(Command, FormatMessage):
             return
         u2 = user.find_by_prefix_for_user(args[0], conn)
         if u2:
-            if conn.user.name in u2.censor and not conn.user.is_admin:
+            if conn.user.name in u2.censor and not conn.user.is_admin():
                 conn.write(_('%s is censoring you.\n') % u2.name)
                 return
             msgs = db.get_messages_range(conn.user.id, args[1], args[1])

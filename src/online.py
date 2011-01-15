@@ -27,12 +27,17 @@ class Online(object):
         # this is redundant, but faster; it's very slow to iterate
         # over the trie
         self.online_names = {}
+        self.guest_count = 0
 
     def add(self, u):
         self.online[u.name.lower()] = u
         self.online_names[u.name.lower()] = u
+        if u.is_guest:
+            self.guest_count += 1
 
     def remove(self, u):
+        if u.is_guest:
+            self.guest_count -= 1
         try:
             del self.online[u.name.lower()]
             del self.online_names[u.name.lower()]

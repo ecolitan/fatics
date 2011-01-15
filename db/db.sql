@@ -491,6 +491,8 @@ INSERT INTO `server_message` VALUES (NULL,'motd',"Welcome to the fatics.org test
 INSERT INTO `server_message` VALUES (NULL,'welcome',"Welcome to / Bienvenue à / Bienvenido a / Willkommen auf\n\n                   ♙♘♗♖♕♔ FatICS ♚♛♜♝♞♟\n\n");
 INSERT INTO `server_message` VALUES (NULL,'login',"If you are not a registered player, enter the login name \"guest\".\n\n");
 INSERT INTO `server_message` VALUES (NULL,'logout',"♙♙♙ Thank you for using FatICS. ♟♟♟\n");
+INSERT INTO `server_message` VALUES (NULL,'full',"Sorry, the server has reached its limit for players logged on at once.\nPlease come back later.\n");
+INSERT INTO `server_message` VALUES (NULL,'full_unreg',"Sorry, the server has reached its limit for guests logged on at one.\nPlease log on using a registered account or come back later.\n");
 
 UNLOCK TABLES;
 

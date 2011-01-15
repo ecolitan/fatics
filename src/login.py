@@ -17,6 +17,11 @@
 #
 
 import user
+import filter_
+import online
+
+from config import config
+from db import db
 
 class Login(object):
     # return a user object if one exists; otherwise make a
@@ -45,6 +50,32 @@ class Login(object):
                 else:
                     u = user.GuestUser(name)
                     conn.write(_('\n"%s" is not a registered name.  You may play unrated games as a guest.\n(After logging in, do "help register" for more info on how to register.)\n\nPress return to enter the server as "%s":\n') % (name, name))
+
+        if u:
+            if u.is_guest:
+                if filter_.check_filter(conn.ip):
+                    # not translated, since the player hasn't logged on
+                    conn.write('Due to abuse, guest logins are blocked from your address.\n')
+                    conn.loseConnection('filtered')
+                    u = None
+                if u and online.online.guest_count >= config.maxguest:
+                    conn.write(db.get_server_message('full_unreg'))
+                    conn.loseConnection('guests full')
+                    u = None
+            else:
+                if u.is_banned:
+                    # not translated, since the player hasn't logged on
+                    conn.write('Player "%s" is banned.\n' % u.name)
+                    conn.loseConnection('banned')
+                    u = None
+
+        if u:
+            pmax = config.maxplayer if u.is_admin() else (config.maxplayer -
+                config.admin_reserve)
+            if len(online.online) >= pmax:
+                conn.write(db.get_server_message('full'))
+                conn.loseConnection('players full')
+                u = None
 
         return u
 

@@ -29,6 +29,7 @@ from reload import reload
 
 from db import db
 from command import Command, ics_command, requires_registration
+from config import config
 
 @ics_command('admin', '', admin.Level.admin)
 class Admin(Command):
@@ -117,6 +118,33 @@ class Asetadmin(Command):
                     (u.name, level))
                 if u.is_online:
                     u.write(A_('''\n\n%s has set your admin level to %d.\n\n''') % (conn.user.name, level))
+
+@ics_command('asetmaxplayer', 'p', admin.Level.admin)
+class Asetmaxplayer(Command):
+    def run(self, args, conn):
+        if args[0] is not None:
+            # basic sanity checks XXX
+            if args[0] < 10 or args[0] > 100000:
+                raise BadCommandError
+            conn.write(A_("Previously %d total connections allowed....\n")
+                % config.maxplayer)
+            config.maxplayer = args[0]
+
+        conn.write(A_('There are currently %d regular and %d admin connections available.\n') %
+            (config.maxplayer - config.admin_reserve, config.admin_reserve))
+        conn.write(A_('Total allowed connections: %d.\n') % config.maxplayer)
+
+@ics_command('asetmaxguest', 'p', admin.Level.admin)
+class Asetmaxguest(Command):
+    def run(self, args, conn):
+        if args[0] is not None:
+            if args[0] < 0 or args[0] > config.maxplayer - config.admin_reserve:
+                raise BadCommandError
+            conn.write(A_("Previously %d guest connections allowed....\n")
+                % config.maxguest)
+            config.maxguest = args[0]
+
+        conn.write(A_('Allowed guest connections: %d.\n') % config.maxguest)
 
 @ics_command('asetpasswd', 'wW', admin.Level.admin)
 class Asetpasswd(Command):

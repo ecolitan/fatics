@@ -32,11 +32,21 @@ class Config(object):
     # max idle time in seconds
     idle_timeout = 60 * 60
 
+    # maximum number of players connected to the server at once
+    maxplayer = 49
+
+    # number of connections reserved for admins
+    admin_reserve = 5
+
+    # maximum number of guests
+    maxguest = 10
+
     # limit on number of channels one user can own
     max_channels_owned = 8
 
     prompt = 'fics% '
 
 config = Config()
+assert(config.admin_reserve + config.maxguest <= config.maxplayer)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

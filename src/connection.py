@@ -19,6 +19,7 @@
 import time
 import re
 import twisted.internet.interfaces
+
 from twisted.protocols import basic
 from twisted.internet import reactor
 from zope.interface import implements
@@ -26,7 +27,7 @@ from zope.interface import implements
 import telnet
 import command_parser
 import lang
-import filter_
+
 from config import config
 from db import db
 from timeseal import timeseal, REPLY as TIMESEAL_REPLY
@@ -48,6 +49,7 @@ class Connection(basic.LineReceiver):
     logged_in_again = False
     buffer_output = False
     ivar_pat = re.compile(r'%b([01]{32})')
+    timeout_check = None
 
     def connectionMade(self):
         lang.langs['en'].install(names=['ngettext'])
@@ -65,6 +67,7 @@ class Connection(basic.LineReceiver):
 
     def login_timeout(self):
         assert(self.state in ['login', 'passwd'])
+        self.timeout_check = None
         self.write(_("\n**** LOGIN TIMEOUT ****\n"))
         self.loseConnection('login timeout')
 
@@ -125,22 +128,11 @@ class Connection(basic.LineReceiver):
         self.transport.will(telnet.ECHO)
         self.user = login.get_user(name, self)
         if self.user:
-            if self.user.is_guest:
-                if filter_.check_filter(self.ip):
-                    # not translated, since the player hasn't logged on
-                    self.write('Due to abuse, guest logins are blocked from your address.\n')
-                    self.loseConnection('filtered')
-                    return
-            else:
-                if self.user.is_banned:
-                    # not translated, since the player hasn't logged on
-                    self.write('Player "%s" is banned.\n' % self.user.name)
-                    self.loseConnection('banned')
-                    return
             self.state = 'passwd'
         else:
-            self.transport.wont(telnet.ECHO)
-            self.write("login: ")
+            if self.state != 'quitting':
+                self.transport.wont(telnet.ECHO)
+                self.write("login: ")
 
     def lineReceived_passwd(self, line):
         self.timeout_check.cancel()
@@ -164,6 +156,7 @@ class Connection(basic.LineReceiver):
 
     def prompt(self):
         self.timeout_check.cancel()
+        self.timeout_check = None
         self.user.log_on(self)
         assert(self.user.is_online)
         self.user.send_prompt()
@@ -187,6 +180,10 @@ class Connection(basic.LineReceiver):
             assert(not written_users)
 
     def loseConnection(self, reason):
+        self.state = 'quitting'
+        if self.timeout_check:
+            self.timeout_check.cancel()
+            self.timeout_check = None
         if reason == 'logged in again':
             # As a special case, we don't want to remove a user
             # from the online list if we are losing this connection
