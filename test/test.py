@@ -74,6 +74,7 @@ class Test(unittest.TestCase):
             t.read_until('not-seen', 1)
             t.read_very_eager()
         self.assertRaises(EOFError, read_some)
+        t.close()
 
     def connect(self):
         return connect()

@@ -81,6 +81,7 @@ class TestMaxguest(Test):
         t = self.connect_as_admin()
         t.write('asetmaxguest %d\n' % maxguest)
         self.expect('Allowed guest connections: %d' % maxguest, t)
+        self.close(t)
 
         conns = []
         for i in range(0, maxguest):

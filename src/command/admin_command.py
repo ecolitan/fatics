@@ -138,7 +138,7 @@ class Asetmaxplayer(Command):
 class Asetmaxguest(Command):
     def run(self, args, conn):
         if args[0] is not None:
-            if args[0] < 0 or args[0] > config.maxplayer - config.admin_reserve:
+            if args[0] < 0 or args[0] + config.admin_reserve > config.maxplayer:
                 raise BadCommandError
             conn.write(A_("Previously %d guest connections allowed....\n")
                 % config.maxguest)
