@@ -32,8 +32,7 @@ zipseal_prog_win = '../timeseal/win32/zipseal.exe'
 zipseal_port = 5001
 
 class TestZipseal(Test):
-
-    def _zipseal_connect(self, username, passwd):
+    def _connect(self, username, passwd):
         if not os.path.exists(zipseal_prog):
             raise unittest.SkipTest('no zipseal binary')
             return
@@ -49,8 +48,15 @@ class TestZipseal(Test):
 
         return p
 
+    def _close(self, t):
+        """ Gracefully close a connection. """
+        t.send('quit\n')
+        t.expect_exact('Thank you for using')
+        t.expect_exact(pexpect.EOF)
+        t.close()
+
     def test_zipseal(self):
-        process = self._zipseal_connect('admin', admin_passwd)
+        process = self._connect('admin', admin_passwd)
 
         process.send('iset nowrap 1\n')
         process.expect_exact('nowrap set.')
@@ -62,15 +68,12 @@ class TestZipseal(Test):
         process.send('''t admin Les naïfs ægithales hâtifs pondant à Noël où il gèle sont sûrs d'être déçus et de voir leurs drôles d'œufs abîmés.\n''')
         process.expect_exact('''tells you: Les naïfs ægithales hâtifs pondant à Noël où il gèle sont sûrs d'être déçus et de voir leurs drôles d'œufs abîmés''')
 
-        process.send('quit\n')
-        process.expect_exact('Thank you for using')
-        process.expect_exact(pexpect.EOF)
 
-        process.close()
+        self._close(process)
 
     def test_zipseal_game(self):
-        p1 = self._zipseal_connect('admin', admin_passwd)
-        p2 = self._zipseal_connect('GuestABCD', '')
+        p1 = self._connect('admin', admin_passwd)
+        p2 = self._connect('GuestABCD', '')
 
         p1.send("set style 12\n")
         p2.send("set style 12\n")
@@ -93,14 +96,30 @@ class TestZipseal(Test):
         p1.expect_exact('<12> ')
         p2.expect_exact('<12> ')
 
-        p1.close()
-        p2.close()
+        p2.send('abo\n')
+        p1.expect_exact('abort')
+        p1.send('abort\n')
+        p2.expect_exact('aborted by agreement')
+
+        self._close(p1)
+        self._close(p2)
 
     def test_zipseal_error(self):
         t = telnetlib.Telnet(host, zipseal_port, 120)
         t.write('\n')
         self.expect_EOF(t)
         t.close()
+
+    def test_long_utf8(self):
+        t = self._connect('admin', admin_passwd)
+
+        t.send('iset nowrap 1\n')
+        t.expect_exact('nowrap set.')
+
+        t.send('t admin Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.\n')
+        t.expect_exact('admin(*) tells you: Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.Μπορώ να φάω σπασμένα γυαλιά χωρίς να πάθω τίποτα.')
+
+        self._close(t)
 
 class TestZipsealWindows(Test):
     def test_zipseal_windows(self):

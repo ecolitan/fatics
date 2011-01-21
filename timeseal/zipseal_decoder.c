@@ -30,7 +30,7 @@
 #include <string.h>
 #include <zlib.h>
 
-#define BSIZE 1024
+#define BSIZE 2048
 
 void decrypt(char *s)
 {

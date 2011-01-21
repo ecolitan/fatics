@@ -55,7 +55,8 @@ class Timeseal(object):
         try:
             line = line[0:1023] # XXX
             self.zipseal_encoder.stdin.write('%04x%s' % (len(line),line))
-            count = int(self.zipseal_encoder.stdout.read(4), 16)
+            count_str = self.zipseal_encoder.stdout.read(4)
+            count = int(count_str, 16)
             ret = self.zipseal_encoder.stdout.read(count)
         except IOError:
             ret = None

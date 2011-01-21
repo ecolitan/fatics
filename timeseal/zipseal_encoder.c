@@ -10,11 +10,11 @@
 
 #include "chuffman.h"
 
-#define BSIZE 1024
+#define BSIZE 2048
 
 int encode(struct CHuffman *ch, char *inBuf, int inBytes)
 {
-        char outBuf[1024];
+        char outBuf[BSIZE];
         int i;
 
         ch->inBuf = inBuf;
