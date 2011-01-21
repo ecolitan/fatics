@@ -197,12 +197,12 @@ class Game(object):
                     u.session.ivars['compressmove'] and
                     self.variant.pos.get_last_move() is not None and
                     not isolated):
-                u.write(self.variant.to_deltaboard(u))
+                u.write_nowrap(self.variant.to_deltaboard(u))
             else:
-                u.write(self.variant.to_style12(u))
+                u.write_nowrap(self.variant.to_style12(u))
         else:
             # style 1, the default
-            u.write(self.variant.to_style1(u))
+            u.write_nowrap(self.variant.to_style1(u))
 
     def __eq__(self, other):
         return self.number == other.number
@@ -786,7 +786,7 @@ class PlayedGame(Game):
             elif self.variant.pos.is_stalemate:
                 self.result('Game drawn by stalemate', '1/2-1/2')
             elif self.variant.pos.is_draw_nomaterial:
-                self.result('Game drawn because neither player has mating material', '1/2-1/2')
+                self.result('Neither player has mating material', '1/2-1/2')
 
     def observe(self, u):
         """ For some reason it seems that FICS only sends gameinfo strings

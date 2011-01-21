@@ -27,6 +27,8 @@ class TestSeek(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest()
 
+        self.set_nowrap(t)
+
         t.write('seek 3 0\n')
         m = self.expect_re('Your seek has been posted with index (\d+).', t)
         n = int(m.group(1))
@@ -72,6 +74,8 @@ class TestSeek(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest('GuestEFGH')
 
+        self.set_nowrap(t2)
+
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
         self.expect('(1 player saw the seek.)', t)
@@ -93,6 +97,7 @@ class TestSeek(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest('GuestEFGH')
 
+        self.set_nowrap(t2)
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
         self.expect('(1 player saw the seek.)', t)

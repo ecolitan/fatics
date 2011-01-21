@@ -30,7 +30,7 @@ class History(object):
             result_reason = 'Fla'
         elif 'checkmated' in msg:
             result_reason = 'Mat'
-        elif 'neither player has mating material' in msg:
+        elif 'either player has mating material' in msg:
             result_reason = 'NM'
         elif 'by repetition' in msg:
             result_reason = 'Rep'

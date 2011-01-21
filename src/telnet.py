@@ -31,6 +31,8 @@
 protocol.  Since the the goal is to be compatible with FICS clients,
 followed the server and not the RFC."""
 
+import textwrap
+
 from zope.interface import implements
 from twisted.internet import protocol, interfaces
 
@@ -61,6 +63,7 @@ class TelnetTransport(protocol.Protocol):
     protocol = None
     disconnecting = False
     encoder = None
+    _wrapper = None
 
     def __init__(self, protocolFactory=None, *a, **kw):
         self.commandMap = {
@@ -214,7 +217,27 @@ class TelnetTransport(protocol.Protocol):
             data = data.replace('\n', '\r\n')
         return data
 
-    def write(self, data):
+    def enableWrapping(self, width):
+        """ Enable automatic word wrapping for this transport. """
+        self._wrapper = textwrap.TextWrapper(
+            width=width, expand_tabs=True,
+            replace_whitespace=False, drop_whitespace=False,
+            break_long_words=True,
+            subsequent_indent=r'\   ')
+
+    def disableWrapping(self):
+        self._wrapper = None
+
+    def write(self, data, wrap=True):
+        if wrap and self._wrapper:
+            # we have to split the text into lines before
+            # wrapping
+            # relevant: http://bugs.python.org/issue1859
+            udata = data.decode('utf-8')
+            wrapped_lines = [self._wrapper.fill(line)
+                for line in udata.splitlines(True)]
+            udata = ''.join(wrapped_lines)
+            data = udata.encode('utf-8')
         data = self._escape(data)
         self._write(data)
 

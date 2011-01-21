@@ -240,10 +240,12 @@ class Seek(MatchStringParser):
 
         count = 0
         for u in online.online:
+            assert(u.is_online)
+            assert('formula' in u.vars)
             if not u.session.game:
                 # seekinfo
                 if u.session.ivars['seekinfo']:
-                    u.write(seekinfo_str)
+                    u.write_nowrap(seekinfo_str)
 
                 if u.vars['seek']:
                     # showownseek is both a variable and an ivariable
@@ -314,7 +316,7 @@ class Seek(MatchStringParser):
         # seekremove
         for u in online.online:
             if u.session.ivars['seekremove'] and not u.session.game:
-                u.write('<sr> %d\n' % self.num)
+                u.write_nowrap('<sr> %d\n' % self.num)
 
     def __str__(self):
         return self._str

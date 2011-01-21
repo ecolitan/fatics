@@ -60,6 +60,7 @@ class TestChess960(Test):
             clear_hist=False)
 
         t = self.connect_as_admin()
+        self.set_style_12(t)
         t.write('exl\n')
         self.expect('<12> qbbnrnkr pppppppp -------- -------- -------- -------- PPPPPPPP QBBNRNKR W -1 1 1 1 1 0 1 admin admin 2 0 0 39 39 0 0 1 none (0:00) none 0 0 0', t)
         t.write('forward 9999\n')
@@ -204,8 +205,8 @@ class TestPgn(Test):
                 self.expect('drawn by stalemate} 1/2-1/2', t)
                 self.expect('drawn by stalemate} 1/2-1/2', t2)
             elif g.result == '1/2-1/2' and g.is_draw_nomaterial:
-                self.expect('neither player has mating material} 1/2-1/2', t)
-                self.expect('neither player has mating material} 1/2-1/2', t2)
+                self.expect('Neither player has mating material} 1/2-1/2', t)
+                self.expect('Neither player has mating material} 1/2-1/2', t2)
             elif g.result == '1/2-1/2' and g.is_repetition:
                 """ Old FICS does not consider holding when detecting
                 repetitions, so a FICS draw by repetition won't necessarily

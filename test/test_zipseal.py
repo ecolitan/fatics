@@ -52,6 +52,9 @@ class TestZipseal(Test):
     def test_zipseal(self):
         process = self._zipseal_connect('admin', admin_passwd)
 
+        process.send('iset nowrap 1\n')
+        process.expect_exact('nowrap set.')
+
         process.send('fi admin\n')
         process.expect_exact('Finger of admin')
         process.expect_exact('Zipseal:     On')

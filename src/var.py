@@ -33,6 +33,12 @@ ivar_number = {}
 class BadVarError(Exception):
     pass
 
+def _set_nowrap(user, val):
+    if val:
+        user.session.conn.transport.disableWrapping()
+    else:
+        user.session.conn.transport.enableWrapping(user.vars['width'])
+
 class Var(object):
     """This class represents the form of a variable but does not hold
     a specific value.  For example, the server has one global instance of
@@ -45,6 +51,7 @@ class Var(object):
         self.db_store = lambda user_id, name, val: None
         self.is_persistent = False
         self.is_formula_or_note = False
+        self._hook = None
         # display in vars output
 
     def add_as_var(self):
@@ -65,11 +72,17 @@ class Var(object):
         self.is_persistent = True
         return self
 
+    def set_hook(self, func):
+        """ Register a function to be called when this variable or ivariable
+        is set or unset. """
+        self._hook = func
+
     def set(self, user, val):
-        """This checks whether the given value for a var is legal and
+        """ This checks whether the given value for a var is legal and
         sets a user's value of the var.  Returns the message to display to
-        the user. On an error, raises BadVarError."""
-        pass
+        the user. On an error, raises BadVarError. """
+        if self._hook:
+            self._hook(user, val)
 
 class StringVar(Var):
     def __init__(self, name, default, max_len=1023):
@@ -88,6 +101,8 @@ class StringVar(Var):
         else:
             user.write((_('''%(name)s set to "%(val)s".\n''')
                 % {'name': self.name, 'val': val}))
+        if self._hook:
+            self._hook(user, val)
 
 class PromptVar(StringVar):
     def set(self, user, val):
@@ -186,6 +201,8 @@ class IntVar(Var):
         else:
             user.set_var(self, val)
         user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
+        if self._hook:
+            self._hook(user, val)
 
 class BoolVar(Var):
     """ A boolean variable. """
@@ -225,6 +242,8 @@ class BoolVar(Var):
                 user.write(_(self.off_msg))
             else:
                 user.write(_("%s unset.\n") % self.name)
+        if self._hook:
+            self._hook(user, val)
 
 class VarList(object):
     def __init__(self):
@@ -261,8 +280,8 @@ class VarList(object):
 
         IntVar("time", 2, min=0).persist().add_as_var()
         IntVar("inc", 12, min=0).persist().add_as_var()
-        IntVar("height", 24, min=5).persist().add_as_var()
-        IntVar("width", 79, min=32).persist().add_as_var()
+        IntVar("height", 24, min=5, max=240).persist().add_as_var()
+        IntVar("width", 79, min=32, max=240).persist().add_as_var()
 
         IntVar("style", 1, min=1, max=12).persist().add_as_var()
         IntVar("kiblevel", 0, min=0, max=9999).add_as_var()
@@ -323,7 +342,7 @@ class VarList(object):
         BoolVar("losers", False).add_as_ivar(28)
         BoolVar("wildcastle", False).add_as_ivar(29)
         BoolVar("fr", False).add_as_ivar(30)
-        BoolVar("nowrap", False).add_as_ivar(31)
+        BoolVar("nowrap", False).add_as_ivar(31).set_hook(_set_nowrap)
         BoolVar("allresults", False).add_as_ivar(32)
         BoolVar("obsping", False).add_as_ivar(33) # ignored
         BoolVar("singleboard", False).add_as_ivar(34)

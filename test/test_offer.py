@@ -55,6 +55,8 @@ class TestAbort(Test):
         t = self.connect_as_guest()
         t2 = self.connect_as_admin()
 
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -74,6 +76,8 @@ class TestAbort(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -82,6 +86,7 @@ class TestAbort(Test):
 
         t.write('e4\n')
         t2.write('e5\n')
+        self.expect('P/e7-e5', t)
         t.write('abort\n')
 
         self.expect('Requesting to abort game 1', t)
@@ -101,6 +106,8 @@ class TestAbort(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -109,6 +116,7 @@ class TestAbort(Test):
 
         t.write('e4\n')
         t2.write('e5\n')
+        self.expect('P/e7-e5', t)
         t.write('abort\n')
 
         self.expect('GuestABCD requests to abort game 1', t2)
@@ -130,6 +138,8 @@ class TestAbort(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -138,6 +148,7 @@ class TestAbort(Test):
 
         t.write('e4\n')
         t2.write('e5\n')
+        self.expect('P/e7-e5', t2)
         t2.write('abort\n')
 
         self.expect('admin requests to abort game 1', t)
@@ -184,6 +195,8 @@ class TestAbort(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -192,6 +205,7 @@ class TestAbort(Test):
 
         t.write('e4\n')
         t2.write('e5\n')
+        self.expect('P/e7-e5', t)
         t.write('abort\n')
 
         self.expect('GuestABCD requests to abort game 1', t2)
@@ -209,6 +223,8 @@ class TestAbort(Test):
         t2 = self.connect_as_admin()
         t3 = self.connect_as_guest()
 
+        t.write('set style 12\n')
+
         t.write('match admin white 1+0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -221,7 +237,7 @@ class TestAbort(Test):
         t.write('e4\n')
         self.expect('e4', t2)
         t2.write('e5\n')
-        self.expect('e5', t)
+        self.expect('P/e7-e5', t)
 
         t2.write('abo\n')
         self.expect('admin requests to abort game 1.', t)
@@ -312,6 +328,8 @@ class TestDraw(Test):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
+        t2.write('set style 12\n')
+
         t.write('match admin white 1 0\n')
         self.expect('Challenge:', t2)
         t2.write('accept\n')
@@ -320,6 +338,7 @@ class TestDraw(Test):
 
         t.write('e4\n')
         t2.write('e5\n')
+        self.expect('P/e7-e5', t2)
         t2.write('draw\n')
         self.expect('admin offers a draw', t)
 

@@ -168,6 +168,8 @@ class TestStandardClock(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
 
+        t.write('set style 12\n')
+
         t2.write('match admin 40/90,sd/30+30\n')
         self.expect('Challenge:', t)
         self.expect('40/90,SD/30+30', t)
@@ -234,6 +236,7 @@ class TestUntimed(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
 
+        self.set_style_12(t)
 
         t2.write('match admin untimed white\n')
         self.expect('Issuing: testplayer (----) [white] admin (----) unrated untimed\r\n', t2)

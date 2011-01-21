@@ -68,6 +68,8 @@ class BaseUser(object):
         db.user_log(self.name, login=True, ip=conn.ip)
         self.is_online = True
         online.add(self)
+        if not self.session.ivars['nowrap']:
+            conn.transport.enableWrapping(self.vars['width'])
         self.write(server.get_copyright_notice())
         self.write(db.get_server_message('motd'))
         for ch in self.channels:
@@ -85,12 +87,17 @@ class BaseUser(object):
         online.remove(self)
 
     def write(self, s):
+        """ Write a string to the user. """
         assert(self.is_online)
         connection.written_users.add(self)
         self.session.conn.write(s)
 
-    # Like write(), but localizes for this user.
+    def write_nowrap(self, s):
+        """ Write a string to the user without word wrapping. """
+        self.session.conn.transport.write(s, wrap=False)
+
     def write_(self, s, args={}):
+        """ Like write(), but localizes for this user. """
         #assert(isinstance(args, (list, dict, tuple)))
         connection.written_users.add(self)
         self.session.conn.write(lang.langs[self.vars['lang']].gettext(s) %
@@ -344,11 +351,11 @@ class User(BaseUser):
             self.vars['f' + str(num)] = None
 
         for f in db.user_get_formula(self.id):
-            #self.formula[f['num']] = f['f']
             if f['num'] == 0:
                 self.vars['formula'] = f['f']
             else:
                 self.vars['f' + str(f['num'])] = f['f']
+        assert('formula' in self.vars)
         for note in db.user_get_notes(self.id):
             self.notes[note['num']] = note['txt']
         self._rating = None
@@ -648,6 +655,7 @@ class GuestUser(BaseUser):
         self.admin_level = admin.Level.user
         self.channels = channel.chlist.get_default_guest_channels()
         self.vars = var.varlist.get_default_vars()
+        assert('formula' in self.vars)
         self.censor = set()
         self.is_muted = False
         self.is_playbanned = False

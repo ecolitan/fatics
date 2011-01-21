@@ -26,6 +26,11 @@ class TestBughouseMatch(Test):
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
 
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
+
         t.write('match guestijkl bughouse\n')
         self.expect('You have no partner for bughouse.', t)
 
@@ -82,6 +87,11 @@ class TestBughouseMatch(Test):
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
 
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
+
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
@@ -125,6 +135,11 @@ class TestBughouseMatch(Test):
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
 
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
+
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
@@ -165,6 +180,11 @@ class TestBughouseMatch(Test):
         t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
+
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
 
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
@@ -259,6 +279,11 @@ class TestBughouseKibitz(Test):
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
 
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
+
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
@@ -313,6 +338,11 @@ class TestBughouseKibitz(Test):
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
 
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
+
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
@@ -362,6 +392,11 @@ class TestBughouseKibitz(Test):
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
 
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
+
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
@@ -407,6 +442,11 @@ class TestBughouseKibitz(Test):
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
 
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
+
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)
         t.write('part guestefgh\n')
@@ -451,6 +491,11 @@ class TestBughouseKibitz(Test):
         t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
+
+        self.set_nowrap(t)
+        self.set_nowrap(t2)
+        self.set_nowrap(t3)
+        self.set_nowrap(t4)
 
         t2.write('set bugopen\n')
         self.expect('You are now open for bughouse.', t2)

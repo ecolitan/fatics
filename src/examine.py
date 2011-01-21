@@ -149,7 +149,7 @@ class ExaminedGame(Game):
         elif self.variant.pos.is_stalemate:
             self.result('Game drawn by stalemate', '1/2-1/2')
         elif self.variant.pos.is_draw_nomaterial:
-            self.result('Game drawn because neither player has mating material', '1/2-1/2')
+            self.result('Neither player has mating material', '1/2-1/2')
 
     def mexamine(self, u, conn):
         # GuestWYMW has made you an examiner of game 81.

@@ -227,6 +227,7 @@ class TestPartner(Test):
         t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest('GuestIJKL')
 
+        self.set_nowrap(t)
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
         t3.write('set bugopen 1\n')
@@ -251,6 +252,7 @@ class TestPartner(Test):
         t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest('GuestIJKL')
 
+        self.set_nowrap(t2)
         t2.write('set bugopen 1\n')
         self.expect('You are now open for bughouse.', t2)
         t3.write('set bugopen 1\n')

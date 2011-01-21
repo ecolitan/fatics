@@ -94,8 +94,20 @@ class Test(unittest.TestCase):
         t = connect()
         t.write("admin\n%s\n" % admin_passwd)
         s = t.read_until('fics% ', 5)
-        assert('fics% ' in s)
+        self.assert_('fics% ' in s)
+        self.set_nowrap(t)
         return t
+
+    def set_nowrap(self, t):
+        """ Turn off line wrapping for a connection, to make messages
+        in test cases more readable. """
+        t.write('iset nowrap 1\n')
+        self.expect('nowrap set.', t)
+
+    def set_style_12(self, t):
+        """ Set style 12 for a connection. """
+        t.write('set style 12\n')
+        self.expect('style set to 12.', t)
 
     def connect_as(self, name, passwd):
         t = connect()
