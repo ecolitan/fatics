@@ -16,6 +16,8 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import connection
+
 from online import online
 from db import db
 
@@ -68,5 +70,17 @@ def notify_users(user, arrived):
                 u.write_("\nNotification: %s has arrived and isn't on your notify list.\n", name)
             else:
                 u.write_("\nNotification: %s has departed and isn't on your notify list.\n", name)
+
+def notify_pin(user, arrived):
+    """ Notify users who have the pin variable or ivariable set. """
+    if online.pin_ivar:
+        if arrived:
+            pin_ivar_str = '\n<wa> %s 011106 0P0P0P0P0P0P0P0P\n' % user.name
+            #pin_ivar_str = '\n<wa> %s 001222 1326P1169P0P0P0P0P0P0P\n' % user.name
+        else:
+            pin_ivar_str = '\n<wd> %s\n' % user.name
+        for u in online.pin_ivar:
+            u.write_nowrap(pin_ivar_str)
+            connection.written_users.add(u)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

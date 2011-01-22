@@ -21,6 +21,7 @@ import trie
 #class AmbiguousException(Exception):
 #        def __init__(self, matches):
 #                self.matches = matches
+
 class Online(object):
     def __init__(self):
         self.online = trie.Trie()
@@ -28,6 +29,8 @@ class Online(object):
         # over the trie
         self.online_names = {}
         self.guest_count = 0
+        self.pin_ivar = set()
+        #self.shouts_var = set()
 
     def add(self, u):
         self.online[u.name.lower()] = u
@@ -36,13 +39,17 @@ class Online(object):
             self.guest_count += 1
 
     def remove(self, u):
-        if u.is_guest:
-            self.guest_count -= 1
+        if u in self.pin_ivar:
+            self.pin_ivar.remove(u)
+        #if u in shouts_var:
+        #    shouts_var.remove(u)
         try:
             del self.online[u.name.lower()]
             del self.online_names[u.name.lower()]
         except KeyError:
             pass
+        else:
+            self.guest_count -= int(u.is_guest)
 
     def is_online(self, name):
         return name.lower() in self.online_names

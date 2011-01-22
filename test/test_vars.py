@@ -271,4 +271,17 @@ class TestCompressMove(Test):
         self.close(t)
         self.close(t2)
 
+class TestPinIvar(Test):
+    def test_pin(self):
+        t = self.connect_as_admin()
+
+        t.write('iset pin 1\n')
+        self.expect('pin set.', t)
+        t2 = self.connect_as_guest('GuestABCD')
+        self.expect_re('<wa> GuestABCD \d+ [0-9EP]+\r\n', t)
+        self.close(t2)
+        self.expect('<wd> GuestABCD\r\n', t)
+
+        self.close(t)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

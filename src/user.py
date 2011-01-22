@@ -74,10 +74,12 @@ class BaseUser(object):
         self.write(db.get_server_message('motd'))
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
+        notify.notify_pin(self, arrived=True)
 
     def log_off(self):
         assert(self.is_online)
 
+        notify.notify_pin(self, arrived=False)
         db.user_log(self.name, login=False, ip=self.session.conn.ip)
 
         for ch in self.channels:
@@ -326,7 +328,7 @@ class BaseUser(object):
         self.is_playbanned = val
 
 # a registered user
-class User(BaseUser):
+class RegUser(BaseUser):
     def __init__(self, u):
         BaseUser.__init__(self)
         self.id = u['user_id']
@@ -703,7 +705,7 @@ def find_by_name_exact(name,
     if not u and not online_only:
         dbu = db.user_get(name)
         if dbu:
-            u = User(dbu)
+            u = RegUser(dbu)
     return u
 
 def _find_by_prefix(name, online_only=False):
@@ -733,7 +735,7 @@ def _find_by_prefix(name, online_only=False):
     if not u and not online_only:
         ulist = db.user_get_matching(name)
         if len(ulist) == 1:
-            u = User(ulist[0])
+            u = RegUser(ulist[0])
         elif len(ulist) > 1:
             raise AmbiguousException([u['user_name'] for u in ulist])
     return u

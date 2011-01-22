@@ -23,6 +23,7 @@ import datetime
 import trie
 import lang
 import formula
+import online
 
 from config import config
 
@@ -34,10 +35,19 @@ class BadVarError(Exception):
     pass
 
 def _set_nowrap(user, val):
+    """ Called when the nowrap ivar is set. """
     if val:
         user.session.conn.transport.disableWrapping()
     else:
         user.session.conn.transport.enableWrapping(user.vars['width'])
+
+def _set_pin(user, val):
+    """ Called when the pin ivar is set. """
+    if val:
+        online.online.pin_ivar.add(user)
+    else:
+        if user in online.online.pin_ivar:
+            online.online.pin_ivar.remove(user)
 
 class Var(object):
     """This class represents the form of a variable but does not hold
@@ -327,7 +337,7 @@ class VarList(object):
         BoolVar("nohighlight", False).add_as_ivar(13)
         BoolVar("highlight", False).add_as_ivar(14)
         BoolVar("showserver", False).add_as_ivar(15)
-        BoolVar("pin", False).add_as_ivar(16)
+        BoolVar("pin", False).add_as_ivar(16).set_hook(_set_pin)
         BoolVar("ms", False).add_as_ivar(17)
         BoolVar("pinginfo", False).add_as_ivar(18)
         BoolVar("boardinfo", False).add_as_ivar(19)

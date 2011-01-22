@@ -219,6 +219,8 @@ class TelnetTransport(protocol.Protocol):
 
     def enableWrapping(self, width):
         """ Enable automatic word wrapping for this transport. """
+        # XXX this doesn't remove whitespace at the beginning of
+        # indented lines like original FICS
         self._wrapper = textwrap.TextWrapper(
             width=width, expand_tabs=True,
             replace_whitespace=False, drop_whitespace=False,

@@ -159,8 +159,16 @@ class Connection(basic.LineReceiver):
         self.timeout_check = None
         self.user.log_on(self)
         assert(self.user.is_online)
-        self.user.send_prompt()
+        written_users.add(self.user)
         self.state = 'prompt'
+        self.send_prompts()
+
+    def send_prompts(self):
+        for u in written_users:
+            if u.is_online:
+                u.send_prompt()
+        written_users.clear()
+        assert(not written_users)
 
     def lineReceived_prompt(self, line):
         if line == TIMESEAL_REPLY:
@@ -173,11 +181,7 @@ class Connection(basic.LineReceiver):
         try:
             command_parser.parser.parse(line, self)
         finally:
-            for u in written_users:
-                if u.is_online:
-                    u.send_prompt()
-            written_users.clear()
-            assert(not written_users)
+            self.send_prompts()
 
     def loseConnection(self, reason):
         self.state = 'quitting'
