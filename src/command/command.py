@@ -196,15 +196,4 @@ class Unalias(Command):
             conn.user.set_alias(aname, None)
             conn.write(_('Alias "%s" unset.\n') % aname)
 
-@ics_command('who', 'T', admin.Level.user)
-class Who(Command):
-    def run(self, args, conn):
-        count = 0
-        conn.write('\n')
-        for u in online.online:
-            conn.write(u.get_display_name() + '\n')
-            count = count + 1
-        conn.write('\n')
-        conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
-
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

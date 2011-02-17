@@ -24,6 +24,7 @@ import rating
 import user
 import game
 import history
+import time_format
 
 from command import ics_command, Command
 from command_parser import BadCommandError
@@ -51,7 +52,9 @@ class Finger(Command):
             conn.write(_('Finger of %s:\n\n') % u.get_display_name())
 
             if u.is_online:
-                conn.write(_('On for: %s   Idle: %s\n') % (u.session.get_online_time(), u.session.get_idle_time()))
+                conn.write(_('On for: %s   Idle: %s\n')
+                    % (time_format.hms_words(u.session.get_online_time()),
+                        time_format.hms_words(u.session.get_idle_time())))
                 if u.vars['silence']:
                     conn.write(_('%s is in silence mode.\n') % u.name)
 

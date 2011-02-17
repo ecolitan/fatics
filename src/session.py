@@ -22,7 +22,6 @@ import copy
 import var
 import game
 import timeseal
-import time_format
 import partner
 
 from game_list import GameList
@@ -60,15 +59,15 @@ class Session(object):
         self.user = user
         self.conn.write(_('**** Starting FICS session as %s ****\n\n') % user.get_display_name())
 
-    """returns a human-readable string"""
     def get_idle_time(self):
+        """ returns seconds """
         assert(self.last_command_time is not None)
-        return time_format.hms_words(time.time() - self.last_command_time)
+        return time.time() - self.last_command_time
 
-    """returns a human-readable string"""
     def get_online_time(self):
+        """ returns seconds """
         assert(self.login_time is not None)
-        return time_format.hms_words(time.time() - self.login_time)
+        return time.time() - self.login_time
 
     def close(self):
         assert(not self.closed)

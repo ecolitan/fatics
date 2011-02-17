@@ -75,8 +75,8 @@ def notify_pin(user, arrived):
     """ Notify users who have the pin variable or ivariable set. """
     if online.pin_ivar:
         if arrived:
-            pin_ivar_str = '\n<wa> %s 011106 0P0P0P0P0P0P0P0P\n' % user.name
-            #pin_ivar_str = '\n<wa> %s 001222 1326P1169P0P0P0P0P0P0P\n' % user.name
+            #pin_ivar_str = '\n<wa> %s 011106 0P0P0P0P0P0P0P0P\n' % user.name
+            pin_ivar_str = '\n<wa> %s 001222 1326P1169P0P0P0P0P0P0P\n' % user.name
         else:
             pin_ivar_str = '\n<wd> %s\n' % user.name
         for u in online.pin_ivar:

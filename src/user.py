@@ -46,7 +46,7 @@ class BaseUser(object):
         self.is_online = False
         self.notes = {}
         self._history = None
-        self._titles = None
+        #self._titles = None
         self._title_str = None
 
     def __eq__(self, other):
@@ -380,9 +380,11 @@ class RegUser(BaseUser):
     def _load_titles(self):
         disp_list = []
         self._titles = set()
+        self._on_duty_titles = set()
         for t in db.user_get_titles(self.id):
             if t['title_flag'] and t['title_light']:
                 disp_list.append('(%s)' % t['title_flag'])
+                self._on_duty_titles.add(t['title_name'])
             self._titles.add(t['title_name'])
         self._title_str = ''.join(disp_list)
 
@@ -559,6 +561,11 @@ class RegUser(BaseUser):
         if self._titles is None:
             self._load_titles()
         return BaseUser.has_title(self, title)
+
+    def on_duty_as(self, title):
+        if self._titles is None:
+            self._load_titles()
+        return title in self._on_duty_titles
 
     def get_titles(self):
         if self._titles is None:

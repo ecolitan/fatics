@@ -65,9 +65,15 @@ class LoginTest(Test):
         # no tests here; we need to make sure this doesn't raise an
         # exception in the server
 
-    """User should not actually be logged in until a correct password
-    is entered."""
+    def test_named_guest(self):
+        t = self.connect()
+        t.write('GuestABCD\n\n')
+        self.expect('Starting FICS session as GuestABCD(U)', t)
+        self.close(t)
+
     def test_half_login(self):
+        """ User should not actually be logged in until a correct password
+        is entered. """
         t = self.connect()
         t.write('admin\n')
         t2 = self.connect_as_guest()

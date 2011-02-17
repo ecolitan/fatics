@@ -25,6 +25,7 @@ __all__ = ['admin_command',
 'notify_command', 'observe_command',
 'offer_command', 'user_command', 'seek_command',
 'shout_command', 'td_command',
-'tell_command', 'var_command']
+'tell_command', 'var_command',
+'who_command']
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
