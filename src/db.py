@@ -122,13 +122,14 @@ class DB(object):
         cursor.close()
         return rows
 
-    def user_get_matching(self, prefix):
+    def user_get_matching(self, prefix, limit=8):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT user_id,user_name,user_passwd,
                 user_last_logout,user_admin_level,user_email,user_real_name,
                 user_banned,user_muzzled,user_muted,user_ratedbanned,
                 user_playbanned
-            FROM user WHERE user_name LIKE %s LIMIT 8""", (prefix + '%',))
+            FROM user WHERE user_name LIKE %s""" + " LIMIT %s" % limit,
+                (prefix + '%',))
         rows = cursor.fetchall()
         cursor.close()
         return rows

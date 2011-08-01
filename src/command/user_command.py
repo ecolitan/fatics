@@ -170,4 +170,21 @@ class Llogons(Command, LogMixin):
 
         self._display_log(db.get_log_all(limit), conn)
 
+@ics_command('handles', 'w')
+class Handles(Command):
+    def run(self, args, conn):
+        if len(args[0]) < 2:
+            conn.write(_('You need to specify at least two characters of the name.\n'))
+        else:
+            ulist = db.user_get_matching(args[0], limit=100)
+            if not ulist:
+                conn.write(_('There is no player matching the name %s.\n') %
+                    args[0])
+            else:
+                conn.write(ngettext('-- Matches: %d player --\n',
+                    '-- Matches: %d players --\n', len(ulist)) % len(ulist))
+                # XXX should print in columns
+                for u in ulist:
+                    conn.write('%s\n' % u['user_name'])
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

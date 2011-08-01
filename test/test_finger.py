@@ -109,4 +109,30 @@ class FingerTest(Test):
         self.close(t)
         self.close(t2)
 
+class HandlesTest(Test):
+    @with_player('someplayerone', 'aaa')
+    @with_player('someplayertwo', 'aaa')
+    @with_player('someplayerthree', 'aaa')
+    def test_handles(self):
+        t = self.connect_as_guest()
+
+        t.write('handles d\n')
+        self.expect('You need to specify at least two characters of the name.',
+            t)
+
+        t.write('handles doesnotexist\n')
+        self.expect('There is no player matching the name doesnotexist.', t)
+
+        t.write('handles someplayero\n')
+        self.expect('-- Matches: 1 player --', t)
+        self.expect('someplayerone', t)
+
+        t.write('handles someplayer\n')
+        self.expect('-- Matches: 3 players --', t)
+        self.expect('someplayer', t)
+        self.expect('someplayer', t)
+        self.expect('someplayer', t)
+
+        self.close(t)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

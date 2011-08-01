@@ -85,6 +85,7 @@ class TestAbort(Test):
         self.expect('Creating: ', t2)
 
         t.write('e4\n')
+        self.expect('P/e2-e4', t2)
         t2.write('e5\n')
         self.expect('P/e7-e5', t)
         t.write('abort\n')
@@ -115,6 +116,7 @@ class TestAbort(Test):
         self.expect('Creating: ', t2)
 
         t.write('e4\n')
+        self.expect('P/e2-e4', t2)
         t2.write('e5\n')
         self.expect('P/e7-e5', t)
         t.write('abort\n')
@@ -147,6 +149,7 @@ class TestAbort(Test):
         self.expect('Creating: ', t2)
 
         t.write('e4\n')
+        self.expect('P/e2-e4', t2)
         t2.write('e5\n')
         self.expect('P/e7-e5', t2)
         t2.write('abort\n')
@@ -204,6 +207,7 @@ class TestAbort(Test):
         self.expect('Creating: ', t2)
 
         t.write('e4\n')
+        self.expect('P/e2-e4', t2)
         t2.write('e5\n')
         self.expect('P/e7-e5', t)
         t.write('abort\n')
@@ -235,7 +239,7 @@ class TestAbort(Test):
         self.expect('Game 1: TestPlayer (----) admin (----) rated lightning 1 0', t3)
 
         t.write('e4\n')
-        self.expect('e4', t2)
+        self.expect('P/e2-e4', t2)
         t2.write('e5\n')
         self.expect('P/e7-e5', t)
 
@@ -337,6 +341,7 @@ class TestDraw(Test):
         self.expect('Creating: ', t2)
 
         t.write('e4\n')
+        self.expect('P/e2-e4', t2)
         t2.write('e5\n')
         self.expect('P/e7-e5', t2)
         t2.write('draw\n')
