@@ -178,6 +178,13 @@ class BaseUser(object):
     def is_admin(self):
         return self.admin_level >= admin.Level.admin
 
+    # For showsr and showtm commands, respectively ~ilknight
+    def is_sr(self):
+        return self.name in db.title_get_users(db.title_get_id('SR'))
+
+    def is_tm(self):
+        return self.name in db.title_get_users(db.title_get_id('TM'))
+
     def add_notification(self, user):
         self.notifiers.add(user.name)
         if user.is_online:
