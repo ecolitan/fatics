@@ -1,0 +1,6 @@
+Command: help
+Usage: help [topic]
+Example: help adjourn
+
+Returns the text of the selected help topic [topic], if it exists.  For
+a list of available help topics, see "info" and "help commands".

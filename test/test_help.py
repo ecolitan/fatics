@@ -16,17 +16,32 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-__all__ = ['admin_command',
-'bug_command', 'channel_command', 'command',
-'date_command', 'examine_command',
-'game_command',
-'help_command',
-'kibitz_command', 'list_command', 'match_command', 'message_command',
-'news_command',
-'notify_command', 'observe_command',
-'offer_command', 'user_command', 'seek_command',
-'shout_command', 'td_command',
-'tell_command', 'var_command',
-'who_command']
+from test import *
+
+class TestHelp(Test):
+    def test_help(self):
+        t = self.connect_as_guest()
+
+        t.write("help\n")
+        self.expect("Command: help", t)
+        self.expect("Usage: help", t)
+
+        t.write("help say\n")
+        self.expect("Command: say", t)
+        self.expect("Usage: say", t)
+
+        t.write("help SAY\n")
+        self.expect("Command: say", t)
+        self.expect("Usage: say", t)
+
+        self.close(t)
+
+    def test_help_error(self):
+        t = self.connect_as_guest()
+        t.write("help blahblah\n")
+        self.expect('There is no help available for "blahblah".', t)
+        t.write("help a/test\n")
+        self.expect('There is no help available for "a/test".', t)
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

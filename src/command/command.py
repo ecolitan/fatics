@@ -17,7 +17,6 @@
 #
 
 import re
-from os path import exists
 
 import user
 import trie
@@ -141,28 +140,6 @@ class Games(Command):
         for g in game.games.values():
             count += 1
         conn.write(ngettext('  %(count)d game displayed (of %(total)3d in progress).\n', '  %(count)d games displayed (of %(total)d in progress).\n', count) % {'count': count, 'total': len(game.games)})
-
-# New help file system ~ilknight - 8-5-2011
-@ics_command('help', 'o', admin.Level.user)
-class Help(Command):
-    def run(self, args, conn):
-        # Create list for all commands. If user is not admin, populate only with
-        # regular user commands. If user is admin, populate with all commands.
-        help_cmds = []
-        if conn.user.admin_level > admin.level.user:
-            help_cmds = command_list.admin_cmds.itervalues()
-        else:
-            help_cmds = command_list.cmds.itervalues()
-
-        # Search for actual .txt help file and return text inside that file
-        argument = args[0].lower()
-        if argument in help_cmds and exists("../help_files/%s.txt" % argument):
-            help_file = open(("../help_files/%s.txt" % argument), "r")
-            conn.write(('Help file documentation for "%s":\n\n' % argument) + help_file.read())
-            return
-        else:
-            conn.write('There is no help file documentation available for "%s".' % args[0].lower())
-            return
 
 @ics_command('limits', '')
 class Limits(Command):
