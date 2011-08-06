@@ -53,4 +53,58 @@ class TestShowadmins(Test):
         self.close(t2)
         self.close(t)
 
+class TestShowsrs(Test):
+    @with_player('srplayer', 'srplayer', ['sr'])
+    def test_showsrs(self):
+        t = self.connect_as_guest()
+        t.write('showsrs\n')
+        self.expect('0 SRs logged in.', t)
+
+        t2 = self.connect_as('srplayer', 'srplayer')
+        t.write('showsr\n')
+        self.expect_re('srplayer          Available    \d second', t)
+        self.expect('1 SR logged in.', t)
+
+        t.write('match srplayer 1+0 u\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('Creating:', t2)
+        t.write('showsr\n')
+        self.expect_re('srplayer          Playing      \d second', t)
+
+        # XXX test on/off duty
+
+        t.write('abo\n')
+        self.expect('aborted', t2)
+        self.close(t2)
+
+        self.close(t)
+
+class TestShowtms(Test):
+    @with_player('tmplayer', 'tmplayer', ['tm'])
+    def test_showtms(self):
+        t = self.connect_as_guest()
+        t.write('showtms\n')
+        self.expect('0 TMs logged in.', t)
+
+        t2 = self.connect_as('tmplayer', 'tmplayer')
+        t.write('showtm\n')
+        self.expect_re('tmplayer          Available    \d second', t)
+        self.expect('1 TM logged in.', t)
+
+        t.write('match tmplayer 1+0 u\n')
+        self.expect('Challenge:', t2)
+        t2.write('a\n')
+        self.expect('Creating:', t2)
+        t.write('showtm\n')
+        self.expect_re('tmplayer          Playing      \d second', t)
+
+        # XXX test on/off duty
+
+        t.write('abo\n')
+        self.expect('aborted', t2)
+        self.close(t2)
+
+        self.close(t)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

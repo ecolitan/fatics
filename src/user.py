@@ -128,6 +128,8 @@ class BaseUser(object):
         return self.name
 
     def has_title(self, title):
+        """ Test whether the user has a given title, regardless of whether
+        the title light is on or off. """
         assert(self._titles is not None)
         return title in self._titles
 
@@ -177,13 +179,6 @@ class BaseUser(object):
 
     def is_admin(self):
         return self.admin_level >= admin.Level.admin
-
-    # For showsr and showtm commands, respectively ~ilknight
-    def is_sr(self):
-        return self.name in db.title_get_users(db.title_get_id('SR'))
-
-    def is_tm(self):
-        return self.name in db.title_get_users(db.title_get_id('TM'))
 
     def add_notification(self, user):
         self.notifiers.add(user.name)
@@ -379,7 +374,8 @@ class RegUser(BaseUser):
     censor = property(fget=_get_censor)
 
     def get_display_name(self):
-        """Get the name displayed for other users, e.g. admin(*)(SR)"""
+        """Get the name displayed for other users, e.g. admin(*)(SR).  Titles
+        for which the light is turned off are not included. """
         if self._title_str is None:
             self._load_titles()
         return BaseUser.get_display_name(self)
