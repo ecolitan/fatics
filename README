@@ -1,4 +1,5 @@
-== Introduction ==
+Introduction
+------------
 This is an Internet chess server inteded to be a free software equivalant
 for the server that currently runs at freechess.org.
 
@@ -9,7 +10,8 @@ it under the terms of the GNU Affero General Public License as
 published by the Free Software Foundation, either version 3 of the
 License, or (at your option) any later version.
 
-== System requirements ==
+System requirements
+-------------------
 * Linux (it might work on other OSes, but I haven't tried)
 * GCC and make for compiling timeseal (any recent version should work)
 * Python 2.6 or 2.7
@@ -22,9 +24,10 @@ License, or (at your option) any later version.
 * GNU gettext
 * (optional) The pexpect module, for timeseal/zipseal tests
 
-== INSTALLATION ==
+Installation
+------------
 
-=== Timeseal and zipseal ===
+* Timeseal and zipseal *
 The timeseal and zipseal programs can be compiled by changing to the
 timeseal/ directory and typing "make".  That should build both the client
 programs (named openseal and zipseal) and the decoders that
@@ -35,12 +38,12 @@ doesn't have a proper build instructions, because I don't have Windows.
 I currently compile it with an unholy mix of wine and a Microsoft
 compiler.
 
-=== Gettext messages ===
+* Gettext messages *
 The gettext messages need to be compiled into machine-readable (.mo)
 format.  Assuming you have GNU gettext, you can do this by executing
 scripts/compile-messages from the top of the source tree.
 
-=== Running the server ===
+* Running the server *
 First you'll need to create a MySQL database and user.  I assume you
 know how to do this.
 
