@@ -1,0 +1,6 @@
+Command: showadmins
+Usage: showadmins
+Example: showadmins
+
+Shows a list of all of the admins online. It specifies their usernames,
+idle times and availability information.

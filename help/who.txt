@@ -1,0 +1,5 @@
+Command: who
+Usage: who
+Example: who
+
+Shows all of the players online at the current time.

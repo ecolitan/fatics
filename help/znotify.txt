@@ -1,0 +1,6 @@
+Command: znotify
+Usage: znotify
+Example: znotify
+
+Shows all of the people in your notify list that are currently logged
+in.

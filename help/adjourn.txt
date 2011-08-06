@@ -1,0 +1,6 @@
+Command: adjourn
+Usage: adjourn
+Example: adjourn
+
+Sends a request to your opponent asking to adjourn the current game to
+a later time for you two to finish up.

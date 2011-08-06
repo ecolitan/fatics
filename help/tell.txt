@@ -1,0 +1,9 @@
+Command: tell
+Usage: tell [player] [message]
+Example: tell wmahan Hello there.
+
+Sends a tell to the [player] specified with the inputed [message]. You
+can also use the "." (period) shorthand to send a tell to your most
+recent chat partner (does not apply to xtells, only tells). For example,
+if player "foo" was already chatting with "bar", he can type in ". lol"
+to say "lol" to foo.

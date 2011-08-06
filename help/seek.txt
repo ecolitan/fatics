@@ -1,0 +1,7 @@
+Command: seek
+Usage: seek [time_control] [rated|unrated] [variant]
+Example: seek 15 0 r standard
+
+Puts a game request up on the public seek graph/table. All of FatICS
+will be able to see your seek request and can accept it if they wish
+to.

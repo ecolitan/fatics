@@ -1,0 +1,6 @@
+Command: news
+Usage: news [item_number]
+Example: news 1000
+
+Shows the news item that is denoted with the number [item_number]. If
+this is not specified, then it will return all of the news items.

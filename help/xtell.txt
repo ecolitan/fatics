@@ -1,0 +1,7 @@
+Command: xtell
+Usage: xtell [user] [message]
+Example: xtell ilknight What's up?
+
+Works exactly like the "tell" command ("help tell" for more info), but
+it does not affect the who-told-you-last variable, so it will NOT 
+affect the recipient of the "." (period) tell alias.

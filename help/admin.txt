@@ -1,0 +1,7 @@
+Command: admin
+Usage: admin
+Example: admin
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Toggles your admin light on/off.

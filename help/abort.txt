@@ -1,0 +1,8 @@
+Command: abort
+Usage: abort
+Example: abort
+
+Completely aborts your current game if the game has not progressed
+past move 1. If it has, then this command will send a abort request
+to your opponent, and he or she will have to type "accept" to abort
+the game on mutual agreement.

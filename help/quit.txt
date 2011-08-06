@@ -1,0 +1,5 @@
+Command: quit
+Usage: quit
+Example: quit
+
+Logs you out of FatICS.

@@ -1,0 +1,8 @@
+Command: shout
+Usage: shout [message]
+Example: shout Hello, world!
+
+Shouts a [message] out to all of the FatICS community (who have their
+shout variable set to 1). Please do not spam the server though, as it
+costs extra resources and will most likely result in a muzzle. You have
+been officially warned :-)

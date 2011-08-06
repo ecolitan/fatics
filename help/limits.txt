@@ -1,0 +1,5 @@
+Command: limits
+Usage: limits
+Example: limits
+
+Shows the current hardcoded limits of the server.

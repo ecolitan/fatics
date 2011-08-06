@@ -1,0 +1,7 @@
+Command: showtms
+Usage: showtms
+Example: showtms
+
+Shows a list similar to showsrs and showadmins, but shows the current TMs
+logged in at the present time. It shows the TMs' usernames, idle times,
+and availability information.

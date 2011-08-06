@@ -1,0 +1,7 @@
+Command: showsrs
+Usage: showsrs
+Example: showsrs
+
+Shows a list similar to showadmins and showtm, but shows the current SRs
+logged in at the present time. It shows the SRs' usernames, idle times,
+and availability information.

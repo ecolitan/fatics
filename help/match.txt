@@ -1,0 +1,7 @@
+Command: match
+Usage: match [user] [time control] [rated|unrated] [variant]
+Example: match ilknight 15 0 r standard
+
+Sends a game challenge request to the specified [user], if logged in.
+The request will show the [time control] you specified, whether or
+not it is a [rated|unrated] game, and the [variant] of the game.
