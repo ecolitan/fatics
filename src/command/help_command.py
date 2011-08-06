@@ -55,7 +55,7 @@ class Help(Command):
             conn.write(_('Help file documentation for "%s":\n\n%s\n') %
                 (args[0], help_file.read()))
         else:
-            conn.write(_('There is no help available for "%s".')
+            conn.write(_('There is no help available for "%s".\n')
                 % args[0])
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
