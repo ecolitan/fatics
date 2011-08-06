@@ -35,6 +35,9 @@ class ToldMixin(object):
                 conn.write(_("(told %s, who is examining a game)\n") % u.name)
             else:
                 assert(False)
+        elif u.session.get_idle_time() >= 180:
+            conn.write(_("(told %s, who has been idle for %d minutes)\n") %
+                       (u.name, (u.session.get_idle_time() / 60)))
         else:
             conn.write(_("(told %s)\n") % u.name)
 

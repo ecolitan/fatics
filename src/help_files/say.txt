@@ -1,0 +1,7 @@
+Command: say
+Usage: say [message]
+Example: say Hello from Chicago, Illinois!
+
+Tells your current opponent, or the opponent you just played with (if you
+don't currently have an opponent), the message [message] that you want to
+tell to him or her.

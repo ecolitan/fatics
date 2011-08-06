@@ -1,0 +1,7 @@
+Command: help
+Usage: help [file]
+Example: help adjourn
+
+Returns the text of the selected help file [file], if it exists. If 
+it doesn't exist, then it will return that the help file documentation
+was not found for that command.
