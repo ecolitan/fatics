@@ -42,12 +42,12 @@ class TestList(Test):
 
         try:
             t.write('t admin foo bar\n')
-            self.expect('admin(SR)(*) tells you: foo bar', t)
+            self.expect('admin(*)(SR) tells you: foo bar', t)
             self.close(t)
 
             t = self.connect_as_admin()
             t.write('t admin foo bar\n')
-            self.expect('admin(SR)(*) tells you: foo bar', t)
+            self.expect('admin(*)(SR) tells you: foo bar', t)
         finally:
             t.write('-sr admin\n')
 
@@ -84,7 +84,7 @@ class TestTitle(Test):
         self.expect("admin", t)
 
         t.write('t admin a b c\n')
-        self.expect("admin(GM)(*) tells you: a b c", t)
+        self.expect("admin(*)(GM) tells you: a b c", t)
 
         t.write('+gm admin\n')
         self.expect("admin is already on the GM list", t)

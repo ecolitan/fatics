@@ -644,6 +644,7 @@ class TestBpgn(Test):
                 t2.write('abo\n')
                 t3.write('abo\n')
                 t4.write('abo\n')
+                self.expect('aborted', t)
 
         self.close(t)
         self.close(t2)

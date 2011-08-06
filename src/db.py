@@ -479,7 +479,7 @@ class DB(object):
 
     def user_get_titles(self, user_id):
         cursor = self.db.cursor(cursors.DictCursor)
-        cursor.execute("""SELECT title_name,title_flag,title_light FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s ORDER BY title_id DESC""", (user_id,))
+        cursor.execute("""SELECT title_name,title_flag,title_light FROM user_title LEFT JOIN title USING (title_id) WHERE user_id=%s ORDER BY title_id ASC""", (user_id,))
         rows = cursor.fetchall()
         cursor.close()
         return rows
@@ -615,16 +615,6 @@ class DB(object):
         rows = cursor.fetchall()
         cursor.close()
         return rows
-
-    
-    def title_get_id(self, title_flag):
-        # Makes it easier for other modules' functions, like showsr and showtm
-        # to quickly get the ID of the specific title ~ilknight
-        cursor = self.db.cursor()
-        cursor.execute("""SELECT title_id FROM titles WHERE title_flag=%s""", (title_flag,))
-        rows = cursor.fetchall()
-        cursor.close()
-        return rows[0]
 
     def title_get_users(self, title_id):
         cursor = self.db.cursor()

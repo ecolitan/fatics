@@ -49,7 +49,7 @@ class Showsrs(Command):
     def run(self, args, conn):
         conn.write('SRs:\n')
         conn.write('Name              Status       Idle time\n')
-        srs = [u for u in online.online if u.is_sr()]
+        srs = [u for u in online.online if u.has_title('SR')]
         for u in srs:
             if u.session.game and u.session.game.gtype == game.PLAYED:
                 status = 'Playing'
@@ -69,7 +69,7 @@ class Showtms(Command):
     def run(self, args, conn):
         conn.write('TMs:\n')
         conn.write('Name              Status       Idle time\n')
-        tms = [u for u in online.online if u.is_tm()]
+        tms = [u for u in online.online if u.has_title('TM')]
         for u in tms:
             if u.session.game and u.session.game.gtype == game.PLAYED:
                 status = 'Playing'
