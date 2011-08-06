@@ -52,8 +52,8 @@ class Help(Command):
             # security safeguard
             assert(re.match('[a-z]+', args[0]))
             help_file = open(help_file, "r")
-            conn.write((_('Help file documentation for "%s":\n\n') % args[0])
-                + help_file.read())
+            conn.write(_('Help file documentation for "%s":\n\n%s\n') %
+                (args[0], help_file.read()))
         else:
             conn.write(_('There is no help available for "%s".')
                 % args[0])
