@@ -117,9 +117,6 @@ class Variables(Command):
             if u.session.following:
                 conn.write(_('Following: %s\n') % u.session.following)
 
-        if u.vars['formula']:
-            conn.write(_('Formula: %s\n') % u.vars['formula'])
-
         for i in range(1, 10):
             fname = 'f' + str(i)
             if u.vars[fname]:
