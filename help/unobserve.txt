@@ -1,0 +1,6 @@
+Command: unobserve
+Usage: unobserve [optional number|username]
+Example 1: unobserve wmahan
+Example 2: ubobserve
+
+Unobserves the game specified.

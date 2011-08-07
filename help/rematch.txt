@@ -1,0 +1,6 @@
+Command: rematch
+Usage: rematch
+Example: rematch
+
+Rematches the player that you played last, using the same variant and
+time control settings.

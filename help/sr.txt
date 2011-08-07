@@ -1,0 +1,7 @@
+Command: sr
+Usage: sr
+Example: sr
+
+RESTRICTED COMMAND - SRs
+
+Toggles (SR) light on/off.

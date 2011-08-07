@@ -1,0 +1,7 @@
+Command: observe
+Usage: observe [game number|username]
+Example 1: observe 15
+Example 2: observe ilknight
+
+Observes the game specified by the unique game number or one of the 
+players currently playing the game.

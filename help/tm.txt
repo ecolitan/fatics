@@ -1,0 +1,7 @@
+Command: tm
+Usage: tm
+Example: tm
+
+RESTRICTED COMMAND - TMs
+
+Toggles (TM) light on/off.
