@@ -27,20 +27,20 @@ class TestShowadmins(Test):
         t2 = self.connect_as_admin()
         t.write('showa\n')
         self.expect('Name              Status       Idle time', t)
-        self.expect_re('admin             Available    \d second', t)
+        self.expect_re(r'admin             Available    \d second', t)
         self.expect('1 admin logged in.', t)
 
         t2.write('admin\n')
         self.expect('(*) is now not shown', t2)
         t.write('showa\n')
-        self.expect_re('admin             Off_duty     \d second', t)
+        self.expect_re(r'admin             Off_duty     \d second', t)
 
         t.write('match admin 1+0 u\n')
         self.expect('Challenge:', t2)
         t2.write('a\n')
         self.expect('Creating:', t2)
         t.write('showa\n')
-        self.expect_re('admin             Playing      \d second', t)
+        self.expect_re(r'admin             Playing      \d second', t)
 
         t.write('abo\n')
         self.expect('aborted', t2)
@@ -48,7 +48,7 @@ class TestShowadmins(Test):
         self.expect('(*) is now shown', t2)
 
         t.write('showadmins\n')
-        self.expect_re('admin             Available    \d second', t)
+        self.expect_re(r'admin             Available    \d second', t)
 
         self.close(t2)
         self.close(t)
@@ -62,7 +62,7 @@ class TestShowsrs(Test):
 
         t2 = self.connect_as('srplayer', 'srplayer')
         t.write('showsr\n')
-        self.expect_re('srplayer          Available    \d second', t)
+        self.expect_re(r'srplayer          Available    \d second', t)
         self.expect('1 SR logged in.', t)
 
         t.write('match srplayer 1+0 u\n')
@@ -70,7 +70,7 @@ class TestShowsrs(Test):
         t2.write('a\n')
         self.expect('Creating:', t2)
         t.write('showsr\n')
-        self.expect_re('srplayer          Playing      \d second', t)
+        self.expect_re(r'srplayer          Playing      \d second', t)
 
         # XXX test on/off duty
 
@@ -89,7 +89,7 @@ class TestShowtms(Test):
 
         t2 = self.connect_as('tmplayer', 'tmplayer')
         t.write('showtm\n')
-        self.expect_re('tmplayer          Available    \d second', t)
+        self.expect_re(r'tmplayer          Available    \d second', t)
         self.expect('1 TM logged in.', t)
 
         t.write('match tmplayer 1+0 u\n')
@@ -97,7 +97,7 @@ class TestShowtms(Test):
         t2.write('a\n')
         self.expect('Creating:', t2)
         t.write('showtm\n')
-        self.expect_re('tmplayer          Playing      \d second', t)
+        self.expect_re(r'tmplayer          Playing      \d second', t)
 
         # XXX test on/off duty
 

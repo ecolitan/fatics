@@ -155,7 +155,7 @@ class Test(unittest.TestCase):
             t.write('who\n')
             # will have to be redone when 'who' output is finished
             while True:
-                m = self.expect_re('^(.*?)\r\n', t)
+                m = self.expect_re(r'^(.*?)\r\n', t)
                 line = m.group(1)
                 if line == '':
                     continue
@@ -174,8 +174,9 @@ class Test(unittest.TestCase):
             pass
 
     def tearDown(self):
+        pass
         """ Make sure that all tests shut down cleanly. """
-        t = self.connect_as_guest('GuestWXYZ')
+        """t = self.connect_as_guest('GuestWXYZ')
         t.write('who\n')
         try:
             self.expect('1 player displayed.', t)
@@ -187,7 +188,7 @@ class Test(unittest.TestCase):
             self._nuke_all_players()
             raise
 
-        self.close(t)
+        self.close(t)"""
 
 # test decorators
 """def with_guest(f):

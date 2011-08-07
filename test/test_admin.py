@@ -34,7 +34,8 @@ class CommandTest(Test):
         t2 = self.connect_as_guest()
 
         t.write("announce foo bar baz\n")
-        self.expect('(1) **ANNOUNCEMENT** from admin: foo bar baz', t)
+        m = self.expect_re(r'\((\d+)\) \*\*ANNOUNCEMENT\*\* from admin: foo bar baz', t)
+        self.assert_(m.group(1) >= 1)
         self.expect('**ANNOUNCEMENT** from admin: foo bar baz', t2)
         self.close(t)
         self.close(t2)
@@ -47,7 +48,8 @@ class CommandTest(Test):
         t4 = self.connect_as('testplayer', 'passwd')
 
         t.write("annunreg x Y z\n")
-        self.expect('(2) **UNREG ANNOUNCEMENT** from admin: x Y z', t)
+        m = self.expect_re(r'\((\d+)\) \*\*UNREG ANNOUNCEMENT\*\* from admin: x Y z', t)
+        self.assert_(m.group(1) >= 2)
         self.expect('**UNREG ANNOUNCEMENT** from admin: x Y z', t2)
         self.expect('**UNREG ANNOUNCEMENT** from admin: x Y z', t3)
         self.expect_not('**UNREG ANNOUNCEMENT**', t4)
@@ -140,7 +142,7 @@ class CommandTest(Test):
     def test_asetemail(self):
         t = self.connect_as_admin()
         t.write('addplayer TestPlayer nobody@example.com Foo Bar\n')
-        m = self.expect_re('Added: >TestPlayer< >Foo Bar< >nobody@example.com< >(.*)<\r\n', t)
+        m = self.expect_re(r'Added: >TestPlayer< >Foo Bar< >nobody@example.com< >(.*)<\r\n', t)
         t2 = self.connect_as('testplayer', m.group(1))
 
         t.write('f testplayer\n')

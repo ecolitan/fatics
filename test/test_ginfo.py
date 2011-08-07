@@ -83,7 +83,7 @@ class TestGinfo(Test):
         self.expect('  GuestABCD (++++) vs GuestEFGH (++++) unrated standard game.', t)
         self.expect('  Time controls: 300 15', t)
         self.expect('  Time of starting: ', t)
-        self.expect_re('   White time \d+:\d+    Black time \d+:\d+', t)
+        self.expect_re(r'   White time \d+:\d+    Black time \d+:\d+', t)
         self.expect('  The clock is not paused', t)
         self.expect('  4 halfmoves have been made.', t)
         self.expect('  Fifty move count started at halfmove 4 (100 halfmoves until a draw).', t)

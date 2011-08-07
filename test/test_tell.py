@@ -16,8 +16,9 @@
 # along with FatICS.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-#from twisted.trial import unittest
 from test import *
+
+import time
 
 class TellTest(Test):
     def test_tell(self):
@@ -86,6 +87,16 @@ class TellTest(Test):
         self.expect('No player named "a" is online', t2)
 
         self.close(t2)
+
+    def test_tell_idle(self):
+        self._skip('slow test')
+        t = self.connect_as_admin()
+        time.sleep(181)
+        t2 = self.connect_as_guest()
+        t2.write('tell admin hello\n')
+        self.expect('(told admin, who has been idle for 3 minutes)', t2)
+        self.close(t2)
+        self.close(t)
 
     def test_tell_disconnected(self):
         t = self.connect_as_admin()

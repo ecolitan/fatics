@@ -196,7 +196,7 @@ class TestExamine(Test):
         self.expect('GuestEFGH resigns} 0-1', t2)
 
         t.write('exl\n')
-        # TODO self.expect_re('Game \d+: GuestEFGH vs. GuestABCD', t)
+        # TODO self.expect_re(r'Game \d+: GuestEFGH vs. GuestABCD', t)
         t.write('fo\n')
         self.expect('GuestABCD goes forward 1 move.', t)
         self.expect('Nf3', t)
