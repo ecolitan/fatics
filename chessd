@@ -22,7 +22,7 @@ case "$1" in
     echo "Upgrading and restarting server...."
     $0 stop
     hg pull
-    hg update
+    hg update -C
     $0 start
     ;;
   reloaddb)
