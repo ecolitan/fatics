@@ -38,7 +38,7 @@ class Level(object):
         elif lvl == self.admin:
             return _('Administrator')
         else:
-            return _('Unknown (%d)') % level
+            return _('Unknown (%d)') % lvl
 level = Level()
 
 class Checker(object):
