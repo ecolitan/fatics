@@ -1,0 +1,5 @@
+Command: withdraw
+Usage: withdraw
+Example: withdraw
+
+Withdraws current match offer.

@@ -1,0 +1,6 @@
+Command: xwhisper
+Usage: xwhisper [game] [message]
+Example: xwhisper 69 Hello sirs.
+
+Sends a whisper to the specified game number without affected the 
+"game-whispered-last" variable.

@@ -1,0 +1,6 @@
+Command: xkibitz
+Usage: xkibitz [game] [message]
+Example: xkibitz 69 Hello sirs.
+
+Sends a kibitz to the specified game number without affected the 
+"game-kibitzed-in-last" variable.

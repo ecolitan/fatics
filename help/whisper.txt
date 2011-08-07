@@ -1,0 +1,7 @@
+Command: whisper
+Usage: whisper [game] [message]
+Example: whisper 15 Hi.
+
+Sends a text to the observers, but not the players, of the game
+specified. You must be observing the game to whisper in it. Unlike
+kibitz, the players do not hear your whispers.
