@@ -1,0 +1,5 @@
+Command: uptime
+Usage: uptime
+Example: uptime
+
+Checks the version information of the server and its uptime.

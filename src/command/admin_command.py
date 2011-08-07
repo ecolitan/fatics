@@ -31,20 +31,6 @@ from db import db
 from command import Command, ics_command, requires_registration
 from config import config
 
-@ics_command('admin', '', admin.Level.admin)
-class Admin(Command):
-    # requires registration because I did not implement light toggling
-    # for guest admins; the concept of a guest admin is a weird case
-    @requires_registration
-    def run(self, args, conn):
-        title_id = list_.lists['admin'].id
-        conn.user.toggle_light(title_id)
-        # ugly hack
-        if '(*)' in conn.user.get_display_name():
-            conn.write(A_('Admin mode (*) is now shown.\n'))
-        else:
-            conn.write(A_('Admin mode (*) is now not shown.\n'))
-
 @ics_command('aclearhistory', 'w', admin.Level.admin)
 class Aclearhistory(Command):
     def run(self, args, conn):

@@ -1,0 +1,5 @@
+Command: unseek
+Usage: unseek
+Example: unseek
+
+Withdraws your current seeks.

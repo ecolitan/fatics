@@ -1,0 +1,5 @@
+Command: unalias
+Usage: unalias [alias name]
+Example: unalias coolalias
+
+Removes the specified alias from your profile.

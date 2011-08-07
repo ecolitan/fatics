@@ -1,0 +1,7 @@
+Command: variables
+Usage: variables [optional username]
+Example 1: variables wmahan
+Example 2: variables
+
+Checks player variables. Checks your own if you do not specify a
+specific username.

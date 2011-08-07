@@ -1,0 +1,5 @@
+Command: unexamine
+Usage: unexamine [optional game number]
+Example: unexamine 14
+
+Unexamines and closes the game number you are currently examining.
