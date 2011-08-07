@@ -29,6 +29,13 @@ import admin
 @ics_command('help', 'o', admin.Level.user)
 class Help(Command):
     def run(self, args, conn):
+        # non-admins should not be able to see/view documentation for
+        # admin commands.
+        if conn.user.admin_level > admin.level.user:
+            help_cmds = [c.name for c in command_list.admin_cmds.itervalues()]
+        else:
+            help_cmds = [c.name for c in command_list.cmds.itervalues()]
+            
         # for legal reasons, the license help file should be in the code
         # and not in a separate file
         if args[0] in ['license', 'license', 'copying', 'copyright']:
@@ -37,20 +44,11 @@ class Help(Command):
 
         # "help commands" should return a complete list of server commands
         elif args[0] == 'commands':
-            if conn.user.admin_level > admin.level.user:
-                help_cmds = [c.name for c in command_list.admin_cmds.itervalues()]
-            else:
-                help_cmds = [c.name for c in command_list.cmds.itervalues()]
-            conn.write('Current FatICS command list:\n\n%s' % help_cmds)
+            conn.write('Current FatICS command list:\n\n%s\n' % help_cmds)
             return
 
         # Create list for all commands. If user is not admin, populate only with
         # regular user commands. If user is admin, populate with all commands.
-        if conn.user.admin_level > admin.level.user:
-            help_cmds = [c.name for c in command_list.admin_cmds.itervalues()]
-        else:
-            help_cmds = [c.name for c in command_list.cmds.itervalues()]
-
         if not args[0]:
             # TODO: some help text for "help" with no arguments
             args[0] = 'help'
