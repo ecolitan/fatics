@@ -34,7 +34,9 @@ class Help(Command):
         if args[0] in ['license', 'license', 'copying', 'copyright']:
             conn.write(server.get_license())
             return
-        if args[0] in ['commands']:
+
+        # "help commands" should return a complete list of server commands
+        elif args[0] == 'commands':
             if conn.user.admin_level > admin.level.user:
                 help_cmds = [c.name for c in command_list.admin_cmds.itervalues()]
             else:
