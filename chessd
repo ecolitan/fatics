@@ -3,11 +3,12 @@
 cd `dirname $0`
 
 PIDFILE=chessd.pid
+LOGFILE=chessd.log
 
 case "$1" in
   start)
     echo "Starting chessd...."
-    rm -f chessd.log; twistd --log chessd.log --pidfile $PIDFILE -r epoll -oy src/chessd.tac
+    rm -f $LOGFILE; twistd --log $LOGFILE --pidfile $PIDFILE -r epoll -oy src/chessd.tac
     ;;
   run)
     echo "Running chessd in the foreground...."
@@ -29,9 +30,13 @@ case "$1" in
     mysql chess < db/db.sql
     ./scripts/import-eco.py
     ;;
+  log)
+    echo "Showing chessd log..."
+    tail -100 $LOGFILE
+    ;;
   profile)
     echo "Running chessd in profile mode...."
-    twistd --log chessd.log --profile profile-chessd.data --savestats --profiler cProfile -r epoll -noy src/chessd.tac
+    twistd --log $LOGFILE --profile profile-chessd.data --savestats --profiler cProfile -r epoll -noy src/chessd.tac
     ;;
   stop)
     if [ -f $PIDFILE ]; then
@@ -42,7 +47,7 @@ case "$1" in
     fi
     ;;
   *)
-    echo "Usage: $0 (start|stop|run|test|profile|upgrade|reloaddb)"
+    echo "Usage: $0 (start|stop|run|test|profile|upgrade|reloaddb|log)"
     ;;
 esac
 
