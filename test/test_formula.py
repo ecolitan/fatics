@@ -83,6 +83,12 @@ class TestFormula(Test):
 
         self.close(t)
 
+    def test_formula_registered(self):
+        t = self.connect_as_guest('GuestABCD')
+        t.write('set formula !registered\n')
+        self.expect('formula set to "!registered".', t)
+        self.close(t)
+
     def test_formula_fvar(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest()

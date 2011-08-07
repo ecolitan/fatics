@@ -273,7 +273,7 @@ class LightningSymbol(Symbol):
 class RegisteredSymbol(Symbol):
     lbp = 0
     def nud(self):
-        return 0 if chal.a.is_guest else 1 if chal else None
+        return (0 if chal.a.is_guest else 1) if chal else None
 
 @Token(['timeseal'])
 class TimesealSymbol(Symbol):
