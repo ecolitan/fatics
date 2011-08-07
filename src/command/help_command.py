@@ -34,6 +34,13 @@ class Help(Command):
         if args[0] in ['license', 'license', 'copying', 'copyright']:
             conn.write(server.get_license())
             return
+        if args[0] in ['commands']:
+            if conn.user.admin_level > admin.level.user:
+                help_cmds = [c.name for c in command_list.admin_cmds.itervalues()]
+            else:
+                help_cmds = [c.name for c in command_list.cmds.itervalues()]
+            conn.write('Current FatICS command list:\n\n%s' % help_cmds)
+            return
 
         # Create list for all commands. If user is not admin, populate only with
         # regular user commands. If user is admin, populate with all commands.
