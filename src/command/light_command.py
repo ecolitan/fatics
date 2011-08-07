@@ -1,5 +1,6 @@
-import list__
+import list_
 import user
+import admin
 
 from command import Command, ics_command, requires_registration
 from config import config
@@ -19,7 +20,7 @@ class Sr(Command):
             conn.write(A_('Service Representative mode (SR) is now not shown.\n'))
 
 @ics_command('tm', '', admin.Level.user)
-class Sr(Command):
+class Tm(Command):
     @requires_registration
     def run(self, args, conn):
         if not conn.user.has_title('TM'):
