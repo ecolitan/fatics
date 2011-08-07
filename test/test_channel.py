@@ -205,6 +205,21 @@ class TestKick(Test):
         self.close(t)
         self.close(t2)
 
+    def test_kick_guest(self):
+        t = self.connect_as_guest('GuestARST')
+        t2 = self.connect_as_admin()
+        t.write('+ch 1\n')
+        self.expect('[1] added', t)
+        t2.write('+ch 1\n')
+        self.expect('[1] added', t2)
+        t2.write('chkick 1 guestarst\n')
+        self.expect('You have been kicked out of channel 1 by', t)
+        self.expect('Kicked out GuestARST', t2)
+        t2.write('-ch 1\n')
+        self.expect("[1] removed from your channel list", t2)
+        self.close(t)
+        self.close(t2)
+
     @with_player('TestPlayer', 'testpass')
     def test_kick_admin(self):
         t = self.connect_as_admin()

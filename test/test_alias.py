@@ -140,7 +140,7 @@ class TestUserAlias(Test):
         self.expect('Idle: 0 seconds', t)
         time.sleep(2)
         t.write('$fi\n')
-        m = self.expect_re('Idle: (\d) seconds', t)
+        m = self.expect_re(r'Idle: (\d) seconds', t)
         self.assert_(m.group(1) > 1)
         self.close(t)
 

@@ -65,7 +65,7 @@ def notify_users(user, arrived):
 
     for nname in user.notifiers:
         u = online.find_exact(nname)
-        if u and u.vars['notifiedby']:
+        if u and u.vars['notifiedby'] and u.name not in nlist:
             if arrived:
                 u.write_("\nNotification: %s has arrived and isn't on your notify list.\n", name)
             else:

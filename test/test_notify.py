@@ -118,6 +118,37 @@ class TestNotify(Test):
         self.close(t2)
         self.close(t)
 
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'test')
+
+    @with_player('TestPlayer', 'test')
+    def test_notifiedby_notify(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'test')
+
+        t2.write('set notifiedby 1\n')
+        self.expect('You will now hear if people notify you', t2)
+
+        t.write('+notify testplayer\n')
+        self.expect("TestPlayer added to your notify list", t)
+        self.expect("You have been added to the notify list of admin.", t2)
+
+        t2.write('+notify admin\n')
+        self.expect("admin added to your notify list", t2)
+
+        self.close(t)
+        self.expect("Notification: admin has departed.", t2)
+        self.expect_not("isn't on your notify list", t2)
+        t2.write('-notify admin\n')
+        self.expect('admin removed from your notify list', t2)
+        self.close(t2)
+
+        t = self.connect_as_admin()
+        t.write('-not testplayer\n')
+        self.expect('TestPlayer removed from your notify list', t)
+        self.close(t)
+
+
 class TestIdlenotify(Test):
     def test_idlenotify_guest(self):
         t = self.connect_as_guest('GuestABCD')
