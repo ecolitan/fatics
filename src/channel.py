@@ -199,7 +199,7 @@ class Channel(object):
             if not admin.checker.check_user_operation(owner, u):
                 owner.write(A_('You need a higher adminlevel to do that.\n'))
                 return
-            if db.channel_is_owner(self.id, u.id):
+            if not u.is_guest and db.channel_is_owner(self.id, u.id):
                 # remove kicked user as owner of the channel, too
                 db.channel_del_owner(self.id, u.id)
 
