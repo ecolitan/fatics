@@ -145,11 +145,7 @@ class BaseUser(object):
                 del self.vars[v.name]
 
     def set_formula(self, v, val):
-        if val is not None:
-            self.vars[v.name] = val
-        else:
-            if v.name in self.vars:
-                del self.vars[v.name]
+        self.vars[v.name] = val
 
     def set_note(self, v, val):
         num = int(v.name, 10)

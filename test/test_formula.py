@@ -37,10 +37,15 @@ class TestFormula(Test):
         t = self.connect_as_admin()
         t.write('set formula blitz\n')
         self.expect('formula set', t)
+        t.write('var\n')
+        self.expect('Formula: blitz', t)
         t.write('set formula\n')
         self.expect('formula unset.', t)
         t.write('set formula\n')
         self.expect('formula unset.', t)
+
+        t.write('var\n')
+        self.expect_not('Formula:', t)
 
         t.write('set f1\n')
         self.expect('f1 unset.', t)
