@@ -1,0 +1,8 @@
+Command: asetrating
+Usage: asetrating [username] [speed] [variant] [rating] [RD] [volatility]
+[win] [loss] [draw]
+Example: asetrating ilknight standard chess960 2500 80 1.000 1000 100 10
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets rating information of [username] to specified arguments.

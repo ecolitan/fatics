@@ -1,0 +1,7 @@
+Command: areload
+Usage: areload
+Example: areload
+
+RESTRICTED COMMAND - ADMINISTRATORS (SUPER)
+
+Reloads server.

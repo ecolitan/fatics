@@ -1,0 +1,9 @@
+Command: announce
+Usage: announce [message]
+Example: announce I am getting married this weekend!
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Puts [message] up as a public announcement on the server. All players
+online can see announcements by admins. Please do not abuse this 
+quite awe-inspiring feature.

@@ -1,0 +1,5 @@
+Command: annunreg
+Usage: annunreg [message]
+Example: annunreg Hello guests of FatICS!
+
+Announces a [message] to all guest / unregistered players on the server.

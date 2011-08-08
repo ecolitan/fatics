@@ -1,0 +1,9 @@
+Command: asetadmin
+Usage: asetadmin [user] [level]
+Example: asetadmin johnthegreat 100
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets the admin level of [user] to [level]. Please note that you can
+only set the admin level of admins below your level, and you can only
+set those admins' levels to a level below you.

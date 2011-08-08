@@ -1,0 +1,8 @@
+Command: asetemail
+Usage: asetemail [user] [email]
+Example: asetemail DrChiu dr.chiu@health.org
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets the email of [user] to [email]. You can only set the email of
+users below your level.

@@ -1,0 +1,6 @@
+Command: backward
+Usage: backward [#]
+Example: backward 5
+
+Sets the examined game [#] moves back. If [#] is not specified, then
+1 will be the value used.

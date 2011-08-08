@@ -1,0 +1,5 @@
+Command: decline
+Usage: decline
+Example: decline
+
+Declines match offer made to you. Opposite of "accept".

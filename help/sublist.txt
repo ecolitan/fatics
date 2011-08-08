@@ -1,0 +1,6 @@
+Command: sublist
+Usage: sublist [list] [value]
+Example: sublist censor ilknight
+Alias: -
+
+Deletes [value] from your personal list [list].

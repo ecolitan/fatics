@@ -1,0 +1,7 @@
+Command: asetmaxguest
+Usage: asetmaxguest [number]
+Example: asetmaxguest 10
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets the maximum number of guest connections allowed to [number].

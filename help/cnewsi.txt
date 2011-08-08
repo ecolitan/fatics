@@ -1,0 +1,7 @@
+Command: cnewsi
+Usage: cnewsi [item] [title]
+Example: cnewsi 1000 Title.
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets title of news item [item] to [title].

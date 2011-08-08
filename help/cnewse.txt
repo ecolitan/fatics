@@ -1,0 +1,7 @@
+Command: cnewse
+Usage: cnewse [item] [date]
+Example: cnewse 1000 08/07/2011
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Set new expiration date for news item [item].

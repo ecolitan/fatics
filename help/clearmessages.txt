@@ -1,0 +1,8 @@
+Command: clearmessages
+Usage: clearmessages [number|*]
+Example 1: clearmessages 1
+Example 2: clearmessages *
+
+Clear message [number] if a number is specified. If you give the command a
+wildcard character (*) as the argument, then it will delete all of your
+messages in your message box.

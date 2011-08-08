@@ -1,0 +1,6 @@
+Command: allobservers
+Usage: allobservers [username|game]
+Example 1: allobservers ilknight
+Example 2: allobservers 69
+
+Shows all current observers of specified username or game number.

@@ -1,0 +1,8 @@
+Command: asetmaxplayer
+Usage: asetmaxplayer [number]
+Example: asetmaxplayer 100
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets the maximum number of registered player connections allowed to 
+[number].

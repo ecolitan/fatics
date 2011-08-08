@@ -1,0 +1,7 @@
+Command: finger
+Usage: finger [username]
+Example: finger ilknight
+
+Grabs the profile information of [username] and displays it on the screen.
+If [username] is not specified, then the command will return your finger
+profile.

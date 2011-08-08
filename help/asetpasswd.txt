@@ -1,0 +1,7 @@
+Command: asetpasswd
+Usage: asetpasswd [username] [password]
+Example: asetpasswd wmahan iscool
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets the password of [username] to [password].

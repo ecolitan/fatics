@@ -1,0 +1,6 @@
+Command: addlist
+Usage: addlist [list] [value]
+Example: addlist censor ilknight
+Alias: +
+
+Adds [value] to your personal list [list].

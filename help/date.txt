@@ -1,0 +1,5 @@
+Command: date
+Usage: date
+Example: date
+
+Shows current date and time in Server Time(UTC) and your Local Time.

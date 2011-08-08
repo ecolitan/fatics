@@ -1,0 +1,8 @@
+Command: addcomment
+Usage: addcomment [username] [comment]
+Example: addcomment admin You are the best head admin ever. Just sayin'
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Adds a [comment] to [username]'s profile.
+

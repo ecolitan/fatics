@@ -1,0 +1,8 @@
+Command: cshout
+Usage: cshout [message]
+Example: cshout Important Chess mess.
+
+C-shouts [message] to the FatICS community. Please keep c-shouts chess-related,
+as this command was created for important chess messages. Abuse of this
+feature will result in a muzzle, as well as other possible consequences. You
+have been warned.

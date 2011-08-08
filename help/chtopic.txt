@@ -1,0 +1,9 @@
+Command: chtopic
+Usage: chtopic [channel] [optional text]
+Example 1: chtopic 1
+Example 2: chtopic 1 n00b Help
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets topic of channel [channel] to [optional text]. If [optional text] is
+not specified, the command will return the current channel topic.

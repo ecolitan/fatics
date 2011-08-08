@@ -1,0 +1,5 @@
+Command: draw
+Usage: draw
+Example: draw
+
+Offers draw to your current opponent.

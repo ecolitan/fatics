@@ -1,0 +1,6 @@
+Command: alias
+Usage: alias [alias] [command]
+Example: alias mycoolalias tell ilknight you are so cool.
+
+Sets an alias, or personal shortcut command, for the specified command
+[command] with the alias name [alias].

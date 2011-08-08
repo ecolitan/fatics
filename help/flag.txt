@@ -1,0 +1,8 @@
+Command: flag
+Usage: flag
+Example: flag
+
+Attempts to flag opponent in current game because his time has run out. The
+server should automatically do this by itself, but in the rare case that it
+does not, please use this command. If it still doesn't work, it is most
+likely the result of latency in the game.

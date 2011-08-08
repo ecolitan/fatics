@@ -1,0 +1,7 @@
+Command: cnewsf
+Usage: cnewsf [item] [line]
+Example: cnewsf 1000 Last line.
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Sets last line of news item [item] to [line].

@@ -1,0 +1,8 @@
+Command: aclearhistory 
+Usage: aclearhistory [username]
+Example: aclearhistory johnthegreat
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Clears the history of a specified player, denoted by the passed in
+parameter [username].

@@ -1,0 +1,5 @@
+Command: accept
+Usage: accept
+Example: accept
+
+Accepts match challenge from another player.

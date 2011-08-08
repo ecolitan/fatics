@@ -1,0 +1,7 @@
+Command: chkick
+Usage: chkick [number] [username]
+Example: chkick 24 BadBoi
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Kicks user with username [username] from channel number [number].

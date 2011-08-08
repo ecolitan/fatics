@@ -1,0 +1,7 @@
+Command: addplayer
+Usage: addplayer [handle] [real_name] [email]
+Example: addplayer DrChiu Ryan Chiu rchiu95@gmail.com
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Adds player with specified credentials.

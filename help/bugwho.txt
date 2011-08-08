@@ -1,0 +1,10 @@
+Command: bugwho
+Usage: bugwho [g|p|u]
+Example: bugwho u
+
+This command lists current bughouse games, partnerships and/or available
+partners.  "Bugwho g" lists current bughouse games, paired by bughouse 
+matches (different from the "games" command).  "Bugwho p" lists current 
+bughouse partnerships that are not playing bughouse games, paired by 
+partnerships. "Bugwho u" lists users who are open for bughouse partnerships.  
+Lastly, "bugwho" will show all three kinds of information.

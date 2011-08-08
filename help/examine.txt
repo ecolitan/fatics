@@ -1,0 +1,5 @@
+Command: examine
+Usage: examine [game_number]
+Example: examine 10
+
+Examines game, denoted by [game_number].

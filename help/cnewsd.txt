@@ -1,0 +1,7 @@
+Command: cnewsd
+Usage: cnewsd [item]
+Example: cnewsd 1069
+
+RESTRICTED COMMAND - ADMINISTRATORS
+
+Clears last line of text in new item [item].
