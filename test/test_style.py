@@ -188,4 +188,28 @@ class TestStyle12(Test):
         self.close(t)
         self.close(t2)
 
+    def test_style12_nowrap(self):
+        """ Long style12 lines should not be wrapped. """
+        t = self.connect_as_guest('GuestABCDEFGHIJKL')
+        t2 = self.connect_as_guest('GuestMNOPQRSTUVWX')
+        t.write('set style 12\n')
+        t.write('iset ms 1\n')
+        t2.write('set style 12\n')
+        t2.write('finger\n')
+
+        t.write('match guestmnopqrstuvwx white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCDEFGHIJKL GuestMNOPQRSTUVWX 1 1 0 39 39 60000 60000 1 none (0:00.000) none 0 0 0\r\n', t)
+        self.expect('\r\n<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestABCDEFGHIJKL GuestMNOPQRSTUVWX -1 1 0 39 39 60 60 1 none (0:00) none 1 0 0\r\n', t2)
+
+        t.write('abort\n')
+        self.expect('aborted', t2)
+
+        self.close(t)
+        self.close(t2)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
