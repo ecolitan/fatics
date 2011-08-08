@@ -438,8 +438,8 @@ class Challenge(Offer, MatchStringParser):
 
         self._register()
 
-        a.write('Issuing: %s\n' % challenge_str)
-        b.write('Challenge: %s\n' % challenge_str)
+        a.write_nowrap('Issuing: %s.\n' % challenge_str)
+        b.write_nowrap('Challenge: %s.\n' % challenge_str)
         if a.has_title('abuser'):
             b.write_('--** %s is an abuser **--\n', (a.name,))
         if b.has_title('abuser'):
