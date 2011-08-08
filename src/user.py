@@ -96,6 +96,7 @@ class BaseUser(object):
 
     def write_nowrap(self, s):
         """ Write a string to the user without word wrapping. """
+        connection.written_users.add(self)
         self.session.conn.transport.write(s, wrap=False)
 
     def write_(self, s, args={}):
