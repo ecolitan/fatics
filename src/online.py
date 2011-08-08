@@ -77,6 +77,10 @@ class Online(object):
     def __len__(self):
         return len(self.online_names)
 
-online = Online()
+# don't change the online list if we are reloading this module
+try:
+    online
+except NameError:
+    online = Online()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

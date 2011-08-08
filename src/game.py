@@ -27,6 +27,7 @@ import speed_variant
 import clock
 import history
 import time_format
+import variant
 
 from db import db
 from online import online
@@ -366,7 +367,7 @@ class Game(object):
             mv = self.variant.parse_move(s, conn)
             parsed = mv is not None
             illegal = False
-        except speed_variant.IllegalMoveError:
+        except variant.base_variant.IllegalMoveError:
             illegal = True
             parsed = True
         if parsed:

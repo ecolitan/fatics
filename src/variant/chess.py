@@ -27,8 +27,7 @@ import random
 from array import array
 
 from game_constants import *
-from speed_variant import IllegalMoveError
-from variant.base_variant import BaseVariant
+from variant.base_variant import BaseVariant, IllegalMoveError
 """
 0x88 board representation; pieces are represented as ASCII,
 the same as FEN. A blank square is '-'.

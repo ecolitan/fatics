@@ -24,8 +24,7 @@ from array import array
 import time_format
 
 from game_constants import *
-from speed_variant import IllegalMoveError
-from base_variant import BaseVariant
+from base_variant import BaseVariant, IllegalMoveError
 
 """
 0x88 board representation; pieces are represented as ASCII,

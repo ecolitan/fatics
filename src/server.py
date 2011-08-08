@@ -51,6 +51,9 @@ available here: %s
     def get_server_link(self):
         return 'http://bitbucket.org/wmahan/fatics'
 
-server = Server()
+try:
+    server
+except NameError:
+    server = Server()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
