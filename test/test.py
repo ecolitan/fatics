@@ -107,7 +107,7 @@ class Test(unittest.TestCase):
     def set_style_12(self, t):
         """ Set style 12 for a connection. """
         t.write('set style 12\n')
-        self.expect('style set to 12.', t)
+        self.expect('Style 12 set.', t)
 
     def connect_as(self, name, passwd):
         t = connect()

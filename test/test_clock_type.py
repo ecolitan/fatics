@@ -26,7 +26,7 @@ class TestFischer(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
         t.write('set style 12\n')
-        self.expect('style set', t)
+        self.expect('Style 12 set.', t)
 
         t2.write('match admin 3 5 chess fischer white\n')
         self.expect('Challenge:', t)
@@ -66,7 +66,7 @@ class TestBronstein(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
         t.write('set style 12\n')
-        self.expect('style set', t)
+        self.expect('Style 12 set.', t)
 
         t2.write('match admin 3 2 chess bronstein white\n')
         self.expect('Challenge:', t)
@@ -117,7 +117,7 @@ class TestHourglass(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as('testplayer', 'testpass')
         t.write('set style 12\n')
-        self.expect('style set', t)
+        self.expect('Style 12 set.', t)
 
         t2.write('match admin 1 chess hourglass white\n')
         self.expect('Challenge:', t)
@@ -239,8 +239,8 @@ class TestUntimed(Test):
         self.set_style_12(t)
 
         t2.write('match admin untimed white\n')
-        self.expect('Issuing: testplayer (----) [white] admin (----) unrated untimed\r\n', t2)
-        self.expect('Challenge: testplayer (----) [white] admin (----) unrated untimed\r\n', t)
+        self.expect('Issuing: testplayer (----) [white] admin (----) unrated untimed.\r\n', t2)
+        self.expect('Challenge: testplayer (----) [white] admin (----) unrated untimed.\r\n', t)
         t.write('a\n')
         self.expect('Creating: testplayer (----) admin (----) unrated untimed 0 0\r\n', t)
 
