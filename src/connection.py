@@ -126,13 +126,13 @@ class Connection(basic.LineReceiver):
         name = line.strip()
         # hide password
         self.transport.will(telnet.ECHO)
-        self.user = login.get_user(name, self)
-        if self.user:
+        self.claimed_user = login.get_user(name, self)
+        if self.claimed_user:
             self.state = 'passwd'
         else:
             if self.state != 'quitting':
                 self.transport.wont(telnet.ECHO)
-                self.write("login: ")
+                self.write("\nlogin: ")
 
     def lineReceived_passwd(self, line):
         self.timeout_check.cancel()
@@ -140,14 +140,14 @@ class Connection(basic.LineReceiver):
         self.session.login_last_command = time.time()
         self.transport.wont(telnet.ECHO)
         self.write('\n')
-        if self.user.is_guest:
+        if self.claimed_user.is_guest:
             # ignore whatever was entered in place of a password
             self.prompt()
         else:
             passwd = line.strip()
             if len(passwd) == 0:
                 self.login()
-            elif self.user.check_passwd(passwd):
+            elif self.claimed_user.check_passwd(passwd):
                 self.prompt()
             else:
                 self.write('\n**** Invalid password! ****\n\n')
@@ -155,6 +155,7 @@ class Connection(basic.LineReceiver):
         assert(self.state != 'passwd')
 
     def prompt(self):
+        self.user = self.claimed_user
         self.timeout_check.cancel()
         self.timeout_check = None
         self.user.log_on(self)

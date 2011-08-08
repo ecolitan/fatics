@@ -35,7 +35,7 @@ class Server(object):
         self.start_time = time.time()
 
     def get_copyright_notice(self):
-        return """Copyright (C) 2010 Wil Mahan
+        return """Copyright (C) 2010-2011 Wil Mahan
 This server is free software licensed under the GNU Affero General Public
 License, version 3 or any later version.  Type "help license" for details.
 The source code for the version of the server you are using is

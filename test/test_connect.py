@@ -110,6 +110,19 @@ class LoginTest(Test):
         self.close(t)
         self.close(t2)
 
+    def test_failed_login(self):
+        """ A failed login should not interfere with a user actually
+        logged in. """
+        t = self.connect_as_admin()
+        t2 = self.connect()
+        t2.write('admin\nwrongpass\n')
+        self.expect('*** Invalid password! ***', t2)
+        t2.close()
+        time.sleep(0.1)
+        t.write('finger\n')
+        self.expect('On for:', t)
+        self.close(t)
+
 class PromptTest(Test):
     def test_prompt(self):
         t = self.connect()
