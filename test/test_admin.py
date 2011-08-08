@@ -729,9 +729,9 @@ class TestLight(Test):
 
 class AreloadTest(Test):
     def test_areload(self):
-        t = self.connect()
+        t = self.connect_as_admin()
         t.write('areload\n')
-        self.expect('reloaded online', t)
-        t.close()
+        self.expect('reloaded online', t, timeout=10)
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

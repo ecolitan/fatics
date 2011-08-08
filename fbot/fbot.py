@@ -190,6 +190,7 @@ class FBot(icsbot.IcsBot):
         self.send('set open 0')
         self.send('set seek 0')
         self.send('set shout 0')
+        self.send('set bell 0')
         self.send('set cshout 0')
         self.send('set highlight 0')
         self.send('set chanoff 1')
