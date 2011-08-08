@@ -211,7 +211,7 @@ class IntVar(Var):
         else:
             user.set_var(self, val)
         if self.name == 'style':
-            user.write(_('''Style %(val)s set.\n''') % val)
+            user.write(_('''Style %s set.\n''') % val)
         else:
             user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
         if self._hook:

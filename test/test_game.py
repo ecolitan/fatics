@@ -130,6 +130,12 @@ class TestGame(Test):
             'Rxa7','c7', 'Nc6', 'c8=Q+']
         self._assert_game_is_legal(moves)
 
+    def test_promotion_lalg(self):
+        moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
+            'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',
+            'Rxa7','c7', 'Nc6', 'c7c8=q']
+        self._assert_game_is_legal(moves)
+
     def test_promotion_assumes_queen(self):
         moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
             'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',

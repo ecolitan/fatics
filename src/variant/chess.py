@@ -853,7 +853,7 @@ class Position(object):
 
         return False
 
-    lalg_re = re.compile(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?$')
+    lalg_re = re.compile(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?$', re.I)
     def move_from_lalg(self, s):
         m = self.lalg_re.match(s)
         if not m:
@@ -876,8 +876,7 @@ class Position(object):
                     mv.is_ooo = True
         else:
             if self.wtm:
-                assert(prom == prom.upper())
-                mv = Move(self, fr, to, prom=prom)
+                mv = Move(self, fr, to, prom=prom.upper())
             else:
                 mv = Move(self, fr, to, prom=prom.lower())
 
