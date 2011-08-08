@@ -171,7 +171,7 @@ class BaseVariant(object):
             last_move_lag = last_mv.lag
 
         # board_str begins with a space
-        s = '\n\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
+        s = '\n<12>%s %s %d %d %d %d %d %d %d %s %s %d %d %d %d %d %d %d %d %s (%s) %s %d %d %d\n' % (
             board_str, side_str, ep, w_oo, w_ooo, b_oo, b_ooo,
             self.pos.fifty_count, self.game.number, white_name,
             black_name, relation, self.game.white_time,
