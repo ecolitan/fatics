@@ -334,13 +334,13 @@ class Game(object):
             white_rating = list(self.players)[0].get_rating(self.speed_variant)
             black_rating = white_rating
 
-        conn.write_nowrap("%s (%s) vs. %s (%s) --- %s\n" % (white_name,
+        conn.write("%s (%s) vs. %s (%s) --- %s\n" % (white_name,
             white_rating, black_name, black_rating, time_str))
 
-        conn.write_nowrap("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
+        conn.write("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
             (self.rated_str.capitalize(), self.speed_variant,
                 self.white_time, self.inc))
-        conn.write_nowrap('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (white_name, black_name))
+        conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (white_name, black_name))
         i = self.variant.pos.start_ply & ~1
         while i < self.variant.pos.ply:
             if i < self.variant.pos.start_ply:
@@ -471,11 +471,11 @@ class PlayedGame(Game):
             self.white_time, self.inc)
         # it seems original FICS uses "creating" here even for
         # adjourned games
-        create_str = 'Creating: %s\n' % self.info_str
+        create_str = '\nCreating: %s\n' % self.info_str
         self.white.write_nowrap(create_str)
         self.black.write_nowrap(create_str)
 
-        create_str_2 = '\n{Game %d (%s vs. %s) %s %s %s match.}\n' % (
+        create_str_2 = '{Game %d (%s vs. %s) %s %s %s match.}\n' % (
             self.number, self.white.name, self.black.name, creating,
             self.rated_str, self.speed_variant)
         self.white.write_nowrap(create_str_2)
