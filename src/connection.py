@@ -101,6 +101,10 @@ class Connection(basic.LineReceiver):
         if self.state:
             getattr(self, "lineReceived_" + self.state)(line)
 
+    def lineReceived_quitting(self, line):
+        """ Shouldn't happen normally. """
+        pass
+
     def lineReceived_login(self, line):
         self.timeout_check.cancel()
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)

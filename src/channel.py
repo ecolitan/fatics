@@ -23,7 +23,8 @@ from datetime import datetime
 import list_
 import admin
 
-from db import db, DeleteError
+import db as dbmod
+from db import db
 from config import config
 
 USER_CHANNEL_START = 1024
@@ -171,7 +172,7 @@ class Channel(object):
         if not user.is_guest and self.is_user_owned():
             try:
                 db.channel_del_owner(self.id, user.id)
-            except DeleteError:
+            except dbmod.DeleteError:
                 # user was not an owner
                 pass
             else:
@@ -254,7 +255,11 @@ class ChannelList(object):
 
     def get_default_guest_channels(self):
         return [4, 53][:]
-chlist = ChannelList()
 
+chlist = ChannelList()
+#try:
+#    chlist
+#except NameError:
+#    chlist = ChannelList()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

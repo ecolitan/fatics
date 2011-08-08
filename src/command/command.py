@@ -27,16 +27,11 @@ import speed_variant
 import online
 import time_format
 import channel
+import command_parser
 
 from server import server
 from db import db, DeleteError
 from config import config
-
-class CommandList(object):
-    def __init__(self):
-        self.cmds = trie.Trie()
-        self.admin_cmds = trie.Trie()
-command_list = CommandList()
 
 # parameter format (taken from Lasker)
 # w - a word
@@ -55,9 +50,9 @@ class Command(object):
         self.name = name
         self.param_str = param_str
         self.admin_level = admin_level
-        command_list.admin_cmds[name] = self
+        command_parser.command_list.admin_cmds[name] = self
         if admin_level <= admin.Level.user:
-            command_list.cmds[name] = self
+            command_parser.command_list.cmds[name] = self
 
     def help(self, conn):
         conn.write("help for %s\n" % self.name)
@@ -77,9 +72,14 @@ class ics_command(object):
         assert(inspect.getmro(f)[0].__name__ == self.name.capitalize())
         # instantiate the decorated class at decoration time
         f(self.name, self.param_str, self.admin_level)
-        def wrapped_f(*args):
-            raise RuntimeError('command objects should not be instantiated directly')
+        #def wrapped_f(*args):
+        #    raise RuntimeError('command objects should not be instantiated directly')
         return wrapped_f
+
+# hack around bug in twisted.python.rebuild that occurs when this is a
+# nested function
+def wrapped_f(*args):
+    raise RuntimeError('command objects should not be instantiated directly')
 
 def requires_registration(f):
     def check_reg(self, args, conn):

@@ -728,11 +728,10 @@ class TestLight(Test):
         self.close(t)
 
 class AreloadTest(Test):
-    def runTest(self):
-        self.skip('not stable')
+    def test_areload(self):
         t = self.connect()
         t.write('areload\n')
-        self.expect('reloaded online', t, "server reload")
+        self.expect('reloaded online', t)
         t.close()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

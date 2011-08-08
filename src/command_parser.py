@@ -28,10 +28,20 @@ import alias
 import utf8
 import trie
 import admin
-from command import *
 import timeseal
 import block
 
+class CommandList(object):
+    def __init__(self):
+        self.cmds = trie.Trie()
+        self.admin_cmds = trie.Trie()
+
+try:
+    command_list
+except NameError:
+    command_list = CommandList()
+
+from command import *
 
 class CommandParser(object):
     command_re = re.compile(r'^(\S+)(?:\s+(.*))?$')
@@ -83,9 +93,9 @@ class CommandParser(object):
                 return block.BLK_ERROR_BADCOMMAND
 
         if conn.user.admin_level > admin.Level.user:
-            cmds = command.command_list.admin_cmds
+            cmds = command_list.admin_cmds
         else:
-            cmds = command.command_list.cmds
+            cmds = command_list.cmds
 
         ret = block.BLK_SUCCESS
         cmd = None
@@ -200,6 +210,9 @@ class CommandParser(object):
         return args
 
 
-parser = CommandParser()
+try:
+    parser
+except NameError:
+    parser = CommandParser()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

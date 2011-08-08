@@ -18,6 +18,15 @@ case "$1" in
     echo "Running test suite...."
     trial -e test/
     ;;
+  restart)
+    $0 stop
+    $0 start
+    ;;
+  pull)
+    echo "Pulling latest changes (but not restarting server)...."
+    hg pull
+    hg update -C
+    ;;
   upgrade)
     echo "Upgrading and restarting server...."
     $0 stop
@@ -47,7 +56,7 @@ case "$1" in
     fi
     ;;
   *)
-    echo "Usage: $0 (start|stop|run|test|profile|upgrade|reloaddb|log)"
+    echo "Usage: $0 (start|stop|run|test|profile|upgrade|reloaddb|log|restart|pull)"
     ;;
 esac
 

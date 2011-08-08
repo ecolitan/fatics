@@ -507,8 +507,12 @@ def _init_lists():
 
     for title in db.title_get_all():
         TitleList(title)
-lists = trie.Trie()
-_init_lists()
+
+try:
+    lists
+except NameError:
+    lists = trie.Trie()
+    _init_lists()
 
 # TODO:
 # removedcom muzzle, cmuzzle, c1muzzle, c24muzzle, c46muzzle, c49muzzle,

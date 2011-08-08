@@ -1099,6 +1099,9 @@ class DB(object):
         cursor.close()
         return row[0]
 
-db = DB()
+try:
+    db
+except NameError:
+    db = DB()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
