@@ -157,10 +157,7 @@ class FormulaVar(Var):
             except formula.FormulaError:
                 raise BadVarError()
             user.set_formula(self, val)
-            if self.name == 'style':
-                user.write(_('''Style %(val)s set.\n''') % val)
-            else:
-                user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
+            user.write((_('''%(name)s set to "%(val)s".\n''') % {'name': self.name, 'val': val}))
 
 class NoteVar(Var):
     max_len = 1023
@@ -213,7 +210,10 @@ class IntVar(Var):
             user.session.set_ivar(self, val)
         else:
             user.set_var(self, val)
-        user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
+        if self.name == 'style':
+            user.write(_('''Style %(val)s set.\n''') % val)
+        else:
+            user.write(_("%(name)s set to %(val)s.\n") % {'name': self.name, 'val': val})
         if self._hook:
             self._hook(user, val)
 
