@@ -31,6 +31,7 @@ def assign_number():
 class Tournament(object):
     def __init__(self):
         # default tournament setup
+        self.manager = None
         self.name = "New Tournament"
         self.number = assign_number()
         self.open = False
@@ -51,12 +52,6 @@ class Tournament(object):
                 user.write(message+"\n")
             else:
                 announce("%s has disconnected." & user.name)
-
-    def changeManager(self, name):
-        managers[self.number] = name
-
-    def changeName(self, name):
-        tourneys[self.number] = name
 
     def increment_round(self):
         self.round = self.round + 1

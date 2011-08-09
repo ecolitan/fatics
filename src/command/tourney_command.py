@@ -42,19 +42,37 @@ class Tourneylist(Command):
 class Createtourney(Command):
     def run(self, args, conn):
         if not conn.user.has_title('TM'):
-            conn.write("You are not a tournament manager (TM).")
+            conn.write("You are not a tournament manager (TM).\n")
             return
-        tourney.tourneys[tourney.assign_number()] = tourney.Tournament()
-        conn.write("New tournament created with ID %d." % len(tourney.tourneys))
+        assigned_number = tourney.assign_number()
+        tourney.tourneys[assigned_number] = tourney.Tournament()
+        tourney.tourneys[assigned_number].manager = conn.user.name
+        conn.write("New tournament created with ID %d.\n" % assigned_number)
+                
+@ics_command('setpairingmethod', 'dw', admin.Level.user)
+class Setpairingmethod(Command):
+    def run(self, args, conn):
+        number = args[0]
+        method = args[1]
+        if not conn.user.has_title('TM'):
+            conn.write("You are not a tournament manager (TM).\n")
+            return
+        if not tourney.tourneys[number] in tourney.tourneys:
+            conn.write('Tourney number %d not found.\n' % number)
+            return
+        tourney.tourneys[number].pairing_method = method
 
-##@ics_command('settourneyname', 'dS', admin.Level.user)
-##class Settourneyname(Command):
-##    def run(self, args, conn):
-##        number = args[0]
-##        name = args[1]
-##        tournament = tourney.tourneys.
-##        if not conn.user.has_title('TM'):
-##            conn.write("You are not a tournament manager (TM).")
-##            return
-        
+@ics_command('settourneyname', 'dS', admin.Level.user)
+class Settourneyname(Command):
+    def run(self, args, conn):
+        number = args[0]
+        name = args[1]
+        if not conn.user.has_title('TM'):
+            conn.write("You are not a tournament manager (TM).\n")
+            return
+        if not tourney.tourneys[number] in tourney.tourneys:
+            conn.write('Tourney number %d not found.\n' % number)
+            return    
+        tourney.tourneys[number].name = name
+        conn.write('Name of tourney number %d changed to "%s".\n' % (number, name))  
         
