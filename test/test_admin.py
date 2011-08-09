@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2010  Wil Mahan <wmahan+fatics@gmail.com>
 #
 # This file is part of FatICS.
@@ -33,10 +34,10 @@ class CommandTest(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
 
-        t.write("announce foo bar baz\n")
-        m = self.expect_re(r'\((\d+)\) \*\*ANNOUNCEMENT\*\* from admin: foo bar baz', t)
+        t.write("announce This is a test announcement; please ignore. ♟\n")
+        m = self.expect_re(r'\((\d+)\) \*\*ANNOUNCEMENT\*\* from admin: This is a test announcement; please ignore. ♟', t)
         self.assert_(m.group(1) >= 1)
-        self.expect('**ANNOUNCEMENT** from admin: foo bar baz', t2)
+        self.expect('**ANNOUNCEMENT** from admin: This is a test announcement; please ignore. ♟', t2)
         self.close(t)
         self.close(t2)
 
@@ -47,11 +48,11 @@ class CommandTest(Test):
         t3 = self.connect_as_guest()
         t4 = self.connect_as('testplayer', 'passwd')
 
-        t.write("annunreg x Y z\n")
-        m = self.expect_re(r'\((\d+)\) \*\*UNREG ANNOUNCEMENT\*\* from admin: x Y z', t)
+        t.write("annunreg Test please ignore\n")
+        m = self.expect_re(r'\((\d+)\) \*\*UNREG ANNOUNCEMENT\*\* from admin: Test please ignore', t)
         self.assert_(m.group(1) >= 2)
-        self.expect('**UNREG ANNOUNCEMENT** from admin: x Y z', t2)
-        self.expect('**UNREG ANNOUNCEMENT** from admin: x Y z', t3)
+        self.expect('**UNREG ANNOUNCEMENT** from admin: Test please ignore', t2)
+        self.expect('**UNREG ANNOUNCEMENT** from admin: Test please ignore', t3)
         self.expect_not('**UNREG ANNOUNCEMENT**', t4)
         self.close(t)
         self.close(t2)
@@ -748,6 +749,7 @@ class TestLight(Test):
 
 class AreloadTest(Test):
     def test_areload(self):
+        self._skip('not stable')
         t = self.connect_as_admin()
         t.write('areload\n')
         self.expect('reloaded online', t, timeout=10)
