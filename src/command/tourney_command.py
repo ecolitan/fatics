@@ -18,9 +18,10 @@
 
 # Implementation of botless tournaments on FatICS ~ilknight
 # Tournament commands here in this file
-from tourney import *
+import tourney
+import user
+
 from command import *
-from user import *
 
 @ics_command('tourneylist', '', admin.Level.user)
 class Tourneylist(Command):
