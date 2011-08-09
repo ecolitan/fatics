@@ -156,7 +156,7 @@ class CommandTest(Test):
         self.expect_re('admin at .*: Changed email address from "nobody@example.com" to "new@example.org".', t)
 
         t.write('f testplayer\n')
-        self.expect('new@example.org', t)
+        self.expect_re('Email: +new@example.org', t)
 
         self.close(t2)
 
@@ -166,6 +166,25 @@ class CommandTest(Test):
         t.write('remplayer testplayer\n')
         self.expect('Player TestPlayer removed.', t)
 
+        self.close(t)
+
+    @with_player('TestPlayer', 'passwd')
+    def test_asetrealname(self):
+        t = self.connect_as_admin()
+        t2 = self.connect_as('testplayer', 'passwd')
+
+        t.write('asetrealname testplayer John Doe\n')
+        self.expect('Real name of TestPlayer changed to "John Doe".', t)
+
+        t.write('f testplayer\n')
+        self.expect_re('Real name: +John Doe', t)
+
+        self.expect('admin has changed your real name to "John Doe".', t2)
+
+        t.write('showcomment testplayer\n')
+        self.expect_re('admin at .*: Changed real name from .* to "John Doe".', t)
+
+        self.close(t2)
         self.close(t)
 
     @with_player('TestPlayer', 'testpass')
