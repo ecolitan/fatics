@@ -26,7 +26,7 @@ __all__ = ['admin_command',
 'news_command',
 'notify_command', 'observe_command',
 'offer_command', 'user_command', 'seek_command',
-'shout_command', 'td_command',
+'shout_command', 'td_command', 'tourney_command',
 'tell_command', 'var_command',
 'who_command']
 
