@@ -31,7 +31,9 @@ def assign_number():
 class Tournament(object):
     def __init__(self):
         # default tournament setup
+        self.name = "New Tournament"
         self.number = assign_number()
+        self.open = false
         self.round = 0
         self.pairing_method = "SS"
         self.players = []

@@ -30,11 +30,31 @@ class Tourneylist(Command):
             conn.write("Only registered players may use tourney commands.")
             return
         conn.write('Current Tournaments :\n')
-        conn.write('ID | Tourney           | Manager          \n')
-        conn.write('------------------------------------------\n')
+        conn.write('ID   Tourney             Manager        |\n')
+        conn.write('-----------------------------------------\n')
         for t in tourney.tourneys:
             conn.write('%-20s %-12s %s\n' %
-                (tourney.tourneys.index(t), t, tourney.managers[tourney.tourneys.index(t)]))
-        conn.write(ngettext('\nFound %d tournament.\n',
-            '\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
+                (tourney.tourneys.index(t), t.name, tourney.managers[tourney.tourneys.index(t)]))
+        conn.write(ngettext('\n\nFound %d tournament.\n',
+            '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
+        
+@ics_command('createtourney', '', admin.Level.user)
+class Createtourney(Command):
+    def run(self, args, conn):
+        if not conn.user.has_title('TM'):
+            conn.write("You are not a tournament manager (TM).")
+            return
+        tourney.tourneys[tourney.assign_number()] = tourney.Tournament()
+        conn.write("New tournament created with ID %d." % len(tourney.tourneys))
+
+##@ics_command('settourneyname', 'dS', admin.Level.user)
+##class Settourneyname(Command):
+##    def run(self, args, conn):
+##        number = args[0]
+##        name = args[1]
+##        tournament = tourney.tourneys.
+##        if not conn.user.has_title('TM'):
+##            conn.write("You are not a tournament manager (TM).")
+##            return
+        
         
