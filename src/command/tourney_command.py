@@ -18,10 +18,9 @@
 
 # Implementation of botless tournaments on FatICS ~ilknight
 # Tournament commands here in this file
-import tourney
-import user
-
+from tourney import *
 from command import *
+from user import *
 
 @ics_command('tourneylist', '', admin.Level.user)
 class Tourneylist(Command):
@@ -44,10 +43,10 @@ class Createtourney(Command):
         if not conn.user.has_title('TM'):
             conn.write("You are not a tournament manager (TM).\n")
             return
-        tourney.tourneys.append(tourney.Tournament())
-        tourney = tourney.tourneys[-1]
-        number = tourney.tourneys.index(tourney)
-        tourney.manager = conn.user.name
+        tourney.new_tournament(tourney.Tournament)
+        tournament = tourney.tourneys[-1]
+        number = tourney.tourneys.index(tournament)
+        tournament.manager = conn.user.name
         conn.write("New tournament created with ID %d.\n" % number)
                 
 @ics_command('setpairingmethod', 'dw', admin.Level.user)

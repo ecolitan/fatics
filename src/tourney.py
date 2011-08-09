@@ -28,6 +28,9 @@ managers = []
 def assign_number():
     return len(tourneys)
 
+def new_tournament(t):
+    tourneys.append(t)
+
 class Tournament(object):
     def __init__(self):
         # default tournament setup
