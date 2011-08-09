@@ -44,10 +44,10 @@ class Createtourney(Command):
         if not conn.user.has_title('TM'):
             conn.write("You are not a tournament manager (TM).\n")
             return
-        assigned_number = tourney.assign_number()
-        tourney.tourneys[assigned_number] = tourney.Tournament()
-        tourney.tourneys[assigned_number].manager = conn.user.name
-        conn.write("New tournament created with ID %d.\n" % assigned_number)
+        tourney = tourney.tourneys.append(tourney.Tournament())
+        number = tourney.tourneys.index(tourney)
+        tourney.manager = conn.user.name
+        conn.write("New tournament created with ID %d.\n" % number)
                 
 @ics_command('setpairingmethod', 'dw', admin.Level.user)
 class Setpairingmethod(Command):
