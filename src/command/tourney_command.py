@@ -30,7 +30,7 @@ class Tourneylist(Command):
             conn.write("Only registered players may use tourney commands.")
             return
         conn.write('Current Tournaments :\n')
-        conn.write('ID   Tourney             Manager        |\n')
+        conn.write('ID   Tourney             Manager         \n')
         conn.write('-----------------------------------------\n')
         for t in tourney.tourneys:
             conn.write('%-20s %-12s %s\n' %
