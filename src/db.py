@@ -783,6 +783,12 @@ class DB(object):
             SET user_email=%s WHERE user_id=%s""", (email, user_id))
         cursor.close()
 
+    def user_set_real_name(self, user_id, real_name):
+        cursor = self.db.cursor()
+        cursor.execute("""UPDATE user SET user_real_name=%s WHERE user_id=%s""",
+                       (real_name, user_id))
+        cursor.close()
+
     def get_variants(self):
         cursor = self.db.cursor(cursors.DictCursor)
         cursor.execute("""SELECT variant_id,variant_name,variant_abbrev FROM variant""")

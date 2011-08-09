@@ -618,6 +618,10 @@ class RegUser(BaseUser):
         db.user_set_email(self.id, email)
         self.email = email
 
+    def set_real_name(self, real_name):
+        db.user_set_real_name(self.id, real_name)
+        self.real_name = real_name
+
     def set_banned(self, val):
         """ Ban or unban this user. """
         self.is_banned = val

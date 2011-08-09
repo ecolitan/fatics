@@ -209,6 +209,33 @@ class Asetemail(Command):
                 conn.write(A_('Email address of %(uname)s changed to "%(email)s".\n') %
                     {'uname': u.name, 'email': email})
 
+@ics_command('asetrealname', 'wS', admin.Level.admin)
+class Asetrealname(Command):
+    def run(self, args, conn):
+        u = user.find_by_prefix_for_user(args[0], conn)
+        if u:
+            if not admin.checker.check_user_operation(conn.user, u):
+                conn.write("You need a higher adminlevel to change the real name of %s.\n" % u.name)
+                return
+            if u.is_guest:
+                conn.write(A_('You can only set the real name of registered players.\n'))
+                return
+
+            real_name = args[1]
+            if real_name is None:
+                # TODO?
+                assert(False)
+            else:
+                old_real_name = u.real_name
+                u.set_real_name(real_name)
+                db.add_comment(conn.user.id, u.id,
+                    'Changed real name from "%s" to "%s".' % (old_real_name, real_name))
+                if u.is_online:
+                    u.write_('%(aname)s has changed your email address to "%(real_name)s".\n',
+                        {'aname': conn.user.name, 'real_name': real_name})
+                conn.write(A_('Email address of %(uname)s changed to "%(real_name)s".\n') %
+                    {'uname': u.name, 'real_name': real_name})
+
 @ics_command('nuke', 'w', admin.Level.admin)
 class Nuke(Command):
     def run(self, args, conn):
