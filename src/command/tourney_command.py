@@ -26,7 +26,7 @@ from command import *
 @ics_command('tourneylist', '', admin.Level.user)
 class Tourneylist(Command):
     def run(self, args, conn):
-        if conn.user.is_guest():
+        if conn.user.is_guest:
             conn.write("Only registered players may use tourney commands.")
             return
         conn.write('Current Tournaments :\n')
