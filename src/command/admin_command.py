@@ -231,9 +231,9 @@ class Asetrealname(Command):
                 db.add_comment(conn.user.id, u.id,
                     'Changed real name from "%s" to "%s".' % (old_real_name, real_name))
                 if u.is_online:
-                    u.write_('%(aname)s has changed your email address to "%(real_name)s".\n',
+                    u.write_('%(aname)s has changed your real name to "%(real_name)s".\n',
                         {'aname': conn.user.name, 'real_name': real_name})
-                conn.write(A_('Email address of %(uname)s changed to "%(real_name)s".\n') %
+                conn.write(A_('Real name of %(uname)s changed to "%(real_name)s".\n') %
                     {'uname': u.name, 'real_name': real_name})
 
 @ics_command('nuke', 'w', admin.Level.admin)
