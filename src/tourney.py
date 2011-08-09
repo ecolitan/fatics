@@ -33,7 +33,7 @@ class Tournament(object):
         # default tournament setup
         self.name = "New Tournament"
         self.number = assign_number()
-        self.open = false
+        self.open = False
         self.round = 0
         self.pairing_method = "SS"
         self.players = []
