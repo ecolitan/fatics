@@ -44,7 +44,8 @@ class Createtourney(Command):
         if not conn.user.has_title('TM'):
             conn.write("You are not a tournament manager (TM).\n")
             return
-        tourney = tourney.tourneys.append(tourney.Tournament())
+        tourney.tourneys.append(tourney.Tournament())
+        tourney = tourney.tourneys[-1]
         number = tourney.tourneys.index(tourney)
         tourney.manager = conn.user.name
         conn.write("New tournament created with ID %d.\n" % number)
