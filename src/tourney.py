@@ -52,8 +52,8 @@ class Tournament(object):
     def announce(self, message):
         player_index = 0
         while (player_index < len(self.players_in)):
-            user = user.find_by_name_exact(self.players_in[player_index])
-            if user in online.online:
+            username = user.find_by_name_exact(self.players_in[player_index])
+            if username in online.online:
                 user.write(message+"\n")
             else:
                 announce("%s has disconnected." & user.name)

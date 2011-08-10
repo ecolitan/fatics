@@ -38,6 +38,7 @@ class Listtourneys(Command):
         for t in tourney.tourneys:
             conn.write('| %-4d| %-28s| %-8s| %-6s| %-16s|\n' %
                 (t.number, t.name, t.time_control, t.pairing_method, t.manager))
+        conn.write(' -----------------------------------------------------------------------\n')
         conn.write(ngettext('\n\nFound %d tournament.\n',
             '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
         
