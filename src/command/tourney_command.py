@@ -30,12 +30,14 @@ class Tourneylist(Command):
         if conn.user.is_guest:
             conn.write("Only registered players may use tourney commands.")
             return
-        conn.write('Current Tournaments :\n')
-        conn.write('ID   Tourney             Manager         \n')
-        conn.write('-----------------------------------------\n')
+        conn.write(' -----------------------------------------------------------------------\n')
+        conn.write('| Current Tournaments                                                   |\n')
+        conn.write('|-----------------------------------------------------------------------|')
+        conn.write('| ID  | Tourney Name                | T.Ctrl. | Pair. | Manager         |\n')
+        conn.write(' -----------------------------------------------------------------------\n')
         for t in tourney.tourneys:
-            conn.write('%-4d %-19s %s\n' %
-                (t.number, t.name, t.manager))
+            conn.write('| %-4d| %-28s| %-8s| %-6s| %-16s|\n' %
+                (t.number, t.name, t.time_control, t.pairing_method, t.manager))
         conn.write(ngettext('\n\nFound %d tournament.\n',
             '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
         
@@ -59,7 +61,7 @@ class Setpairingmethod(Command):
         if not conn.user.has_title('TM'):
             conn.write("You are not a tournament manager (TM).\n")
             return
-        if not tourney.tourneys[number] in tourney.tourneys:
+        if number >= len(tourney.tourneys):
             conn.write('Tourney number %d not found.\n' % number)
             return
         if not method in ('SS', 'RR', 'KO'):
@@ -75,7 +77,7 @@ class Settourneyname(Command):
         if not conn.user.has_title('TM'):
             conn.write("You are not a tournament manager (TM).\n")
             return
-        if not tourney.tourneys[number] in tourney.tourneys:
+        if number >= len(tourney.tourneys):
             conn.write('Tourney number %d not found.\n' % number)
             return    
         tourney.tourneys[number].name = name

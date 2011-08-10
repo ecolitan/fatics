@@ -39,6 +39,7 @@ class Tournament(object):
         self.number = assign_number()
         self.open = False
         self.round = 0
+        self.time_control = "5 0"
         self.pairing_method = "SS"
         self.players = []
         self.player_scores = {}
