@@ -34,7 +34,7 @@ class Tourneylist(Command):
         conn.write('ID   Tourney             Manager         \n')
         conn.write('-----------------------------------------\n')
         for t in tourney.tourneys:
-            conn.write('%-20d %-17s %s\n' %
+            conn.write('%-4d %-17s %s\n' %
                 (t.number, t.name, t.manager))
         conn.write(ngettext('\n\nFound %d tournament.\n',
             '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
@@ -63,7 +63,7 @@ class Setpairingmethod(Command):
             conn.write('Tourney number %d not found.\n' % number)
             return
         if not method in ('SS', 'RR', 'KO'):
-            conn.write('"%s" is not a valid pairing method\n')
+            conn.write('"%s" is not a valid pairing method\n' % method)
             return
         tourney.tourneys[number].pairing_method = method
 
