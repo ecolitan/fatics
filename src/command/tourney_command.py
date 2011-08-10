@@ -34,7 +34,7 @@ class Listtourneys(Command):
         conn.write('| Current Tournaments                                                   |\n')
         conn.write('|-----------------------------------------------------------------------|\n')
         conn.write('| ID  | Tourney Name                | T.Ctrl. | Pair. | Manager         |\n')
-        conn.write(' -----------------------------------------------------------------------\n')
+        conn.write('|-----------------------------------------------------------------------|\n')
         for t in tourney.tourneys:
             conn.write('| %-4d| %-28s| %-8s| %-6s| %-16s|\n' %
                 (t.number, t.name, t.time_control, t.pairing_method, t.manager))
@@ -90,7 +90,7 @@ class Setpairingmethod(Command):
         if number >= len(tourney.tourneys):
             conn.write('Tourney number %d not found.\n' % number)
             return
-        if not method in ('SS', 'RR', 'KO'):
+        if not method in ('ss', 'rr', 'ko'):
             conn.write('"%s" is not a valid pairing method\n' % method)
             return
         tourney.tourneys[number].pairing_method = method
