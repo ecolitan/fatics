@@ -44,7 +44,7 @@ class Createtourney(Command):
         if not conn.user.has_title('TM'):
             conn.write("You are not a tournament manager (TM).\n")
             return
-        tourney.new_tournament(tourney.Tournament)
+        tourney.new_tournament(tourney.Tournament())
         tournament = tourney.tourneys[-1]
         number = tourney.tourneys.index(tournament)
         tournament.manager = conn.user.name
@@ -60,6 +60,9 @@ class Setpairingmethod(Command):
             return
         if not tourney.tourneys[number] in tourney.tourneys:
             conn.write('Tourney number %d not found.\n' % number)
+            return
+        if not method in ('SS', 'RR', 'KO'):
+            conn.write('"%s" is not a valid pairing method\n')
             return
         tourney.tourneys[number].pairing_method = method
 
