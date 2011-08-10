@@ -33,10 +33,9 @@ class Tourneylist(Command):
         conn.write('ID   Tourney             Manager         \n')
         conn.write('-----------------------------------------\n')
         for t in tourney.tourneys:
-            conn.write('%-20d %-12s %s\n' %
-                (t.number, t.name, t.manager)
+            conn.write('%-20d %-12s %s\n' % (t.number, t.name, t.manager))
         conn.write(ngettext('\n\nFound %d tournament.\n',
-            '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
+                '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
         
 @ics_command('createtourney', '', admin.Level.user)
 class Createtourney(Command):
