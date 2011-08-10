@@ -180,7 +180,8 @@ class FBot(icsbot.IcsBot):
 
 
         self.reg_tell('register', self.register)
-        self.reg_tell('help', self.help)
+        self.reg_tell('help', self.help_)
+        self.reg_tell('quit', self.quit)
         self.db = DB()
 
         # wrapping long lines would interfere with parsing finger notes
@@ -347,11 +348,11 @@ class FBot(icsbot.IcsBot):
         self.last_tell_time = now
         self.send('t %s %s' % (usr, msg))
 
-    def help(self, usr, args, tags):
+    def help_(self, usr, args, tags):
         self.tell(usr, 'Please see my finger notes.')
 
     def quit(self, usr, args, tags):
-        if usr in bot_admins:
+        if str(usr) in bot_admins:
             self.close()
 
 bot = FBot()

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright (C) 2010  Wil Mahan <wmahan+fatics@gmail.com>
 #
 # This file is part of FatICS.

@@ -1,0 +1,239 @@
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231685429"]
+[White "Bleaker"]
+[Black "Raph"]
+[WhiteElo "1917"]
+[BlackElo "1944"]
+[TimeControl "120+0"]
+[Date "2009.08.12"]
+[Time "21:47:00"]
+[WhiteClock "0:02:00.000"]
+[BlackClock "0:02:00.000"]
+[Variant "Fischerandom"]
+[FEN "nrbbqknr/pppppppp/8/8/8/8/PPPPPPPP/NRBBQKNR w KQkq - 0 1"]
+[PlyCount "99"]
+[Result "1/2-1/2"]
+
+1. e4 {[%emt 0.0]} Nb6 {[%emt 0.0]} 2. d3 {[%emt 0.1]} c6 {[%emt 2.25]} 3. Be3 {[%emt 0.1]} Bc7 {[%emt 0.768]} 4. f4 {[%emt 0.1]} e6 {[%emt 1.284]} 5. Nf3 {[%emt 0.1]} Ne7 {[%emt 0.771]} 6. c4 {[%emt 0.1]} O-O {[%emt 2.25]} 7. Nc2 {[%emt 0.1]} f5 {[%emt 3.014]} 8. b4 {[%emt 0.1]} fxe4 {[%emt 1.286]} 9. dxe4 {[%emt 0.1]} d5 {[%emt 0.761]} 10. exd5 {[%emt 1.11]} exd5 {[%emt 0.783]} 11. c5 {[%emt 0.703]} Nd7 {[%emt 0.938]} 12. Be2 {[%emt 1.281]} Nf5 {[%emt 0.909]} 13. Bd2 {[%emt 3.015]} Nf6 {[%emt 2.869]} 14. h3 {[%emt 1.922]} Ne4 {[%emt 1.099]} 15. g4 {[%emt 0.672]} Neg3+ {[%emt 1.225]} 16. Kg2 {[%emt 1.281]} Nxh1 {[%emt 5.181]} 17. gxf5 {[%emt 1.375]} Bxf5 {[%emt 4.317]} 18. Rb2 {[%emt 3.219]} Qh5 {[%emt 2.202]} 19. Kxh1 {[%emt 2.797]} Qxh3+ {[%emt 2.306]} 20. Kg1 {[%emt 1.016]} Rf6 {[%emt 2.484]} 21. Ng5 {[%emt 3.422]} Qh6 {[%emt 5.189]} 22. Qg3 {[%emt 1.219]} Bxc2 {[%emt 4.513]} 23. Rxc2 {[%emt 1.25]} Rbf8 {[%emt 1.404]} 24. Bg4 {[%emt 3.172]} Bxf4 {[%emt 1.635]} 25. Bxf4 {[%emt 2.468]} Rxf4 {[%emt 0.966]} 26. Be6+ {[%emt 0.906]} Kh8 {[%emt 4.279]} 27. Nf7+ {[%emt 0.922]} R8xf7 {[%emt 1.405]} 28. Bxf7 {[%emt 0.1]} Qf6 {[%emt 22.515]} 29. Re2 {[%emt 2.766]} g6 {[%emt 9.118]} 30. Be8 {[%emt 20.047]} Qd4+ {[%emt 8.117]} 31. Kg2 {[%emt 8.782]} Rg4 {[%emt 3.417]} 32. Re3 {[%emt 1.125]} Rxg3+ {[%emt 2.402]} 33. Rxg3 {[%emt 0.1]} Kg7 {[%emt 1.043]} 34. Bd7 {[%emt 2.563]} Qxb4 {[%emt 1.339]} 35. Bc8 {[%emt 5.547]} Qxc5 {[%emt 1.211]} 36. Bxb7 {[%emt 0.812]} d4 {[%emt 0.681]} 37. Rg5 {[%emt 3.875]} Qc2+ {[%emt 2.208]} 38. Kf3 {[%emt 3.141]} d3 {[%emt 0.894]} 39. Bxc6 {[%emt 2.438]} Qe2+ {[%emt 1.035]} 40. Kf4 {[%emt 1.438]} d2 {[%emt 0.799]} 41. Rd5 {[%emt 1.14]} d1=Q {[%emt 1.142]} 42. Rxd1 {[%emt 0.1]} Qxd1 {[%emt 0.802]} 43. Bf3 {[%emt 0.563]} Qd2+ {[%emt 1.175]} 44. Kg3 {[%emt 0.1]} Qxa2 {[%emt 0.716]} 45. Bb7 {[%emt 1.812]} Qb3+ {[%emt 0.1]} 46. Bf3 {[%emt 0.453]} Qe3 {[%emt 0.929]} 47. Kg4 {[%emt 1.578]} h5+ {[%emt 1.65]} 48. Kg3 {[%emt 1.391]} g5 {[%emt 0.852]} 49. Kg2 {[%emt 0.797]} h4 {[%emt 1.082]} 50. Bg4 {[%emt 1.36]} {Black ran out of time and White has no material to mate} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231685356"]
+[White "EnPassant"]
+[Black "Slylow"]
+[WhiteElo "1812"]
+[BlackElo "1530"]
+[TimeControl "240+4"]
+[Date "2009.08.12"]
+[Time "21:31:00"]
+[WhiteClock "0:04:00.000"]
+[BlackClock "0:04:00.000"]
+[Variant "Fischerandom"]
+[FEN "bnrknqrb/pppppppp/8/8/8/8/PPPPPPPP/BNRKNQRB w KQkq - 0 1"]
+[PlyCount "139"]
+[Result "1/2-1/2"]
+
+1. b3 {[%emt 0.0]} g5 {[%emt 0.0]} 2. Nc3 {[%emt 4.835]} Ng7 {[%emt 6.087]} 3. O-O-O {[%emt 7.078]} b6 {[%emt 5.207]} 4. g3 {[%emt 20.819]} Bxh1 {[%emt 5.165]} 5. Rxh1 {[%emt 2.833]} e6 {[%emt 5.938]} 6. f4 {[%emt 28.721]} g4 {[%emt 15.547]} 7. Kb1 {[%emt 2.353]} Nf5 {[%emt 4.145]} 8. e4 {[%emt 6.974]} Nd4 {[%emt 7.42]} 9. Qd3 {[%emt 17.432]} a6 {[%emt 24.321]} 10. Ng2 {[%emt 21.725]} Nbc6 {[%emt 15.803]} 11. Ne2 {[%emt 20.734]} Nb4 {[%emt 13.745]} 12. Qc4 {[%emt 4.702]} Nb5 {[%emt 11.273]} 13. Bb2 {[%emt 54.886]} Bxb2 {[%emt 22.147]} 14. Kxb2 {[%emt 2.158]} Nc6 {[%emt 23.114]} 15. a4 {[%emt 4.888]} Qa3+ {[%emt 3.856]} 16. Kb1 {[%emt 5.468]} Nb4 {[%emt 1.993]} 17. Nc1 {[%emt 9.029]} Nd6 {[%emt 25.94]} 18. Qc3 {[%emt 13.453]} Nxe4 {[%emt 6.19]} 19. Qb2 {[%emt 2.35]} Qxb2+ {[%emt 14.039]} 20. Kxb2 {[%emt 3.021]} Nf2 {[%emt 1.7]} 21. c3 {[%emt 9.953]} Nc6 {[%emt 12.044]} 22. Ne3 {[%emt 7.18]} f5 {[%emt 21.192]} 23. Rdf1 {[%emt 33.591]} Nxh1 {[%emt 2.964]} 24. Rxh1 {[%emt 2.418]} h5 {[%emt 30.564]} 25. d4 {[%emt 7.608]} Ne7 {[%emt 19.234]} 26. Nd3 {[%emt 8.045]} d6 {[%emt 6.038]} 27. Re1 {[%emt 11.013]} Kd7 {[%emt 5.791]} 28. Nc2 {[%emt 13.454]} c6 {[%emt 15.19]} 29. Na3 {[%emt 11.81]} Rb8 {[%emt 4.621]} 30. Nb4 {[%emt 4.91]} a5 {[%emt 2.861]} 31. Nd3 {[%emt 1.941]} Rb7 {[%emt 2.607]} 32. Nc4 {[%emt 2.087]} Re8 {[%emt 11.058]} 33. Nd2 {[%emt 9.585]} Nd5 {[%emt 1.414]} 34. c4 {[%emt 2.897]} Nc7 {[%emt 1.309]} 35. Kc3 {[%emt 5.106]} d5 {[%emt 4.629]} 36. c5 {[%emt 1.92]} bxc5 {[%emt 3.389]} 37. Nxc5+ {[%emt 1.029]} Kc8 {[%emt 2.297]} 38. Nxb7 {[%emt 1.604]} Kxb7 {[%emt 0.714]} 39. b4 {[%emt 6.83]} axb4+ {[%emt 2.957]} 40. Kxb4 {[%emt 1.149]} Na6+ {[%emt 4.746]} 41. Kb3 {[%emt 1.304]} c5 {[%emt 2.386]} 42. dxc5 {[%emt 2.395]} Nxc5+ {[%emt 1.628]} 43. Kb4 {[%emt 0.807]} Kc6 {[%emt 11.972]} 44. Re3 {[%emt 5.749]} Rb8+ {[%emt 10.339]} 45. Ka3 {[%emt 12.066]} Ra8 {[%emt 5.468]} 46. Nb3 {[%emt 18.621]} Rxa4+ {[%emt 8.092]} 47. Kb2 {[%emt 1.42]} Nxb3 {[%emt 2.702]} 48. Kxb3 {[%emt 3.998]} Rc4 {[%emt 1.736]} 49. Rxe6+ {[%emt 2.17]} Kc5 {[%emt 3.886]} 50. Rf6 {[%emt 2.355]} Rb4+ {[%emt 11.767]} 51. Kc3 {[%emt 1.819]} d4+ {[%emt 0.731]} 52. Kd2 {[%emt 1.95]} Rb2+ {[%emt 2.884]} 53. Kd3 {[%emt 1.072]} Rb3+ {[%emt 3.354]} 54. Kc2 {[%emt 1.853]} Rc3+ {[%emt 2.16]} 55. Kd2 {[%emt 1.519]} Kc4 {[%emt 1.167]} 56. Rxf5 {[%emt 1.149]} d3 {[%emt 3.332]} 57. Rxh5 {[%emt 3.138]} Rc2+ {[%emt 0.856]} 58. Kd1 {[%emt 1.543]} Rg2 {[%emt 4.664]} 59. Rh8 {[%emt 3.357]} Kc3 {[%emt 12.677]} 60. Rc8+ {[%emt 3.819]} Kd4 {[%emt 0.878]} 61. Rd8+ {[%emt 6.265]} Ke3 {[%emt 2.087]} 62. Re8+ {[%emt 1.914]} Kf3 {[%emt 1.26]} 63. Rh8 {[%emt 5.895]} Ke3 {[%emt 14.483]} 64. Re8+ {[%emt 1.759]} Kd4 {[%emt 0.697]} 65. Rd8+ {[%emt 1.761]} Kc3 {[%emt 0.584]} 66. Rc8+ {[%emt 1.283]} Kd4 {[%emt 0.677]} 67. Rd8+ {[%emt 1.103]} Ke3 {[%emt 1.501]} 68. Re8+ {[%emt 0.987]} Kf3 {[%emt 0.681]} 69. Rh8 {[%emt 3.032]} Ke3 {[%emt 0.85]} 70. Re8+ {[%emt 2.059]} {Game drawn by repetition} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231684261"]
+[White "Slylow"]
+[Black "EnPassant"]
+[WhiteElo "1531"]
+[BlackElo "1811"]
+[TimeControl "240+4"]
+[Date "2009.08.12"]
+[Time "20:52:00"]
+[WhiteClock "0:04:00.000"]
+[BlackClock "0:04:00.000"]
+[Variant "Fischerandom"]
+[FEN "nrbbnqkr/pppppppp/8/8/8/8/PPPPPPPP/NRBBNQKR w KQkq - 0 1"]
+[PlyCount "122"]
+[Result "1/2-1/2"]
+
+1. e4 {[%emt 0.0]} e5 {[%emt 0.0]} 2. c4 {[%emt 16.057]} Nf6 {[%emt 8.089]} 3. f3 {[%emt 20.114]} Be7 {[%emt 8.328]} 4. Nd3 {[%emt 4.896]} Nb6 {[%emt 9.22]} 5. b3 {[%emt 9.327]} d6 {[%emt 11.958]} 6. Be2 {[%emt 26.401]} c6 {[%emt 7.134]} 7. Bb2 {[%emt 11.858]} Nfd7 {[%emt 28.672]} 8. Nc2 {[%emt 13.134]} f6 {[%emt 16.779]} 9. Qf2 {[%emt 12.288]} d5 {[%emt 23.14]} 10. Qg3 {[%emt 68.49]} dxc4 {[%emt 10.669]} 11. bxc4 {[%emt 2.141]} Nxc4 {[%emt 5.795]} 12. Bc1 {[%emt 7.269]} Nc5 {[%emt 8.024]} 13. Nxc5 {[%emt 6.156]} Bxc5+ {[%emt 2.346]} 14. d4 {[%emt 5.595]} Be6 {[%emt 40.793]} 15. dxc5 {[%emt 5.629]} Qxc5+ {[%emt 2.07]} 16. Qf2 {[%emt 2.873]} Qa5 {[%emt 24.016]} 17. O-O {[%emt 28.137]} O-O {[%emt 9.021]} 18. Bxc4 {[%emt 14.042]} Bxc4 {[%emt 4.039]} 19. Rd1 {[%emt 4.564]} Qxa2 {[%emt 23.168]} 20. Rb2 {[%emt 11.231]} Qa4 {[%emt 19.26]} 21. Ne3 {[%emt 14.537]} Bb3 {[%emt 27.292]} 22. Rd3 {[%emt 17.138]} Be6 {[%emt 11.426]} 23. h3 {[%emt 2.101]} Rfd8 {[%emt 3.652]} 24. Rbd2 {[%emt 1.127]} Rxd3 {[%emt 11.121]} 25. Rxd3 {[%emt 2.442]} Qa1 {[%emt 8.106]} 26. Qd2 {[%emt 4.124]} Bc4 {[%emt 5.534]} 27. Rd8+ {[%emt 1.773]} Rxd8 {[%emt 2.692]} 28. Qxd8+ {[%emt 1.45]} Kf7 {[%emt 0.858]} 29. Qd7+ {[%emt 6.22]} Kg6 {[%emt 6.105]} 30. Qd2 {[%emt 3.357]} Bb5 {[%emt 5.02]} 31. Ng4 {[%emt 1.821]} Qd4+ {[%emt 4.926]} 32. Qxd4 {[%emt 3.321]} exd4 {[%emt 1.179]} 33. Bd2 {[%emt 6.1]} c5 {[%emt 1.942]} 34. Nf2 {[%emt 4.62]} Be2 {[%emt 10.508]} 35. Nh1 {[%emt 7.928]} b5 {[%emt 1.82]} 36. Kf2 {[%emt 0.984]} d3 {[%emt 1.91]} 37. Ng3 {[%emt 2.146]} b4 {[%emt 2.965]} 38. Nxe2 {[%emt 1.942]} dxe2 {[%emt 1.229]} 39. Kxe2 {[%emt 0.831]} a5 {[%emt 1.033]} 40. Kd1 {[%emt 1.674]} Kf7 {[%emt 4.578]} 41. Be3 {[%emt 1.124]} c4 {[%emt 3.326]} 42. Kc2 {[%emt 3.537]} Ke6 {[%emt 2.364]} 43. Bb6 {[%emt 5.437]} a4 {[%emt 1.135]} 44. Bc5 {[%emt 0.962]} b3+ {[%emt 1.701]} 45. Kb2 {[%emt 2.776]} Kd7 {[%emt 2.74]} 46. Ba3 {[%emt 9.906]} Kc6 {[%emt 5.765]} 47. Kc3 {[%emt 1.004]} Kb5 {[%emt 1.442]} 48. g4 {[%emt 5.582]} g5 {[%emt 8.037]} 49. Kd4 {[%emt 18.375]} h6 {[%emt 5.008]} 50. Kc3 {[%emt 18.68]} Kc6 {[%emt 11.727]} 51. Kxc4 {[%emt 1.806]} Kd7 {[%emt 1.426]} 52. Kb4 {[%emt 3.331]} Ke6 {[%emt 1.581]} 53. Kxa4 {[%emt 1.728]} Ke5 {[%emt 0.558]} 54. Bb2+ {[%emt 3.431]} Kf4 {[%emt 1.386]} 55. Kxb3 {[%emt 1.147]} Kxf3 {[%emt 2.133]} 56. Bxf6 {[%emt 1.249]} Kxe4 {[%emt 1.653]} 57. Bg7 {[%emt 2.199]} Kf3 {[%emt 0.728]} 58. Bxh6 {[%emt 0.738]} Kf4 {[%emt 3.927]} 59. Kc3 {[%emt 7.481]} Kg3 {[%emt 2.191]} 60. Bxg5 {[%emt 7.667]} Kxh3 {[%emt 1.164]} 61. Bd2 {[%emt 2.335]} Kxg4 {[%emt 1.035]} {Neither player has mating material} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231683612"]
+[White "EnPassant"]
+[Black "BlindRobot"]
+[WhiteElo "1811"]
+[BlackElo "2029"]
+[TimeControl "180+5"]
+[Date "2009.08.12"]
+[Time "20:33:00"]
+[WhiteClock "0:03:00.000"]
+[BlackClock "0:03:00.000"]
+[Variant "Fischerandom"]
+[FEN "brkbrqnn/pppppppp/8/8/8/8/PPPPPPPP/BRKBRQNN w KQkq - 0 1"]
+[PlyCount "74"]
+[Result "1/2-1/2"]
+
+1. b3 {[%emt 0.0]} Ng6 {[%emt 0.0]} 2. Nf3 {[%emt 6.808]} e6 {[%emt 1.442]} 3. Ng3 {[%emt 2.572]} d5 {[%emt 1.412]} 4. e4 {[%emt 2.632]} b6 {[%emt 8.312]} 5. Be2 {[%emt 19.58]} Bb7 {[%emt 12.938]} 6. Ba6 {[%emt 11.361]} Bf6 {[%emt 1.872]} 7. Bxb7+ {[%emt 7.3]} Kxb7 {[%emt 1.002]} 8. exd5 {[%emt 4.782]} exd5 {[%emt 1.682]} 9. Bxf6 {[%emt 20.564]} Nxf6 {[%emt 1.542]} 10. O-O-O {[%emt 11.668]} Qa3+ {[%emt 4.927]} 11. Kb1 {[%emt 2.883]} Nf4 {[%emt 6.66]} 12. Ne5 {[%emt 27.157]} a5 {[%emt 18.757]} 13. Qb5 {[%emt 30.142]} Nxg2 {[%emt 73.095]} 14. Qc6+ {[%emt 15.225]} Kc8 {[%emt 1.071]} 15. Nc4 {[%emt 23.38]} Qf8 {[%emt 51.765]} 16. Rxe8+ {[%emt 14.933]} Nxe8 {[%emt 0.801]} 17. Qxd5 {[%emt 8.513]} Nh4 {[%emt 15.923]} 18. Ne5 {[%emt 25.476]} Nd6 {[%emt 20.88]} 19. Re1 {[%emt 22.47]} Ng6 {[%emt 19.458]} 20. Nxg6 {[%emt 6.618]} fxg6 {[%emt 7.4]} 21. Ne4 {[%emt 4.446]} Nxe4 {[%emt 11.817]} 22. Rxe4 {[%emt 4.917]} b5 {[%emt 3.325]} 23. Qe6+ {[%emt 4.381]} Kb7 {[%emt 1.733]} 24. Re3 {[%emt 2.857]} Rd8 {[%emt 7.621]} 25. Qe4+ {[%emt 3.236]} Kb6 {[%emt 3.936]} 26. a4 {[%emt 6.864]} Rxd2 {[%emt 3.665]} 27. axb5 {[%emt 1.936]} Qc5 {[%emt 3.795]} 28. Qe6+ {[%emt 4.375]} Kb7 {[%emt 6.179]} 29. Qe4+ {[%emt 6.39]} Ka7 {[%emt 2.453]} 30. Qc4 {[%emt 4.009]} Kb6 {[%emt 12.138]} 31. Re6+ {[%emt 7.302]} Rd6 {[%emt 1.082]} 32. Rxd6+ {[%emt 3.99]} cxd6 {[%emt 3.084]} 33. Qf7 {[%emt 4.03]} Qe5 {[%emt 7.461]} 34. Qd7 {[%emt 2.918]} Qe1+ {[%emt 2.393]} 35. Kb2 {[%emt 1.947]} Qe5+ {[%emt 0.852]} 36. Kb1 {[%emt 2.878]} Qe1+ {[%emt 1.182]} 37. Kb2 {[%emt 1.785]} Qe5+ {[%emt 0.641]} {Game drawn by mutual agreement} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231677632"]
+[White "matsufish"]
+[Black "Guepardo"]
+[WhiteElo "2081"]
+[BlackElo "2160"]
+[TimeControl "180+0"]
+[Date "2009.08.12"]
+[Time "17:33:00"]
+[WhiteClock "0:03:00.000"]
+[BlackClock "0:03:00.000"]
+[Variant "Fischerandom"]
+[FEN "bnrkqnrb/pppppppp/8/8/8/8/PPPPPPPP/BNRKQNRB w KQkq - 0 1"]
+[PlyCount "250"]
+[Result "1/2-1/2"]
+
+1. b3 {[%emt 0.0]} e5 {[%emt 0.0]} 2. e4 {[%emt 0.875]} b6 {[%emt 1.781]} 3. Nc3 {[%emt 1.125]} Ne6 {[%emt 5.453]} 4. Nd5 {[%emt 2.859]} Bxd5 {[%emt 3.5]} 5. exd5 {[%emt 0.657]} Nf4 {[%emt 0.1]} 6. Qxe5 {[%emt 8.36]} Qxe5 {[%emt 5.234]} 7. Bxe5 {[%emt 1.016]} Nxd5 {[%emt 0.1]} 8. g3 {[%emt 0.937]} Nb4 {[%emt 4.0]} 9. Bb7 {[%emt 3.312]} N8c6 {[%emt 4.875]} 10. Bxc8 {[%emt 3.547]} Nxe5 {[%emt 1.922]} 11. Bb7 {[%emt 0.703]} c6 {[%emt 1.109]} 12. a3 {[%emt 0.609]} Nd5 {[%emt 2.906]} 13. Ba6 {[%emt 0.594]} b5 {[%emt 0.531]} 14. c4 {[%emt 0.641]} Nc7 {[%emt 1.422]} 15. cxb5 {[%emt 1.344]} cxb5 {[%emt 0.1]} 16. Bb7 {[%emt 0.954]} Nd3 {[%emt 7.109]} 17. Rc3 {[%emt 2.688]} Nxf2+ {[%emt 0.391]} 18. Ke2 {[%emt 0.438]} Ng4 {[%emt 0.547]} 19. Bf3 {[%emt 6.171]} Ne5 {[%emt 2.188]} 20. Ne3 {[%emt 1.484]} Ne6 {[%emt 3.047]} 21. Bb7 {[%emt 11.406]} Nd4+ {[%emt 2.469]} 22. Kd1 {[%emt 3.203]} O-O {[%emt 4.078]} 23. Nd5 {[%emt 4.984]} g6 {[%emt 2.094]} 24. Re1 {[%emt 2.453]} Rb8 {[%emt 7.578]} 25. Rc8+ {[%emt 4.406]} Rxc8 {[%emt 1.969]} 26. Bxc8 {[%emt 1.156]} Nxb3 {[%emt 0.297]} 27. Re4 {[%emt 33.485]} Nc5 {[%emt 10.625]} 28. Rb4 {[%emt 4.171]} Ned3 {[%emt 8.234]} 29. Rxb5 {[%emt 4.375]} Bb2 {[%emt 3.953]} 30. Rb8 {[%emt 3.781]} Kg7 {[%emt 3.078]} 31. a4 {[%emt 8.578]} Nxa4 {[%emt 1.0]} 32. Bxd7 {[%emt 1.766]} Nac5 {[%emt 2.047]} 33. Be8 {[%emt 1.203]} Be5 {[%emt 3.125]} 34. Ra8 {[%emt 1.672]} a6 {[%emt 1.375]} 35. Ra7 {[%emt 0.906]} Nf2+ {[%emt 7.265]} 36. Ke2 {[%emt 2.938]} Ng4 {[%emt 0.1]} 37. Rxf7+ {[%emt 2.156]} Kh6 {[%emt 0.515]} 38. h3 {[%emt 1.703]} Nh2 {[%emt 8.235]} 39. g4 {[%emt 5.078]} Ne4 {[%emt 3.14]} 40. Re7 {[%emt 6.672]} Ng3+ {[%emt 8.109]} 41. Kd3 {[%emt 0.516]} Bd6 {[%emt 1.532]} 42. Re6 {[%emt 0.422]} Bb8 {[%emt 2.438]} 43. Rxa6 {[%emt 0.766]} Nf3 {[%emt 1.968]} 44. Rb6 {[%emt 0.5]} Ne5+ {[%emt 0.422]} 45. Kc3 {[%emt 1.079]} Ne4+ {[%emt 1.391]} 46. Kd4 {[%emt 1.235]} Nxd2 {[%emt 2.703]} 47. Rxb8 {[%emt 1.468]} Nef3+ {[%emt 0.25]} 48. Ke3 {[%emt 0.688]} Kg5 {[%emt 2.875]} 49. Ne7 {[%emt 1.062]} Kh4 {[%emt 1.36]} 50. Rb5 {[%emt 0.1]} Kxh3 {[%emt 0.688]} 51. Rb2 {[%emt 0.719]} Kxg4 {[%emt 0.562]} 52. Rxd2 {[%emt 0.656]} Nxd2 {[%emt 0.312]} 53. Kxd2 {[%emt 0.343]} g5 {[%emt 0.328]} 54. Nc8 {[%emt 0.1]} h5 {[%emt 0.203]} 55. Bc6 {[%emt 0.1]} h4 {[%emt 0.297]} 56. Ke1 {[%emt 0.1]} Kf4 {[%emt 0.328]} 57. Kf1 {[%emt 0.359]} g4 {[%emt 0.1]} 58. Kg1 {[%emt 0.453]} g3 {[%emt 0.1]} 59. Nd6 {[%emt 0.484]} h3 {[%emt 1.579]} 60. Bd7 {[%emt 0.781]} Ke3 {[%emt 0.562]} 61. Bxh3 {[%emt 1.484]} Kf3 {[%emt 0.1]} 62. Bg2+ {[%emt 0.1]} Ke3 {[%emt 0.469]} 63. Nf5+ {[%emt 0.438]} Kf4 {[%emt 0.547]} 64. Nh6 {[%emt 0.922]} Kg5 {[%emt 0.75]} 65. Nf7+ {[%emt 0.1]} Kf4 {[%emt 0.1]} 66. Nd6 {[%emt 0.25]} Kg4 {[%emt 0.1]} 67. Nc4 {[%emt 0.39]} Kf4 {[%emt 0.1]} 68. Nd2 {[%emt 0.437]} Kg4 {[%emt 0.1]} 69. Nf1 {[%emt 0.422]} Kf4 {[%emt 0.1]} 70. Bh3 {[%emt 0.578]} Kf3 {[%emt 0.828]} 71. Bf5 {[%emt 0.735]} Kf4 {[%emt 0.109]} 72. Bd7 {[%emt 0.406]} Kf3 {[%emt 0.1]} 73. Bc6+ {[%emt 0.39]} Kf4 {[%emt 0.1]} 74. Kg2 {[%emt 0.312]} Kg4 {[%emt 0.1]} 75. Bd7+ {[%emt 0.297]} Kf4 {[%emt 0.1]} 76. Nd2 {[%emt 0.688]} Ke3 {[%emt 0.1]} 77. Nf1+ {[%emt 0.172]} Ke2 {[%emt 0.532]} 78. Nxg3+ {[%emt 0.1]} Ke1 {[%emt 0.1]} 79. Nf5 {[%emt 0.1]} Kd2 {[%emt 0.1]} 80. Bc6 {[%emt 0.171]} Kd3 {[%emt 0.1]} 81. Kf3 {[%emt 0.1]} Kd2 {[%emt 0.75]} 82. Bd7 {[%emt 0.1]} Kc3 {[%emt 0.1]} 83. Be6 {[%emt 0.1]} Kd3 {[%emt 1.359]} 84. Bd5 {[%emt 0.1]} Kc3 {[%emt 0.953]} 85. Be4 {[%emt 0.1]} Kd2 {[%emt 0.641]} 86. Nd4 {[%emt 1.125]} Kc3 {[%emt 0.1]} 87. Ke3 {[%emt 1.015]} Kc4 {[%emt 0.187]} 88. Ne6 {[%emt 0.609]} Kc3 {[%emt 0.1]} 89. Nf4 {[%emt 0.109]} Kc4 {[%emt 0.1]} 90. Bd5+ {[%emt 0.718]} Kc3 {[%emt 0.766]} 91. Ke4 {[%emt 0.469]} Kd2 {[%emt 1.078]} 92. Ne6 {[%emt 0.1]} Kc2 {[%emt 0.1]} 93. Bc4 {[%emt 0.125]} Kc3 {[%emt 0.1]} 94. Kd5 {[%emt 1.265]} Kb4 {[%emt 0.687]} 95. Nc5 {[%emt 0.1]} Kc3 {[%emt 0.1]} 96. Nd3 {[%emt 0.1]} Kd2 {[%emt 0.11]} 97. Ne5 {[%emt 0.1]} Ke3 {[%emt 0.1]} 98. Ng4+ {[%emt 0.1]} Kf4 {[%emt 0.421]} 99. Nf6 {[%emt 0.1]} Kf3 {[%emt 0.1]} 100. Bd3 {[%emt 0.1]} Ke3 {[%emt 0.1]} 101. Be4 {[%emt 0.1]} Kd2 {[%emt 1.156]} 102. Nh5 {[%emt 0.1]} Kc3 {[%emt 0.125]} 103. Ng3 {[%emt 1.781]} Kb4 {[%emt 0.1]} 104. Kd4 {[%emt 0.453]} Ka3 {[%emt 0.75]} 105. Bd5 {[%emt 0.1]} Kb2 {[%emt 0.172]} 106. Ne2 {[%emt 0.672]} Kc2 {[%emt 0.1]} 107. Bc4 {[%emt 1.047]} Kd2 {[%emt 0.1]} 108. Bd3 {[%emt 0.25]} Kd1 {[%emt 1.391]} 109. Ke3 {[%emt 0.515]} Ke1 {[%emt 0.437]} 110. Nf4 {[%emt 0.281]} Kd1 {[%emt 0.1]} 111. Nh3 {[%emt 0.219]} Kc1 {[%emt 0.1]} 112. Nf2 {[%emt 0.1]} Kb2 {[%emt 0.1]} 113. Be4 {[%emt 0.1]} Kb3 {[%emt 0.1]} 114. Bd5+ {[%emt 0.1]} Kc3 {[%emt 0.1]} 115. Nd1+ {[%emt 0.1]} Kb4 {[%emt 0.187]} 116. Kd2 {[%emt 0.422]} Ka3 {[%emt 1.094]} 117. Ne3 {[%emt 0.1]} Kb4 {[%emt 0.1]} 118. Bc4 {[%emt 0.1]} Kc5 {[%emt 0.1]} 119. Kc3 {[%emt 0.281]} Kd6 {[%emt 0.719]} 120. Bd3 {[%emt 0.469]} Ke5 {[%emt 0.1]} 121. Nf5 {[%emt 0.1]} Kf4 {[%emt 0.1]} 122. Nd4 {[%emt 0.234]} Ke3 {[%emt 0.75]} 123. Ne6 {[%emt 0.1]} Kf3 {[%emt 1.36]} 124. Bc4 {[%emt 0.1]} Kf2 {[%emt 0.1]} 125. Nd4 {[%emt 0.1]} Ke1 {[%emt 0.1]} {White ran out of time and Black has no material to mate} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231674334"]
+[White "matsufish"]
+[Black "wutziwutzi"]
+[WhiteElo "2072"]
+[BlackElo "2047"]
+[TimeControl "180+0"]
+[Date "2009.08.12"]
+[Time "16:05:00"]
+[WhiteClock "0:03:00.000"]
+[BlackClock "0:03:00.000"]
+[Variant "Fischerandom"]
+[FEN "bbrnkrnq/pppppppp/8/8/8/8/PPPPPPPP/BBRNKRNQ w KQkq - 0 1"]
+[PlyCount "148"]
+[Result "1/2-1/2"]
+
+1. Nf3 {[%emt 0.0]} b6 {[%emt 0.0]} 2. b3 {[%emt 2.281]} f6 {[%emt 0.656]} 3. d3 {[%emt 1.25]} e5 {[%emt 0.578]} 4. e4 {[%emt 0.5]} Ne6 {[%emt 1.578]} 5. Ne3 {[%emt 0.422]} Ne7 {[%emt 4.266]} 6. c3 {[%emt 3.25]} d5 {[%emt 0.813]} 7. Bb2 {[%emt 1.688]} dxe4 {[%emt 0.766]} 8. dxe4 {[%emt 1.562]} Nf4 {[%emt 4.719]} 9. g3 {[%emt 3.469]} Ne6 {[%emt 2.203]} 10. Nd2 {[%emt 4.0]} Nc5 {[%emt 1.437]} 11. b4 {[%emt 5.438]} Na4 {[%emt 10.422]} 12. Ba1 {[%emt 0.796]} c5 {[%emt 1.172]} 13. b5 {[%emt 1.312]} Qg8 {[%emt 11.86]} 14. c4 {[%emt 1.313]} a6 {[%emt 6.234]} 15. Nd5 {[%emt 1.922]} axb5 {[%emt 2.656]} 16. cxb5 {[%emt 2.969]} Nxd5 {[%emt 4.25]} 17. exd5 {[%emt 0.672]} Bxd5 {[%emt 0.594]} 18. Be4 {[%emt 1.219]} Rd8 {[%emt 10.766]} 19. Bxd5 {[%emt 6.985]} Qxd5 {[%emt 1.422]} 20. Qxd5 {[%emt 1.219]} Rxd5 {[%emt 0.1]} 21. Ke2 {[%emt 2.031]} O-O {[%emt 3.313]} 22. Rfd1 {[%emt 2.844]} Rfd8 {[%emt 1.547]} 23. Nc4 {[%emt 0.609]} Bc7 {[%emt 5.266]} 24. Ne3 {[%emt 2.406]} Rxd1 {[%emt 2.328]} 25. Rxd1 {[%emt 0.937]} Kf7 {[%emt 5.5]} 26. Rxd8 {[%emt 2.25]} Bxd8 {[%emt 0.1]} 27. Kd3 {[%emt 0.719]} c4+ {[%emt 1.656]} 28. Kxc4 {[%emt 0.547]} Nc5 {[%emt 0.172]} 29. Nd5 {[%emt 1.047]} Ke6 {[%emt 3.016]} 30. Nb4 {[%emt 6.375]} Ne4 {[%emt 7.516]} 31. f3 {[%emt 3.984]} Ng5 {[%emt 3.313]} 32. Nc6 {[%emt 4.281]} Bc7 {[%emt 1.172]} 33. a4 {[%emt 13.75]} Nxf3 {[%emt 1.359]} 34. h3 {[%emt 1.047]} Ng1 {[%emt 3.078]} 35. h4 {[%emt 1.594]} Ne2 {[%emt 0.375]} 36. g4 {[%emt 0.672]} Nf4 {[%emt 8.406]} 37. Bc3 {[%emt 2.328]} Nd5 {[%emt 1.109]} 38. Bd2 {[%emt 2.141]} Ne7 {[%emt 3.953]} 39. Nxe7 {[%emt 5.735]} Kxe7 {[%emt 0.1]} 40. Kd5 {[%emt 0.359]} Kd7 {[%emt 0.594]} 41. Bb4 {[%emt 1.547]} g6 {[%emt 3.828]} 42. Bf8 {[%emt 1.0]} f5 {[%emt 2.485]} 43. gxf5 {[%emt 1.922]} gxf5 {[%emt 0.625]} 44. Bg7 {[%emt 0.468]} e4 {[%emt 2.047]} 45. Bh6 {[%emt 1.141]} Bg3 {[%emt 5.093]} 46. h5 {[%emt 1.187]} e3 {[%emt 1.062]} 47. Bxe3 {[%emt 9.703]} f4 {[%emt 0.609]} 48. Bxb6 {[%emt 1.547]} f3 {[%emt 5.906]} 49. a5 {[%emt 0.64]} f2 {[%emt 0.875]} 50. Bxf2 {[%emt 0.875]} Bxf2 {[%emt 0.1]} 51. b6 {[%emt 3.5]} Kc8 {[%emt 1.172]} 52. Kc6 {[%emt 0.859]} Kb8 {[%emt 3.625]} 53. a6 {[%emt 0.625]} Ka8 {[%emt 4.125]} 54. a7 {[%emt 5.562]} Bg3 {[%emt 3.703]} 55. Kd7 {[%emt 4.297]} Kb7 {[%emt 3.563]} 56. Ke8 {[%emt 3.922]} Bf2 {[%emt 1.828]} 57. Kf7 {[%emt 0.75]} Bxb6 {[%emt 1.938]} 58. Kg7 {[%emt 1.641]} h6 {[%emt 1.313]} 59. Kxh6 {[%emt 0.953]} Be3+ {[%emt 0.907]} 60. Kg6 {[%emt 0.234]} Bxa7 {[%emt 0.453]} 61. Kf5 {[%emt 0.312]} Bd4 {[%emt 0.1]} 62. h6 {[%emt 0.734]} Bh8 {[%emt 0.813]} 63. Ke4 {[%emt 0.1]} Kc7 {[%emt 0.531]} 64. Kf5 {[%emt 0.1]} Kd7 {[%emt 0.453]} 65. Kg6 {[%emt 0.1]} Ba1 {[%emt 0.453]} 66. Kf7 {[%emt 0.641]} Kd6 {[%emt 0.922]} 67. h7 {[%emt 0.406]} Bh8 {[%emt 2.031]} 68. Kg6 {[%emt 0.1]} Ba1 {[%emt 0.313]} 69. Kf7 {[%emt 0.1]} Bh8 {[%emt 0.89]} 70. Kg8 {[%emt 0.1]} Ba1 {[%emt 0.515]} 71. Kf8 {[%emt 0.875]} Bb2 {[%emt 0.828]} 72. Kf7 {[%emt 0.1]} Bc3 {[%emt 0.531]} 73. Kg8 {[%emt 0.1]} Ke7 {[%emt 0.704]} 74. h8=Q {[%emt 1.922]} Bxh8 {[%emt 0.812]} {Neither player has mating material} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231673791"]
+[White "skittles"]
+[Black "spendius"]
+[WhiteElo "1833"]
+[BlackElo "1798"]
+[TimeControl "180+5"]
+[Date "2009.08.12"]
+[Time "15:38:00"]
+[WhiteClock "0:03:00.000"]
+[BlackClock "0:03:00.000"]
+[Variant "Fischerandom"]
+[FEN "rnbqnkrb/pppppppp/8/8/8/8/PPPPPPPP/RNBQNKRB w KQkq - 0 1"]
+[PlyCount "150"]
+[Result "1/2-1/2"]
+
+1. g4 {[%emt 0.0]} O-O {[%emt 0.0]} 2. Nc3 {[%emt 31.109]} c6 {[%emt 7.372]} 3. Ne4 {[%emt 5.609]} d5 {[%emt 2.385]} 4. Ng3 {[%emt 3.266]} g6 {[%emt 3.483]} 5. e4 {[%emt 14.656]} dxe4 {[%emt 9.545]} 6. Bxe4 {[%emt 4.687]} Nf6 {[%emt 3.647]} 7. Bf3 {[%emt 15.391]} e5 {[%emt 12.942]} 8. d3 {[%emt 7.14]} Qe7 {[%emt 4.158]} 9. Bh6 {[%emt 4.828]} Rd8 {[%emt 1.238]} 10. g5 {[%emt 12.235]} Nd5 {[%emt 13.292]} 11. Ng2 {[%emt 41.406]} Na6 {[%emt 14.125]} 12. O-O {[%emt 21.515]} Bh3 {[%emt 11.071]} 13. Bxd5 {[%emt 17.344]} cxd5 {[%emt 3.985]} 14. Re1 {[%emt 1.656]} Bxg2 {[%emt 17.801]} 15. Kxg2 {[%emt 2.079]} f6 {[%emt 1.445]} 16. Qd2 {[%emt 10.485]} Bg7 {[%emt 4.927]} 17. Bxg7 {[%emt 9.016]} Kxg7 {[%emt 1.052]} 18. h4 {[%emt 9.125]} f5 {[%emt 10.968]} 19. h5 {[%emt 17.109]} Nc7 {[%emt 17.109]} 20. f4 {[%emt 6.109]} e4 {[%emt 3.981]} 21. dxe4 {[%emt 6.109]} dxe4 {[%emt 1.851]} 22. Qc3+ {[%emt 1.765]} Kg8 {[%emt 4.123]} 23. hxg6 {[%emt 4.047]} hxg6 {[%emt 2.195]} 24. Rh1 {[%emt 1.328]} Qg7 {[%emt 16.342]} 25. Qb3+ {[%emt 2.844]} Nd5 {[%emt 16.752]} 26. Rh6 {[%emt 8.484]} Qd4 {[%emt 23.643]} 27. Re1 {[%emt 36.484]} b6 {[%emt 7.347]} 28. c3 {[%emt 5.75]} Qd3 {[%emt 8.979]} 29. Rd1 {[%emt 7.266]} Qf3+ {[%emt 1.575]} 30. Kh2 {[%emt 2.437]} Qf2+ {[%emt 9.06]} 31. Kh3 {[%emt 3.297]} Qc5 {[%emt 31.498]} 32. Rxg6+ {[%emt 3.078]} Kh7 {[%emt 9.459]} 33. Rh6+ {[%emt 3.438]} Kg7 {[%emt 4.123]} 34. Nxf5+ {[%emt 1.735]} Kg8 {[%emt 10.629]} 35. Rg6+ {[%emt 6.109]} Kf8 {[%emt 7.222]} 36. Rxd5 {[%emt 8.671]} Rxd5 {[%emt 9.772]} 37. Rf6+ {[%emt 2.079]} Ke8 {[%emt 9.242]} 38. Nd6+ {[%emt 1.61]} Kd7 {[%emt 29.462]} 39. Nxe4 {[%emt 5.531]} Rh8+ {[%emt 2.32]} 40. Kg4 {[%emt 4.969]} Qg1+ {[%emt 5.448]} 41. Ng3 {[%emt 6.281]} Qd1+ {[%emt 9.988]} 42. Qxd1 {[%emt 2.796]} Rxd1 {[%emt 1.293]} 43. g6 {[%emt 2.703]} Ke7 {[%emt 3.939]} 44. Rf7+ {[%emt 3.547]} Ke8 {[%emt 4.208]} 45. Rxa7 {[%emt 5.156]} Rd6 {[%emt 16.88]} 46. Ra8+ {[%emt 5.156]} Rd8 {[%emt 3.758]} 47. Rxd8+ {[%emt 7.938]} Kxd8 {[%emt 1.047]} 48. g7 {[%emt 1.063]} Rg8 {[%emt 0.931]} 49. Nh5 {[%emt 1.203]} Ke7 {[%emt 2.021]} 50. Kg5 {[%emt 5.828]} Kf7 {[%emt 2.417]} 51. f5 {[%emt 1.625]} Re8 {[%emt 7.085]} 52. f6 {[%emt 6.516]} Re5+ {[%emt 1.319]} 53. Kh6 {[%emt 1.875]} Rf5 {[%emt 8.758]} 54. b3 {[%emt 4.969]} Rf2 {[%emt 16.942]} 55. a4 {[%emt 21.734]} Rf5 {[%emt 1.741]} 56. b4 {[%emt 3.5]} Kg8 {[%emt 3.453]} 57. Kg6 {[%emt 2.485]} Rf3 {[%emt 6.077]} 58. a5 {[%emt 10.235]} bxa5 {[%emt 2.271]} 59. bxa5 {[%emt 1.297]} Rf2 {[%emt 0.416]} 60. a6 {[%emt 10.484]} Rg2+ {[%emt 1.367]} 61. Kh6 {[%emt 4.891]} Ra2 {[%emt 4.395]} 62. Kg6 {[%emt 6.203]} Rg2+ {[%emt 3.034]} 63. Kf5 {[%emt 3.656]} Ra2 {[%emt 4.142]} 64. Nf4 {[%emt 6.375]} Rxa6 {[%emt 3.427]} 65. c4 {[%emt 3.64]} Rc6 {[%emt 4.74]} 66. Ne6 {[%emt 8.5]} Rxc4 {[%emt 3.323]} 67. Kg6 {[%emt 1.36]} Rg4+ {[%emt 6.39]} 68. Ng5 {[%emt 1.86]} Rf4 {[%emt 15.532]} 69. Ne6 {[%emt 11.297]} Rg4+ {[%emt 2.782]} 70. Kf5 {[%emt 3.657]} Rg1 {[%emt 9.713]} 71. Ng5 {[%emt 5.735]} Rf1+ {[%emt 2.491]} 72. Kg6 {[%emt 1.594]} Rf4 {[%emt 5.581]} 73. Nh3 {[%emt 8.812]} Rf3 {[%emt 6.685]} 74. Ng5 {[%emt 3.047]} Rf4 {[%emt 7.564]} 75. Ne6 {[%emt 2.609]} Rg4+ {[%emt 5.943]} {Game drawn by repetition} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231672456"]
+[White "Verdimaal"]
+[Black "Raph"]
+[WhiteElo "1852"]
+[BlackElo "1954"]
+[TimeControl "240+0"]
+[Date "2009.08.12"]
+[Time "15:18:00"]
+[WhiteClock "0:04:00.000"]
+[BlackClock "0:04:00.000"]
+[Variant "Fischerandom"]
+[FEN "rknbqnbr/pppppppp/8/8/8/8/PPPPPPPP/RKNBQNBR w KQkq - 0 1"]
+[PlyCount "112"]
+[Result "1/2-1/2"]
+
+1. f3 {[%emt 0.0]} Nb6 {[%emt 0.0]} 2. Qg3 {[%emt 1.302]} Ng6 {[%emt 3.142]} 3. e4 {[%emt 2.865]} e6 {[%emt 1.058]} 4. Bxb6 {[%emt 18.575]} axb6 {[%emt 3.19]} 5. Qf2 {[%emt 5.023]} f6 {[%emt 5.812]} 6. d4 {[%emt 2.059]} Be7 {[%emt 1.277]} 7. Nd3 {[%emt 3.187]} e5 {[%emt 3.145]} 8. d5 {[%emt 2.039]} Nf4 {[%emt 11.651]} 9. Nxf4 {[%emt 3.206]} exf4 {[%emt 0.758]} 10. Nd2 {[%emt 1.409]} d6 {[%emt 1.793]} 11. Be2 {[%emt 2.672]} g5 {[%emt 1.087]} 12. h3 {[%emt 7.327]} h5 {[%emt 1.134]} 13. Nb3 {[%emt 10.942]} f5 {[%emt 3.865]} 14. Bd3 {[%emt 11.557]} Qa4 {[%emt 2.364]} 15. Qd4 {[%emt 9.506]} Qxd4 {[%emt 11.111]} 16. Nxd4 {[%emt 1.243]} fxe4 {[%emt 0.868]} 17. fxe4 {[%emt 2.362]} Bf6 {[%emt 7.309]} 18. Nf5 {[%emt 5.195]} c5 {[%emt 5.436]} 19. Nxd6 {[%emt 7.45]} Kc7 {[%emt 1.901]} 20. Nf5 {[%emt 3.719]} Ra5 {[%emt 2.43]} 21. c3 {[%emt 7.198]} b5 {[%emt 2.385]} 22. Re1 {[%emt 5.96]} c4 {[%emt 7.327]} 23. Bc2 {[%emt 1.485]} g4 {[%emt 2.941]} 24. e5 {[%emt 2.607]} Bg5 {[%emt 5.151]} 25. e6 {[%emt 6.501]} f3 {[%emt 20.213]} 26. d6+ {[%emt 5.61]} Kc6 {[%emt 10.669]} 27. Be4+ {[%emt 8.209]} Kb6 {[%emt 2.193]} 28. e7 {[%emt 13.298]} Bxe7 {[%emt 5.29]} 29. dxe7 {[%emt 4.232]} Be6 {[%emt 1.336]} 30. gxf3 {[%emt 5.121]} gxh3 {[%emt 7.409]} 31. Nd4 {[%emt 5.15]} Bd7 {[%emt 10.444]} 32. Bf5 {[%emt 5.339]} Be8 {[%emt 2.706]} 33. Bxh3 {[%emt 3.777]} b4 {[%emt 1.047]} 34. cxb4 {[%emt 12.81]} Rg5 {[%emt 4.665]} 35. a4 {[%emt 7.654]} Rg3 {[%emt 2.984]} 36. a5+ {[%emt 2.828]} Ka6 {[%emt 5.224]} 37. Be6 {[%emt 6.103]} b5 {[%emt 5.427]} 38. Bd5 {[%emt 6.963]} h4 {[%emt 4.561]} 39. Bc6 {[%emt 1.02]} h3 {[%emt 3.372]} 40. Bxe8 {[%emt 1.804]} h2 {[%emt 1.58]} 41. Bxb5+ {[%emt 2.406]} Ka7 {[%emt 1.895]} 42. Rh1 {[%emt 2.076]} Rg1+ {[%emt 1.919]} 43. Kc2 {[%emt 1.289]} Rxa1 {[%emt 1.299]} 44. Rxa1 {[%emt 2.85]} h1=Q {[%emt 1.275]} 45. Rxh1 {[%emt 1.042]} Rg8 {[%emt 3.517]} 46. Re1 {[%emt 1.905]} Kb7 {[%emt 2.658]} 47. e8=Q {[%emt 2.906]} Rxe8 {[%emt 1.043]} 48. Rxe8 {[%emt 1.507]} Kc7 {[%emt 0.925]} 49. f4 {[%emt 0.567]} Kd6 {[%emt 1.463]} 50. f5 {[%emt 0.527]} c3 {[%emt 1.023]} 51. f6 {[%emt 0.649]} Kd5 {[%emt 1.027]} 52. f7 {[%emt 1.208]} cxb2 {[%emt 0.687]} 53. Kxb2 {[%emt 1.007]} Kxd4 {[%emt 1.423]} 54. f8=Q {[%emt 1.468]} Kd5 {[%emt 0.748]} 55. Rd8+ {[%emt 0.804]} Ke6 {[%emt 1.008]} 56. Qd6+ {[%emt 2.098]} Kf5 {[%emt 1.216]} {White ran out of time and Black has no material to mate} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231671076"]
+[White "BramB"]
+[Black "Aplomb"]
+[WhiteElo "1772"]
+[BlackElo "1570"]
+[TimeControl "600+0"]
+[Date "2009.08.12"]
+[Time "14:47:00"]
+[WhiteClock "0:10:00.000"]
+[BlackClock "0:10:00.000"]
+[Variant "Fischerandom"]
+[FEN "rqknbrnb/pppppppp/8/8/8/8/PPPPPPPP/RQKNBRNB w KQkq - 0 1"]
+[PlyCount "74"]
+[Result "1/2-1/2"]
+
+1. g3 {[%emt 0.0]} e5 {[%emt 0.0]} 2. f4 {[%emt 4.809]} d6 {[%emt 13.596]} 3. Bf2 {[%emt 8.878]} g6 {[%emt 3.553]} 4. Nf3 {[%emt 2.273]} e4 {[%emt 5.426]} 5. Nh4 {[%emt 4.837]} d5 {[%emt 2.671]} 6. c3 {[%emt 4.656]} Bb5 {[%emt 22.763]} 7. d3 {[%emt 6.125]} exd3 {[%emt 12.451]} 8. exd3 {[%emt 2.408]} c6 {[%emt 5.429]} 9. Re1 {[%emt 3.991]} Ne6 {[%emt 7.806]} 10. d4 {[%emt 7.605]} Qc7 {[%emt 14.38]} 11. a4 {[%emt 11.948]} Ba6 {[%emt 11.129]} 12. b4 {[%emt 1.248]} Bc4 {[%emt 13.82]} 13. Ne3 {[%emt 4.37]} b5 {[%emt 3.613]} 14. a5 {[%emt 4.473]} O-O-O {[%emt 25.201]} 15. Nxc4 {[%emt 5.418]} dxc4 {[%emt 4.79]} 16. Qe4 {[%emt 3.472]} Ne7 {[%emt 20.035]} 17. Nf3 {[%emt 3.186]} f5 {[%emt 12.771]} 18. Qe2 {[%emt 5.559]} Nd5 {[%emt 8.408]} 19. Qxe6+ {[%emt 4.767]} Kb8 {[%emt 5.445]} 20. Kc2 {[%emt 3.324]} Bg7 {[%emt 54.008]} 21. Qe2 {[%emt 3.576]} Rfe8 {[%emt 8.995]} 22. Ne5 {[%emt 1.694]} Rf8 {[%emt 10.599]} 23. Bxd5 {[%emt 5.322]} cxd5 {[%emt 8.032]} 24. Qf3 {[%emt 1.381]} a6 {[%emt 13.839]} 25. Re2 {[%emt 1.211]} Rfe8 {[%emt 11.075]} 26. Rae1 {[%emt 3.371]} Bf6 {[%emt 26.219]} 27. Bg1 {[%emt 3.786]} Bg7 {[%emt 9.466]} 28. Qf2 {[%emt 8.214]} Bf6 {[%emt 4.883]} 29. Nf3 {[%emt 2.058]} Re4 {[%emt 7.323]} 30. h4 {[%emt 5.862]} Rde8 {[%emt 4.977]} 31. Kd2 {[%emt 2.851]} Kc8 {[%emt 9.076]} 32. Kd1 {[%emt 1.417]} Kb8 {[%emt 0.967]} 33. Nd2 {[%emt 2.044]} R4e7 {[%emt 33.676]} 34. Rxe7 {[%emt 2.845]} Rxe7 {[%emt 1.151]} 35. Rxe7 {[%emt 1.449]} Qxe7 {[%emt 0.871]} 36. Qe2 {[%emt 1.501]} Qd7 {[%emt 12.065]} 37. Nf3 {[%emt 2.559]} Kc8 {[%emt 11.755]} {Game drawn by mutual agreement} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231670654"]
+[White "TangerineDream"]
+[Black "spendius"]
+[WhiteElo "1840"]
+[BlackElo "1795"]
+[TimeControl "180+0"]
+[Date "2009.08.12"]
+[Time "14:42:00"]
+[WhiteClock "0:03:00.000"]
+[BlackClock "0:03:00.000"]
+[Variant "Fischerandom"]
+[FEN "nnbrkqrb/pppppppp/8/8/8/8/PPPPPPPP/NNBRKQRB w KQkq - 0 1"]
+[PlyCount "106"]
+[Result "1/2-1/2"]
+
+1. Nc3 {[%emt 0.0]} Nc6 {[%emt 0.0]} 2. d3 {[%emt 1.31]} e5 {[%emt 2.364]} 3. Bd2 {[%emt 1.65]} d5 {[%emt 1.271]} 4. e4 {[%emt 1.76]} d4 {[%emt 5.495]} 5. Ne2 {[%emt 2.2]} g6 {[%emt 2.947]} 6. f4 {[%emt 1.21]} Qe7 {[%emt 2.155]} 7. fxe5 {[%emt 1.65]} Bxe5 {[%emt 2.659]} 8. Bf4 {[%emt 2.41]} Bg4 {[%emt 2.813]} 9. Bxe5 {[%emt 2.75]} Qxe5 {[%emt 1.535]} 10. h3 {[%emt 1.7]} Be6 {[%emt 4.048]} 11. Qf4 {[%emt 2.42]} Nb6 {[%emt 3.187]} 12. Nb3 {[%emt 4.01]} O-O {[%emt 23.456]} 13. Rf1 {[%emt 1.98]} f5 {[%emt 8.785]} 14. Qxe5 {[%emt 3.46]} Nxe5 {[%emt 4.232]} 15. Nexd4 {[%emt 4.56]} Bxb3 {[%emt 7.542]} 16. Nxb3 {[%emt 4.78]} fxe4 {[%emt 2.263]} 17. Rxf8+ {[%emt 1.87]} Kxf8 {[%emt 2.881]} 18. dxe4 {[%emt 0.44]} Rxd1+ {[%emt 9.181]} 19. Kxd1 {[%emt 0.99]} Nbc4 {[%emt 1.196]} 20. Kc1 {[%emt 1.81]} b6 {[%emt 10.174]} 21. Nd2 {[%emt 1.81]} Ke7 {[%emt 4.504]} 22. Nxc4 {[%emt 1.15]} Nxc4 {[%emt 2.435]} 23. b3 {[%emt 0.55]} Ne5 {[%emt 1.402]} 24. Kd2 {[%emt 2.42]} Kd6 {[%emt 1.035]} 25. Ke3 {[%emt 1.81]} Kc5 {[%emt 1.309]} 26. g3 {[%emt 3.13]} Kb4 {[%emt 2.448]} 27. Kd4 {[%emt 2.64]} Nc6+ {[%emt 5.949]} 28. Kd3 {[%emt 1.98]} Ka3 {[%emt 4.175]} 29. c3 {[%emt 5.6]} Kxa2 {[%emt 2.63]} 30. b4 {[%emt 2.36]} Kb3 {[%emt 3.731]} 31. Bf3 {[%emt 1.98]} a5 {[%emt 2.309]} 32. b5 {[%emt 1.98]} Ne5+ {[%emt 2.389]} 33. Ke3 {[%emt 2.2]} a4 {[%emt 3.54]} 34. Bd1+ {[%emt 3.29]} Kxc3 {[%emt 7.43]} 35. Bxa4 {[%emt 1.32]} Kb4 {[%emt 0.469]} 36. Bc2 {[%emt 7.96]} Kxb5 {[%emt 1.017]} 37. Kd4 {[%emt 1.87]} Nc6+ {[%emt 3.367]} 38. Kd5 {[%emt 1.32]} Nb4+ {[%emt 1.843]} 39. Ke6 {[%emt 2.09]} Nxc2 {[%emt 1.342]} 40. Kf6 {[%emt 1.1]} Ne3 {[%emt 3.695]} 41. e5 {[%emt 2.31]} Kc6 {[%emt 1.529]} 42. e6 {[%emt 2.47]} Nd5+ {[%emt 2.353]} 43. Kf7 {[%emt 0.88]} Kd6 {[%emt 0.946]} 44. Kg7 {[%emt 1.59]} b5 {[%emt 1.96]} 45. Kxh7 {[%emt 0.6]} b4 {[%emt 1.022]} 46. Kxg6 {[%emt 0.49]} Kxe6 {[%emt 1.737]} 47. h4 {[%emt 0.1]} b3 {[%emt 0.876]} 48. g4 {[%emt 0.66]} b2 {[%emt 0.567]} 49. h5 {[%emt 0.54]} b1=Q+ {[%emt 0.629]} 50. Kg7 {[%emt 1.81]} Ne7 {[%emt 1.029]} 51. g5 {[%emt 2.19]} Qf5 {[%emt 4.606]} 52. g6 {[%emt 1.37]} Qxh5 {[%emt 1.385]} 53. Kf8 {[%emt 2.42]} Qxg6 {[%emt 0.614]} {Game drawn by stalemate} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231669315"]
+[White "spendius"]
+[Black "UBoot"]
+[WhiteElo "1764"]
+[BlackElo "2024"]
+[TimeControl "180+0"]
+[Date "2009.08.12"]
+[Time "14:18:00"]
+[WhiteClock "0:03:00.000"]
+[BlackClock "0:03:00.000"]
+[Variant "Fischerandom"]
+[FEN "bnrbqknr/pppppppp/8/8/8/8/PPPPPPPP/BNRBQKNR w KQkq - 0 1"]
+[PlyCount "45"]
+[Result "1/2-1/2"]
+
+1. b3 {[%emt 0.0]} Nf6 {[%emt 0.0]} 2. c4 {[%emt 1.199]} b6 {[%emt 3.437]} 3. Nc3 {[%emt 4.67]} O-O {[%emt 3.61]} 4. Nf3 {[%emt 2.874]} e6 {[%emt 5.203]} 5. e4 {[%emt 4.097]} c5 {[%emt 9.031]} 6. d3 {[%emt 7.711]} Nc6 {[%emt 1.453]} 7. Be2 {[%emt 2.108]} Bc7 {[%emt 9.64]} 8. O-O {[%emt 3.309]} Rd8 {[%emt 3.11]} 9. Nb5 {[%emt 9.58]} Bb8 {[%emt 3.157]} 10. e5 {[%emt 4.767]} Nh5 {[%emt 11.718]} 11. Ng5 {[%emt 12.537]} Nf4 {[%emt 2.969]} 12. Bf3 {[%emt 7.423]} h6 {[%emt 2.36]} 13. Ne4 {[%emt 6.853]} Nxd3 {[%emt 12.531]} 14. Qe3 {[%emt 4.41]} Nxc1 {[%emt 2.484]} 15. Rxc1 {[%emt 1.443]} Nd4 {[%emt 5.688]} 16. Nxd4 {[%emt 16.976]} cxd4 {[%emt 0.719]} 17. Bxd4 {[%emt 1.31]} d5 {[%emt 11.062]} 18. Nf6+ {[%emt 15.538]} gxf6 {[%emt 1.0]} 19. Qxh6 {[%emt 1.692]} fxe5 {[%emt 42.016]} 20. Qg5+ {[%emt 2.657]} Kh8 {[%emt 2.844]} 21. Qh6+ {[%emt 33.869]} Kg8 {[%emt 0.844]} 22. Qg5+ {[%emt 0.934]} Kh8 {[%emt 0.875]} 23. Qh6+ {[%emt 0.899]} {Game drawn by mutual agreement} 1/2-1/2
+
+
+[Event "FICS rated wild/fr game"]
+[Site "FICS"]
+[FICSGamesDBGameNo "231666497"]
+[White "hugho"]
+[Black "Guepardo"]
+[WhiteElo "2256"]
+[BlackElo "2173"]
+[TimeControl "300+0"]
+[Date "2009.08.12"]
+[Time "13:21:00"]
+[WhiteClock "0:05:00.000"]
+[BlackClock "0:05:00.000"]
+[Variant "Fischerandom"]
+[FEN "rkbrqbnn/pppppppp/8/8/8/8/PPPPPPPP/RKBRQBNN w KQkq - 0 1"]
+[PlyCount "68"]
+[Result "1/2-1/2"]
+
+1. e4 {[%emt 0.0]} e5 {[%emt 0.0]} 2. Ng3 {[%emt 6.523]} Nf6 {[%emt 4.953]} 3. d4 {[%emt 20.586]} Ng6 {[%emt 2.484]} 4. d5 {[%emt 18.632]} Bc5 {[%emt 6.828]} 5. f3 {[%emt 14.99]} Bxg1 {[%emt 1.562]} 6. Nf5 {[%emt 15.718]} Qf8 {[%emt 7.203]} 7. d6 {[%emt 1.321]} cxd6 {[%emt 6.578]} 8. Bc4 {[%emt 11.37]} Bc5 {[%emt 6.563]} 9. b4 {[%emt 1.123]} Bd4 {[%emt 10.328]} 10. c3 {[%emt 10.829]} Bb6 {[%emt 8.547]} 11. a4 {[%emt 1.455]} Bc7 {[%emt 6.5]} 12. b5 {[%emt 6.291]} b6 {[%emt 2.172]} 13. Ba3 {[%emt 3.247]} Ne8 {[%emt 11.016]} 14. Ra2 {[%emt 16.118]} a6 {[%emt 15.421]} 15. Rad2 {[%emt 5.169]} axb5 {[%emt 0.938]} 16. Bxb5 {[%emt 1.711]} Ba6 {[%emt 5.266]} 17. Bb4 {[%emt 11.726]} Bxb5 {[%emt 0.782]} 18. axb5 {[%emt 0.363]} Nf4 {[%emt 24.141]} 19. Nxd6 {[%emt 27.573]} Nxd6 {[%emt 20.485]} 20. Rxd6 {[%emt 1.001]} Qe8 {[%emt 1.657]} 21. Qe3 {[%emt 9.187]} Kb7 {[%emt 7.953]} 22. g3 {[%emt 6.968]} Ne6 {[%emt 2.156]} 23. Qd3 {[%emt 1.141]} Nc5 {[%emt 4.172]} 24. Qd5+ {[%emt 3.419]} Kb8 {[%emt 2.844]} 25. Bxc5 {[%emt 2.323]} bxc5 {[%emt 1.766]} 26. b6 {[%emt 2.457]} Bxd6 {[%emt 3.578]} 27. Qxd6+ {[%emt 1.105]} Kb7 {[%emt 0.265]} 28. Qc7+ {[%emt 2.975]} Ka6 {[%emt 0.468]} 29. Kc2 {[%emt 34.636]} Qe6 {[%emt 46.328]} 30. Ra1+ {[%emt 13.776]} Kb5 {[%emt 1.094]} 31. Rb1+ {[%emt 0.927]} Ka6 {[%emt 1.328]} 32. Ra1+ {[%emt 7.616]} Kb5 {[%emt 1.14]} 33. Rb1+ {[%emt 1.592]} Ka6 {[%emt 0.375]} 34. Ra1+ {[%emt 11.51]} Kb5 {[%emt 0.968]} {Game drawn by repetition} 1/2-1/2
+
