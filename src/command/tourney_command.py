@@ -34,7 +34,7 @@ class Tourneylist(Command):
         conn.write('ID   Tourney             Manager         \n')
         conn.write('-----------------------------------------\n')
         for t in tourney.tourneys:
-            conn.write('%-4d %-17s %s\n' %
+            conn.write('%-4d %-19s %s\n' %
                 (t.number, t.name, t.manager))
         conn.write(ngettext('\n\nFound %d tournament.\n',
             '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))

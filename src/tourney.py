@@ -112,7 +112,7 @@ class Tournament(object):
             announce_str = "  White                   Black\n"
             index = 0
             while (index < (len(self.players_in) / 2)):
-                announce_str = announce_str + ('%-19d %-17s %s\n' %
+                announce_str = announce_str + ('%-19d %s\n' %
                         ((index+1), self.white_players[index], self.black_players[index]))
                 index = index + 1
             return
