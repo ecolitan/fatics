@@ -44,6 +44,7 @@ class Tournament(object):
         self.player_scores = {}
         self.player_ratings = {}
         self.players_in = []
+        self.players_bye = []
         self.white_players = []
         self.black_players = []
 
@@ -58,21 +59,45 @@ class Tournament(object):
 
     def increment_round(self):
         self.round = self.round + 1
+        # move all players with byes last round into active players
+        index = 0
+        while (index < len(self.players_bye)):
+            self.players_bye.pop[index]
+            index = index + 1
+        return
         
     def pair(self):
         self.increment_round()
         # Swiss System
         if self.pairing_method == "SS":
+            if self.round == 1:
+                sortPlayersByRating()
+            else:
+                sortPlayersByScore()    
+            # even number of players
+            if len(players_in) % 2 == 1:
+                # lowest score - bye
+                sortPlayersByScore()
+                self.players_bye.append(self.players_in[len(self.players_in)-1])
+                self.players_in.pop(len(self.players_in)-1)     
+            # 1 paired with 5, 2 with 6, 3 with 7, 4 with 8 (8 players)
+            differential = len(self.players_in) / 2
+            counter = 0
+            while (counter < differential):
+                if (counter % 2 == 0):
+                    self.white_players[counter] = self.players_in[counter]
+                    self.black_players[counter] = self.players_in[counter+differential]
+                else:
+                    self.black_players[counter] = self.players_in[counter]
+                    self.white_players[counter] = self.players_in[counter + differential]
+                counter = counter + 1
             return
         # Round robin
         elif self.pairing_method == "RR":
             return
         # Knockout
         else:
-            if self.round == 1:
-                sortPlayersByRating()
-            else:
-                sortPlayersByScore()
+            sortPlayersByRating()
             player_index_end = len(self.players_in) / 2
             index = 0
             while (index < player_index_end):
@@ -92,15 +117,19 @@ class Tournament(object):
                 index = index + 1
             return
 
+    def removePlayer(self, name):
+        if name in self.players_in:
+            self.players_in.remove(name)
+
     def sortPlayersByRating(self):
-        self.player_ratings = sorted(self.player_ratings.values())
+        self.player_ratings = reversed(sorted(self.player_ratings.values()))
         players_in_idx = 0
         for username in self.player_ratings:
             self.players_in[players_in_idx] = username
             player_in_idx = player_in_idx + 1
 
     def sortPlayersByScore(self):
-        self.player_scores = sorted(self.player_scores.values())
+        self.player_scores = reversed(sorted(self.player_scores.values()))
         players_in_idx = 0
         for username in self.player_scores:
             self.players_in[players_in_idx] = username
