@@ -78,7 +78,13 @@ class ExaminedGame(Game):
                 'Game %d: %s goes forward %d moves.\n', n,
                 (self.number, conn.user.name, n))
         for i in range(0, n):
-            mv = self.variant.pos.move_from_san(self.moves[self.variant.pos.ply])
+            san = self.moves[self.variant.pos.ply]
+            mv = self.variant.pos.move_from_castle(san)
+            if not mv:
+                mv = self.variant.pos.move_from_san(san)
+            if not mv:
+                print 'internal error: failed to parse move %s' % san
+            assert(mv)
             mv.time = 0.0
             self.variant.do_move(mv)
             if self.variant.pos.ply >= len(self.moves):
@@ -137,7 +143,8 @@ class ExaminedGame(Game):
             p.nwrite_('Game %d: %s backs up %d move.\n',
                 'Game %d: %s backs up %d moves.\n', n,
                 (self.number, conn.user.name, n))
-        self.variant.undo_move()
+        for i in range(0, n):
+            self.variant.undo_move()
         self.send_boards()
 
     def _check_result(self):

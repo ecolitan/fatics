@@ -310,7 +310,7 @@ class TestInchannel(Test):
         t.write('+ch 1\n')
         t.write('inch 1\n')
         self.expect_re('1 "help": .*GuestTest', t)
-        self.expect('There is 1 player', t)
+        self.expect('in channel 1.', t)
 
         t.write('inch 28741\n') # XXX somebody could join
         self.expect('There are 0 players in channel 28741.', t)

@@ -22,13 +22,14 @@ class TestShowadmins(Test):
     def test_showadmins(self):
         t = self.connect_as_guest()
         t.write('showa\n')
-        self.expect('0 admins logged in.', t)
+        m = self.expect_re(r'(\d+) admins? logged in\.', t)
+        count = int(m.group(1))
 
         t2 = self.connect_as_admin()
         t.write('showa\n')
         self.expect('Name              Status       Idle time', t)
         self.expect_re(r'admin             Available    \d second', t)
-        self.expect('1 admin logged in.', t)
+        self.expect_re(r'%d admins? logged in\.' % (count + 1), t)
 
         t2.write('admin\n')
         self.expect('(*) is now not shown', t2)
@@ -58,12 +59,13 @@ class TestShowsrs(Test):
     def test_showsrs(self):
         t = self.connect_as_guest()
         t.write('showsrs\n')
-        self.expect('0 SRs logged in.', t)
+        m = self.expect_re(r'(\d+) SRs? logged in\.', t)
+        count = int(m.group(1))
 
         t2 = self.connect_as('srplayer')
         t.write('showsr\n')
         self.expect_re(r'srplayer          Available    \d second', t)
-        self.expect('1 SR logged in.', t)
+        self.expect_re(r'%d SRs? logged in\.' % (count + 1), t)
 
         t.write('match srplayer 1+0 u\n')
         self.expect('Challenge:', t2)

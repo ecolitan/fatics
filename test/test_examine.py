@@ -271,6 +271,17 @@ class TestExamine(Test):
 
         self.close(t)
 
+class TestBackward(Test):
+    def test_backward(self):
+        t = self.connect_as_guest()
+        t.write('ex\ne4\ne5\nf4\n')
+        t.write('back 2\n')
+        self.expect('backs up 2 moves', t)
+        t.write('c5\n')
+        self.expect('moves: c5', t)
+        t.write('unex\n')
+        self.close(t)
+
 class TestUnexamine(Test):
     def test_unexamine(self):
         t = self.connect_as_guest()
