@@ -65,7 +65,7 @@ class Deletetourney(Command):
             conn.write('Tourney number %d not found.\n' % number)
             return
         tourney.tourneys[number].announce('Tournament deleted by %s!' % conn.user.name)
-        tourney.delete_tournament_number(number)
+        tourney.remove_tournament_number(number)
         conn.write('Tournament #%d deleted.\n' % number)
         
 
