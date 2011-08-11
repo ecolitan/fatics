@@ -95,6 +95,8 @@ class Test(unittest.TestCase):
         t = connect()
         t.write("admin\n%s\n" % admin_passwd)
         s = t.read_until('fics% ', 5)
+        if 'fics%' not in s:
+            print 'got {%s}' % s
         self.assert_('fics% ' in s)
         self.set_nowrap(t)
         return t

@@ -297,9 +297,9 @@ class TestKick(Test):
 
 class TestInchannel(Test):
     def test_inchannel(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_guest('GuestTest')
         t.write('inch\n')
-        self.expect("4: Guest", t)
+        self.expect_re("4: .*GuestTest", t)
 
         t.write('inch -1\n')
         self.expect('Invalid channel', t)
@@ -309,11 +309,11 @@ class TestInchannel(Test):
 
         t.write('+ch 1\n')
         t.write('inch 1\n')
-        self.expect('1 "help": Guest', t)
+        self.expect_re('1 "help": .*GuestTest', t)
         self.expect('There is 1 player', t)
 
-        t.write('inch 999\n')
-        self.expect('There are 0 players in channel 999.', t)
+        t.write('inch 28741\n') # XXX somebody could join
+        self.expect('There are 0 players in channel 28741.', t)
 
         self.close(t)
 
@@ -329,14 +329,14 @@ class TestCtellVar(Test):
         t2.write('+ch 1\n')
         self.expect("[1] added to your channel list", t2)
 
-        t2.write('tell 1 Can you see this?\n')
-        self.expect_not('Can you see', t)
+        t2.write('tell 1 Channel 1 test\n')
+        self.expect_not('Channel 1 test', t)
 
         t.write('set ctell 1\n')
         self.expect('You will now hear channel tells from unregistered', t)
 
-        t2.write('tell 1 Can you see this?\n')
-        self.expect('Can you see', t)
+        t2.write('tell 1 Another channel 1 test\n')
+        self.expect('Another channel 1 test', t)
 
         t.write('-ch 1\n')
         self.expect("[1] removed from your channel list", t)
