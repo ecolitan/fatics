@@ -99,7 +99,7 @@ class Listplayers(Command):
             # get status of player
             if not user.find_by_name_exact(u).is_online:
                 status = "Offline"
-            elif u in tourney.tourneys[number].player_byes:
+            elif u in tourney.tourneys[number].players_bye:
                 status = "Ready (BYE)"
             elif user.find_by_name_exact(u).is_online.session.game:
                 status = "Playing"
