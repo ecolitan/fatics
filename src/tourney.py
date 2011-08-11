@@ -60,7 +60,8 @@ class Tournament(object):
         for user_name in self.players_in:
             u = user.find_by_name_exact(user_name)
             if u.is_online:
-                u.write("> Tournament #"+self.number+": "+message+"\n")
+                # fix concat issue - 8/11/2011 -- Ryan
+                u.write("> Tournament #"+str(self.number)+": "+message+"\n")
 
             # this doesn't look like the right place to announce this -- Wil
             #else:
