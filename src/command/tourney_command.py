@@ -57,7 +57,6 @@ class Createtourney(Command):
 @ics_command('jointourney', 'd', admin.Level.user)
 class Jointourney(Command):
     def run(self, args, conn):
-	print '0'
         number = int(args[0])
         if number >= len(tourney.tourneys):
             conn.write('Tourney number %d not found.\n' % number)
@@ -74,13 +73,10 @@ class Jointourney(Command):
             tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating('blitz')
         elif time_minute <= 2:
             tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating('lightning')
-	print 3
         tourney.tourneys[number].players_in.append(conn.user.name)
         conn.write("You have successfully joined tournament number %d!\n" % number)
-	print '4'
         tourney.tourneys[number].announce("%s(%d) has joined tournament #%d" %
             (conn.user.name, tourney.tourneys[number].player_ratings[conn.user.name], number))
-	print '5'
         return
 
 @ics_command('setpairingmethod', 'dw', admin.Level.user)
