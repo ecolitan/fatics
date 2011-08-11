@@ -19,6 +19,7 @@
 # Implementation of botless tournaments on FatICS ~ilknight
 # Tournament commands here in this file
 
+import speed_variant
 import tourney
 import user
 
@@ -30,17 +31,17 @@ class Listtourneys(Command):
         if conn.user.is_guest:
             conn.write("Only registered players may use tourney commands.")
             return
-        conn.write(' -----------------------------------------------------------------------\n')
+        conn.write('+-----------------------------------------------------------------------+\n')
         conn.write('| Current Tournaments                                                   |\n')
-        conn.write('|-----------------------------------------------------------------------|\n')
+        conn.write('+-----------------------------------------------------------------------+\n')
         conn.write('| ID  | Tourney Name                | T.Ctrl. | Pair. | Manager         |\n')
-        conn.write('|-----------------------------------------------------------------------|\n')
+        conn.write('+-----------------------------------------------------------------------+\n')
         for t in tourney.tourneys:
             conn.write('| %-4d| %-28s| %-8s| %-6s| %-16s|\n' %
                 (t.number, t.name, t.time_control, t.pairing_method, t.manager))
-        conn.write(' -----------------------------------------------------------------------\n')
-        conn.write(ngettext('\n\nFound %d tournament.\n',
-            '\n\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
+        conn.write('+-----------------------------------------------------------------------+\n')
+        conn.write(ngettext('\nFound %d tournament.\n',
+            '\nFound %d tournaments.\n', len(tourney.tourneys)) % len(tourney.tourneys))
         
 @ics_command('createtourney', '', admin.Level.user)
 class Createtourney(Command):
@@ -68,16 +69,44 @@ class Jointourney(Command):
         time_second = int(time_control[1])
         # no variants yet
         if time_minute > 10:
-            tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating('standard')
+            tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating(
+                speed_variant.from_names('standard','chess'))
         elif time_minute > 2:
-            tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating('blitz')
+            tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating(
+                speed_variant.from_names('blitz','chess'))
         elif time_minute <= 2:
-            tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating('lightning')
+            tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating(
+                speed_variant.from_names('lightning','chess'))
         tourney.tourneys[number].players_in.append(conn.user.name)
         conn.write("You have successfully joined tournament number %d!\n" % number)
         tourney.tourneys[number].announce("%s(%d) has joined tournament #%d" %
             (conn.user.name, tourney.tourneys[number].player_ratings[conn.user.name], number))
         return
+
+@ics_command('listplayers', 'd', admin.Level.user)
+class Listplayers(Command):
+    def run(self, args, conn):
+        number = args[0]
+        if number >= len(tourney.tourneys):
+            conn.write('Tourney number %d not found.\n' % number)
+            return
+        conn.write('+----------------------------------------------------------+\n')
+        conn.write('| Player Handle             | Rating | Score | Status      |\n')
+        conn.write('+---------------------------+--------+-------+-------------+\n')
+        for u in tourney.tourneys[number].players
+            rating = tourney.tourneys[number].player_ratings[u]
+            score = tourney.tourneys[number].player_scores[u]
+            # get status of player
+            if not user.find_by_name_exact(u).is_online:
+                status = "Offline"
+            elif u in tourney.tourneys[number].player_byes:
+                status = "Ready (BYE)"
+            elif user.find_by_name_exact(u).is_online.session.game:
+                status = "Playing"
+            else:
+                status = "Ready"
+            conn.write('| %-26s| %-7s| %-6s| %-12s|\n' % (u, rating, score, status))
+        conn.write('+----------------------------------------------------------+\n')
 
 @ics_command('setpairingmethod', 'dw', admin.Level.user)
 class Setpairingmethod(Command):
