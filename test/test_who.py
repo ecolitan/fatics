@@ -87,12 +87,14 @@ class TestShowtms(Test):
     def test_showtms(self):
         t = self.connect_as_guest()
         t.write('showtms\n')
-        self.expect('0 TMs logged in.', t)
+        m = self.expect_re(r'(\d+) TMs? logged in\.', t)
+        count = int(m.group(1))
 
         t2 = self.connect_as('tmplayer')
         t.write('showtm\n')
         self.expect_re(r'tmplayer          Available    \d second', t)
-        self.expect('1 TM logged in.', t)
+        m = self.expect_re(r'(\d+) TMs? logged in\.', t)
+        self.assert_(int(m.group(1)) == count + 1)
 
         t.write('match tmplayer 1+0 u\n')
         self.expect('Challenge:', t2)
