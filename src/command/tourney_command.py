@@ -93,7 +93,7 @@ class Listplayers(Command):
         conn.write('+----------------------------------------------------------+\n')
         conn.write('| Player Handle             | Rating | Score | Status      |\n')
         conn.write('+---------------------------+--------+-------+-------------+\n')
-        for u in tourney.tourneys[number].players
+        for u in tourney.tourneys[number].players:
             rating = tourney.tourneys[number].player_ratings[u]
             score = tourney.tourneys[number].player_scores[u]
             # get status of player
