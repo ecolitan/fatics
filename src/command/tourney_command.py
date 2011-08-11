@@ -18,8 +18,6 @@
 
 # Implementation of botless tournaments on FatICS ~ilknight
 # Tournament commands here in this file
-import string
-
 import speed_variant
 import tourney
 import user
@@ -143,10 +141,12 @@ class Starttourney(Command):
             return
         # check if there's enough players to start
         num_players = len(tourney.tourneys[number].players_in)
-        if tourney.tourneys[number].pairing_method.ascii_lowercase == "ko" or tourney.tourneys[number].pairing_method.ascii_lowercase == "SS":
+        if tourney.tourneys[number].pairing_method.lower() == "ko" or tourney.tourneys[number].pairing_method.lower() == "ss":
             min_players = 8
-        elif tourney.tourneys[number].pairing_method.ascii_lowercase == "rr":
+        elif tourney.tourneys[number].pairing_method.lower() == "rr":
             min_players = 6
+        else:
+            min_players = 8
         if num_players < min_players:
             conn.write('Too few players to start tourney #%d. Need minimum of %d players\n' % (number, min_players))
             return
