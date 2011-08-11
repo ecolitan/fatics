@@ -41,12 +41,12 @@ class CommandTest(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'passwd')
+    @with_player('testplayer')
     def test_annunreg(self):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
         t3 = self.connect_as_guest()
-        t4 = self.connect_as('testplayer', 'passwd')
+        t4 = self.connect_as('testplayer')
 
         t.write("annunreg Test please ignore\n")
         m = self.expect_re(r'\((\d+)\) \*\*UNREG ANNOUNCEMENT\*\* from admin: Test please ignore', t)
@@ -82,10 +82,10 @@ class CommandTest(Test):
 
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_nuke_registered(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('nuke testplayer\n')
         self.expect('You have been kicked out', t2)
@@ -97,7 +97,7 @@ class CommandTest(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'passwd')
+    @with_player('testplayer')
     def test_asetpass(self):
         t = self.connect_as_admin()
 
@@ -106,7 +106,7 @@ class CommandTest(Test):
         self.expect('cannot set the password', t)
         self.close(t2)
 
-        t2 = self.connect_as('testplayer', 'passwd')
+        t2 = self.connect_as('testplayer')
         t.write('asetpass testplayer blah\n')
         self.expect("Password of testplayer changed", t)
         self.expect("admin has changed your password", t2)
@@ -118,11 +118,11 @@ class CommandTest(Test):
         self.expect('fics%', t2)
         self.close(t2)
 
-    @with_player('testplayer', 'passwd')
-    @with_player('testtwo', 'passwd')
+    @with_player('testplayer')
+    @with_player('testtwo')
     def test_asetadmin(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'passwd')
+        t2 = self.connect_as('testplayer')
         t.write('asetadmin testplayer 100\n')
         self.expect('Admin level of testplayer set to 100.', t)
         self.close(t)
@@ -144,7 +144,7 @@ class CommandTest(Test):
         t = self.connect_as_admin()
         t.write('addplayer TestPlayer nobody@example.com Foo Bar\n')
         m = self.expect_re(r'Added: >TestPlayer< >Foo Bar< >nobody@example.com< >(.*)<\r\n', t)
-        t2 = self.connect_as('testplayer', m.group(1))
+        t2 = self.connect_as('testplayer', passwd=m.group(1))
 
         t.write('f testplayer\n')
         self.expect('nobody@example.com', t)
@@ -169,10 +169,10 @@ class CommandTest(Test):
 
         self.close(t)
 
-    @with_player('TestPlayer', 'passwd')
+    @with_player('TestPlayer')
     def test_asetrealname(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'passwd')
+        t2 = self.connect_as('testplayer')
 
         t.write('asetrealname testplayer John Doe\n')
         self.expect('Real name of TestPlayer changed to "John Doe".', t)
@@ -188,7 +188,7 @@ class CommandTest(Test):
         self.close(t2)
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_asetemail_bad(self):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest('GuestABCD')
@@ -245,7 +245,7 @@ class CommandTest(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_pose(self):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest('GuestABCD')
@@ -262,7 +262,7 @@ class CommandTest(Test):
         self.expect('badcommand: Command not found', t2)
         self.close(t2)
 
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t.write('pose testplayer shout disregard that\n')
         self.expect('TestPlayer shouts: disregard that', t)
 
@@ -295,7 +295,7 @@ class PermissionsTest(Test):
         self.close(t)
 
 class CommentTest(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_comment(self):
         t = self.connect_as_admin()
 
@@ -330,10 +330,10 @@ class CommentTest(Test):
         self.close(t)
 
 class BanTest(Test):
-    @with_player('TestPlayer', 'passwd')
+    @with_player('TestPlayer')
     def test_ban(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'passwd')
+        t2 = self.connect_as('TestPlayer')
 
         t.write('+ban testplayer\n')
         self.expect('TestPlayer added to the ban list.', t)
@@ -360,7 +360,7 @@ class BanTest(Test):
         t.write('-ban testplayer\n')
         self.expect('TestPlayer removed from the ban list.', t)
 
-        t2 = self.connect_as('testplayer', 'passwd')
+        t2 = self.connect_as('testplayer')
 
         t.write('-ban testplayer\n')
         self.expect('TestPlayer is not on the ban list.', t)
@@ -448,10 +448,10 @@ class FilterTest(Test):
         self.close(t)'''
 
 class MuzzleTest(Test):
-    @with_player('TestPlayer', 'passwd')
+    @with_player('TestPlayer')
     def test_muzzle(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'passwd')
+        t2 = self.connect_as('TestPlayer')
 
         t.write('+muzzle testplayer\n')
         self.expect('TestPlayer added to the muzzle list.', t)
@@ -472,7 +472,7 @@ class MuzzleTest(Test):
         t.write('showcomment testplayer\n')
         self.expect_re('admin at .*: Muzzled', t)
 
-        t2 = self.connect_as('TestPlayer', 'passwd')
+        t2 = self.connect_as('TestPlayer')
         t2.write('shout test\n')
         self.expect('You are muzzled.', t2)
         t.write('-muzzle testplayer\n')
@@ -506,10 +506,10 @@ class MuzzleTest(Test):
         self.close(t2)
 
 class MuteTest(Test):
-    @with_player('TestPlayer', 'passwd')
+    @with_player('TestPlayer')
     def test_mute(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'passwd')
+        t2 = self.connect_as('TestPlayer')
 
         t.write('+mute testplayer\n')
         self.expect('TestPlayer added to the mute list.', t)
@@ -534,14 +534,14 @@ class MuteTest(Test):
         t.write('showcomment testplayer\n')
         self.expect_re('admin at .*: Muted', t)
 
-        t2 = self.connect_as('TestPlayer', 'passwd')
+        t2 = self.connect_as('TestPlayer')
         t2.write('t 1 test\n')
         self.expect('You are muted.', t2)
         t.write('-mute testplayer\n')
         self.expect('TestPlayer removed from the mute list.', t)
         self.expect('admin has removed you from the mute list.', t2)
 
-        t2 = self.connect_as('testplayer', 'passwd')
+        t2 = self.connect_as('testplayer')
 
         t.write('-mute testplayer\n')
         self.expect('TestPlayer is not on the mute list.', t)
@@ -627,10 +627,10 @@ class TestPlayban(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_playban(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
 
         t.write('+playban testplayer\n')
         self.expect('TestPlayer added to the playban list.', t)
@@ -642,7 +642,7 @@ class TestPlayban(Test):
         t.write('=playban\n')
         self.expect('-- playban list: 1 name --\r\nTestPlayer', t)
 
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
         t2.write('see 3+0\n')
         self.expect('You may not play games.', t2)
         t2.write('match admin 5+0\n')
@@ -679,10 +679,10 @@ class TestPlayban(Test):
         self.close(t)
 
 class TestRatedban(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_ratedban(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
 
         t.write('+ratedban testplayer\n')
         self.expect('TestPlayer added to the ratedban list.', t)
@@ -694,7 +694,7 @@ class TestRatedban(Test):
         t.write('=ratedban\n')
         self.expect('-- ratedban list: 1 name --\r\nTestPlayer', t)
 
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
         t2.write('see 3+0\n')
         self.expect('You may not play rated games.', t2)
         t2.write('match admin 5+0\n')

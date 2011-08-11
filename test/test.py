@@ -20,6 +20,8 @@ import sys
 import telnetlib
 import socket
 import re
+import random
+import string
 
 from twisted.trial import unittest
 
@@ -108,10 +110,12 @@ class Test(unittest.TestCase):
         t.write('set style 12\n')
         self.expect('Style 12 set.', t)
 
-    def connect_as(self, name, passwd):
+    def connect_as(self, name, passwd=None):
         t = connect()
         t.write('%s\n' % name)
         self.expect('is a registered name', t)
+        if passwd is None:
+            passwd = tpasswd
         t.write('%s\n' % passwd)
         s = t.read_until('fics% ', 5)
         assert('fics% ' in s)
@@ -123,16 +127,15 @@ class Test(unittest.TestCase):
         t.read_all()
         t.close()
 
-    def _adduser(self, name, passwd, lists=None):
+    def _adduser(self, name, passwd, lists=[]):
         t = self.connect_as_admin()
         # in case the user already exists due to a failed test
         t.write('remplayer %s\n' % name)
         t.write('addplayer %s fakeemail@example.com Test Player\n' % name)
         self.expect('Added: ', t)
         t.write('asetpass %s %s\n' % (name, passwd))
-        if lists:
-            for lname in lists:
-                t.write('addlist %s %s\n' % (lname, name))
+        for lname in lists:
+            t.write('addlist %s %s\n' % (lname, name))
         self.close(t)
 
     def _deluser(self, name):
@@ -210,10 +213,15 @@ def with_admin(f):
     new_f.__dict__.update(f.__dict__)
     return new_f"""
 
-def with_player(pname, ppass, ptitles=None):
+try:
+    tpasswd
+except NameError:
+    tpasswd = ''.join(random.choice(string.printable) for n in range(8))
+def with_player(pname, ptitles=[]):
+    assert(isinstance (ptitles, (list, tuple)))
     def wrap(f):
         def new_f(self):
-            self._adduser(pname, ppass, ptitles)
+            self._adduser(pname, tpasswd, ptitles)
             try:
                 f(self)
             finally:

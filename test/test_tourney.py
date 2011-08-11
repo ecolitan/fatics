@@ -19,10 +19,10 @@
 from test import *
 
 class TestTourney(Test):
-    @with_player('tdplayer', 'tdpass', ['td'])
+    @with_player('tdplayer', ['td'])
     def test_tournset(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('tdplayer', 'tdpass')
+        t2 = self.connect_as('tdplayer')
 
         t.write("tournset admin 1\n")
         self.expect('Only TD programs', t)

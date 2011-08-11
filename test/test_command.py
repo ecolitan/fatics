@@ -67,7 +67,7 @@ class TestCommand(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_user_exclamation_point(self):
         """ Test that appending ! to a user name prevents it from being
         abbreviated. """
@@ -81,7 +81,7 @@ class TestCommand(Test):
         t.write('f testplayer!\n')
         self.expect('Finger of TestPlayer:', t)
 
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
         t.write('t testplaye this is a test\n')
         self.expect('(told TestPlayer)', t)
         t.write('t testplaye! this is a test\n')

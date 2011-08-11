@@ -21,10 +21,10 @@ from test import *
 import time
 
 class TestFischer(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_fischer(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t.write('set style 12\n')
         self.expect('Style 12 set.', t)
 
@@ -61,10 +61,10 @@ class TestBronstein(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_bronstein(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t.write('set style 12\n')
         self.expect('Style 12 set.', t)
 
@@ -99,10 +99,10 @@ class TestBronstein(Test):
         self.close(t2)
 
 class TestHourglass(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_bad_hourglass(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('match admin 1 1 hourglass\n')
         self.expect('Games using an hourglass clock may not have an increment.', t2)
@@ -112,10 +112,10 @@ class TestHourglass(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_hourglass(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t.write('set style 12\n')
         self.expect('Style 12 set.', t)
 
@@ -163,10 +163,10 @@ class TestStandardClock(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_standard_clock(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set style 12\n')
 
@@ -214,10 +214,10 @@ class TestStandardClock(Test):
         self.close(t2)
 
 class TestUntimed(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_bad_untimed(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('match admin 0 0 fischer\n')
         self.expect('Usage:', t2)
@@ -231,10 +231,10 @@ class TestUntimed(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_untimed(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         self.set_style_12(t)
 

@@ -66,9 +66,9 @@ class TellTest(Test):
 
         self.close(t)
 
-    @with_player('auser', 'test')
+    @with_player('auser')
     def test_ambiguous_tell(self):
-        t = self.connect_as('auser', 'test')
+        t = self.connect_as('auser')
         t2 = self.connect_as_guest()
 
         # not ambiguous when admin is offline
@@ -127,9 +127,9 @@ class TellTest(Test):
         self.close(t2)
 
 class QtellTest(Test):
-    @with_player('tdplayer', 'tdplayer', ['td'])
+    @with_player('tdplayer', ['td'])
     def test_qtell(self):
-        t = self.connect_as('tdplayer', 'tdplayer')
+        t = self.connect_as('tdplayer')
         t.write('qtell nonexistentname test\n')
         self.expect('*qtell nonexistentname 1*', t)
 
@@ -164,9 +164,9 @@ class QtellTest(Test):
         self.close(t)
 
 class SayTest(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_say(self):
-        t = self.connect_as('testplayer', 'testpass')
+        t = self.connect_as('testplayer')
         t2 = self.connect_as_admin()
 
         t.write('set style 12\n')
@@ -204,7 +204,7 @@ class SayTest(Test):
         t2.write('say bye\n')
         self.expect('testplayer is no longer online.', t2)
 
-        t = self.connect_as('testplayer', 'testpass')
+        t = self.connect_as('testplayer')
         t2.write('say yo\n')
         self.expect('admin(*) says: yo', t)
         self.expect('(told testplayer)', t2)
@@ -213,10 +213,10 @@ class SayTest(Test):
         self.close(t2)
 
 class SilenceVarTest(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_silence_var(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('set silence 1\n')
         self.expect('You will now play games in silence.', t2)

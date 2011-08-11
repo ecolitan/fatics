@@ -156,9 +156,9 @@ class TestChannelOwnership(Test):
         self.expect('[1024] removed from your channel list.', t)
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_channel_ownership_limit(self):
-        t = self.connect_as('TestPlayer', 'testpass')
+        t = self.connect_as('TestPlayer')
         for i in range(5000, 5008):
             t.write('+ch %d\n' % i)
             self.expect('You are now the owner of channel %d.' % i, t)
@@ -181,10 +181,10 @@ class TestChannelOwnership(Test):
         self.close(t)
 
 class TestKick(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_kick(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t.write('=ch\n')
         t.write('+ch 1024\n')
         self.expect('You are now the owner of channel 1024.', t)
@@ -220,10 +220,10 @@ class TestKick(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_kick_admin(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
 
         t2.write('+ch 5000\n')
         self.expect('You are now the owner of channel 5000.', t2)
@@ -244,9 +244,9 @@ class TestKick(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_kick_offline(self):
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t2.write('+ch 1024\n')
         self.expect('You are now the owner of channel 1024.', t2)
         self.expect('[1024] added to your channel list.', t2)
@@ -261,18 +261,18 @@ class TestKick(Test):
         self.expect('[1024] removed from your channel list.', t)
         self.close(t)
 
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t2.write('=ch\n')
         self.expect('-- channel list: 1 channel --\r\n1\r\n', t2)
         t2.write('inch 1024\n')
         self.expect('0 players', t2)
         self.close(t2)
 
-    @with_player('testone', 'testpass')
-    @with_player('testtwo', 'testpass')
+    @with_player('testone')
+    @with_player('testtwo')
     def test_kick_bad(self):
-        t = self.connect_as('testone', 'testpass')
-        t2 = self.connect_as('testtwo', 'testpass')
+        t = self.connect_as('testone')
+        t2 = self.connect_as('testtwo')
         t.write('+ch 2000\n')
         self.expect('You are now the owner of channel 2000.', t)
         self.expect('[2000] added to your channel list.', t)
@@ -345,10 +345,10 @@ class TestCtellVar(Test):
         self.close(t)
 
 class TestTopic(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_topic(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
         today = datetime.utcnow().date()
 
         t.write('chtopic\n')
@@ -385,7 +385,7 @@ class TestTopic(Test):
         time.sleep(1)
         self.close(t2)
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('**** Starting FICS session as TestPlayer ****', t2)
         self.expect_not('TOPIC', t2)
         self.close(t2)
@@ -395,7 +395,7 @@ class TestTopic(Test):
         self.expect('TOPIC(10): *** A new topic. (admin at %s' % today, t)
         time.sleep(1)
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('TOPIC(10): *** A new topic. (admin at %s' % today, t2)
 
         # clear topic

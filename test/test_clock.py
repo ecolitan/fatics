@@ -30,10 +30,10 @@ class TestTime(Test):
             int(m.group(3)) + float(m.group(4)) / 1000.0)
         return 60 * 60 * h + 60 * m + s
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_time(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -101,11 +101,11 @@ class TestTime(Test):
         self.close(t)
 
 class TestFlag(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_flag(self):
         self._skip('slow test')
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set autoflag 0\n')
         self.expect('Auto-flagging disabled.', t)
@@ -147,11 +147,11 @@ class TestFlag(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_flag_both(self):
         self._skip('slow test')
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set autoflag 0\n')
         self.expect('Auto-flagging disabled.', t)
@@ -199,13 +199,13 @@ class TestFlag(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_autoflag_nomove(self):
         """ Test when a player forfeits on time without making a move. The
         server make take a few seconds to award the forfeit, since it
         checks at the heartbeat timer. """
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -241,12 +241,12 @@ class TestFlag(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_autoflag_move(self):
         """ Test when a player forfeits on time after moving barely
         too late; the forfeit should happen immediately. """
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')
@@ -283,13 +283,13 @@ class TestFlag(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_autoflag_nomaterial(self):
         """ Test when a player runs out of time but the opponent
         has no mating material. """
         self._skip('slow test')
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')

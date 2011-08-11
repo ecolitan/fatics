@@ -87,12 +87,12 @@ class TestMatch(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_match_case(self):
         """ Test default time controls using the 'time' and 'inc'
         vars. """
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('match admin 3 0 R cRaZyHousE\n')
         self.expect('Challenge:', t)
@@ -395,12 +395,12 @@ class TestMatch(Test):
         self.close(t2)
 
 class TestRmatch(Test):
-    @with_player('testplayer', 'testplayer')
-    @with_player('tdplayer', 'tdplayer', ['td'])
+    @with_player('testplayer')
+    @with_player('tdplayer', ['td'])
     def test_rmatch(self):
-        t = self.connect_as('testplayer', 'testplayer')
+        t = self.connect_as('testplayer')
         t2 = self.connect_as_admin()
-        t3 = self.connect_as('tdplayer', 'tdplayer')
+        t3 = self.connect_as('tdplayer')
 
         t.write('rmatch testplayer admin 3 0\n')
         self.expect('Only TD programs', t)

@@ -62,12 +62,12 @@ class TestKibitz(Test):
         self.close(t2)
         self.close(t3)
 
-    @with_player('testplayer', 'testpass')
-    @with_player('testobs', 'testpass')
+    @with_player('testplayer')
+    @with_player('testobs')
     def test_kibitz_user(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
-        t3 = self.connect_as('testobs', 'testpass')
+        t2 = self.connect_as('testplayer')
+        t3 = self.connect_as('testobs')
 
         t.write('kibitz hello\n')
         self.expect('You are not playing, examining, or observing a game', t)
@@ -106,10 +106,10 @@ class TestKibitz(Test):
         self.close(t2)
         self.close(t3)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_kiblevel(self):
         t = self.connect_as_guest('GuestEFGH')
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t3 = self.connect_as_admin()
 
         t3.write('asetrating testplayer lightning chess 0 0 0 0 0 0\n')
@@ -195,12 +195,12 @@ class TestWhisper(Test):
         self.close(t2)
         self.close(t3)
 
-    @with_player('testplayer', 'testpass')
-    @with_player('testobs', 'testpass')
+    @with_player('testplayer')
+    @with_player('testobs')
     def test_whisper_user(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
-        t3 = self.connect_as('testobs', 'testpass')
+        t2 = self.connect_as('testplayer')
+        t3 = self.connect_as('testobs')
 
         t.write('whisper hello\n')
         self.expect('You are not playing, examining, or observing a game', t)
@@ -226,10 +226,10 @@ class TestWhisper(Test):
         self.close(t2)
         self.close(t3)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_kiblevel_whisper(self):
         t = self.connect_as_guest('GuestEFGH')
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t3 = self.connect_as_admin()
 
         t3.write('asetrating testplayer lightning chess 0 0 0 0 0 0\n')
@@ -271,10 +271,10 @@ class TestWhisper(Test):
         self.close(t3)
 
 class TestXkibitz(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_xkibitz(self):
         t = self.connect_as_guest('GuestEFGH')
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t3 = self.connect_as_admin()
 
         t3.write('xki 1 foo\n')
@@ -303,10 +303,10 @@ class TestXkibitz(Test):
         self.close(t3)
 
 class TestXwhisper(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_xwhisper(self):
         t = self.connect_as_guest('GuestEFGH')
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t3 = self.connect_as_admin()
 
         t3.write('xwhi 1 foo\n')

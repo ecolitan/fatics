@@ -21,14 +21,14 @@ from test import *
 import time
 
 class TestLogons(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_logons_user_admin(self):
         time.sleep(1.0)
         t = self.connect_as_admin()
         t.write('log testplayer\n')
         self.expect('TestPlayer has not logged on.', t)
 
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
         time.sleep(1.0)
 
         t.write('log testplayer\n')
@@ -41,13 +41,13 @@ class TestLogons(Test):
 
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_logons_user(self):
         t = self.connect_as_guest()
         t.write('log testplayer\n')
         self.expect('TestPlayer has not logged on.', t)
 
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
         time.sleep(1.0)
 
         t.write('log testplayer\n')

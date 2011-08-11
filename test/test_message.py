@@ -36,10 +36,10 @@ class TestMessage(Test):
         self.close(t)
 
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_message(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('mess 5\n')
         self.expect('There is no such message.', t)
@@ -61,7 +61,7 @@ class TestMessage(Test):
         self.expect('mess 4!', t)
 
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('You have 4 messages (4 unread).', t2)
         self.expect('fics%', t2)
 
@@ -118,7 +118,7 @@ class TestMessage(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_messages_unread(self):
         t = self.connect_as_admin()
         t.write('mess testplayer message #1\n')
@@ -127,7 +127,7 @@ class TestMessage(Test):
         self.expect('message #3', t)
 
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('You have 3 messages (3 unread).', t2)
         self.expect('fics%', t2)
 
@@ -149,12 +149,12 @@ class TestMessage(Test):
         self.close(t)
 
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('You have 4 messages (1 unread).', t2)
         self.expect('fics%', t2)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_clearmessages(self):
         t = self.connect_as_admin()
 
@@ -168,7 +168,7 @@ class TestMessage(Test):
         self.expect('message #4', t)
 
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('You have 4 messages (4 unread).', t2)
         self.expect('fics%', t2)
 
@@ -203,20 +203,20 @@ class TestMessage(Test):
         self.close(t2)
 
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('You have 0 messages (0 unread).', t2)
         self.expect('fics%', t2)
         self.close(t2)
 
-    @with_player('testplayer', 'testpass')
-    @with_player('testtwo', 'testpass')
+    @with_player('testplayer')
+    @with_player('testtwo')
     def test_fmessage(self):
         t = self.connect_as_admin()
 
         t.write('mess testplayer Hello there\n')
         self.expect(': Hello there', t)
 
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t2.write('mess\n')
         self.expect(': Hello there', t2)
         t2.write('fmess testtwo 2\n')
@@ -224,7 +224,7 @@ class TestMessage(Test):
         t2.write('fmess blahblah 1\n')
         self.expect('There is no player matching the name "blahblah".', t2)
 
-        t3 = self.connect_as('testtwo', 'testpass')
+        t3 = self.connect_as('testtwo')
         t2.write('fmess testtwo 1\n')
         self.expect('The following message was forwarded to testtwo:', t2)
         self.expect('testplayer forwarded: admin at ', t2)

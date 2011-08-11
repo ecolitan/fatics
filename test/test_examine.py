@@ -63,10 +63,10 @@ class TestExamine(Test):
 
         self.close(t)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_examine_history(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('set style 12\n')
         t2.write('set style 12\n')

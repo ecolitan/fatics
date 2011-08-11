@@ -363,13 +363,13 @@ class TestAllobservers(Test):
 
 
 class TestPrimary(Test):
-    @with_player('testobs', 'testpass')
+    @with_player('testobs')
     def test_primary(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_guest('GuestEFGH')
         t3 = self.connect_as_guest('GuestIJKL')
         t4 = self.connect_as_guest('GuestMNOP')
-        t5 = self.connect_as('testobs', 'testpass')
+        t5 = self.connect_as('testobs')
 
         t.write('ex\n')
         self.expect('Starting a game', t)
@@ -443,9 +443,9 @@ class TestPrimary(Test):
         self.close(t2)
 
 class TestRobserve(Test):
-    @with_player('tdplayer', 'tdplayer', ['td'])
+    @with_player('tdplayer', ['td'])
     def test_robserve(self):
-        t = self.connect_as('tdplayer', 'tdplayer')
+        t = self.connect_as('tdplayer')
         t2 = self.connect_as_guest('GuestABCD')
         t3 = self.connect_as_guest('GuestEFGH')
 

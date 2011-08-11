@@ -50,13 +50,13 @@ class FingerTest(Test):
 
         self.close(t)
 
-    @with_player('admintwo', 'admintwo')
+    @with_player('admintwo')
     def test_ambiguous_finger(self):
         t = self.connect_as_admin()
 
         t.write('finger ad\n')
         self.expect('Finger of admin(*):', t, "finger with prefix ignores offline user")
-        t2 = self.connect_as('admintwo', 'admintwo')
+        t2 = self.connect_as('admintwo')
         # ambiguous, both users online
         t2.write('finger ad\n')
         self.expect('Matches: admin admintwo', t2)
@@ -110,9 +110,9 @@ class FingerTest(Test):
         self.close(t2)
 
 class HandlesTest(Test):
-    @with_player('someplayerone', 'aaa')
-    @with_player('someplayertwo', 'aaa')
-    @with_player('someplayerthree', 'aaa')
+    @with_player('someplayerone')
+    @with_player('someplayertwo')
+    @with_player('someplayerthree')
     def test_handles(self):
         t = self.connect_as_guest()
 

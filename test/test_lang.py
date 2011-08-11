@@ -65,10 +65,10 @@ class TestLang(Test):
         self.expect('bar: Command not found', t)
         self.close(t)
 
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_lang_upper_message(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('set lang upper\n')
         self.expect('lang SET TO "upper".', t2)

@@ -19,9 +19,9 @@
 from test import *
 
 class TestStyle1(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_style1(self):
-        t = self.connect_as('testplayer', 'testpass')
+        t = self.connect_as('testplayer')
         t2 = self.connect_as_admin()
         t.write('set style 1\n')
         t.write('iset ms 1\n')
@@ -155,9 +155,9 @@ Black holding: []'''
         self.close(t2)
 
 class TestStyle12(Test):
-    @with_player('testplayer', 'testpass')
+    @with_player('testplayer')
     def test_style12(self):
-        t = self.connect_as('testplayer', 'testpass')
+        t = self.connect_as('testplayer')
         t2 = self.connect_as_admin()
         t.write('set style 12\n')
         t.write('iset ms 1\n')

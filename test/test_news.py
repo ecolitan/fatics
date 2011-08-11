@@ -105,10 +105,10 @@ class TestNews(Test):
 
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_news_notification(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'testpass')
+        t2 = self.connect_as('TestPlayer')
         today = datetime.utcnow().date()
 
         t.write('cnewsi News item 1.\n')
@@ -123,7 +123,7 @@ class TestNews(Test):
         news_id2 = int(m.group(1))
 
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('There is 1 new news item since your last login:\r\n%4d (%s) News item 2.\r\n' %
             (news_id2, today), t2)
         self.close(t2)
@@ -137,7 +137,7 @@ class TestNews(Test):
         news_id4 = int(m.group(1))
 
         t2 = self.connect()
-        t2.write('testplayer\ntestpass\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('There are 2 new news items since your last login:\r\n%4d (%s) News item 3.\r\n%4d (%s) News item 4.\r\n' %
             (news_id3, today, news_id4, today), t2)
         self.close(t2)

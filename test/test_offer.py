@@ -221,9 +221,9 @@ class TestAbort(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_observer_sees_abort(self):
-        t = self.connect_as('testplayer', 'testpass')
+        t = self.connect_as('testplayer')
         t2 = self.connect_as_admin()
         t3 = self.connect_as_guest()
 
@@ -400,9 +400,9 @@ class TestDraw(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_observer_sees_draw(self):
-        t = self.connect_as('testplayer', 'testpass')
+        t = self.connect_as('testplayer')
         t2 = self.connect_as_admin()
         t3 = self.connect_as_guest()
 

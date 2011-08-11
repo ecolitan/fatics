@@ -44,7 +44,7 @@ class TestNotify(Test):
         self.expect("notify yourself.", t)
         self.close(t)
 
-    @with_player('TestPlayer', 'test')
+    @with_player('TestPlayer')
     def test_notify_user(self):
         t = self.connect_as_admin()
 
@@ -61,7 +61,7 @@ class TestNotify(Test):
         t.write('+not testplayer\n')
         self.expect("TestPlayer is already on your notify list", t)
 
-        t2 = self.connect_as('testplayer', 'test')
+        t2 = self.connect_as('testplayer')
         self.expect("Notification: TestPlayer has arrived", t)
 
         self.close(t)
@@ -79,16 +79,16 @@ class TestNotify(Test):
         t.write('-not testplayer\n')
         self.expect('TestPlayer is not on your notify list', t)
 
-        t2 = self.connect_as('testplayer', 'test')
+        t2 = self.connect_as('testplayer')
         self.expect_not("TestPlayer", t)
 
         self.close(t2)
         self.close(t)
 
-    @with_player('TestPlayer', 'test')
+    @with_player('TestPlayer')
     def test_notifiedby(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'test')
+        t2 = self.connect_as('testplayer')
 
         t2.write('set notifiedby 1\n')
         self.expect('You will now hear if people notify you', t2)
@@ -109,7 +109,7 @@ class TestNotify(Test):
         t2.close()
 
         t2 = self.connect()
-        t2.write('testplayer\ntest\n')
+        t2.write('testplayer\n%s\n' % tpasswd)
         self.expect('The following players were notified of your arrival: admin', t2)
 
         t.write('-not testplayer\n')
@@ -119,12 +119,12 @@ class TestNotify(Test):
         self.close(t)
 
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'test')
+        t2 = self.connect_as('testplayer')
 
-    @with_player('TestPlayer', 'test')
+    @with_player('TestPlayer')
     def test_notifiedby_notify(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'test')
+        t2 = self.connect_as('testplayer')
 
         t2.write('set notifiedby 1\n')
         self.expect('You will now hear if people notify you', t2)
@@ -211,7 +211,7 @@ class TestIdlenotify(Test):
         self.close(t)
 
 class TestSummon(Test):
-    @with_player('TestPlayer', 'test')
+    @with_player('TestPlayer')
     def test_summon(self):
         t = self.connect_as_admin()
 
@@ -222,7 +222,7 @@ class TestSummon(Test):
         t.write('summo admin\n')
         self.expect('summon yourself', t)
 
-        t2 = self.connect_as('testplayer', 'test')
+        t2 = self.connect_as('testplayer')
 
         t.write('summo testp\n')
         self.expect('Summoning sent to "TestPlayer".\r\n', t)
@@ -242,16 +242,16 @@ class TestSummon(Test):
         self.close(t2)
 
 class TestZnotify(Test):
-    @with_player('TestPlayer', 'test')
-    @with_player('testtwo', 'test')
+    @with_player('TestPlayer')
+    @with_player('testtwo')
     def test_znotify(self):
         t = self.connect_as_admin()
         t.write('znotify\n')
         self.expect('No one from your notify list is logged on.\r\nNo one logged in has you on their notify list.', t)
 
         t.write('+notify testplayer\n')
-        t2 = self.connect_as('testplayer', 'test')
-        t3 = self.connect_as('testtwo', 'test')
+        t2 = self.connect_as('testplayer')
+        t3 = self.connect_as('testtwo')
         t3.write('+notify admin\n')
         self.expect('admin added to your notify list', t3)
 
@@ -288,7 +288,7 @@ class TestGnotify(Test):
         self.expect("gnotify yourself.", t)
         self.close(t)
 
-    @with_player('TestPlayer', 'test')
+    @with_player('TestPlayer')
     def test_gnotify_user(self):
         t = self.connect_as_admin()
 
@@ -307,7 +307,7 @@ class TestGnotify(Test):
         self.close(t)
 
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'test')
+        t2 = self.connect_as('TestPlayer')
         t3 = self.connect_as_guest('GuestABCD')
 
         t2.write('match guestabcd 2+12 b zh u\n')

@@ -587,10 +587,10 @@ class TestDisconnect(Test):
         self.close(t)
 
 class TestMoretime(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_moretime(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t3 = self.connect_as_guest()
 
         t.write('set style 12\n')

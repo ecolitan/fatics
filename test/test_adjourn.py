@@ -19,10 +19,10 @@
 from test import *
 
 class TestAdjourn(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_adjourn_and_resume(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t.write('set style 12\n')
         t2.write('set style 12\n')
 
@@ -81,10 +81,10 @@ class TestAdjourn(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_adjourn_agreement(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t3 = self.connect_as_guest()
 
         t.write('set style 12\n')

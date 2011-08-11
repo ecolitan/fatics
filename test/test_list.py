@@ -107,10 +107,10 @@ class TestAbuser(Test):
         self.expect("You don't have permission", t)
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_abuser(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t.write('=abuser\n')
         self.expect('abuser list: ', t)
@@ -182,7 +182,7 @@ class TestCensor(Test):
         self.close(t2)
         self.close(t)
 
-    @with_player('TestPlayer', 'test')
+    @with_player('TestPlayer')
     def test_censor_user(self):
         t = self.connect_as_admin()
         t.write('+cen nosuchplayer\n')
@@ -200,7 +200,7 @@ class TestCensor(Test):
         self.close(t)
 
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'test')
+        t2 = self.connect_as('TestPlayer')
         t.write('+ch 5\n')
         t2.write('+ch 5\n')
 
@@ -245,10 +245,10 @@ class TestCensor(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_censor_game(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('match admin white 1+0\n')
         self.expect('Challenge:', t)
@@ -284,17 +284,17 @@ class TestCensor(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_censor_persistence(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t.write('+cen testplayer\n')
         self.expect('TestPlayer added to your censor list.', t)
         self.close(t)
         self.close(t2)
 
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t2.write('t admin hi\n')
         self.expect('admin is censoring you.', t2)
         t.write('-cen testplayer\n')
@@ -327,7 +327,7 @@ class TestNoplay(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('TestPlayer', 'test')
+    @with_player('TestPlayer')
     def test_noplay_user(self):
         t = self.connect_as_admin()
         t.write('+noplay nosuchplayer\n')
@@ -345,7 +345,7 @@ class TestNoplay(Test):
         self.close(t)
 
         t = self.connect_as_admin()
-        t2 = self.connect_as('TestPlayer', 'test')
+        t2 = self.connect_as('TestPlayer')
 
         t2.write('match admin\n')
         self.expect("You are on admin's noplay list", t2)

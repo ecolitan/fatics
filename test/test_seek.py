@@ -50,11 +50,11 @@ class TestSeek(Test):
         self.close(t)
         self.close(t2)
 
-    @with_player('testone', 'pass')
-    @with_player('testtwo', 'pass')
+    @with_player('testone')
+    @with_player('testtwo')
     def test_seek_defaults(self):
-        t = self.connect_as('testone', 'pass')
-        t2 = self.connect_as('testtwo', 'pass')
+        t = self.connect_as('testone')
+        t2 = self.connect_as('testtwo')
 
         t.write('set time 7\n')
         t.write('set inc 4\n')
@@ -138,10 +138,10 @@ class TestSeek(Test):
 
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_censor(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('+cen admin\n')
         self.expect('admin added to your censor list.', t2)
@@ -171,10 +171,10 @@ class TestSeek(Test):
         self.close(t2)
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_noplay(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
 
         t2.write('+noplay admin\n')
         self.expect('admin added to your noplay list.', t2)
@@ -327,12 +327,12 @@ class TestSeek(Test):
         self.assert_(n2 <= n1)
         self.close(t)
 
-    @with_player('testplayer', 'testpass')
-    @with_player('testtwo', 'testpass')
+    @with_player('testplayer')
+    @with_player('testtwo')
     def test_seeker_formula(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
-        t3 = self.connect_as('testtwo', 'testpass')
+        t2 = self.connect_as('testplayer')
+        t3 = self.connect_as('testtwo')
 
         t.write('asetrating testplayer blitz chess 1500 200 .005 100 75 35\n')
         self.expect('Set blitz chess rating for testplayer.', t)
@@ -385,10 +385,10 @@ class TestSeek(Test):
         self.close(t2)
 
 class TestPlay(Test):
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_play(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t3 = self.connect_as_guest()
 
         t2.write('set style 12\n')
@@ -417,10 +417,10 @@ class TestPlay(Test):
         self.close(t2)
         self.close(t)
 
-    @with_player('TestPlayer', 'testpass')
+    @with_player('TestPlayer')
     def test_play_name(self):
         t = self.connect_as_admin()
-        t2 = self.connect_as('testplayer', 'testpass')
+        t2 = self.connect_as('testplayer')
         t2.write('set style 12\n')
 
         t2.write('play admin\n')

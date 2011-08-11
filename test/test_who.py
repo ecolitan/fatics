@@ -54,13 +54,13 @@ class TestShowadmins(Test):
         self.close(t)
 
 class TestShowsrs(Test):
-    @with_player('srplayer', 'srplayer', ['sr'])
+    @with_player('srplayer', ['sr'])
     def test_showsrs(self):
         t = self.connect_as_guest()
         t.write('showsrs\n')
         self.expect('0 SRs logged in.', t)
 
-        t2 = self.connect_as('srplayer', 'srplayer')
+        t2 = self.connect_as('srplayer')
         t.write('showsr\n')
         self.expect_re(r'srplayer          Available    \d second', t)
         self.expect('1 SR logged in.', t)
@@ -81,13 +81,13 @@ class TestShowsrs(Test):
         self.close(t)
 
 class TestShowtms(Test):
-    @with_player('tmplayer', 'tmplayer', ['tm'])
+    @with_player('tmplayer', ['tm'])
     def test_showtms(self):
         t = self.connect_as_guest()
         t.write('showtms\n')
         self.expect('0 TMs logged in.', t)
 
-        t2 = self.connect_as('tmplayer', 'tmplayer')
+        t2 = self.connect_as('tmplayer')
         t.write('showtm\n')
         self.expect_re(r'tmplayer          Available    \d second', t)
         self.expect('1 TM logged in.', t)
