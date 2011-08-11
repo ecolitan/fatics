@@ -43,7 +43,6 @@ class TestMaxplayer(Test):
         # XXX we should probably not count admins
         m = self.expect_re(r'(\d+) players? displayed', t)
         user_count = int(m.group(1)) - 1
-        maxplayer += user_count
 
         t.write('asetmaxplayer %d\n' % maxplayer)
         self.expect('Total allowed connections: %d' % maxplayer, t)
@@ -91,9 +90,8 @@ class TestMaxguest(Test):
         t.write('annunreg Test please ignore\n')
         m = self.expect_re(r'\((\d+)\) ', t)
         guest_count = int(m.group(1))
-        maxguest += guest_count
 
-        t.write('asetmaxguest %d\n' % (maxguest))
+        t.write('asetmaxguest %d\n' % maxguest)
         self.expect('Allowed guest connections: %d' % maxguest, t)
         self.close(t)
 

@@ -18,6 +18,7 @@
 #
 
 import time
+import pytz
 
 import admin
 import rating
@@ -70,7 +71,8 @@ class Finger(Command):
                 if u.last_logout is None:
                     conn.write(_('%s has never connected.\n') % u.name)
                 else:
-                    conn.write(_('Last disconnected: %s\n') % time.strftime("%a %b %e, %H:%M %Z %Y", u.last_logout.timetuple()))
+                    conn.write(_('Last disconnected: %s\n') %
+                        u.last_logout.replace(tzinfo=pytz.utc).astimezone(conn.user.tz).strftime('%Y-%m-%d %H:%M %Z'))
 
             conn.write('\n')
 
