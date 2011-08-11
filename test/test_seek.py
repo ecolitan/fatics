@@ -78,7 +78,7 @@ class TestSeek(Test):
 
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
-        self.expect_re(r'\(\d players saw the seek\.\)', t)
+        self.expect_re(r'\(\d players? saw the seek\.\)', t)
         self.expect('GuestABCD (++++) seeking 15 5 unrated standard crazyhouse bronstein [white] ("play ', t2)
 
         t2.write('seek 15 5 bronstein crazyhouse black\n')
