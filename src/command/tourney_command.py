@@ -55,6 +55,21 @@ class Createtourney(Command):
         tournament.manager = conn.user.name
         conn.write("New tournament created with ID %d.\n" % number)
 
+@ics_command('deletetourney', 'd', admin.Level.user)
+class Deletetourney(Command):
+    def run(self, args, conn):
+        number = args[0]
+        if not conn.user.has_title('TM'):
+            conn.write("You are not a tournament manager (TM).\n")
+            return
+        if number >= len(tourney.tourneys):
+            conn.write('Tourney number %d not found.\n' % number)
+            return
+        tourney.tourneys[number].announce('Tournament deleted by %s!' % conn.user.name)
+        tourney.delete_tournament_number(number)
+        conn.write('Tournament #%d deleted.\n' % number)
+        
+
 @ics_command('jointourney', 'd', admin.Level.user)
 class Jointourney(Command):
     def run(self, args, conn):
@@ -77,9 +92,12 @@ class Jointourney(Command):
         elif time_minute <= 2:
             tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating(
                 speed_variant.from_names('lightning','chess'))
+        if conn.user.name in tourney.tourneys[number].players_in:
+            conn.write('You are already in tourney #%d!' % number)
+            return
         tourney.tourneys[number].players_in.append(conn.user.name)
         conn.write("You have successfully joined tournament number %d!\n" % number)
-        tourney.tourneys[number].announce("%s(%d) has joined tournament #%d" %
+        tourney.tourneys[number].announce("%s(%d) has joined tournament #%d!" %
             (conn.user.name, tourney.tourneys[number].player_ratings[conn.user.name], number))
         return
 
@@ -107,6 +125,34 @@ class Listplayers(Command):
                 status = "Ready"
             conn.write('| %-26s| %-7s| %-6s| %-12s|\n' % (u, rating, score, status))
         conn.write('+----------------------------------------------------------+\n')
+
+@ics_command('starttourney', 'd', admin.Level.user)
+class Starttourney(Command):
+    def run(self, args, conn):
+        number = args[0]
+        if not conn.user.has_title('TM'):
+            conn.write("You are not a tournament manager (TM).\n")
+            return
+        if number >= len(tourney.tourneys):
+            conn.write('Tourney number %d not found.\n' % number)
+            return
+        # check if already started
+        if tourney.tourneys[number].started:
+            conn.write('Tourney number %d already in progress!\n' % number)
+            return
+        # check if there's enough players to start
+        num_players = len(tourney.tourneys[number].players_in)
+        if tourney.tourneys[number].pairing_method == "KO" or tourney.tourneys[number].pairing_method == "SS":
+            min_players = 8
+        elif tourney.tourneys[number].pairing_method == "RR":
+            min_players = 6
+        if num_players < min_players:
+            conn.write('Too few players to start tourney #%d. Need minimum of %d players\n' % (number, min_players))
+            return
+        conn.write('Tourney #%d has started!\n')
+        tourney.tourneys[number].announce('Tourney starting NOW!!!')
+        tourney.tourneys[number].pair()
+        return
 
 @ics_command('setpairingmethod', 'dw', admin.Level.user)
 class Setpairingmethod(Command):
@@ -136,7 +182,8 @@ class Settimecontrol(Command):
             conn.write('Tourney number %d not found.\n' % number)
             return
         if not len(time_control.split(" ")) == 2:
-            conn.write('That is not a valid time control.')
+            conn.write('That is not a valid time control.\n')
+            return
         tourney.tourneys[number].time_control = time_control
         conn.write('Time control of tourney number %d changed to "%s".\n' % (number, time_control))
 

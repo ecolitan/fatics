@@ -31,6 +31,11 @@ def assign_number():
 
 def new_tournament(t):
     tourneys.append(t)
+    return
+
+def remove_tournament_number(num):
+    tourneys.pop(tourneys[num])
+    return
 
 class Tournament(object):
     def __init__(self):
@@ -39,6 +44,7 @@ class Tournament(object):
         self.name = "New Tournament"
         self.number = assign_number()
         self.open = False
+        self.started = False
         self.round = 0
         self.time_control = "5 0"
         self.pairing_method = "SS"
@@ -54,11 +60,16 @@ class Tournament(object):
         for user_name in self.players_in:
             u = user.find_by_name_exact(user_name)
             if u.is_online:
-                u.write(message+"\n")
+                u.write("> Tournament #"+self.number+": "+message+"\n")
 
             # this doesn't look like the right place to announce this -- Wil
             #else:
             #    announce("%s has disconnected." % user.name)
+
+    def get_tourney_display_name(self, player):
+        index = self.players.index(player)
+        rating = int(self.player_ratings[index])
+        return player+"("+rating+")"
 
     def increment_round(self):
         self.round = self.round + 1
@@ -112,13 +123,21 @@ class Tournament(object):
                     self.black_players[index] = self.players_in[index]
                     self.white_players[index] = self.players_in[len(self.players_in)-1-index]
                 index = index + 1
-            announce_str = "  White                   Black\n"
+            announce_str = "+---------------------------+---------------------------+\n"
+            announce_str = announce_str + "| White                     | Black                     |\n"
+            announce_str = announce_str + "+---------------------------+---------------------------+\n"
             index = 0
             while (index < (len(self.players_in) / 2)):
-                announce_str = announce_str + ('%-19d %s\n' %
-                        ((index+1), self.white_players[index], self.black_players[index]))
+                announce_str = announce_str + ('| %-26d| %s\n' %
+                        ((index+1), get_tourney_display_name(self.white_players[index]),
+                         get_tourney_display_name(self.black_players[index])))
                 index = index + 1
-            return
+            announce_str = announce_str + "+---------------------------+---------------------------+\n"
+            announce_str = announce_str + "| Please start your games immediately!!!                |\n"
+            announce_str = announce_str + "| Type \"playtourneygame %d\" to match your opponent!   |\n"
+            announce_str = announce_str + "+---------------------------+---------------------------+\n"
+            self.announce(announce_str)
+        return
 
     def removePlayer(self, name):
         if name in self.players_in:
