@@ -52,11 +52,13 @@ class Tournament(object):
     def announce(self, message):
         player_index = 0
         while (player_index < len(self.players_in)):
-            username = user.find_by_name_exact(self.players_in[player_index])
-            if username in online.online:
-                username.write(message+"\n")
-            else:
-                announce("%s has disconnected." & user.name)
+            u = user.find_by_name_exact(self.players_in[player_index])
+            if u in online.online:
+                u.write(message+"\n")
+
+            # this doesn't look like the right place to announce this -- Wil
+            #else:
+            #    announce("%s has disconnected." % user.name)
 
     def increment_round(self):
         self.round = self.round + 1
@@ -66,7 +68,7 @@ class Tournament(object):
             self.players_bye.pop[index]
             index = index + 1
         return
-        
+
     def pair(self):
         self.increment_round()
         # Swiss System
@@ -74,13 +76,13 @@ class Tournament(object):
             if self.round == 1:
                 sortPlayersByRating()
             else:
-                sortPlayersByScore()    
+                sortPlayersByScore()
             # even number of players
             if len(players_in) % 2 == 1:
                 # lowest score - bye
                 sortPlayersByScore()
                 self.players_bye.append(self.players_in[len(self.players_in)-1])
-                self.players_in.pop(len(self.players_in)-1)     
+                self.players_in.pop(len(self.players_in)-1)
             # 1 paired with 5, 2 with 6, 3 with 7, 4 with 8 (8 players)
             differential = len(self.players_in) / 2
             counter = 0
@@ -135,3 +137,5 @@ class Tournament(object):
         for username in self.player_scores:
             self.players_in[players_in_idx] = username
             player_in_idx = player_in_idx + 1
+
+# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
