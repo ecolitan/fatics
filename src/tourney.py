@@ -18,6 +18,7 @@
 
 # Implementation of botless tournaments on FatICS ~ilknight
 # Tournament classes go in this file
+
 import online
 import user
 
@@ -50,10 +51,9 @@ class Tournament(object):
         self.black_players = []
 
     def announce(self, message):
-        player_index = 0
-        while (player_index < len(self.players_in)):
-            u = user.find_by_name_exact(self.players_in[player_index])
-            if u in online.online:
+        for user_name in self.players_in:
+            u = user.find_by_name_exact(user_name)
+            if u.is_online:
                 u.write(message+"\n")
 
             # this doesn't look like the right place to announce this -- Wil
