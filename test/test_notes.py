@@ -21,15 +21,15 @@ from test import *
 
 class TestNotes(Test):
     def test_notes_guest(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_guest('GuestABCD')
         t.write("set 1 Jeg kan spise glas, det gør ikke ondt på mig.\n")
         self.expect('Note 1 set: Jeg kan spise glas, det gør ikke ondt på mig.', t)
 
         t.write('fi\n')
         self.expect(' 1: Jeg kan spise glas, det gør ikke ondt på mig.', t)
-        
+
         t2 = self.connect_as_admin()
-        t2.write('fi guest\n')
+        t2.write('fi guestabcd\n')
         self.expect(' 1: Jeg kan spise glas, det gør ikke ondt på mig.', t2)
         self.close(t2)
 
@@ -73,9 +73,9 @@ class TestNotes(Test):
         self.expect('Note 1 set: The quick brown fox jumps over the lazy dog.', t)
         t.write('fi\n')
         self.expect(' 1: The quick brown fox jumps over the lazy dog.', t)
-        
+
         self.close(t)
-        
+
         t = self.connect_as_guest()
         t.write('fi admin\n')
         self.expect(' 1: The quick brown fox jumps over the lazy dog.', t)

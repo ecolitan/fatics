@@ -38,10 +38,17 @@ class TestMaxplayer(Test):
         passwds = []
 
         t = self.connect_as_admin()
+
+        t.write('who\n')
+        # XXX we should probably not count admins
+        m = self.expect_re(r'(\d+) players? displayed', t)
+        user_count = int(m.group(1)) - 1
+        maxplayer += user_count
+
         t.write('asetmaxplayer %d\n' % maxplayer)
         self.expect('Total allowed connections: %d' % maxplayer, t)
 
-        for i in range(0, maxplayer - admin_reserve):
+        for i in range(0, maxplayer - user_count - admin_reserve):
             name = self._random_name()
             #print 'creating #%d: %s' % (i, name)
             names.append(name)
@@ -79,14 +86,20 @@ class TestMaxguest(Test):
         maxguest = 10
 
         t = self.connect_as_admin()
-        t.write('asetmaxguest %d\n' % maxguest)
+
+        # count guests already present
+        t.write('annunreg Test please ignore\n')
+        m = self.expect_re(r'\((\d+)\) ', t)
+        guest_count = int(m.group(1))
+        maxguest += guest_count
+
+        t.write('asetmaxguest %d\n' % (maxguest))
         self.expect('Allowed guest connections: %d' % maxguest, t)
         self.close(t)
 
         conns = []
-        for i in range(0, maxguest):
+        for i in range(0, maxguest - guest_count):
             conns.append(self.connect_as_guest())
-
 
         t1 = self.connect()
         t1.write('g\n')

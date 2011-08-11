@@ -61,8 +61,8 @@ class TestCommand(Test):
         t2.write('\n')
         self.expect('fics% ', t2)
 
-        t.write('shout foo bar\n')
-        self.expect('\r\nadmin(*) shouts: foo bar\r\nfics% ', t2)
+        t.write('shout Test shout\n')
+        self.expect('\r\nadmin(*) shouts: Test shout\r\nfics% ', t2)
 
         self.close(t)
         self.close(t2)

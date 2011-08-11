@@ -20,10 +20,10 @@ from test import *
 
 class TestMatch(Test):
     def test_match(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
 
-        t.write('match guest\n')
+        t.write('match guestabcd\n')
         self.expect("can't match yourself", t)
 
         t.write('match nonexistentname\n')
@@ -31,7 +31,7 @@ class TestMatch(Test):
 
         t.write('match admin 1 0 r\n')
         self.expect('Only registered players can play rated games', t)
-        t2.write('match Guest 1 0 r\n')
+        t2.write('match GuestABCD 1 0 r\n')
         self.expect('Only registered players can play rated games', t2)
 
         t.write('set open 0\n')
@@ -115,7 +115,7 @@ class TestMatch(Test):
     def test_withdraw_logout(self):
         t = self.connect_as_guest('GuestABCD')
         t2 = self.connect_as_admin()
-        t2.write('match guest\n')
+        t2.write('match guestabcd\n')
         t2.write('quit\n')
         self.expect('Challenge to GuestABCD withdrawn.', t2)
         self.expect('Thank you for using', t2)
@@ -289,7 +289,7 @@ class TestMatch(Test):
 
         t.write('match admin 1 0\n')
         self.expect('Challenge:', t2)
-        t2.write('match Guest 2 0\n')
+        t2.write('match GuestABCD 2 0\n')
         self.expect('Declining the offer from GuestABCD and proposing a counteroffer', t2)
         self.expect('admin declines your offer and proposes a counteroffer', t)
 

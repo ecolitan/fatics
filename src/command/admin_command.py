@@ -117,7 +117,7 @@ class Asetmaxplayer(Command):
             config.maxplayer = args[0]
 
         conn.write(A_('There are currently %d regular and %d admin connections available.\n') %
-            (config.maxplayer - config.admin_reserve, config.admin_reserve))
+            (max(config.maxplayer - config.admin_reserve, 0), min(config.maxplayer - len(online.online), config.admin_reserve)))
         conn.write(A_('Total allowed connections: %d.\n') % config.maxplayer)
 
 @ics_command('asetmaxguest', 'p', admin.Level.admin)

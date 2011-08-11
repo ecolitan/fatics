@@ -33,7 +33,7 @@ class TestSeek(Test):
         m = self.expect_re(r'Your seek has been posted with index (\d+).', t)
         n = int(m.group(1))
         self.expect('GuestABCD (++++) seeking 3 0 unrated blitz ("play %d" to respond)' % n, t2)
-        self.expect('(1 player saw the seek.)', t)
+        self.expect_re(r'\(\d+ players? saw the seek\.\)', t)
 
         t.write('seek 3 0\n')
         self.expect('You already have an active seek with the same parameters.', t)
@@ -42,7 +42,7 @@ class TestSeek(Test):
         m2 = self.expect_re(r'Your seek has been posted with index (\d+).', t)
         n2 = int(m2.group(1))
         self.expect('GuestABCD (++++) seeking 15 5 unrated standard ("play %d" to respond)' % n2, t2)
-        self.expect('(1 player saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
 
         t.write('unseek\n')
         self.expect('Your seeks have been removed.', t)
@@ -78,7 +78,7 @@ class TestSeek(Test):
 
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
-        self.expect('(1 player saw the seek.)', t)
+        self.expect_re(r'\(\d players saw the seek\.\)', t)
         self.expect('GuestABCD (++++) seeking 15 5 unrated standard crazyhouse bronstein [white] ("play ', t2)
 
         t2.write('seek 15 5 bronstein crazyhouse black\n')
@@ -100,10 +100,10 @@ class TestSeek(Test):
         self.set_nowrap(t2)
         t.write('seek 15+5 bronstein zh white\n')
         self.expect('Your seek has been posted with index ', t)
-        self.expect('(1 player saw the seek.)', t)
+        self.expect_re(r'\(\d+ players? saw the seek\.\)', t)
         self.expect('GuestABCD (++++) seeking 15 5 unrated standard crazyhouse bronstein [white] ("play ', t2)
 
-        t2.write('set formula rating > 0\n')
+        t2.write('set formula rating < 0\n')
         t2.write('seek 15 5 bronstein crazyhouse black f\n')
         self.expect('(0 players saw the seek.)', t2)
 
@@ -149,18 +149,20 @@ class TestSeek(Test):
         t2.write('seek 3 0\n')
         m = self.expect_re(r'Your seek has been posted with index (\d+).', t2)
         n1 = int(m.group(1))
-        self.expect('(0 players saw the seek.)', t2)
+        self.expect(' saw the seek.)', t2)
+        self.expect_not('TestPlayer', t)
 
         t.write('play %d\n' % n1)
         self.expect('TestPlayer is censoring you.', t)
 
         t.write('sou\n')
-        self.expect('0 ads displayed.', t)
+        self.expect_not('TestPlayer', t)
 
         t.write('seek 3 0\n')
         m = self.expect_re(r'Your seek has been posted with index (\d+).', t)
         n2 = int(m.group(1))
-        self.expect('(0 players saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
+        self.expect_not('admin', t2)
 
         t2.write('play %d\n' % n2)
         self.expect('You are censoring admin.', t2)
@@ -182,7 +184,8 @@ class TestSeek(Test):
         t2.write('seek 3 0\n')
         m = self.expect_re(r'Your seek has been posted with index (\d+).', t2)
         n1 = int(m.group(1))
-        self.expect('(0 players saw the seek.)', t2)
+        self.expect(' saw the seek.)', t2)
+        self.expect_not('TestPlayer', t)
 
         t.write('play %d\n' % n1)
         self.expect("You are on TestPlayer's noplay list.", t)
@@ -190,7 +193,8 @@ class TestSeek(Test):
         t.write('seek 3 0\n')
         m = self.expect_re(r'Your seek has been posted with index (\d+).', t)
         n2 = int(m.group(1))
-        self.expect('(0 players saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
+        self.expect_not('admin', t2)
 
         t2.write('play %d\n' % n2)
         self.expect('You have admin on your noplay list.', t2)
@@ -238,17 +242,17 @@ class TestSeek(Test):
         """ Test the showownseek var and ivar. """
         t = self.connect_as_guest('GuestABCD')
         t.write('see 3+0\n')
-        self.expect('(0 players saw the seek.)', t)
+        self.expect_not('GuestABCD', t)
 
         t.write('set showownseek 1\n')
         self.expect('You will now see your own seeks.', t)
         t.write('see 4+0\n')
-        self.expect('(1 player saw the seek.)', t)
+        self.expect('GuestABCD (++++) seeking', t)
 
         t.write('iset showownseek 0\n')
         self.expect('showownseek unset.', t)
         t.write('see 5+0\n')
-        self.expect('(0 players saw the seek.)', t)
+        self.expect_not('GuestABCD', t)
 
         t.write('unseek\n')
         self.expect('Your seeks have been removed.', t)
@@ -259,11 +263,11 @@ class TestSeek(Test):
         t = self.connect_as_guest('GuestABCD')
 
         t.write('see 1+0\n')
-        self.expect('(0 players saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
         t.write('see 5+0\n')
-        self.expect('(0 players saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
         t.write('see 15+0\n')
-        self.expect('(0 players saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
         t.write('see 60+0\n')
         self.expect('You can only have 3 active seeks.', t)
 
@@ -342,7 +346,7 @@ class TestSeek(Test):
         t.write('set formula 1000 <= rating and rating <= 2000\n')
         self.expect('formula set to ', t)
         t.write('seek 3+0 f\n')
-        self.expect('(1 player saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
         m = self.expect_re(r'admin \(----\) seeking 3 0 rated blitz f \("play (\d+)"', t2)
         n = int(m.group(1))
 
@@ -372,11 +376,11 @@ class TestSeek(Test):
         self.expect('formula set to "!blitz".', t2)
 
         t.write('seek 1+0\n')
-        self.expect('(1 player saw the seek.)', t)
+        self.expect(' saw the seek.)', t)
         self.expect('GuestABCD (++++) seeking', t2)
         t.write('seek 3+0\n')
-        self.expect('(0 players saw the seek.)', t)
-        self.expect_not('seeking', t2)
+        self.expect(' saw the seek.)', t)
+        self.expect_not('GuestABCD', t2)
 
         t.write('uns\n')
         t2.write('uns\n')
@@ -396,7 +400,9 @@ class TestPlay(Test):
         t2.write('seek 3 0 white\n')
         m = self.expect_re(r'Your seek has been posted with index (\d+).', t2)
         n = int(m.group(1))
-        self.expect('(1 player saw the seek.)', t2)
+        self.expect(' saw the seek.)', t2)
+        self.expect('TestPlayer (----) seeking', t)
+        self.expect_not('TestPlayer', t3)
 
         t3.write('play %d\n' % n)
         self.expect('Only registered players can play rated games.', t3)

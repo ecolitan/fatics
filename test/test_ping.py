@@ -25,11 +25,11 @@ from test import *
 
 class TestPing(Test):
     def test_ping(self):
-        t = self.connect_as_guest()
+        t = self.connect_as_guest('GuestABCD')
         t.write('ping\n')
         self.expect('not using zipseal', t)
 
-        t.write('ping guest\n')
+        t.write('ping guestabcd\n')
         self.expect('not using zipseal', t)
 
         t.write('ping admin\n')

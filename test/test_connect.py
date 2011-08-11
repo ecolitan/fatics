@@ -141,11 +141,14 @@ class LogoutTest(Test):
         t = self.connect_as_admin()
         t2 = self.connect_as_guest()
         t2.write('who\n')
-        self.expect('2 players', t2)
+        m = self.expect_re('(\d+) players', t2)
+        count = int(m.group(1))
         t.close()
         time.sleep(0.1)
+
         t2.write('who\n')
-        self.expect('1 player', t2)
+        m = self.expect_re('(\d) player', t2)
+        self.assert_(int(m.group(1)) == count - 1)
         self.close(t2)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

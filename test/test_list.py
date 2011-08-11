@@ -67,12 +67,12 @@ class TestTitle(Test):
         self.close(t)
 
     def test_title(self):
-        t2 = self.connect_as_guest()
+        t2 = self.connect_as_guest('GuestABCD')
         t2.write('+gm admin\n')
         self.expect("You don't have permission", t2)
 
         t = self.connect_as_admin()
-        t.write('+gm guest\n')
+        t.write('+gm guestabcd\n')
         self.expect('nly registered users may', t)
         self.close(t2)
 
@@ -203,6 +203,8 @@ class TestCensor(Test):
         t2 = self.connect_as('TestPlayer')
         t.write('+ch 5\n')
         t2.write('+ch 5\n')
+        self.expect('[5] added', t)
+        self.expect('[5] added', t2)
 
         t2.write('t Admin hey there!\n')
         self.expect("admin is censoring you.", t2)
@@ -210,14 +212,17 @@ class TestCensor(Test):
         t2.write('mess admin test\n')
         self.expect("admin is censoring you.", t2)
 
-        t2.write('shout anybody there?\n')
-        self.expect("shouted to 1 player", t2)
+        t2.write('shout Test shout\n')
+        self.expect("shouted to ", t2)
+        self.expect_not('Test shout', t)
 
-        t2.write('cshout or there?\n')
-        self.expect("c-shouted to 1 player", t2)
+        t2.write('cshout Test cshout\n')
+        self.expect("c-shouted to ", t2)
+        self.expect_not('Test cshout', t)
 
-        t2.write('tell 5 or in ch 1\n')
-        self.expect("(told 1 player in channel 5)", t2)
+        t2.write('tell 5 Channel test; please ignore\n')
+        self.expect("(told ", t2)
+        self.expect_not('Channel test', t)
 
         t.write('-cen testplayer\n')
         self.expect('TestPlayer removed from your censor list.', t)
@@ -225,13 +230,13 @@ class TestCensor(Test):
         t.write('-cen testplayer\n')
         self.expect('TestPlayer is not on your censor list.', t)
 
-        t2.write('shout test 123\n')
-        self.expect("(shouted to 2 players)", t2)
-        self.expect('test 123', t)
+        t2.write('shout Test shout; please ignore\n')
+        self.expect("(shouted to", t2)
+        self.expect('Test shout', t)
 
-        t2.write('tell 5 456 789\n')
-        self.expect("(told 2 players in channel 5)", t2)
-        self.expect('TestPlayer(5): 456 789', t)
+        t2.write('tell 5 Channel test\n')
+        self.expect("(told ", t2)
+        self.expect('TestPlayer(5): Channel test', t)
 
         self.close(t)
 
@@ -241,7 +246,9 @@ class TestCensor(Test):
 
         t.write('-ch 5\n')
         t2.write('-ch 5\n')
-        t.write('-cen testplayer\n')
+        self.expect('[5] removed', t)
+        self.expect('[5] removed', t2)
+
         self.close(t)
         self.close(t2)
 

@@ -30,8 +30,8 @@ class TestAlias(Test):
         self.expect('admin(*) tells you: test 2', t)
 
         # case-insensitivity
-        t.write("I is king\n")
-        self.expect("admin(*) is king", t)
+        t.write("I is testing\n")
+        self.expect("admin(*) is testing", t)
 
         self.close(t)
 
@@ -45,10 +45,11 @@ class TestSystemAlias(Test):
 
         t.write('answer\n')
         self.expect('(1): (answering ): ', t)
-
-        t.write('! blah blah\n')
-        self.expect('shouts: blah blah', t)
         t.write('-ch 1\n')
+        self.expect('[1] removed', t)
+
+        t.write('! Test shout\n')
+        self.expect('shouts: Test shout', t)
 
         self.close(t)
 
@@ -97,17 +98,17 @@ class TestUserAlias(Test):
         t.write('alias bar\n')
         self.expect('You have no alias named "bar"', t)
 
-        t.write('alias bar shout my name is $m\n')
+        t.write('alias bar tell admin my name is $m\n')
         self.expect('Alias "bar" set.', t)
 
         self.close(t)
 
         t = self.connect_as_admin()
         t.write('alias bar\n')
-        self.expect('bar -> shout my name is $m', t)
+        self.expect('bar -> tell admin my name is $m', t)
 
         t.write('bar\n')
-        self.expect('shouts: my name is admin', t)
+        self.expect('tells you: my name is admin', t)
 
         t.write('alias bar tell admin hi there\n')
         self.expect('Alias "bar" changed.', t)

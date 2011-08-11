@@ -46,3 +46,5 @@ class Tm(Command):
             conn.write(A_('Tournament Manager mode (TM) is now shown.\n'))
         else:
             conn.write(A_('Tournament Manager mode (TM) is now not shown.\n'))
+
+# vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -229,8 +229,8 @@ class SilenceVarTest(Test):
         t2.write('+ch 5\n')
         self.expect('[5] added to your channel list.', t2)
 
-        t.write('t 5 test 1\n')
-        self.expect('test 1', t2)
+        t.write('t 5 Test 1; please ignore\n')
+        self.expect('Test 1', t2)
 
         # playing a game
         t.write('match testplayer white 1 0\n')
@@ -238,8 +238,8 @@ class SilenceVarTest(Test):
         t2.write('accept\n')
         self.expect('Creating: ', t)
         self.expect('Creating: ', t2)
-        t.write('t 5 test 2\n')
-        self.expect_not('test 2', t2)
+        t.write('t 5 Test 2; please ignore\n')
+        self.expect_not('Test 2', t2)
         t.write('abort\n')
         self.expect('Game aborted', t)
         self.expect('Game aborted', t2)
@@ -247,8 +247,8 @@ class SilenceVarTest(Test):
         # examining a game
         t2.write('ex\n')
         self.expect('examine (scratch) mode', t2)
-        t.write('t 5 test 3\n')
-        self.expect_not('test 3', t2)
+        t.write('t 5 Test 3; please ignore\n')
+        self.expect_not('Test 3', t2)
         t2.write('unex\n')
         self.expect('You are no longer examining', t2)
 
@@ -272,12 +272,12 @@ class SilenceVarTest(Test):
         # shouts
         t2.write('ex\n')
         self.expect('examine (scratch) mode', t2)
-        t.write('shout test 5\n')
-        self.expect_not('test 5', t2)
+        t.write('shout Test 5 please ignore\n')
+        self.expect_not('Test 5', t2)
 
         # c-shouts
-        t.write('cshout test 6\n')
-        self.expect_not('test 6', t2)
+        t.write('cshout Test 6 please ignore\n')
+        self.expect_not('Test 6', t2)
 
         # inchannel
         t.write('in 5\n')
@@ -285,8 +285,8 @@ class SilenceVarTest(Test):
         t2.write('unex\n')
         self.expect('You are no longer examining', t2)
 
-        t.write('t 5 test 7\n')
-        self.expect('test 7', t2)
+        t.write('t 5 Test 7; please ignore\n')
+        self.expect('Test 7; please ignore', t2)
 
         t.write('-ch 5\n')
         self.expect('[5] removed from your channel list.', t)

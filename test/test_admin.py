@@ -263,8 +263,8 @@ class CommandTest(Test):
         self.close(t2)
 
         t2 = self.connect_as('testplayer')
-        t.write('pose testplayer shout disregard that\n')
-        self.expect('TestPlayer shouts: disregard that', t)
+        t.write('pose testplayer shout Test; please ignore\n')
+        self.expect('TestPlayer shouts: Test; please ignore', t)
 
         self.close(t)
         self.close(t2)

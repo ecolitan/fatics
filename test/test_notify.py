@@ -28,7 +28,7 @@ class TestNotify(Test):
         self.expect('Only registered players', t)
 
         t2 = self.connect_as_admin()
-        t2.write('+not guest\n')
+        t2.write('+not guestabcd\n')
         self.expect('You cannot add an unregistered', t2)
 
         self.close(t)
@@ -272,7 +272,7 @@ class TestGnotify(Test):
         self.expect('Only registered players', t)
 
         t2 = self.connect_as_admin()
-        t2.write('+gnot guest\n')
+        t2.write('+gnot guestabcd\n')
         self.expect('You cannot add an unregistered', t2)
 
         self.close(t)
