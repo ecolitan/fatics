@@ -37,14 +37,14 @@ class TestLang(Test):
         t = self.connect_as_admin()
         t.write('set lang en\n')
         t.write("who\n")
-        self.expect_re(r"\d+ players displayed", t)
+        self.expect_re(r"\d+ players? displayed", t)
         t.write('set lang compat\n')
         self.expect('lang set', t)
         self.close(t)
 
         t = self.connect_as_admin()
         t.write("who\n")
-        self.expect_re(r"\d+ Players Displayed\.", t)
+        self.expect_re(r"\d+ Players? Displayed\.", t)
 
         t2 = self.connect_as_guest()
         t2.write("who\n")

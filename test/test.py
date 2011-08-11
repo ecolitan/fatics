@@ -44,7 +44,7 @@ def connect():
 class Test(unittest.TestCase):
     def expect(self, s, t, msg=None, timeout=2):
         ret = t.read_until(s, timeout)
-        if not s in ret:
+        if s not in ret:
             print("\ngot {{%s}}\nexp {{%s}}\n" % (repr(ret), repr(s)))
         self.assert_(s in ret)
 
@@ -120,6 +120,8 @@ class Test(unittest.TestCase):
             passwd = tpasswd
         t.write('%s\n' % passwd)
         s = t.read_until('fics% ', 5)
+        if 'fics%' not in s:
+            print 'got {%s}' % s
         assert('fics% ' in s)
         return t
 
