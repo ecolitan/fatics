@@ -25,12 +25,12 @@ import string
 
 from twisted.trial import unittest
 
-host = '127.0.0.1'
-port = '5000'
-admin_passwd = 'admin'
 LOCAL_IP = '127.0.0.1'
 
 sys.path.append('src/')
+
+from local_config import admin_passwd, host, port
+
 
 def connect():
     try:

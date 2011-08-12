@@ -50,6 +50,14 @@ class FingerTest(Test):
 
         self.close(t)
 
+    def test_finger_timezone(self):
+        t = self.connect_as_guest()
+        t.write('set tzone US/Eastern\n')
+        self.expect('Time zone set', t)
+        t.write('finger admin\n')
+        self.expect_re(r'Last disconnected: .* E[DS]T', t)
+        self.close(t)
+
     @with_player('admintwo')
     def test_ambiguous_finger(self):
         t = self.connect_as_admin()
