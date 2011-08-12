@@ -222,7 +222,8 @@ def with_admin(f):
 try:
     tpasswd
 except NameError:
-    tpasswd = ''.join(random.choice(string.printable) for n in range(8))
+    tpasswd = (''.join(random.choice(string.letters + string.digits)
+        for n in range(8)))
 def with_player(pname, ptitles=[]):
     assert(isinstance (ptitles, (list, tuple)))
     def wrap(f):
