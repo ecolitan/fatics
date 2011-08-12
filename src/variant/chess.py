@@ -858,8 +858,8 @@ class Position(object):
         if not m:
             return None
 
-        fr = str_to_sq(m.group(1))
-        to = str_to_sq(m.group(2))
+        fr = str_to_sq(m.group(1).lower())
+        to = str_to_sq(m.group(2).lower())
         prom = m.group(3)
         if prom == None:
             mv = Move(self, fr, to)

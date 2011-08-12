@@ -138,8 +138,10 @@ class Test(unittest.TestCase):
         t.write('addplayer %s fakeemail@example.com Test Player\n' % name)
         self.expect('Added: ', t)
         t.write('asetpass %s %s\n' % (name, passwd))
+        self.expect('Password of %s changed' % name, t)
         for lname in lists:
             t.write('addlist %s %s\n' % (lname, name))
+            self.expect('added', t)
         self.close(t)
 
     def _deluser(self, name):
