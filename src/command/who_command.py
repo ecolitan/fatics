@@ -28,7 +28,8 @@ class Showadmins(Command):
     def run(self, args, conn):
         conn.write('Admins:\n')
         conn.write('Name              Status       Idle time\n')
-        admins = [u for u in online.online if u.is_admin()]
+        # TD programs should not be displayed in showadmins (e.g. ROBOadmin)
+        admins = [u for u in online.online if u.is_admin() and not u.has_title('TD')]
         for u in admins:
             if u.session.game and u.session.game.gtype == game.PLAYED:
                 status = 'Playing'
