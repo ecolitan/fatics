@@ -26,7 +26,7 @@ class TestNews(Test):
     def test_news_guest(self):
         t = self.connect_as_guest()
         t.write("news\n")
-        self.expect("There is no news", t)
+        self.expect_re(r"(?:There is no news|Index of the last few news items:)", t)
 
         t.write("cnewsi test\n")
         self.expect("cnewsi: Command not found", t)
@@ -36,7 +36,7 @@ class TestNews(Test):
     def test_news(self):
         t = self.connect_as_admin()
         t.write("news\n")
-        self.expect("There is no news", t)
+        self.expect_re(r"(?:There is no news|Index of the last few news items:)", t)
 
         t.write("cnewsi This is a test news item that is more than 45 characters long.\n")
         self.expect('The news title exceeds', t)
@@ -63,7 +63,8 @@ class TestNews(Test):
         self.expect('News item %d not found.' % news_id, t)
 
         t.write('news\n')
-        self.expect('There is no news.', t)
+        self.expect_re(r"(?:There is no news|Index of the last few news items:)", t)
+        self.expect_not('^%d' % news_id, t)
         self.close(t)
 
     def test_news_text(self):
