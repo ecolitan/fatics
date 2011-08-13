@@ -75,12 +75,20 @@ def notify_pin(user, arrived):
     """ Notify users who have the pin variable or ivariable set. """
     if online.pin_ivar:
         if arrived:
-            #pin_ivar_str = '\n<wa> %s 011106 0P0P0P0P0P0P0P0P\n' % user.name
             pin_ivar_str = '\n<wa> %s 001222 1326P1169P0P0P0P0P0P0P\n' % user.name
         else:
             pin_ivar_str = '\n<wd> %s\n' % user.name
         for u in online.pin_ivar:
             u.write_nowrap(pin_ivar_str)
             connection.written_users.add(u)
+
+    if online.pin_var:
+        # XXX fics displays the IP address to admins
+        if arrived:
+            pin_var_str = '\n[%s has connected.]\n' % user.name
+        else:
+            pin_var_str = '\n[%s has disconnected.]\n' % user.name
+        for u in online.pin_var:
+            u.write(pin_var_str)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

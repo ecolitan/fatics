@@ -30,17 +30,27 @@ class Online(object):
         self.online_names = {}
         self.guest_count = 0
         self.pin_ivar = set()
+        self.pin_var = set()
+        self.gin_var = set()
         #self.shouts_var = set()
 
     def add(self, u):
         self.online[u.name.lower()] = u
         self.online_names[u.name.lower()] = u
+        if u.vars['pin']:
+            self.pin_var.add(u)
+        if u.vars['gin']:
+            self.gin_var.add(u)
         if u.is_guest:
             self.guest_count += 1
 
     def remove(self, u):
         if u in self.pin_ivar:
             self.pin_ivar.remove(u)
+        if u in self.pin_var:
+            self.pin_var.remove(u)
+        if u in self.gin_var:
+            self.gin_var.remove(u)
         #if u in shouts_var:
         #    shouts_var.remove(u)
         try:

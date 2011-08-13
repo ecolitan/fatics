@@ -48,7 +48,7 @@ CREATE TABLE `user` (
   `width` SMALLINT(4) NOT NULL DEFAULT 79 COMMENT 'terminal width in characters',
   `bugopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for bughouse',
   `ctell` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show channel tells from guests',
-  `gin` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show channel tells from guests',
+  `gin` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'notify when games start and end',
   `height` SMALLINT(4) NOT NULL DEFAULT 24 COMMENT 'terminal height in characters',
   `mailmess` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'email a copy of messages',
   `seek` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'show seeks',

@@ -41,13 +41,29 @@ def _set_nowrap(user, val):
     else:
         user.session.conn.transport.enableWrapping(user.vars['width'])
 
-def _set_pin(user, val):
+def _set_pin_ivar(user, val):
     """ Called when the pin ivar is set. """
     if val:
         online.online.pin_ivar.add(user)
     else:
         if user in online.online.pin_ivar:
             online.online.pin_ivar.remove(user)
+
+def _set_pin_var(user, val):
+    """ Called when the pin var is set. """
+    if val:
+        online.online.pin_var.add(user)
+    else:
+        if user in online.online.pin_var:
+            online.online.pin_var.remove(user)
+
+def _set_gin_var(user, val):
+    """ Called when the gin var is set. """
+    if val:
+        online.online.gin_var.add(user)
+    else:
+        if user in online.online.gin_var:
+            online.online.gin_var.remove(user)
 
 class Var(object):
     """This class represents the form of a variable but does not hold
@@ -285,6 +301,8 @@ class VarList(object):
         BoolVar("examine", False, N_("You will now enter examine mode after a game.\n"), N_("You will now not enter examine mode after a game.\n")).persist().add_as_var()
         BoolVar("mailmess", False, N_("Your messages will be mailed to you.\n"), N_("Your messages will not be mailed to you.\n")).persist().add_as_var()
         BoolVar("showownseek", False, N_("You will now see your own seeks.\n"), N_("You will not see your own seeks.\n")).persist().add_as_var()
+        BoolVar("pin", False, N_("You will now hear logins/logouts.\n"), N_("You will not hear logins/logouts.\n")).persist().add_as_var().set_hook(_set_pin_var)
+        BoolVar("gin", False, N_("You will now hear game results.\n"), N_("You will not hear game results.\n")).persist().add_as_var().set_hook(_set_gin_var)
         # TODO: highlight
 
         # not persistent
@@ -340,7 +358,7 @@ class VarList(object):
         BoolVar("nohighlight", False).add_as_ivar(13)
         BoolVar("highlight", False).add_as_ivar(14)
         BoolVar("showserver", False).add_as_ivar(15)
-        BoolVar("pin", False).add_as_ivar(16).set_hook(_set_pin)
+        BoolVar("pin", False).add_as_ivar(16).set_hook(_set_pin_ivar)
         BoolVar("ms", False).add_as_ivar(17)
         BoolVar("pinginfo", False).add_as_ivar(18)
         BoolVar("boardinfo", False).add_as_ivar(19)

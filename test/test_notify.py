@@ -320,4 +320,53 @@ class TestGnotify(Test):
         self.close(t2)
         self.close(t3)
 
+class TestPinVar(Test):
+    def test_pin_var(self):
+        t = self.connect_as_admin()
+        t.write('set pin 1\n')
+        self.expect('You will now hear logins/logouts.', t)
+
+        t2 = self.connect_as_guest('GuestTest')
+        self.expect('[GuestTest has connected.]', t)
+        self.close(t2)
+        self.expect('[GuestTest has disconnected.]', t)
+        self.close(t)
+
+        t = self.connect_as_admin()
+        t2 = self.connect_as_guest('GuestTwo')
+        self.expect('[GuestTwo has connected.]', t)
+        self.close(t2)
+        self.expect('[GuestTwo has disconnected.]', t)
+
+        t.write('set pin\n')
+        self.expect('You will not hear logins/logouts.', t)
+        self.close(t)
+
+class TestGinVar(Test):
+    def test_gin_var(self):
+        t = self.connect_as_admin()
+        t.write('set gin 1\n')
+        self.expect('You will now hear game results.', t)
+
+        t2 = self.connect_as_guest('GuestTest')
+        t3 = self.connect_as_guest('GuestTwo')
+        t2.write('match guesttwo 1 0 white\n')
+        self.expect('Challenge:', t3)
+        t3.write('accept\n')
+        self.expect('Creating:', t2)
+        self.expect('Creating:', t3)
+        m = self.expect_re(r'{Game (\d+) \(GuestTest vs\. GuestTwo\) Creating unrated lightning match\.}', t)
+        game_num = int(m.group(1))
+        self.close(t)
+
+        t = self.connect_as_admin()
+        t2.write('resign\n')
+        self.expect('{Game %d (GuestTest vs. GuestTwo) GuestTest resigns} 0-1\r\n' % game_num, t)
+        self.close(t2)
+        self.close(t3)
+
+        t.write('set gin\n')
+        self.expect('You will not hear game results.', t)
+        self.close(t)
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

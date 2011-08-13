@@ -66,6 +66,7 @@ class BaseUser(object):
         self.session = conn.session
         self.session.set_user(self)
         db.user_log(self.name, login=True, ip=conn.ip)
+        notify.notify_pin(self, arrived=True)
         self.is_online = True
         online.add(self)
         if not self.session.ivars['nowrap']:
@@ -74,12 +75,10 @@ class BaseUser(object):
         self.write(db.get_server_message('motd'))
         for ch in self.channels:
             channel.chlist[ch].log_on(self)
-        notify.notify_pin(self, arrived=True)
 
     def log_off(self):
         assert(self.is_online)
 
-        notify.notify_pin(self, arrived=False)
         db.user_log(self.name, login=False, ip=self.session.conn.ip)
 
         for ch in self.channels:
@@ -87,6 +86,7 @@ class BaseUser(object):
         self.session.close()
         self.is_online = False
         online.remove(self)
+        notify.notify_pin(self, arrived=False)
 
     def write(self, s):
         """ Write a string to the user. """

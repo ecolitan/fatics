@@ -545,6 +545,10 @@ class PlayedGame(Game):
                     self.black_rating, self.rated_str, self.speed_variant,
                     self.white_time, self.inc, self.number))
 
+        # notify users with the gin variable set
+        for u in online.gin_var:
+            u.write_nowrap(create_str_2)
+
         p = self.get_user_to_move()
         if p.has_timeseal():
             p.session.ping(for_move=True)
@@ -800,9 +804,11 @@ class PlayedGame(Game):
         self.when_ended = datetime.datetime.utcnow()
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
             self.white.name, self.black.name, msg, result_code)
-        self.white.write(line)
-        self.black.write(line)
+        self.white.write_nowrap(line)
+        self.black.write_nowrap(line)
         for u in self.observers:
+            u.write_nowrap(line)
+        for u in online.gin_var:
             u.write_nowrap(line)
 
         self.clock.stop()
