@@ -594,13 +594,13 @@ class RegUser(BaseUser):
 
     def set_rating(self, speed_variant,
             rating, rd, volatility, win, loss, draw, ltime):
-        db.user_set_rating(self.id, speed_variant.speed.id,
-            speed_variant.variant.id, rating, rd, volatility, win, loss,
+        db.user_set_rating(self.id, speed_variant.speed.id_,
+            speed_variant.variant.id_, rating, rd, volatility, win, loss,
             draw, win + loss + draw, ltime)
         self._load_ratings() # TODO: don't reload all ratings
 
     def del_rating(self, sv):
-        db.user_del_rating(self.id, sv.speed.id, sv.variant.id)
+        db.user_del_rating(self.id, sv.speed.id_, sv.variant.id_)
         if self._rating is not None and sv in self._rating:
             del self._rating[sv]
 

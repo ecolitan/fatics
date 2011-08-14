@@ -44,7 +44,11 @@ class Aclearhistory(Command):
 class Addplayer(Command):
     def run(self, args, conn):
         [name, email, real_name] = args
-        u = user.find_by_name_exact_for_user(name, conn)
+        try:
+            u = user.find_by_name_exact(name, conn)
+        except user.UsernameException:
+            conn.write(_('"%s" is not a valid handle.\n') % name)
+            return
         if u:
             conn.write(A_('A player named %s is already registered.\n')
                 % u.name)

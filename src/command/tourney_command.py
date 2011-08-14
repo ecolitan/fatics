@@ -84,13 +84,13 @@ class Jointourney(Command):
         # no variants yet
         if time_minute > 10:
             tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating(
-                speed_variant.from_names('standard','chess'))
+                speed_variant.standard_chess)
         elif time_minute > 2:
             tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating(
-                speed_variant.from_names('blitz','chess'))
+                speed_variant.blitz_chess)
         elif time_minute <= 2:
             tourney.tourneys[number].player_ratings[conn.user.name] = conn.user.get_rating(
-                speed_variant.from_names('lightning','chess'))
+                speed_variant.lightning_chess)
         if conn.user.name in tourney.tourneys[number].players_in:
             conn.write('You are already in tourney #%d!' % number)
             return

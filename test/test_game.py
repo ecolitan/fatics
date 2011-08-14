@@ -40,21 +40,21 @@ class TestGame(Test):
 
         # plain illegal move
         t.write('e2e5\n')
-        self.expect('Illegal move (e2e5)', t)
+        self.expect('Illegal move (e2e5).', t)
 
         t.write('e7e5\n')
-        self.expect('Illegal move (e7e5)', t)
+        self.expect('Illegal move (e7e5).', t)
 
         t.write('e3e4\n')
-        self.expect('Illegal move (e3e4)', t)
+        self.expect('Illegal move (e3e4).', t)
 
         # square occpied by own piece
         t.write('a1a2\n')
-        self.expect('Illegal move (a1a2)', t)
+        self.expect('Illegal move (a1a2).', t)
 
         # path blocked by own piece
         t.write('a1a3\n')
-        self.expect('Illegal move (a1a3)', t)
+        self.expect('Illegal move (a1a3).', t)
 
         # legal move
         t.write('e2e4\n')
@@ -157,6 +157,39 @@ class TestGame(Test):
 
         t.write('e4\n')
         self.expect_not('Illegal move', t)
+
+        self.close(t)
+        self.close(t2)
+
+    def test_illegal_move(self):
+        t = self.connect_as_guest()
+        t2 = self.connect_as_admin()
+
+        t.write('set style 12\n')
+        self.expect('Style 12 set.', t)
+        t2.write('set style 12\n')
+        self.expect('Style 12 set.', t2)
+
+        t.write('match admin white 1 0\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t.write('e4\n')
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        t2.write('e4\n')
+        self.expect('Illegal move (e4).', t2)
+        # the style12 string should be re-sent (eboard depends on this)
+        self.expect('<12> ', t2)
+
+        t2.write('abort\n')
+        self.expect('aborted', t)
 
         self.close(t)
         self.close(t2)

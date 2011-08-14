@@ -244,7 +244,7 @@ class Game(object):
         self.observers.add(u)
         u.write(_('You are now observing game %d.\n') % self.number)
         self.send_info_str(u)
-        self.send_board(u)
+        self.send_board(u, isolated=True)
 
     def send_info_str(self, u):
         u.write('Game %d: %s\n' % (self.number, self.info_str))
@@ -375,7 +375,10 @@ class Game(object):
                     self.get_user_side(conn.user) != self.variant.get_turn()):
                 conn.write(_('It is not your move.\n'))
             elif illegal:
-                conn.write(_('Illegal move (%s)\n') % s)
+                conn.write(_('Illegal move (%s).\n') % s)
+                # Re-send the board in case of an illegal move.
+                # Eboard depends on this if legality checking is off.
+                self.send_board(conn.user, True)
             else:
                 self.variant.do_move(mv)
                 self.next_move(mv, conn)
@@ -916,8 +919,8 @@ class PlayedGame(Game):
             'movetext': self.get_movetext(),
             'eco': self.get_eco()[1],
             'ply_count': self.get_ply_count(),
-            'variant_id': self.speed_variant.variant.id,
-            'speed_id': self.speed_variant.speed.id,
+            'variant_id': self.speed_variant.variant.id_,
+            'speed_id': self.speed_variant.speed.id_,
             'rated': self.rated,
             'when_started': self.when_started,
             'when_adjourned': datetime.datetime.utcnow()

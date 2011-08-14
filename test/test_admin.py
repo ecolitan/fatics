@@ -22,10 +22,16 @@ from test import *
 class CommandTest(Test):
     def test_addplayer_and_remplayer(self):
         t = self.connect_as_admin()
+
+        t.write('addplayer TestPlayer1 nobody@example.com Foo Bar\n')
+        self.expect('"TestPlayer1" is not a valid handle.', t)
+
         t.write('addplayer TestPlayer nobody@example.com Foo Bar\n')
         self.expect('Added: >TestPlayer< >Foo Bar< >nobody@example.com<', t)
         t.write('addplayer testplayer nobody@example.com Foo Bar\n')
         self.expect('already registered', t)
+
+
         t.write('remplayer testplayer\n')
         self.expect('Player TestPlayer removed.', t)
         self.close(t)

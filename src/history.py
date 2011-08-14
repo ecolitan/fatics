@@ -58,8 +58,8 @@ class History(object):
 
         (i, eco, longeco) = game.get_eco()
         game_id = db.game_add(game.white.name, white_rating, game.black.name,
-            black_rating, eco, game.speed_variant.variant.id,
-            game.speed_variant.speed.id, game.white_time, game.inc,
+            black_rating, eco, game.speed_variant.variant.id_,
+            game.speed_variant.speed.id_, game.white_time, game.inc,
             game.rated, result_code, result_reason, game.get_ply_count(),
             movetext, game.when_started, game.when_ended)
 

@@ -264,6 +264,17 @@ class TestCompressMove(Test):
         t2.write('d5\n')
         self.expect('<d1> %d 2 d5 d7d5 0 120000 0\r\n' % n, t)
 
+
+        # first board of observed game should not be compressed
+        t3 = self.connect_as_guest()
+        t3.write('set style 12\n')
+        self.expect('Style 12 set.', t3)
+        t3.write('iset compressmove 1\n')
+        self.expect('compressmove set.', t3)
+        t3.write('ob guestabcd\n')
+        self.expect('<12> ', t3)
+        self.close(t3)
+
         t.write('abort\n')
         t2.write('abort\n')
         self.expect('aborted by agreement', t)

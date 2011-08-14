@@ -25,30 +25,30 @@ variant_names = {}
 variant_abbrevs = {}
 
 class Speed(object):
-    def __init__(self, id, name, abbrev):
-        self.id = id
+    def __init__(self, id_, name, abbrev):
+        self.id_ = id_
         self.name = name
         self.abbrev = abbrev
-        speed_ids[id] = self
+        speed_ids[id_] = self
         speed_names[name] = self
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.id_ == other.id_
 
     def __str__(self):
         return self.name
 
 class Variant(object):
-    def __init__(self, id, name, abbrev):
-        self.id = id
+    def __init__(self, id_, name, abbrev):
+        self.id_ = id_
         self.name = name
         self.abbrev = abbrev
-        variant_ids[id] = self
+        variant_ids[id_] = self
         variant_names[name] = self
         variant_abbrevs[abbrev] = self
 
     def __eq__(self, other):
-        return self.id == other.id
+        return self.id_ == other.id_
 
     def __str__(self):
         return self.name
@@ -59,7 +59,7 @@ class SpeedAndVariant(object):
         self.variant = variant
 
     def __hash__(self):
-        return self.speed.id | (self.variant.id << 3)
+        return self.speed.id_ | (self.variant.id_ << 3)
 
     def __eq__(self, other):
         return self.speed == other.speed and self.variant == other.variant
@@ -71,13 +71,6 @@ class SpeedAndVariant(object):
         else:
             return '%s %s' % (self.speed.name, self.variant.name)
 
-def init():
-    for row in db.get_speeds():
-        Speed(row['speed_id'], row['speed_name'], row['speed_abbrev'])
-    for row in db.get_variants():
-        Variant(row['variant_id'], row['variant_name'], row['variant_abbrev'])
-init()
-
 def from_names(speed_name, variant_name):
     return SpeedAndVariant(speed_names[speed_name],
         variant_names[variant_name])
@@ -85,6 +78,21 @@ def from_names(speed_name, variant_name):
 def from_ids(speed_id, variant_id):
     return SpeedAndVariant(speed_ids[speed_id],
         variant_ids[variant_id])
+
+def init():
+    for row in db.get_speeds():
+        Speed(row['speed_id'], row['speed_name'], row['speed_abbrev'])
+    for row in db.get_variants():
+        Variant(row['variant_id'], row['variant_name'], row['variant_abbrev'])
+    global standard_chess, blitz_chess, lightning_chess
+    global blitz_chess960, blitz_bughouse, blitz_crazyhouse
+    standard_chess = from_names('standard', 'chess')
+    blitz_chess = from_names('blitz', 'chess')
+    lightning_chess = from_names('lightning', 'chess')
+    blitz_chess960 = from_names('blitz', 'chess960')
+    blitz_bughouse = from_names('blitz', 'bughouse')
+    blitz_crazyhouse = from_names('blitz', 'crazyhouse')
+init()
 
 variant_class = {}
 def _init():
