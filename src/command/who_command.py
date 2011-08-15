@@ -166,19 +166,22 @@ class Who(Command):
             assert(False)
         users.sort(key=compare)
 
-        count = 0
-        conn.write('\n')
-        for u in users:
-            if sort_order == 'A':
-                conn.write('     ')
-            elif sort_order == 'l':
-                conn.write('%4d ' % u.get_rating(speed_variant.blitz_chess))
-            else:
-                conn.write('%4d ' % compare(u))
-            conn.write(u.get_display_name() + '\n')
-            count = count + 1
-        conn.write('\n')
+        if fmt == 't':
+            count = 0
+            conn.write('\n')
+            for u in users:
+                if sort_order == 'A':
+                    conn.write('     ')
+                elif sort_order == 'l':
+                    conn.write('%4d ' % u.get_rating(speed_variant.blitz_chess))
+                else:
+                    conn.write('%4d ' % compare(u))
+                conn.write(u.get_display_name() + '\n')
+                count = count + 1
+            conn.write('\n')
 
-        conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
+            conn.write(ngettext('%d player displayed.\n\n', '%d players displayed.\n\n', count) % count)
+        else:
+            conn.write('TODO: unsupposted format\n')
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
