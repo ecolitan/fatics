@@ -22,6 +22,7 @@ from command import ics_command, Command
 import match
 import user
 import game
+import speed_variant
 
 from command_parser import BadCommandError
 
@@ -90,5 +91,60 @@ class Robserve(Command):
                 pass
             else:
                 g.observe(u2)
+
+@ics_command('getpi', 'w')
+class Getpi(Command):
+    def run(self, args, conn):
+        if not conn.user.has_title('TD'):
+            conn.write(_('Only TD programs are allowed to use this command.\n'))
+            return
+        try:
+            u = user.find_by_name_exact(args[0], online_only=True)
+            if u and u.is_online:
+                if u.is_guest:
+                    # it's not clear why the lasker server only prints
+                    # 3 numbers here; I don't know if FICS is any
+                    # different
+                    conn.write('*getpi %s -1 -1 -1*\n' % u.name)
+                else:
+                    # on original FICS the wild, blitz, standard, and
+                    # lightning ratings are given
+                    # TODO: some way to update this for the new system
+                    # where each speed and variant has a separate rating?
+                    conn.write('*getpi %s %d %d %d %d*\n' % (u.name,
+                        u.get_rating(speed_variant.blitz_chess960),
+                        u.get_rating(speed_variant.blitz_chess),
+                        u.get_rating(speed_variant.standard_chess),
+                        u.get_rating(speed_variant.lightning_chess)))
+            else:
+                # do nothing
+                pass
+        except user.UsernameException:
+            # do nothing
+            pass
+
+@ics_command('getgi', 'w')
+class Getgi(Command):
+    def run(self, args, conn):
+        if not conn.user.has_title('TD'):
+            conn.write(_('Only TD programs are allowed to use this command.\n'))
+            return
+        try:
+            u = user.find_by_name_exact(args[0], online_only=True)
+            if u and u.is_online and not u.is_guest:
+                g = u.session.game
+                if g and g.gtype == game.PLAYED:
+                    conn.write('*getgi %s %s %s %d %d %d %d %d*\n' % (u.name,
+                        g.white.name, g.black.name, g.number,
+                        g.white_time, g.inc,
+                        g.rated, g.private))
+                else:
+                    conn.write(_('%s is not playing a game.\n') % u.name)
+            else:
+                # do nothing
+                pass
+        except user.UsernameException:
+            # do nothing
+            pass
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

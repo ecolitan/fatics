@@ -21,6 +21,7 @@ from gettext import ngettext
 
 import online
 import game
+import connection
 
 from config import config
 
@@ -50,6 +51,9 @@ def heartbeat():
             u = g.get_user_to_move()
             opp = g.get_opp(u)
             if opp.vars['autoflag']:
+                # TODO: send auto-flagging message a la original fics.
                 g.clock.check_flag(g, g.get_user_side(u))
+
+    connection.send_prompts()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -232,8 +232,13 @@ class TestFlag(Test):
         self.expect('<12> rnbqkbnr pppp-ppp -------- ----p--- ----PP-- -------- PPPP--PP RNBQKBNR B -1 1 1 1 1 0 1 admin TestPlayer 1 0 1 39 39 11 10 2 P/f2-f4 (0:00) f4 1 1 0', t2)
 
         time.sleep(10)
+        # XXX TODO
+        #self.expect('Auto-flagging.\r\n', t, timeout=10)
         self.expect('TestPlayer forfeits on time} 1-0', t, timeout=10)
         self.expect('TestPlayer forfeits on time} 1-0', t2, timeout=10)
+
+        self.expect('fics%', t)
+        self.expect('fics%', t2)
 
         t.write('aclearhist admin\n')
         self.expect('History of admin cleared.', t)

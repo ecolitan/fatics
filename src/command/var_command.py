@@ -96,12 +96,12 @@ class Variables(Command):
             conn.user.is_admin()) else '???'
 
         conn.write(_("Variable settings of %s:\n\n") % u.name)
-        conn.write('time=%(time)d       private=?     shout=%(shout)d         pin=?           style=%(style)d \n' % u.vars)
+        conn.write('time=%(time)d       private=?     shout=%(shout)d         pin=%(pin)d           style=%(style)d \n' % u.vars)
         conn.write('inc=%(inc)d       jprivate=?    cshout=%(cshout)d        notifiedby=%(notifiedby)d    flip=?\n' % u.vars)
         conn.write('rated=?                    kibitz=%(kibitz)d        availinfo=?     highlight=?\n' % u.vars)
         conn.write('open=%(open)d       automail=?    kiblevel=?      availmin=?      bell=%(bell)d\n' % u.vars)
         conn.write('pgn=?        tell=%(tell)d        availmax=?      width=%(width)d \n' % u.vars)
-        conn.write('bugopen=%(bugopen)d                  ctell=%(ctell)d         gin=?           height=%(height)d \n' % u.vars)
+        conn.write('bugopen=%(bugopen)d                  ctell=%(ctell)d         gin=%(gin)d           height=%(height)d \n' % u.vars)
         conn.write('mailmess=%(mailmess)d                 seek=%(seek)d          ptime=%(ptime)d\n' % u.vars)
         conn.write('tourney=?    messreply=?   chanoff=%(chanoff)d       showownseek=%(showownseek)d   tzone=%(disp_tzone)s\n' % u.vars)
         conn.write('provshow=?                 silence=%(silence)d                       Lang=%(lang)s\n' % u.vars)

@@ -37,6 +37,13 @@ from login import login
 # the set of users we have sent messages to and to whom we should
 # thefore send prompts
 written_users = set()
+def send_prompts():
+    for u in written_users:
+        if u.is_online:
+            u.send_prompt()
+    written_users.clear()
+    assert(not written_users)
+
 
 class Connection(basic.LineReceiver):
     implements(twisted.internet.interfaces.IProtocol)
@@ -166,14 +173,7 @@ class Connection(basic.LineReceiver):
         assert(self.user.is_online)
         written_users.add(self.user)
         self.state = 'prompt'
-        self.send_prompts()
-
-    def send_prompts(self):
-        for u in written_users:
-            if u.is_online:
-                u.send_prompt()
-        written_users.clear()
-        assert(not written_users)
+        send_prompts()
 
     def lineReceived_prompt(self, line):
         if line == TIMESEAL_REPLY:
@@ -186,7 +186,7 @@ class Connection(basic.LineReceiver):
         try:
             command_parser.parser.parse(line, self)
         finally:
-            self.send_prompts()
+            send_prompts()
 
     def loseConnection(self, reason):
         self.state = 'quitting'
