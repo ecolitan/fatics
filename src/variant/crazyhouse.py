@@ -958,7 +958,7 @@ class Position(object):
 
         return False
 
-    lalg_re = re.compile(r'([a-h][1-8])([a-h][1-8])(?:=([NBRQ]))?$', re.I)
+    lalg_re = re.compile(r'([a-h][1-8])-?([a-h][1-8])(?:=([NBRQ]))?$', re.I)
     def move_from_lalg(self, s):
         m = self.lalg_re.match(s)
         if not m:

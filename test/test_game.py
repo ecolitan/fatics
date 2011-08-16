@@ -124,6 +124,13 @@ class TestGame(Test):
             'e7e6', 'd2d4', 'd8e7', 'c1f4', 'e8c8']
         self._assert_game_is_legal(moves)
 
+    def test_lalg_computer_notation(self):
+        # computer notation as described in the intro_moving help file of
+        # original FICS
+        moves = ['g2-g3', 'b7-b6', 'f1-g2', 'b8-c6', 'g1-f3', 'c8-b7', 'e1-g1',
+            'e7-e6', 'd2-d4', 'd8-e7', 'c1-f4', 'e8-c8']
+        self._assert_game_is_legal(moves)
+
     def test_promotion(self):
         moves = ['d4', 'd5', 'c4', 'c6', 'Nf3', 'Nf6', 'e3', 'Bf5', 'Qb3',
             'Qb6', 'cxd5', 'Qxb3', 'axb3', 'Bxb1', 'dxc6', 'Be4', 'Rxa7',
