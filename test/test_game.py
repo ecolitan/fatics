@@ -541,8 +541,8 @@ class TestMoves(Test):
         self.expect('GuestABCD moves: c4', t)
 
         t.write('moves\n')
-        self.expect('Movelist for game 1:\r\n\r\nGuestABCD (++++) vs. GuestABCD (++++) --- ', t)
-        self.expect('''Move  GuestABCD               GuestABCD\r\n----  ---------------------   ---------------------\r\n''', t)
+        self.expect_re(r'Movelist for game \d+:\r\n\r\nWhite \(0\) vs\. Black \(0\) --- ', t)
+        self.expect('''Move  White                   Black\r\n----  ---------------------   ---------------------\r\n''', t)
         self.expect('''  1.  d4      (0:00)          d5      (0:00)\r\n''', t)
         self.expect('''  2.  c4      (0:00)''', t)
         self.expect('''      {Still in progress} *''', t)

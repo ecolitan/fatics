@@ -33,7 +33,7 @@ class TestExamine(Test):
 
         t.write('examine\n')
         self.expect('Starting a game in examine (scratch) mode.', t)
-        self.expect('<12> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 1 GuestPQLQ GuestPQLQ 2 0 0 39 39 0 0 1 none (0:00) none 0 0 0', t)
+        self.expect_re(r'\<12\> rnbqkbnr pppppppp -------- -------- -------- -------- PPPPPPPP RNBQKBNR W -1 1 1 1 1 0 \d+ GuestPQLQ GuestPQLQ 2 0 0 39 39 0 0 1 none \(0:00\) none 0 0 0', t)
 
         t.write('forward\n')
         self.expect("You're at the end of the game.", t)
@@ -217,9 +217,9 @@ class TestExamine(Test):
         t.write('moves\n')
 
         # original FICS would send "GuestABCD (UNR) vs. GuestABCD (UNR)" here
-        self.expect('Movelist for game 1:\r\n\r\nGuestABCD (++++) vs. GuestABCD (++++) --- ', t)
+        self.expect('Movelist for game 1:\r\n\r\nWhite (0) vs. Black (0) --- ', t)
         self.expect('Unrated untimed match, initial time: 0 minutes, increment: 0 seconds.', t)
-        self.expect('Move  GuestABCD               GuestABCD', t)
+        self.expect('Move  White                   Black', t)
         self.expect('----  ---------------------   ---------------------', t)
         self.expect('  1.  e4      (0:00.000)      e5      (0:00.000)', t)
         self.expect('  2.  f4      (0:00.000)', t)

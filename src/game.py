@@ -320,28 +320,13 @@ class Game(object):
         # places it usually uses (++++) or (----) instead.  This looks like
         # gratuitous inconsistency to me, so let's see if we can get
         # away with using the same notation everywhere.
-        if self.gtype == PLAYED:
-            white_name = self.white.name
-            black_name = self.black.name
-            white_rating = self.white_rating
-            black_rating = self.black_rating
-            white_time = self.white_time
-        else:
-            assert(self.gtype == EXAMINED)
-            white_name = list(self.players)[0].name
-            # XXX when examining a history game, it should use the players'
-            # names here
-            black_name = white_name
-            white_rating = list(self.players)[0].get_rating(self.speed_variant)
-            black_rating = white_rating
-
-        conn.write("%s (%s) vs. %s (%s) --- %s\n" % (white_name,
-            white_rating, black_name, black_rating, time_str))
+        conn.write("%s (%s) vs. %s (%s) --- %s\n" % (self.white_name,
+            self.white_rating, self.black_name, self.black_rating, time_str))
 
         conn.write("%s %s match, initial time: %d minutes, increment: %d seconds.\n\n" %
             (self.rated_str.capitalize(), self.speed_variant,
                 self.white_time, self.inc))
-        conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (white_name, black_name))
+        conn.write('Move  %-23s %s\n----  ---------------------   ---------------------\n' % (self.white_name, self.black_name))
         i = self.variant.pos.start_ply & ~1
         while i < self.variant.pos.ply:
             if i < self.variant.pos.start_ply:
@@ -388,7 +373,7 @@ class Game(object):
         conn.write(_('Game %d: Game information.\n\n') % self.number)
         if self.gtype == PLAYED:
             conn.write(_('  %s (%s) vs %s (%s) %s %s game.\n') % (
-                self.white.name, self.white_rating, self.black.name,
+                self.white_name, self.white_rating, self.black_name,
                 self.black_rating, self.rated_str, self.speed_variant))
             # XXX display something different for non-fischer clocks?
             conn.write(_('  Time controls: %d %d\n') %
@@ -470,7 +455,7 @@ class PlayedGame(Game):
 
         # GuestBEZD (++++) admin (1000) unrated blitz 2 12
         self.info_str = '%s (%s) %s (%s) %s %s %d %d' % (
-            self.white.name, self.white_rating, self.black.name,
+            self.white_name, self.white_rating, self.black_name,
             self.black_rating, self.rated_str, self.speed_variant,
             self.white_time, self.inc)
         # it seems original FICS uses "creating" here even for
@@ -480,7 +465,7 @@ class PlayedGame(Game):
         self.black.write_nowrap(create_str)
 
         create_str_2 = '{Game %d (%s vs. %s) %s %s %s match.}\n' % (
-            self.number, self.white.name, self.black.name, creating,
+            self.number, self.white_name, self.black_name, creating,
             self.rated_str, self.speed_variant)
         self.white.write_nowrap(create_str_2)
         self.black.write_nowrap(create_str_2)
@@ -544,7 +529,7 @@ class PlayedGame(Game):
                 #u.write_('\nGame notification: %s: Game %d\n' % (
                 #    self.info_str, self.number))
                 u.write('\nGame notification: %s (%s) vs. %s (%s) %s %s %d %d: Game %d\n' % (
-                    self.white.name, self.white_rating, self.black.name,
+                    self.white_name, self.white_rating, self.black_name,
                     self.black_rating, self.rated_str, self.speed_variant,
                     self.white_time, self.inc, self.number))
 
@@ -568,6 +553,8 @@ class PlayedGame(Game):
             assert(adj['black_user_id'] == a.id)
             self.white = b
             self.black = a
+        self.white_name = self.white.name
+        self.black_name = self.black.name
 
         self.speed_variant = speed_variant.from_names(adj['speed_name'],
             adj['variant_name'])
@@ -611,6 +598,8 @@ class PlayedGame(Game):
             assert(side == BLACK)
             self.white = chal.b
             self.black = chal.a
+        self.white_name = self.white.name
+        self.black_name = self.black.name
 
         self.speed_variant = chal.speed_variant
         self.white_rating = self.white.get_rating(self.speed_variant)
@@ -636,9 +625,6 @@ class PlayedGame(Game):
         if chal.clock_name == 'overtime':
             self.overtime_move_num = chal.overtime_move_num
             self.overtime_bonus = chal.overtime_bonus
-
-        self.white.session.is_white = True
-        self.black.session.is_white = False
 
         self.rated = chal.rated
 
@@ -753,9 +739,9 @@ class PlayedGame(Game):
                     # mate, and the linked game can never provide a piece
                     # to stop it
                     if self.variant.get_turn() == WHITE:
-                        self.result('%s checkmated' % self.white.name, '0-1')
+                        self.result('%s checkmated' % self.white_name, '0-1')
                     else:
-                        self.result('%s checkmated' % self.black.name, '1-0')
+                        self.result('%s checkmated' % self.black_name, '1-0')
                 elif self.bug_link.variant.pos.is_checkmate:
                     # linked game is also a mate.  If the mating players are on
                     # the same team, that team wins; otherwise it's a draw.
@@ -764,11 +750,11 @@ class PlayedGame(Game):
                     if self.bug_link.variant.get_turn() != self.variant.get_turn():
                         self.is_active = False
                         if self.variant.get_turn() == WHITE:
-                            self.bug_link.result('%s and %s checkmated' % (self.bug_link.black.name, self.white.name), '1-0')
-                            self.result('%s and %s checkmated' % (self.bug_link.black.name, self.white.name), '0-1')
+                            self.bug_link.result('%s and %s checkmated' % (self.bug_link.black_name, self.white_name), '1-0')
+                            self.result('%s and %s checkmated' % (self.bug_link.black_name, self.white_name), '0-1')
                         else:
-                            self.bug_link.result('%s and %s checkmated' % (self.bug_link.white.name, self.black.name, '0-1'))
-                            self.result('%s and %s checkmated' % (self.bug_link.white.name, self.black.name), '1-0')
+                            self.bug_link.result('%s and %s checkmated' % (self.bug_link.white_name, self.black_name, '0-1'))
+                            self.result('%s and %s checkmated' % (self.bug_link.white_name, self.black_name), '1-0')
                     else:
                         self.is_active = False
                         self.bug_link.result('Game drawn by mate on both boards', '1/2-1/2')
@@ -781,16 +767,16 @@ class PlayedGame(Game):
                 elif self.bug_link.variant.pos.is_checkmate:
                     if self.bug_link.variant.get_turn() == WHITE:
                         self.bug_link.result('%s checkmated'
-                            % self.bug_link.white.name, '0-1')
+                            % self.bug_link.white_name, '0-1')
                     else:
                         self.bug_link.result('%s checkmated'
-                            % self.bug_link.black.name, '1-0')
+                            % self.bug_link.black_name, '1-0')
         else:
             if self.variant.pos.is_checkmate:
                 if self.variant.get_turn() == WHITE:
-                    self.result('%s checkmated' % self.white.name, '0-1')
+                    self.result('%s checkmated' % self.white_name, '0-1')
                 else:
-                    self.result('%s checkmated' % self.black.name, '1-0')
+                    self.result('%s checkmated' % self.black_name, '1-0')
             elif self.variant.pos.is_stalemate:
                 self.result('Game drawn by stalemate', '1/2-1/2')
             elif self.variant.pos.is_draw_nomaterial:
@@ -806,7 +792,7 @@ class PlayedGame(Game):
     def result(self, msg, result_code):
         self.when_ended = datetime.datetime.utcnow()
         line = '\n{Game %d (%s vs. %s) %s} %s\n' % (self.number,
-            self.white.name, self.black.name, msg, result_code)
+            self.white_name, self.black_name, msg, result_code)
         self.white.write_nowrap(line)
         self.black.write_nowrap(line)
         for u in self.observers:
@@ -870,12 +856,10 @@ class PlayedGame(Game):
     def allobservers(self, conn):
         if self.observers:
             olist = [u.get_display_name() for u in self.observers]
-            white_name = self.white.name
-            black_name = self.black.name
             conn.write(ngettext('Observing %d [%s vs. %s]: %s (%d user)\n',
                     'Observing %d [%s vs. %s]: %s (%d users)\n',
                     len(olist)) %
-                (self.number, white_name, black_name,
+                (self.number, self.white_name, self.black_name,
                     ' '.join(olist), len(olist)))
             return True
         else:

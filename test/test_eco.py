@@ -185,7 +185,7 @@ class TestEco(Test):
             wtm = not wtm 
 
         t.write('eco\n')
-        self.expect('Eco for game 1 (GuestABCD vs. admin):', t)
+        self.expect_re(r'Eco for game \d+ \(GuestABCD vs\. admin\):', t)
         self.expect(' ECO[  7]: C15h', t)
         self.expect(' NIC[  6]: FR.08', t)
         self.expect('LONG[  7]: French: Winawer, Müller-Zhuravlev Gambit', t)
@@ -196,5 +196,18 @@ class TestEco(Test):
 
         self.close(t)
         self.close(t2)
+
+    def test_eco_examined(self):
+        t = self.connect_as_guest('GuestTest')
+        t.write('e\n')
+        self.expect('Starting a game', t)
+        t.write('e4\ne5\nNf3\nf5\nNxe5\nQf6\nd4\nd6\nNc4\nfxe4\nNc3\nQg6\n')
+        self.expect('moves: Qg6', t)
+        t.write('eco\n')
+        self.expect_re(r'Eco for game \d+ \(White vs\. Black\):', t)
+        self.expect('LONG[ 11]: Latvian Gambit: 3.Nxe5 Qf6 4.d4 d6 5.Nc4 fxe4 6.Nc3', t)
+        t.write('unex\n')
+        self.expect('no longer examining', t)
+        self.close(t)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

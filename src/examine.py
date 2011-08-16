@@ -33,6 +33,8 @@ class ExaminedGame(Game):
 
         self.white_time = 0
         self.black_time = 0
+        self.white_rating = 0 # XXX
+        self.black_rating = 0 # XXX
         self.clock = clock.UntimedClock()
         self.inc = 0
         self.rated_str = 'unrated'
@@ -46,6 +48,8 @@ class ExaminedGame(Game):
             self.speed_variant = speed_variant.from_names('untimed', 'chess')
             self.variant = speed_variant.variant_class[self.speed_variant.variant.name](self)
             self.moves = []
+            #self.white_name = list(self.players)[0].name
+            #self.black_name = self.white_name
             self.white_name = 'White'
             self.black_name = 'Black'
             self.result_code = None

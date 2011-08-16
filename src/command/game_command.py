@@ -138,7 +138,7 @@ class Eco(Command, GameMixin):
         if g:
             (ply, eco, long) = g.get_eco()
             (nicply, nic) = g.get_nic()
-            conn.write(_('Eco for game %d (%s vs. %s):\n') % (g.number, g.white.name, g.black.name))
+            conn.write(_('Eco for game %d (%s vs. %s):\n') % (g.number, g.white_name, g.black_name))
             conn.write(_(' ECO[%3d]: %s\n') % (ply, eco))
             conn.write(_(' NIC[%3d]: %s\n') % (nicply, nic))
             conn.write(_('LONG[%3d]: %s\n') % (ply, long))
