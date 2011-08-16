@@ -264,10 +264,10 @@ class Seek(MatchStringParser):
                     u.write(seek_str)
 
         # set the string for use in the "sought" display
-        self._str = '%3d %4s %-17s %3d %3d %-7s %s%s%s%s\n' % (
+        self._str = '%3d %4s %-17s %3d %3d %-7s %-10s%-9s %4d-%4d%s' % (
             self.num, self.rating, dname, self.time, self.inc,
-            rated_str, speed_name, variant_str, clock_str,
-            side_str)
+            rated_str, speed_name + variant_str + clock_str,
+            side_str, 0, 9999, mf_str)
 
         return count
 
