@@ -19,7 +19,7 @@
 import re
 import subprocess
 
-TIMESEAL_1_PING = '[G]'
+TIMESEAL_1_PING = '[G]\n'
 ZIPSEAL_PING = '[G]\x00'
 REPLY = '\x02\x39' # also known as "\x29" or "9"
 

@@ -42,10 +42,21 @@
 static int crypt(char *s,int l)
 {
         struct timeval tv;
+        int j;
+        printf("before: ");
+        for (j =0; j < l; j++) {
+                printf("%02x ", s[j]);
+        }
+        printf("\n");
         gettimeofday(&tv,NULL);
         s[l++]='\x18';
         l += sprintf(&s[l],"%lx\n",(tv.tv_sec%10000)*1000+tv.tv_usec/1000);
         //s[l++]='\x0a';
+        printf("after: ");
+        for (j =0; j < l; j++) {
+                printf("%02x ", s[j]);
+        }
+        printf("\n");
         return l;
 }
 

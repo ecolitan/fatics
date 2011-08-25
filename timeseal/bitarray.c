@@ -196,11 +196,13 @@ void BitArrayDump(bit_array_t *ba, FILE *outFile)
 
     fprintf(outFile, "%02X", ba->array[0]);     /* first byte */
 
+#if 1
     for (i = 1; i < BITS_TO_CHARS(ba->numBits); i++)
     {
         /* remaining bytes with a leading space */
         fprintf(outFile, " %02X", ba->array[i]);
     }
+#endif
 }
 
 /***************************************************************************
