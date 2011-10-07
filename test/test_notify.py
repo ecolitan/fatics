@@ -296,14 +296,14 @@ class TestGnotify(Test):
         self.expect('gnotify list: 0 names', t)
 
         t.write('+gnotify testplayer\n')
-        self.expect("TestPlayer added to your gnotify list", t)
+        self.expect("[TestPlayer] added to your gnotify list", t)
 
         t.write('=gnot\n')
         self.expect('gnotify list: 1 name', t)
         self.expect('TestPlayer', t)
 
         t.write('+gnot testplayer\n')
-        self.expect("TestPlayer is already on your gnotify list", t)
+        self.expect("[TestPlayer] is already on your gnotify list", t)
         self.close(t)
 
         t = self.connect_as_admin()
@@ -315,6 +315,11 @@ class TestGnotify(Test):
         t3.write('a\n')
         self.expect('Game notification: GuestABCD (++++) vs. TestPlayer (----) unrated blitz crazyhouse 2 12: Game 1', t)
         t3.write('abo\n')
+
+        t.write('-gnotify testplayer\n')
+        self.expect('[TestPlayer] removed from your gnotify list.', t)
+        t.write('-gnotify testplayer\n')
+        self.expect('[TestPlayer] is not on your gnotify list.', t)
 
         self.close(t)
         self.close(t2)
@@ -355,7 +360,7 @@ class TestGinVar(Test):
         t3.write('accept\n')
         self.expect('Creating:', t2)
         self.expect('Creating:', t3)
-        m = self.expect_re(r'{Game (\d+) \(GuestTest vs\. GuestTwo\) Creating unrated lightning match\.}', t)
+        m = self.expect_re('\n' + r'{Game (\d+) \(GuestTest vs\. GuestTwo\) Creating unrated lightning match\.}', t)
         game_num = int(m.group(1))
         self.close(t)
 

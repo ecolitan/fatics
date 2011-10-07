@@ -460,11 +460,11 @@ class PlayedGame(Game):
             self.white_time, self.inc)
         # it seems original FICS uses "creating" here even for
         # adjourned games
-        create_str = '\nCreating: %s\n' % self.info_str
+        create_str = '\nCreating: %s' % self.info_str
         self.white.write_nowrap(create_str)
         self.black.write_nowrap(create_str)
 
-        create_str_2 = '{Game %d (%s vs. %s) %s %s %s match.}\n' % (
+        create_str_2 = '\n{Game %d (%s vs. %s) %s %s %s match.}\n' % (
             self.number, self.white_name, self.black_name, creating,
             self.rated_str, self.speed_variant)
         self.white.write_nowrap(create_str_2)

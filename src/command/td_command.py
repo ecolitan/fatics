@@ -67,10 +67,10 @@ class Tournset(Command):
 
         u2.vars['tourney'] = str(args[1])
         if args[1]:
-            u2.write_('%s has set your tourney variable to ON.\n',
+            u2.write_('\n%s has set your tourney variable to ON.\n',
                 (conn.user.name,))
         else:
-            u2.write_('%s has set your tourney variable to OFF.\n',
+            u2.write_('\n%s has set your tourney variable to OFF.\n',
                 (conn.user.name,))
 
 @ics_command('robserve', 'wi')

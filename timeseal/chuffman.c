@@ -109,12 +109,6 @@ int CHuffmanInit(struct CHuffman *ch)
 	    }
     }
 
-	/*for (i = 18; i < 23; i++) {
-		printf("i %d;val %d; len %d; ", i, ch->canonicalList[i].value, ch->canonicalList[i].codeLen);
-		BitArrayDump(ch->canonicalList[i].code, stdout);
-		printf("\n");
-	}*/
-
     return TRUE;
 }
 
@@ -217,7 +211,7 @@ int CHuffmanDecode(struct CHuffman *ch)
 				fprintf(stderr, "buffer full\n");
 				exit(1);
 			}
-				ch->outBuf[ch->outIndex++] = ch->canonicalList[i].value;
+			ch->outBuf[ch->outIndex++] = ch->canonicalList[i].value;
                     }
 
                     BitArrayClearAll(ch->code);
@@ -323,7 +317,6 @@ static int AssignCanonicalCodes(canonical_list_t *cl)
     BitArrayClearAll(code);
 
     length = cl[(NUM_CHARS - 1)].codeLen;
-	printf("length %d\n", length);
 
     for(i = (NUM_CHARS - 1); i >= 0; i--)
     {

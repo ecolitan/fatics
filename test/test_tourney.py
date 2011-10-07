@@ -31,9 +31,9 @@ class TestTourney(Test):
         self.expect('Usage: ', t2)
 
         t2.write("tournset admin 1\n")
-        self.expect('tdplayer has set your tourney variable to ON.', t)
+        self.expect('\ntdplayer has set your tourney variable to ON.', t)
         t2.write("tournset admin 0\n")
-        self.expect('tdplayer has set your tourney variable to OFF.', t)
+        self.expect('\ntdplayer has set your tourney variable to OFF.', t)
 
         self.close(t)
         self.close(t2)

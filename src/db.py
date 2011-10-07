@@ -536,7 +536,7 @@ class DB(object):
     def user_del_gnotification(self, notified, notifier):
         cursor = self.db.cursor()
         cursor.execute("""DELETE FROM user_gnotify
-            WHERE notified=%s AND notifier=%s""", (notified,notifier))
+            WHERE gnotified=%s AND gnotifier=%s""", (notified,notifier))
         if cursor.rowcount != 1:
             cursor.close()
             raise DeleteError()

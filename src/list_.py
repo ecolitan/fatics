@@ -190,10 +190,10 @@ class GnotifyList(MyList):
             if u.is_guest:
                 raise ListError(_('You cannot add an unregistered user to your gnotify list.\n'))
             if u.name in conn.user.gnotifiers:
-                raise ListError(_('%s is already on your gnotify list.\n')
+                raise ListError(_('[%s] is already on your gnotify list.\n')
                     % u.name)
             conn.user.add_gnotification(u)
-            conn.write(_('%s added to your gnotify list.\n') % u.name)
+            conn.write(_('[%s] added to your gnotify list.\n') % u.name)
             #if u.is_online:
             #    u.write_('\nYou have been added to the gnotify list of %s.\n',
             #        (conn.user.name,))
@@ -204,9 +204,9 @@ class GnotifyList(MyList):
         u = user.find_by_prefix_for_user(item, conn)
         if u:
             if u.name not in conn.user.gnotifiers:
-                raise ListError(_('%s is not on your gnotify list.\n') % u.name)
+                raise ListError(_('[%s] is not on your gnotify list.\n') % u.name)
             conn.user.remove_gnotification(u)
-            conn.write(_('%s removed from your gnotify list.\n') % u.name)
+            conn.write(_('[%s] removed from your gnotify list.\n') % u.name)
 
     def show(self, conn):
         if conn.user.is_guest:
