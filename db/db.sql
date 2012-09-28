@@ -114,12 +114,13 @@ CREATE TABLE `channel` (
   -- Making channel_id AUTO_INCREMENT caused a bug with channel 0, because
   -- MySQL intepreted 0 as an auto-increment value.  Fortunately, there
   -- is no need to use AUTO_INCREMENT with channels.
-  `channel_id` int(8) NOT NULL,
+  `channel_id` int(11) NOT NULL,
   `name` varchar(32) DEFAULT NULL COMMENT 'brief channel name',
   `descr` varchar(255) DEFAULT NULL COMMENT 'long channel desciption',
   `topic` varchar(1024) DEFAULT NULL COMMENT 'topic text, if any',
   `topic_who` int(8) DEFAULT NULL COMMENT 'who posted the topic',
   `topic_when` timestamp COMMENT 'when the topic was posted',
+  UNIQUE KEY(`name`),
   PRIMARY KEY (`channel_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8;
 

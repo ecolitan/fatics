@@ -77,6 +77,7 @@ class SystemUserList(MyList):
         conn.write('%s\n' % ' '.join(names))
 
 class TitleList(SystemUserList):
+    """ A player title, like GM or WFM """
     def __init__(self, params):
         MyList.__init__(self, params['title_name'])
         self.id = params['title_id']

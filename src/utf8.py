@@ -23,14 +23,18 @@ def check_user_utf8(s):
     ret =  legal_chars_re.match(s)
     if ret:
         try:
-            s.decode('utf-8')
+            unicode(s, 'utf-8')
         except UnicodeDecodeError:
             ret = False
     return ret
 
+illegal_char_re = re.compile('''[^\x20-\xfd]''')
 def utf8_to_ascii(s):
     """ Try to gracefully convert UTF-8 to ASCII.  Non-ASCII chars are
     replaced by '?'. """
-    return s.decode('utf-8').encode('ascii', 'replace')
+    try:
+        return unicode(s, 'utf-8').encode('ascii', 'replace')
+    except UnicodeDecodeError:
+        return re.sub(illegal_char_re, '?', s)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

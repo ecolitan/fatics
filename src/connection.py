@@ -106,13 +106,17 @@ class Connection(basic.LineReceiver):
             return
         self.session.timeseal_last_timestamp = t
         if self.state:
-            getattr(self, "lineReceived_" + self.state)(line)
+            getattr(self, "handleLine_" + self.state)(line)
 
-    def lineReceived_quitting(self, line):
+    def handleLine_prelogin(self, line):
         """ Shouldn't happen normally. """
-        pass
+        self.log('got line in prelogin state')
 
-    def lineReceived_login(self, line):
+    def handleLine_quitting(self, line):
+        """ Shouldn't happen normally. """
+        self.log('got line in quitting state')
+
+    def handleLine_login(self, line):
         self.timeout_check.cancel()
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
         self.session.login_last_command = time.time()
@@ -145,7 +149,7 @@ class Connection(basic.LineReceiver):
                 self.transport.wont(telnet.ECHO)
                 self.write("\nlogin: ")
 
-    def lineReceived_passwd(self, line):
+    def handleLine_passwd(self, line):
         self.timeout_check.cancel()
         self.timeout_check = reactor.callLater(config.login_timeout, self.login_timeout)
         self.session.login_last_command = time.time()
@@ -175,7 +179,7 @@ class Connection(basic.LineReceiver):
         self.state = 'prompt'
         send_prompts()
 
-    def lineReceived_prompt(self, line):
+    def handleLine_prompt(self, line):
         if line == TIMESEAL_REPLY:
             self.session.pong(self.session.timeseal_last_timestamp)
             return
@@ -231,5 +235,10 @@ class Connection(basic.LineReceiver):
             self.output_buffer += s
         else:
             self.transport.write(s)
+
+
+    def log(self, s):
+        # log to stdout
+        print s
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

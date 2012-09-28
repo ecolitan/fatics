@@ -13,7 +13,8 @@ License, or (at your option) any later version.
 System requirements
 -------------------
 * Linux (it might work on other OSes, but I haven't tried)
-* GCC and make for compiling timeseal (any recent version should work)
+* GCC, make and zlib1g-dev for compiling timeseal (any recent version
+  should work)
 * Python 2.6 or 2.7
 * Twisted 8.2 or later
 * MySQL 5.0 or later

@@ -226,7 +226,8 @@ class Channel(object):
                 '{%s}' % u.get_display_name())
             for u in self.online]
 
-CHANNEL_MAX = sys.maxint
+""" The channel ID is stored in a 32-bit column in the database. """
+CHANNEL_MAX = 1 << 31
 class ChannelList(object):
     all = {}
     def __init__(self):
@@ -241,10 +242,10 @@ class ChannelList(object):
         try:
             return self.all[key]
         except KeyError:
-            self.all[key] = self.make_ch(key)
+            self.all[key] = self._make_ch(key)
             return self.all[key]
 
-    def make_ch(self, key):
+    def _make_ch(self, key):
         name = None
         db.channel_new(key, name)
         return Channel({'channel_id': key, 'name': None, 'descr': None,
