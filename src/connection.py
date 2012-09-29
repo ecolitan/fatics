@@ -44,7 +44,6 @@ def send_prompts():
     written_users.clear()
     assert(not written_users)
 
-
 class Connection(basic.LineReceiver):
     implements(twisted.internet.interfaces.IProtocol)
     # the telnet transport changes all '\r\n' to '\n',
@@ -113,8 +112,8 @@ class Connection(basic.LineReceiver):
         self.log('got line in prelogin state')
 
     def handleLine_quitting(self, line):
-        """ Shouldn't happen normally. """
-        self.log('got line in quitting state')
+        # ignore
+        pass
 
     def handleLine_login(self, line):
         self.timeout_check.cancel()
@@ -239,6 +238,6 @@ class Connection(basic.LineReceiver):
 
     def log(self, s):
         # log to stdout
-        print s
+        print(s)
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

@@ -81,6 +81,12 @@ class TestMaxplayer(Test):
         self.close(t)
 
 class TestMaxguest(Test):
+    def test_maxguest_bad(self):
+        t = self.connect_as_admin()
+        t.write('asetmaxguest -1\n')
+        self.expect('Usage:', t)
+        self.close(t)
+
     def test_maxguest(self):
         maxguest = 10
 
@@ -92,8 +98,9 @@ class TestMaxguest(Test):
         guest_count = int(m.group(1))
 
         t.write('asetmaxguest %d\n' % maxguest)
+        m = self.expect_re(r'Previously (\d+) guest connections allowed', t)
+        oldmaxguest = int(m.group(1))
         self.expect('Allowed guest connections: %d' % maxguest, t)
-        self.close(t)
 
         conns = []
         for i in range(0, maxguest - guest_count):
@@ -106,6 +113,9 @@ class TestMaxguest(Test):
 
         for t2 in conns:
             self.close(t2)
+        t.write('asetmaxguest %d\n' % oldmaxguest)
+        self.expect('Allowed guest connections: %d' % oldmaxguest, t)
+        self.close(t)
 
 class TestLimitsCommand(Test):
     def test_limits(self):

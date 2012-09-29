@@ -40,7 +40,7 @@ fifty_re = re.compile(r'''\s+drawn\s+by\s+the\s+50\s+move\s+rule\s*$''')
 class PgnError(Exception):
     def __init__(self, reason):
         self.reason = reason
-        print reason
+        print(reason)
 
 class BpgnMove(object):
     def __init__(self, text, decorator, char):
@@ -228,7 +228,7 @@ class PgnGame(object):
                 i = m.end()
                 continue
 
-            print 'match %r' % move_num_re.match(s, i)
+            print('match %r' % move_num_re.match(s, i))
             raise PgnError('unrecognized sytax in pgn: "%s", i %d' % (s[i:i+15], i))
 
     def __str__(self):

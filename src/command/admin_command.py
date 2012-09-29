@@ -29,6 +29,7 @@ from reload import reload
 
 from db import db
 from command import Command, ics_command, requires_registration
+from command_parser import BadCommandError
 from config import config
 
 @ics_command('aclearhistory', 'w', admin.Level.admin)

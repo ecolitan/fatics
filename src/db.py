@@ -89,7 +89,7 @@ class DB(object):
         # ON DUPLICATE KEY UPDATE is probably not very portable to
         # other databases, but this shouldn't be hard to rewrite
         dbkeys = {'formula': 0, 'f1': 1, 'f2': 2, 'f3': 3, 'f4': 4, 'f5': 5, 'f6': 6, 'f7': 7, 'f8': 8, 'f9': 9}
-        assert(name in dbkeys.keys())
+        assert(name in dbkeys)
         num = dbkeys[name]
         cursor = self.db.cursor()
         if val is not None:

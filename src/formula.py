@@ -69,7 +69,7 @@ def advance(sym):
     global token
     if sym not in token.tokens:
         raise FormulaError('expected %s' % sym)
-    token = next()
+    token = nextt()
 
 @Token(['!'])
 class NotSymbol(Symbol):
@@ -292,24 +292,24 @@ class FSymbol(Symbol):
     def __init__(self, num):
         self.num = num
     def nud(self):
-        global token, next, chal, f_num
+        global token, nextt, chal, f_num
         if self.num <= f_num:
             raise FormulaError('A formula variable may not refer to itself or an earlier formula variable')
         if not chal:
             # no need to evaluate
             return None
         old_token = token
-        old_next = next
+        old_nextt = nextt
         ret = check_formula(chal, chal.b.vars['f' + str(self.num)], self.num)
         token = old_token
-        next = old_next
+        nextt = old_nextt
         return ret
 
 def expression(rbp = 0):
-    global token, next
+    global token, nextt
     t = token
     try:
-        token = next()
+        token = nextt()
     except StopIteration:
         # consider an empty formula to be 1
         if rbp == 0:
@@ -319,7 +319,7 @@ def expression(rbp = 0):
     left = t.nud()
     while rbp < token.lbp:
         t = token
-        token = next()
+        token = nextt()
         left = t.led(left)
     return left
 
@@ -330,7 +330,7 @@ def re_escape(s):
 digit_re = re.compile(r'^(\d+)(.*)')
 fvar_re = re.compile(r'^f([1-9])(.*)')
 minute_re = re.compile(r'^\s*minutes?(.*)')
-tokenize_re = re.compile('^(' + '|'.join([re_escape(k) for k in sorted(all_tokens.keys(), key=len, reverse=True)]) + ')(.*)')
+tokenize_re = re.compile('^(' + '|'.join([re_escape(k) for k in sorted(list(all_tokens.keys()), key=len, reverse=True)]) + ')(.*)')
 comment_re = re.compile('#.*')
 def tokenize(s):
     s = comment_re.sub('', s)
@@ -366,8 +366,8 @@ def tokenize(s):
     yield EndSymbol()
 
 def check_formula(chal_, s, num=0):
-    """ Check whether the challenge CHAL meets the formula described by S.
-    If chal is None, we parse the formula for validity but don't worry
+    """ Check whether the challenge CHAL_ meets the formula described by S.
+    If chal_ is None, we parse the formula for validity but don't worry
     about its evaulation.
 
     NUM is 0 for the main formula var, 1 for f1, 2 for f2, etc.
@@ -378,22 +378,27 @@ def check_formula(chal_, s, num=0):
         # no formula
         return 1
     assert(type(s) == str)
-    global token, next, chal, f_num
+    global token, nextt, chal, f_num
     chal = chal_
     try:
-        next = tokenize(s).next
+        nextt = tokenize(s).next
     except StopIteration:
         raise FormulaError('got formula with no tokens')
     f_num = num
-    token = next()
+    token = nextt()
     return expression()
 
 if __name__ == '__main__':
-    #print check_formula(None, '7 * (3 * (3 + 2) /  2) - 42 * 2')
-    #print check_formula(None, '(2 + 5 * 5) - 1')
-    #print check_formula(None, '(2 + 5 * 5) - 1')
-    #print check_formula(None, '!lightning && !blitz')
-    #print check_formula(None, '33-')
-    print check_formula(None, '1000 <= 1500 and 1500 <= 2000')
+    print(check_formula(None, '7 * (3 * (3 + 2) /  2) - 42 * 2'))
+    print(check_formula(None, '(2 + 5 * 5) - 1'))
+    print(check_formula(None, '(2 + 5 * 5) - 1'))
+    print(check_formula(None, '!lightning && !blitz'))
+    print(check_formula(None, '1000 <= 1500 and 1500 <= 2000'))
+    try:
+        print(check_formula(None, '33-'))
+    except FormulaError:
+        print('success')
+    else:
+        print 'FAIL'
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent

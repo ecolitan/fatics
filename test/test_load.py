@@ -20,80 +20,136 @@
 This a load test. You probably need to raise ulimit -n
 to allow more open file descriptors.  Also, it probably won't
 work with the default select() twisted reactor.  I assume
-linux 2.6 and use epoll.
+linux 2.6 and epoll.
 
 """
 
+import sys
 import time
+
+from twisted.internet import epollreactor
+epollreactor.install()
+
 from twisted.trial import unittest
-from twisted.conch import telnet
-from twisted.internet import protocol, epollreactor
-import cProfile
-profile = 1
+from twisted.internet import protocol, defer
+#import cProfile
+#profile = 0
 
-#from test import host, port
-from test import *
-
-#epollreactor.install()
+from .test import *
 
 from twisted.internet import reactor
 
-conn_count = 8000
+#conn_count = 8000
+# For some reason the load test still hangs for a larger number of users.
+# It seems to be a problem with the twisted test, not the server.
+conn_count = 1000
 start_time = time.time()
-conns = []
-class TestProtocol(telnet.Telnet):
+class TestProtocol(protocol.Protocol):
+    state = 'unconnected'
+    allData = ''
     def connectionMade(self):
-        conns.append(self)
-        self.i = len(conns)
-        self.status = 'login'
+        self.state = 'connectionMade'
+        self.factory.conns.append(self)
+        #self.i = len(self.factory.conns)
+        #self.transport.setTcpNoDelay(True)
 
     def dataReceived(self, data):
+        self.allData += data
         if 'login:' in data:
+            self.state = 'login'
             self.transport.write("guest\r\n\r\n")
         elif 'fics% ' in data:
-            self.factory.num_done = self.factory.num_done + 1
-            if self.i % 128 == 0:
-                print '%f: %d done (%f users/sec)' % (time.time() - start_time, self.factory.num_done, self.factory.num_done / (time.time() - start_time))
-            self.status = 'prompt'
+            self.state = 'prompt'
+            self.factory.num_done += 1
+            if self.factory.num_done % 128 == 0:
+                print('%f: %d done (%f users/sec)' % (time.time() - start_time, self.factory.num_done, self.factory.num_done / (time.time() - start_time)))
+            if self.factory.num_done == conn_count:
+                print('finished with all %d logins' % conn_count)
+                self.factory.tester.shut_down()
+                self.factory.tester.finished.callback(self)
+        elif 'limit for guests' in data:
+            print('ERROR: limit for guests reached')
+            self.transport.loseConnection()
+            self.factory.error = 1
 
     def quit(self):
-        if (self.status != 'prompt'):
-            print 'ERROR: state %s' % self.status
+        if (self.state != 'prompt'):
+            print('ERROR: state %s' % self.state)
+            self.factory.error = 1
         #self.factory.tester.assert_(self.status == 'prompt')
         self.transport.write('quit\r\n')
 
-        # self.transport.loseConnection()
+        self.transport.loseConnection()
+        self.factory.conns.remove(self)
 
     def connectionLost(self, reason):
-        self.state = 'done'
+        self.state = 'connectionLost'
 
 class TestLoad(Test):
     def test_load(self):
-        self._skip('slow test')
+        t = self.connect_as_admin()
+        t.write('asetmaxplayer 2048\n')
+        t.write('asetmaxguest 2043\n')
+        self.close(t)
+
+        self.finished = defer.Deferred()
         fact = protocol.ClientFactory()
         fact.protocol = TestProtocol
         fact.tester = self
         fact.num_done = 0
+        fact.error = 0
+        fact.conns = []
+        #fact.shut_down = self.shut_down
+        self.factory = fact
 
-        for i in xrange(0, conn_count):
-            reactor.connectTCP(host, int(port), fact)
+        #for i in range(0, conn_count):
+        #    reactor.connectTCP(host, int(port), fact, timeout=15)
 
-        reactor.callLater(500, self._shut_down)
+        #reactor.callLater(15, self.print_status)
+        # for some reason the reactor hangs when starting too many
+        # connections at once, so stagger them
+        assert(conn_count % 50 == 0)
+        t = 0.0
+        for i in range(0, conn_count, 50):
+            reactor.callLater(t, self.startN, 50)
+            t += 1.0
 
-        # Let's go
+        '''# Let's go
         if not profile:
             reactor.run()
         else:
-            cProfile.runctx('reactor.run()', globals(), locals())
+            cProfile.runctx('reactor.run()', globals(), locals())'''
 
-        for c in conns:
-            self.assert_(c.state == 'done')
-        print 'tested %d' % len(conns)
+        #self.finished.addCallback(self.shut_down)
+        return self.finished
 
-    def _shut_down(self):
-        print "shutting down"
-        for c in conns:
+    def startN(self, n):
+        for i in range(0, n):
+            reactor.connectTCP(host, int(port), self.factory, timeout=15)
+
+    def print_status(self):
+        for c in self.factory.conns:
+            if c.state == 'prompt':
+                sys.stdout.write('*')
+            elif c.state == 'login':
+                sys.stdout.write('x')
+            elif c.state == 'connectionMade':
+                sys.stdout.write('c')
+                sys.stdout.write('{%d}' % len(c.allData))
+            else:
+                sys.stdout.write('?')
+        print
+
+    def shut_down(self):
+        print("shutting down %d conns" % len(self.factory.conns))
+        for c in self.factory.conns[:]:
             c.quit()
-        reactor.stop()
+        for c in self.factory.conns:
+            self.assert_(c.state == 'connectionLost')
+        self.assert_(self.factory.num_done == conn_count)
+        self.assert_(len(self.factory.conns) == 0)
+        reactor.callFromThread(reactor.stop)
+        if self.factory.error:
+            self.fail()
 
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
