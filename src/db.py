@@ -47,9 +47,10 @@ class DB(object):
         except (AttributeError, OperationalError):
             # the connection may have timed out, so try again
             cursor.close()
+            self.db.close()
             self.connect()
-            # get a dict cursor, in case it was needed
-            cursor = self.db.cursor(cursors.DictCursor)
+            # the new cursor needs to be the same type as the old one
+            cursor = self.db.cursor(cursor.__class__)
             cursor.execute(*args)
             return cursor
 

@@ -199,4 +199,44 @@ class TestAdjourn(Test):
         self.close(t)
         self.close(t2)
 
+class TestNoescape(Test):
+    @with_player('TestOne')
+    @with_player('TestTwo')
+    def test_noescape(self):
+        t = self.connect_as('TestOne')
+        t2 = self.connect_as('TestTwo')
+        t.write('set style 12\n')
+        t2.write('set style 12\n')
+        t.write('set noescape 1\n')
+        self.expect('You will request noescape when games start.', t)
+        t2.write('set noescape 1\n')
+        self.expect('You will request noescape when games start.', t2)
+
+        t.write('match testtwo 1 0 w\n')
+        self.expect('Challenge:', t2)
+        t2.write('accept\n')
+        self.expect('Creating: ', t)
+        self.expect('Creating: ', t2)
+        self.expect('<12> ', t)
+        self.expect('<12> ', t2)
+
+        moves = ['e4', 'c5', 'Nf3', 'd6', 'd4', 'cxd4', 'Nxd4', 'Nf6',
+            'Nc3', 'a6']
+        wtm = True
+        for mv in moves:
+            if wtm:
+                t.write('%s\n' % mv)
+            else:
+                t2.write('%s\n' % mv)
+            self.expect('<12> ', t)
+            self.expect('<12> ', t2)
+            wtm = not wtm
+
+        self.close(t2)
+
+        self.expect_re(r'{Game \d+ \(TestOne vs\. TestTwo\) TestTwo forfeits by disconnection} 1-0', t)
+
+        self.close(t)
+
+
 # vim: expandtab tabstop=4 softtabstop=4 shiftwidth=4 smarttab autoindent
