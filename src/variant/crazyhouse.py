@@ -1329,17 +1329,18 @@ class Crazyhouse(BaseVariant):
             # castling
             mv = self.pos.move_from_castle(s)
 
-            # long algebraic
-            if not mv:
-                mv = self.pos.move_from_lalg(s)
-
             # san
             if not mv:
                 mv = self.pos.move_from_san(s)
 
-            # san
+            # drops
             if not mv:
                 mv = self.pos.move_from_drop(s)
+
+            # long algebraic
+            if not mv:
+                mv = self.pos.move_from_lalg(s)
+
         except IllegalMoveError as e:
             #print e.reason
             raise

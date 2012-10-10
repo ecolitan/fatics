@@ -1317,13 +1317,14 @@ class Chess960(BaseVariant):
             # castling
             mv = self.pos.move_from_castle(s)
 
+            # san
+            if not mv:
+                mv = self.pos.move_from_san(s)
+
             # long algebraic
             if not mv:
                 mv = self.pos.move_from_lalg(s)
 
-            # san
-            if not mv:
-                mv = self.pos.move_from_san(s)
         except IllegalMoveError as e:
             print e.reason
             raise

@@ -107,7 +107,6 @@ class Zobrist(object):
     def piece_hash(self, sq, pc):
         assert((0xf << 7) & sq == 0)
         assert(valid_sq(sq))
-        #print 'hashing %s at %s' % (pc, sq_to_str(sq))
         return self._piece[(self._piece_index[pc] << 7) | sq]
 
     def ep_hash(self, ep):
@@ -1197,13 +1196,19 @@ class Chess(BaseVariant):
             # castling
             mv = self.pos.move_from_castle(s)
 
+            # san
+            # this needs to come before long algebraic, because in a few rare
+            # cases a move can be ambiguous. One example was "B5f4" (a legal
+            # SAN move that occurred after a computer had promoted to give
+            # itself two bishops of the same color), which was tripping up
+            # the lalg parser.
+            if not mv:
+                mv = self.pos.move_from_san(s)
+
             # long algebraic
             if not mv:
                 mv = self.pos.move_from_lalg(s)
 
-            # san
-            if not mv:
-                mv = self.pos.move_from_san(s)
         except IllegalMoveError as e:
             #print e.reason
             raise

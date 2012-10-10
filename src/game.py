@@ -270,8 +270,8 @@ class Game(object):
         i = min(self.variant.pos.ply, 36)
         row = None
         while i >= self.variant.pos.start_ply:
-            hash = self.variant.pos.history.get_hash(i)
-            row = db.get_eco(hash)
+            hash_ = self.variant.pos.history.get_hash(i)
+            row = db.get_eco(hash_)
             if row:
                 break
             i -= 1
@@ -285,8 +285,8 @@ class Game(object):
         i = min(self.variant.pos.ply, 36)
         row = None
         while i >= self.variant.pos.start_ply:
-            hash = self.variant.pos.history.get_hash(i)
-            row = db.get_nic(hash)
+            hash_ = self.variant.pos.history.get_hash(i)
+            row = db.get_nic(hash_)
             if row:
                 break
             i -= 1

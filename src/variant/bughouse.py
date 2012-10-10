@@ -1365,13 +1365,13 @@ class Bughouse(BaseVariant):
             # castling
             mv = self.pos.move_from_castle(s)
 
-            # long algebraic
-            if not mv:
-                mv = self.pos.move_from_lalg(s)
-
             # san
             if not mv:
                 mv = self.pos.move_from_san(s)
+
+            # long algebraic
+            if not mv:
+                mv = self.pos.move_from_lalg(s)
 
             # san
             if not mv:

@@ -559,44 +559,6 @@ d5+ Bf6 34. Rxf7+ Qxf7 35. Bxf6+ Qxf6 36. d6 Qb2 37. Qb4 Qc2 38. Qd4+ Kg6
 39. d7 Qf5 40. Qd6+ Kh5 41. Rd1 Qg4+ 42. Qg3 Qc4 43. Qxf3+ g4 44. Qf5+ Rg5
 45. Qh7# 1-0
 
-[Event "fics server game, rated blitz match"]
-[Site "Internet Chess Server: freechess.org 5000"]
-[Date "2009.12.31"]
-[Round "-"]
-[White "vjschach"]
-[Black "Serveman"]
-[Result "1-0"]
-[WhiteElo "1410"]
-[BlackElo "1316"]
-[ECO "A40 Queen's pawn"]
-[TimeControl "180"]
-[Time "23:33:??"]
-[Source "Marcel van Kervinck"]
-
-1. d4 c6 2. c3 d5 3. g3 Nf6 4. Bg2 Bg4 5. Nf3 Qc8 6. O-O Bh3 7. Re1 Bxg2 8.
-Kxg2 Ng4 9. Nbd2 Nxh2 10. Nxh2 h5 11. Ndf3 e6 12. e4 Be7 13. exd5 cxd5 14.
-Qa4+ Nc6 15. Qc2 g5 16. Nxg5 Bxg5 17. Bxg5 Ne7 18. a4 Nf5 19. Rac1 Qc7 20.
-c4 h4 21. cxd5 hxg3 22. Qxc7 Rxh2+ 23. Kg1 Rxf2 24. Rxe6+ fxe6 25. dxe6 Re2
-26. Qf7# 1-0
-
-[Event "fics server game, rated blitz match"]
-[Site "Internet Chess Server: freechess.org 5000"]
-[Date "2009.12.31"]
-[Round "-"]
-[White "ChezMad"]
-[Black "mscp"]
-[Result "0-1"]
-[WhiteElo "1376"]
-[BlackElo "1575"]
-[ECO "B06 Robatsch defence"]
-[TimeControl "300"]
-[Time "23:34:??"]
-[Source "Marcel van Kervinck"]
-
-1. e4 g6 2. d4 Bg7 3. Nf3 Nf6 4. Bd3 d5 5. e5 Ne4 6. O-O O-O 7. Re1 c5 8.
-Bxe4 dxe4 9. Rxe4 Be6 10. Nc3 Bd5 11. Re3 Bxf3 12. Qxf3 cxd4 13. Rd3 Nc6
-14. Be3 Nxe5 15. Qe4 Nxd3 16. cxd3 dxc3 17. bxc3 Bxc3 18. Rc1 Bf6 0-1
-
 [Event "fics server game, rated standard match"]
 [Site "Internet Chess Server: freechess.org 5000"]
 [Date "2009.12.31"]
@@ -729,3 +691,60 @@ Kh1 c5 9. c3 cxd4 10. cxd4 Be7 11. Nbc3 h5 12. Be3 Nh6 13. Bxh6 Rxh6 14. f4
 g6 15. Rfc1 Qd8 16. Nb5 Kf8 17. a4 a6 18. Nbc3 Kg7 19. Qf3 Rc8 20. Rg1 Nb6
 21. b3 Bb4 22. g4 hxg4 23. Rxg4 Qh8 24. Rg2 Rh3 25. Qf2 Bxc3 26. Rc1 Bd2
 27. Rd1 Be3 28. Qf1 Rc2 29. Ng3 Rxh2+ 0-1
+
+[Event "FICS rated standard game"]
+[Site "FICS freechess.org"]
+[Date "2007.10.09"]
+[Round "?"]
+[White "Robowawoy"]
+[Black "TaoGizmo"]
+[Result "1/2-1/2"]
+[WhiteElo "2643"]
+[BlackElo "2608"]
+[ECO "B12"]
+[TimeControl "900+1"]
+[Time "15:26:00"]
+[PlyCount "415"]
+[FICSGamesDBGameNo "190782538"]
+[WhiteClock "0:15:00.000"]
+[BlackClock "0:15:00.000"]
+[BlackIsComp "Yes"]
+[WhiteIsComp "Yes"]
+
+1. d4 c6 2. e4 d5 3. Nd2 g6 4. c3 Bg7 5. Ngf3 Nf6 6. Bd3 c5 7. exd5 cxd4 8.
+c4 O-O 9. O-O e6 10. Nxd4 exd5 11. N2f3 Nc6 12. Nxc6 bxc6 13. Qa4 Qc7 14.
+Bd2 Bg4 15. Ba5 Qf4 16. Bd2 Qb8 17. Qxc6 Bxf3 18. gxf3 Qxb2 19. Rfd1 Rfc8
+20. Qa6 Nd7 21. cxd5 Nc5 22. Qc4 Qd4 23. Be3 Qxc4 24. Bxc4 Bxa1 25. Rxa1
+Rab8 26. Bf1 Na4 27. Bxa7 Rb2 28. Be3 Nc3 29. d6 Nd5 30. Bd4 Rd2 31. Be5 f6
+32. Bg3 Kf7 33. a4 Nc3 34. Re1 Re8 35. Rc1 Ne2+ 36. Bxe2 Rexe2 37. Rc7+ Kg8
+38. Kg2 Rd1 39. Ra7 h5 40. h4 Ree1 41. Bh2 Rd2 42. a5 Kf8 43. a6 Ra1 44.
+Bg3 Raa2 45. Ra8+ Kg7 46. a7 Rd4 47. Kh3 Rd1 48. Bf4 Rd5 49. Be3 Rxd6 50.
+Rc8 Rda6 51. Rc7+ Kf8 52. Kg3 Ke8 53. f4 f5 54. Kf3 R2a3 55. Rb7 Kd8 56.
+Ke2 Kc8 57. Rg7 Ra2+ 58. Kd3 Rd6+ 59. Kc4 Rda6 60. Kd5 Ra1 61. Bd4 R1a2 62.
+Re7 Kd8 63. Rb7 Kc8 64. Rg7 R2a5+ 65. Bc5 Ra2 66. Rf7 Rd2+ 67. Kc4 Raa2 68.
+Be3 Rd6 69. Rf8+ Rd8 70. Rf6 Rg8 71. Rf7 Rd8 72. Rg7 Rd6 73. Rg8+ Rd8 74.
+Rxg6 Kb7 75. Rg5 Rf8 76. Rxh5 Ka8 77. Rg5 Ra1 78. Kd5 Ra5+ 79. Kc6 Ra6+ 80.
+Kb5 Ra1 81. h5 Rb1+ 82. Kc4 Rd1 83. Bc5 Rc1+ 84. Kb5 Rb1+ 85. Ka4 Rh8 86.
+Rxf5 Rh1 87. Re5 R1xh5 88. f5 Rh4+ 89. Kb5 Rd8 90. Be3 Rh5 91. f4 Rh6 92.
+Kc4 Ra6 93. Kb4 Rf6 94. Bc5 Rc6 95. Re6 Rcc8 96. Be3 Rd5 97. Re5 Rd6 98.
+Bf2 Rd2 99. Bc5 Rd7 100. Ka5 Rf7 101. Ka4 Rfc7 102. Be3 Rf7 103. Kb5 Rb7+
+104. Ka5 Rf7 105. Bc5 Rg7 106. Bf2 Rf7 107. Kb5 Rb7+ 108. Ka4 Rbc7 109. Kb3
+Rc3+ 110. Kb4 R3c4+ 111. Kb5 Rxf4 112. Bc5 Kb7 113. Re7+ Ka8 114. Rf7 Rf1
+115. Bb4 Ra1 116. f6 Rxa7 117. Rxa7+ Kxa7 118. f7 Kb7 119. f8=B Ka7 120.
+Bfd6 Kb7 121. Be1 Ka7 122. Ba3 Kb7 123. Bb2 Ka7 124. Bf2+ Kb7 125. Bg7 Kc7
+126. Kc5 Kb7+ 127. Kd4 Ka6 128. Bh6 Ka5 129. Ke4 Ka4 130. Kd3 Ka3 131. Bg5
+Ka2 132. Ba7 Ka1 133. Bae3 Kb1 134. Bef4 Ka1 135. Be7 Kb1 136. Bh2 Ka1 137.
+Kd4 Kb1 138. Bg5 Ka1 139. Bf6 Kb1 140. Kd3 Kc1 141. Bhe5 Kb1 142. Bh4 Kc1
+143. Bd4 Kb1 144. Bb6 Ka1 145. Bg3 Kb1 146. Be5 Kc1 147. Bg7 Kb1 148. Ba5
+Kc1 149. Bf6 Kb1 150. Bh4 Ka1 151. Kd4 Kb1 152. Bg3 Ka1 153. Bb6 Kb1 154.
+Be5 Ka1 155. Kd5+ Kb1 156. Kd6 Kc1 157. Kd7 Kb1 158. Kxc8 Kc1 159. Kd7 Kb1
+160. Ke6 Kc1 161. Be3+ Kb1 162. Kd5 Ka2 163. Kc4 Kb1 164. Kc3 Ka1 165. Kb3+
+Kb1 166. B5f4 Ka1 167. Bc1 Kb1 168. Kc3 Ka1 169. Ba3 Kb1 170. Bb4 Ka1 171.
+Bd2 Kb1 172. Bc5 Ka1 173. Bc1 Kb1 174. Bh6 Ka1 175. Bg5 Kb1 176. Bd6 Ka1
+177. Bh6 Kb1 178. Be7 Ka1 179. Be3 Kb1 180. Bd6 Ka1 181. Ba3 Kb1 182. Kb3
+Ka1 183. Bac1 Kb1 184. Kc3 Ka1 185. Bf4 Kb1 186. Ba3 Ka1 187. Bb4 Kb1 188.
+Bc5 Ka1 189. Kc2 Ka2 190. Bb4 Ka1 191. Be5+ Ka2 192. Bed6 Ka1 193. Be1 Ka2
+194. Bc5 Ka1 195. Bc3+ Ka2 196. B3b4 Ka1 197. Bd4+ Ka2 198. Bf2 Ka1 199.
+Kb3 Kb1 200. Ba3 Ka1 201. Kc2 Ka2 202. Bc1 Ka1 203. Bd2 Ka2 204. Bde1 Ka1
+205. Bb4 Ka2 206. Bd2 Ka1 207. Bc1 Ka2 208. Bb2 { Game drawn by stalemate }
+1/2-1/2
