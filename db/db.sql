@@ -83,7 +83,7 @@ CREATE TABLE `user` (
 DROP TABLE IF EXISTS `user_log`;
 CREATE TABLE `user_log` (
   `log_who_name` varchar(17) NOT NULL,
-  `log_when` timestamp NULL DEFAULT NULL,
+  `log_when` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `log_which` enum('login', 'logout', 'registration') NOT NULL,
   `log_ip` varchar(57) NOT NULL,
   KEY (`log_who_name`),
