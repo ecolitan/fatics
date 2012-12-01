@@ -74,6 +74,7 @@ CREATE TABLE `user` (
   -- other flags
   `simopen` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'open for simul',
   `lang` VARCHAR(6) NOT NULL DEFAULT 'en' COMMENT 'user language',
+  `country` CHAR(2) DEFAULT NULL,
   `prompt` VARCHAR(16) NOT NULL DEFAULT 'fics% ' COMMENT 'command prompt',
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `user_name` (`user_name`)
@@ -83,7 +84,7 @@ DROP TABLE IF EXISTS `user_log`;
 CREATE TABLE `user_log` (
   `log_who_name` varchar(17) NOT NULL,
   `log_when` timestamp NULL DEFAULT NULL,
-  `log_which` enum('login', 'logout') NOT NULL,
+  `log_which` enum('login', 'logout', 'registration') NOT NULL,
   `log_ip` varchar(57) NOT NULL,
   KEY (`log_who_name`),
   KEY (`log_when`)
