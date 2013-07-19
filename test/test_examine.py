@@ -350,6 +350,9 @@ class TestMexamine(Test):
         self.expect('GuestEFGH is now an examiner of game', t)
         self.expect('GuestABCD has made you an examiner of game', t2)
 
+        t.write('mex guestefgh\n')
+        self.expect('GuestEFGH is already an examiner of game', t)
+
         t2.write('f5\n')
         self.expect(': GuestEFGH moves: f5', t)
         self.expect(': GuestEFGH moves: f5', t2)

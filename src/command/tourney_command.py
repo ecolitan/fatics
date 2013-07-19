@@ -150,7 +150,7 @@ class Starttourney(Command):
         if num_players < min_players:
             conn.write('Too few players to start tourney #%d. Need minimum of %d players\n' % (number, min_players))
             return
-        conn.write('Tourney #%d has started!\n')
+        conn.write('Tourney #%d has started!\n' % number)
         tourney.tourneys[number].announce('Tourney starting NOW!!!')
         tourney.tourneys[number].pair()
         return

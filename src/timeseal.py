@@ -46,7 +46,7 @@ class Timeseal(object):
         self.zipseal_decoder.stdin.write(line + '\n')
         dec = self.zipseal_decoder.stdout.readline()
         m = self._zipseal_pat.match(dec)
-        if not m:
+        if not m or int(m.group(1), 16) == 0:
             print('zipseal failed to match: {{%r}}' % dec)
             return (-1, None)
         return (int(m.group(1), 16), m.group(2))

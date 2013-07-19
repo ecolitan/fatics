@@ -167,8 +167,8 @@ class ExaminedGame(Game):
         # GuestMWVC is now an examiner of game 81.
         if u in self.players:
             assert(u.session.game)
-            conn.write(_('%(name)s is already an examiner of game %(num)d.'),
-                {'name': conn.user.name, 'num': self.number})
+            conn.write(_('%(name)s is already an examiner of game %(num)d.') %
+                {'name': u.name, 'num': self.number})
             return
 
         if u.session.game:
