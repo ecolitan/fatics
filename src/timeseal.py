@@ -37,18 +37,18 @@ class Timeseal(object):
         self.timeseal.stdin.write(line + '\n')
         dec = self.timeseal.stdout.readline()
         m = self._timeseal_pat.match(dec)
-        if not m or int(m.group(1)) == 0:
-            #print('timeseal failed to match: {{%s}}' % dec)
-            return (0, '')
+        if not m:
+            print('timeseal failed to match: {{%r}}' % dec)
+            return (-1, None)
         return (int(m.group(1), 10), m.group(2))
 
     def decode_zipseal(self, line):
         self.zipseal_decoder.stdin.write(line + '\n')
         dec = self.zipseal_decoder.stdout.readline()
         m = self._zipseal_pat.match(dec)
-        if not m or int(m.group(1), 16) == 0:
-            #print('zipseal failed to match: {{%s}}' % dec)
-            return (0, '')
+        if not m:
+            print('zipseal failed to match: {{%r}}' % dec)
+            return (-1, None)
         return (int(m.group(1), 16), m.group(2))
 
     def compress_zipseal(self, line):

@@ -94,18 +94,26 @@ class Connection(basic.LineReceiver):
     def lineReceived(self, line):
         #print '((%s,%s))\n' % (self.state, repr(line))
         if self.session.use_timeseal:
-            (t, line) = timeseal.decode_timeseal(line)
+            (t, dline) = timeseal.decode_timeseal(line)
         elif self.session.use_zipseal:
-            (t, line) = timeseal.decode_zipseal(line)
+            (t, dline) = timeseal.decode_zipseal(line)
         else:
             t = None
-        if t == 0:
+            dline = line
+        if t != None and t < 0:
+            self.log('timeseal/zipseal error on line: {%r} {%r}' % (line, dline))
             self.write('timeseal error\n')
             self.loseConnection('timeseal error')
             return
+        elif t == 0:
+            # it seems the Jin application's timeseal sometimes sends
+            # a timeptamp of 0, but still expects the command
+            # to be executed
+            self.log('warning: got timeseal/zipseal 0 on line: {%r} {%r}' % (line, dline))
+
         self.session.timeseal_last_timestamp = t
         if self.state:
-            getattr(self, "handleLine_" + self.state)(line)
+            getattr(self, "handleLine_" + self.state)(dline)
 
     def handleLine_prelogin(self, line):
         """ Shouldn't happen normally. """
