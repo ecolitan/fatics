@@ -16,14 +16,14 @@ System requirements
 * GCC, make and zlib1g-dev for compiling timeseal (any recent version
   should work)
 * Python 2.6 or 2.7
-* Twisted 8.2 or later
+* Twisted 8.2 or later (in venv)
 * MySQL 5.0 or later
 * The MySQLdb Python module
-* The python-bcrypt module
-* The netaddr module
-* The pytz module
+* The python-bcrypt module (in venv)
+* The netaddr module (in venv)
+* The pytz module (in venv)
 * GNU gettext
-* (optional) The pexpect module, for timeseal/zipseal tests
+* (optional) The pexpect module, for timeseal/zipseal tests (in venv)
 
 Installation
 ------------
@@ -68,6 +68,8 @@ You can import the ECO codes into the database now using
 if you don't, the "eco" command will report all openings as unknown, and
 some tests will fail.
 
+Source the virtualenv environment
+  "$ source venv/bin/activate"
 
 If there are no errors, you're ready to try to run the server.
 From the top of the FatICS source tree, you can use one of the
